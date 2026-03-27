@@ -524,11 +524,12 @@ async function loadUltimoConcurso() {
     const res = await fetch('https://loteriascaixa-api.herokuapp.com/api/lotofacil/latest', { signal: controller.signal });
     clearTimeout(timeout);
     const data = await res.json();
-    if (data && data.listaDezenas) {
+    const dezenas = data.listaDezenas || data.dezenas;
+    if (data && dezenas) {
       ULTIMO_CONCURSO = {
         numero: data.concurso || data.numero,
         data: data.data || data.dataApuracao,
-        numeros: data.listaDezenas.map(Number).sort((a, b) => a - b)
+        numeros: dezenas.map(Number).sort((a, b) => a - b)
       };
       showToast('✅ Dados atualizados via API');
     } else {
@@ -811,8 +812,9 @@ async function conferirJogo(idx) {
     const res = await fetch('https://loteriascaixa-api.herokuapp.com/api/lotofacil/latest', { signal: controller.signal });
     clearTimeout(timeout);
     const data = await res.json();
-    if (data && data.listaDezenas) {
-      const resultado = data.listaDezenas.map(Number).sort((a, b) => a - b);
+    const dezenas2 = data.listaDezenas || data.dezenas;
+    if (data && dezenas2) {
+      const resultado = dezenas2.map(Number).sort((a, b) => a - b);
       showCheckResult(idx, resultado);
     } else {
       throw new Error('Invalid');
@@ -1012,42 +1014,4 @@ function renderFilterTab() {
   foraGrid.innerHTML = '';
 
   ULTIMO_CONCURSO.numeros.forEach(n => {
-    dentroGrid.appendChild(createExcludeCell(n));
-  });
-
-  for (let i = 1; i <= 25; i++) {
-    if (!ULTIMO_CONCURSO.numeros.includes(i)) {
-      foraGrid.appendChild(createExcludeCell(i));
-    }
-  }
-}
-
-function createExcludeCell(n) {
-  const cell = document.createElement('div');
-  cell.className = 'exclude-cell' + (excludedNums.has(n) ? ' excluded' : '');
-  cell.textContent = String(n).padStart(2, '0');
-  cell.onclick = () => {
-    if (excludedNums.has(n)) excludedNums.delete(n);
-    else excludedNums.add(n);
-    cell.classList.toggle('excluded');
-  };
-  return cell;
-}
-
-function resetExclusions() {
-  excludedNums.clear();
-  renderFilterTab();
-  showToast('↩ Exclusões resetadas');
-}
-
-// ─── PWA REGISTRATION ───
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('SW registered'))
-      .catch(err => console.log('SW registration failed:', err));
-  });
-}
-</script>
-</body>
-</html>
+    d
