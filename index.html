@@ -141,9 +141,15 @@ h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600}
 .heat-legend-color{width:14px;height:14px;border-radius:4px}
 .heat-source{text-align:center;font-size:.7rem;color:var(--text-light);margin-top:10px;font-style:italic}
 .exclude-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
-.exclude-cell{aspect-ratio:1;border:2px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;background:var(--card-bg);color:var(--text)}
+.exclude-cell{aspect-ratio:1;border:2px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;background:var(--card-bg);color:var(--text);position:relative;user-select:none}
 .exclude-cell.excluded{background:#fee;border-color:#e74c3c;color:#e74c3c}
+.exclude-cell.fixed{background:rgba(46,204,113,.12);border-color:var(--green-med);color:var(--green-dark)}
+.exclude-cell.fixed::after{content:'📌';position:absolute;top:-4px;right:-4px;font-size:.55rem}
+.exclude-cell.excluded::after{content:'✕';position:absolute;top:-2px;right:3px;font-size:.6rem;color:#e74c3c}
 .exclude-cell:hover{border-color:var(--green-med)}
+.filter-legend{display:flex;gap:12px;margin:10px 0 4px;font-size:.7rem;color:var(--text-light)}
+.filter-legend span{display:flex;align-items:center;gap:4px}
+.filter-legend .dot{width:10px;height:10px;border-radius:3px;border:2px solid}
 .btn-reset-filters{margin-top:14px;padding:10px 20px;border:1.5px solid var(--border);background:transparent;border-radius:var(--radius-sm);font-size:.82rem;cursor:pointer;color:var(--text-light);transition:all .2s;font-family:'DM Sans',sans-serif}
 .btn-reset-filters:hover{border-color:#e74c3c;color:#e74c3c}
 .ultimo-balls{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}
@@ -265,9 +271,18 @@ h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600}
     </div>
     <div class="tab-content" id="tabFiltros">
       <div class="card"><div class="card-title">Filtros Ativos</div><div id="filtrosAtivosResumo"></div></div>
-      <div class="card" style="margin-top:14px"><div class="card-title">Excluir que Saíram</div><div class="exclude-grid" id="excludeDentro"></div></div>
-      <div class="card" style="margin-top:14px"><div class="card-title">Excluir que Não Saíram</div><div class="exclude-grid" id="excludeFora"></div></div>
-      <button class="btn-reset-filters" onclick="resetExclusions()">↩ Resetar</button>
+      <div class="card" style="margin-top:14px">
+        <div class="card-title">Números que Saíram (15)</div>
+        <div class="filter-legend"><span><div class="dot" style="border-color:var(--border);background:var(--card-bg)"></div>Normal</span><span><div class="dot" style="border-color:var(--green-med);background:rgba(46,204,113,.12)"></div>Fixado</span><span><div class="dot" style="border-color:#e74c3c;background:#fee"></div>Excluído</span></div>
+        <div class="exclude-grid" id="excludeDentro"></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="card-title">Números que Não Saíram (10)</div>
+        <div class="filter-legend"><span><div class="dot" style="border-color:var(--border);background:var(--card-bg)"></div>Normal</span><span><div class="dot" style="border-color:var(--green-med);background:rgba(46,204,113,.12)"></div>Fixado</span><span><div class="dot" style="border-color:#e74c3c;background:#fee"></div>Excluído</span></div>
+        <div class="exclude-grid" id="excludeFora"></div>
+      </div>
+      <div style="font-size:.72rem;color:var(--text-light);margin-top:10px;line-height:1.5">Clique 1x = fixar (sempre inclui) · Clique 2x = excluir (nunca inclui) · Clique 3x = normal</div>
+      <button class="btn-reset-filters" onclick="resetExclusions()">↩ Resetar Tudo</button>
     </div>
     <div class="tab-content" id="tabMapa"><div class="card">
       <div class="card-title">Mapa de Calor — Frequência</div>
@@ -329,7 +344,7 @@ const FALLBACK={numero:3287,data:"14/07/2025",numeros:[1,3,5,7,9,11,13,15,17,19,
 const FALLBACK_FREQ={1:58,2:52,3:71,4:45,5:63,6:49,7:68,8:44,9:61,10:55,11:66,12:53,13:67,14:46,15:59,16:57,17:64,18:47,19:62,20:65,21:56,22:69,23:60,24:54,25:70};
 const SK='lottobot_data';
 
-let ULT=null,historico=[],FREQ={...FALLBACK_FREQ},ATRASO={},selectedModelo='B',jogos=[],excludedNums=new Set();
+let ULT=null,historico=[],FREQ={...FALLBACK_FREQ},ATRASO={},selectedModelo='B',jogos=[],excludedNums=new Set(),fixedNums=new Set();
 let stats={total:0,scores:[],modelos:{}},saved=[],checkIdx=null,concRef=null;
 
 document.addEventListener('DOMContentLoaded',()=>{loadSaved();loadTheme();loadAPI();initManual()});
@@ -418,8 +433,10 @@ function gerarJogos(){
   setTimeout(()=>{
     const qtd=parseInt(document.getElementById('qtdJogos').value),mod=MODELOS[selectedModelo];
     const fl={pi:document.getElementById('filterParImpar').classList.contains('on'),so:document.getElementById('filterSoma').classList.contains('on'),co:document.getElementById('filterConsec').classList.contains('on'),re:document.getElementById('filterRepet').classList.contains('on')};
-    const dentro=ULT.numeros.filter(n=>!excludedNums.has(n)),fora=[];
-    for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i)&&!excludedNums.has(i))fora.push(i);
+    const fixedArr=[...fixedNums];
+    const dentro=ULT.numeros.filter(n=>!excludedNums.has(n)&&!fixedNums.has(n)),fora=[];
+    for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i)&&!excludedNums.has(i)&&!fixedNums.has(i))fora.push(i);
+    if(fixedArr.length>15){showToast('⚠️ Máximo 15 fixados');btn.classList.remove('loading');btn.textContent='⚡ Gerar Jogos Estratégicos';return}
     jogos=[];const seen=new Set();let att=0;
     while(jogos.length<qtd&&att<qtd*500){att++;
       const j=genOne(dentro,fora,mod);if(!j)continue;
@@ -437,10 +454,19 @@ function gerarJogos(){
 
 function genOne(dentro,fora,mod){
   const ws=(arr,key,f)=>arr.map(n=>({n,w:key(n)+Math.random()*f*key(n)})).sort((a,b)=>b.w-a.w).map(x=>x.n);
-  const sf=ws(fora,n=>ATRASO[n]||1,.35),sd=ws(dentro,n=>FREQ[n]||50,.35);
-  const fc=Math.min(mod.fora,sf.length),dc=15-fc;
-  if(sd.length<dc)return null;
-  const sel=[...sf.slice(0,fc),...sd.slice(0,dc)];
+  const fixed=[...fixedNums];
+  const need=15-fixed.length;
+  if(need<0)return null;
+  if(need===0)return fixed.sort((a,b)=>a-b);
+  // Split remaining slots between fora and dentro
+  const foraAvail=fora.filter(n=>!fixedNums.has(n));
+  const dentroAvail=dentro.filter(n=>!fixedNums.has(n));
+  const sf=ws(foraAvail,n=>ATRASO[n]||1,.35),sd=ws(dentroAvail,n=>FREQ[n]||50,.35);
+  const fc=Math.min(mod.fora,sf.length,need),dc=Math.min(need-fc,sd.length);
+  if(fc+dc<need)return null;
+  const sel=[...fixed,...sf.slice(0,fc),...sd.slice(0,dc)];
+  // If still short, fill from whatever is available
+  if(sel.length<15){const pool=[...sf.slice(fc),...sd.slice(dc)];for(const n of pool){if(sel.length>=15)break;if(!sel.includes(n))sel.push(n)}}
   return sel.length<15?null:sel.sort((a,b)=>a-b)
 }
 
@@ -587,8 +613,18 @@ function renderFilterTab(){
   ULT.numeros.forEach(n=>dg.appendChild(mkExcl(n)));
   for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkExcl(i))
 }
-function mkExcl(n){const c=document.createElement('div');c.className='exclude-cell'+(excludedNums.has(n)?' excluded':'');c.textContent=String(n).padStart(2,'0');c.onclick=()=>{excludedNums.has(n)?excludedNums.delete(n):excludedNums.add(n);c.classList.toggle('excluded')};return c}
-function resetExclusions(){excludedNums.clear();renderFilterTab();showToast('↩ Reset')}
+function mkExcl(n){
+  const c=document.createElement('div');
+  c.className='exclude-cell';
+  if(fixedNums.has(n))c.classList.add('fixed');
+  else if(excludedNums.has(n))c.classList.add('excluded');
+  c.textContent=String(n).padStart(2,'0');
+  c.onclick=()=>{
+    if(fixedNums.has(n)){fixedNums.delete(n);excludedNums.add(n);c.classList.remove('fixed');c.classList.add('excluded')}
+    else if(excludedNums.has(n)){excludedNums.delete(n);c.classList.remove('excluded')}
+    else{fixedNums.add(n);c.classList.add('fixed')}
+  };return c}
+function resetExclusions(){excludedNums.clear();fixedNums.clear();renderFilterTab();showToast('↩ Reset')}
 
 function copyPix(){navigator.clipboard.writeText(document.getElementById('pixKey').textContent).then(()=>{const b=document.getElementById('btnCopyPix');b.textContent='✅ Copiado!';b.classList.add('copied');setTimeout(()=>{b.textContent='📋 Copiar PIX';b.classList.remove('copied')},2000)})}
 function closeDonation(){document.getElementById('donationModal').classList.remove('show')}
