@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a5c35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Gerador analítico de combinações para Lotofácil">
+<title>Lotofácil Estratégico</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23c9a84c'/%3E%3Ctext x='96' y='120' font-size='100' text-anchor='middle'%3E🎯%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════ RESET & BASE ═══════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green-dark:#1a5c35;--green-med:#2d8653;--gold:#c9a84c;
+  --bg:#f5f5f2;--white:#fefefe;--text:#1a1a1a;--text-light:#666;
+  --radius:12px;--radius-sm:8px;--shadow:0 2px 12px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+  --hot:#e67e22;--cold:#3498db;--rising:#27ae60;--neutral:#95a5a6;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600}
+.mono{font-family:'DM Mono',monospace}
+
+/* ═══════════════════════ TOAST ═══════════════════════ */
+#toast-container{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--green-dark);color:#fff;padding:12px 24px;border-radius:var(--radius-sm);font-size:.88rem;font-weight:500;display:flex;align-items:center;gap:8px;animation:toastIn .3s ease,toastOut .3s ease 2.7s forwards;box-shadow:var(--shadow-lg);pointer-events:auto}
+@keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-20px)}}
+
+/* ═══════════════════════ HEADER ═══════════════════════ */
+.header{position:fixed;top:0;left:0;right:0;height:64px;background:var(--green-dark);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.2)}
+.header-logo{display:flex;align-items:center;gap:10px}
+.header-logo .icon{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.header-logo .name{font-family:'Playfair Display',serif;color:var(--white);font-size:1.15rem;font-weight:700}
+.header-right{display:flex;align-items:center;gap:16px}
+.status-badge{display:flex;align-items:center;gap:6px;color:#8fdfaa;font-size:.8rem;font-weight:500}
+.status-dot{width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(74,222,128,.6)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(74,222,128,0)}}
+.concurso-badge{background:rgba(255,255,255,.12);color:#cde6d5;padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:500;font-family:'DM Mono',monospace}
+.header-spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.offline-badge{background:rgba(255,193,7,.15);color:#ffc107;padding:4px 12px;border-radius:12px;font-size:.72rem;display:none}
+
+/* ═══════════════════════ LAYOUT ═══════════════════════ */
+.app{padding-top:64px;min-height:100vh}
+.desktop-layout{display:grid;grid-template-columns:280px 1fr 300px;gap:20px;padding:20px;max-width:1440px;margin:0 auto}
+.col-left,.col-right{position:sticky;top:84px;max-height:calc(100vh - 84px);overflow-y:auto;scrollbar-width:thin}
+.col-left::-webkit-scrollbar,.col-right::-webkit-scrollbar{width:4px}
+.col-left::-webkit-scrollbar-thumb,.col-right::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+
+/* ═══════════════════════ CARDS ═══════════════════════ */
+.card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.04)}
+.card+.card{margin-top:16px}
+.card-title{font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light);margin-bottom:12px;font-family:'DM Sans',sans-serif;font-weight:600}
+
+/* ═══════════════════════ CONFIG PANEL ═══════════════════════ */
+.config-section{margin-bottom:20px}
+.config-section:last-child{margin-bottom:0}
+.config-label{font-size:.78rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.select-wrap{position:relative}
+.select-wrap select{width:100%;padding:10px 14px;border:1.5px solid #e0e0dc;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;background:var(--white);appearance:none;cursor:pointer;transition:border-color .2s}
+.select-wrap select:focus{outline:none;border-color:var(--green-med)}
+.select-wrap::after{content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-light);pointer-events:none}
+
+.modelo-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.modelo-btn{padding:12px;border:2px solid #e0e0dc;border-radius:var(--radius-sm);background:var(--white);cursor:pointer;text-align:left;transition:all .2s}
+.modelo-btn:hover{border-color:var(--green-med)}
+.modelo-btn.active{border-color:var(--green-dark);background:rgba(26,92,53,.05)}
+.modelo-btn .modelo-name{font-weight:700;font-size:.88rem;color:var(--green-dark)}
+.modelo-btn .modelo-desc{font-size:.75rem;color:var(--text-light);margin-top:2px}
+
+.filter-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0ec}
+.filter-toggle:last-child{border-bottom:none}
+.filter-toggle label{font-size:.82rem;color:var(--text);cursor:pointer;flex:1}
+.toggle-switch{width:42px;height:24px;background:#ccc;border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle-switch.on{background:var(--green-med)}
+.toggle-switch::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle-switch.on::after{transform:translateX(18px)}
+
+.slider-wrap{margin-top:8px}
+.slider-wrap input[type=range]{width:100%;accent-color:var(--green-dark)}
+.slider-value{text-align:center;font-family:'DM Mono',monospace;font-size:.85rem;color:var(--green-dark);font-weight:600;margin-top:4px}
+
+.btn-generate{width:100%;padding:16px;background:var(--green-dark);color:#fff;border:none;border-radius:var(--radius-sm);font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;margin-top:16px;position:relative;overflow:hidden}
+.btn-generate:hover{background:#145229;transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.btn-generate:active{transform:translateY(0)}
+.btn-generate.loading{pointer-events:none;opacity:.85}
+.btn-generate.loading::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:shimmer 1.2s ease}
+@keyframes shimmer{to{left:100%}}
+
+/* ═══════════════════════ TABS ═══════════════════════ */
+.tabs-nav{display:flex;gap:0;background:var(--white);border-radius:var(--radius);padding:4px;box-shadow:var(--shadow);margin-bottom:16px;border:1px solid rgba(0,0,0,.04)}
+.tab-btn{flex:1;padding:10px 16px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;color:var(--text-light);cursor:pointer;border-radius:var(--radius-sm);transition:all .2s}
+.tab-btn.active{background:var(--green-dark);color:#fff}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ═══════════════════════ GAME CARDS ═══════════════════════ */
+.game-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.04);animation:cardIn .4s ease both;position:relative;overflow:hidden}
+.game-card+.game-card{margin-top:14px}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.game-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:var(--green-dark)}
+.score-badge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;font-family:'DM Mono',monospace}
+.score-excelente{background:rgba(46,204,113,.15);color:#1a9c4a}
+.score-muitoforte{background:rgba(52,152,219,.15);color:#2471a3}
+.score-forte{background:rgba(201,168,76,.15);color:#a88530}
+.score-regular{background:rgba(149,165,166,.15);color:#717d7e}
+
+.balls-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.ball{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600;color:#fff;position:relative;transition:transform .15s}
+.ball:hover{transform:scale(1.15)}
+.ball-hot{background:var(--hot)}
+.ball-cold{background:var(--cold)}
+.ball-rising{background:var(--rising)}
+.ball-neutral{background:var(--neutral)}
+.ball-hit{background:var(--gold)!important;box-shadow:0 0 12px rgba(201,168,76,.5)}
+
+.pills-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.pill{padding:4px 10px;background:#f5f5f2;border-radius:16px;font-size:.72rem;font-family:'DM Mono',monospace;color:var(--text-light);font-weight:500}
+
+.btn-check-game{padding:8px 16px;border:1.5px solid var(--green-med);background:transparent;color:var(--green-med);border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-check-game:hover{background:var(--green-med);color:#fff}
+
+.alert-historico{background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.15));border:1px solid rgba(201,168,76,.3);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:#8a7028}
+
+/* ═══════════════════════ CHECK OVERLAY ═══════════════════════ */
+.check-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(254,254,254,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;animation:fadeIn .3s ease;z-index:5}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.check-overlay .acertos-num{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;color:var(--green-dark)}
+.check-overlay .acertos-label{font-size:.9rem;color:var(--text-light);margin-bottom:12px}
+.check-overlay .premio{font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--gold);margin-top:8px}
+.check-overlay .btn-close-overlay{margin-top:16px;padding:8px 20px;border:1.5px solid #ddd;background:transparent;border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;color:var(--text-light);transition:all .2s}
+.check-overlay .btn-close-overlay:hover{border-color:var(--green-med);color:var(--green-med)}
+
+/* ═══════════════════════ EMPTY STATE ═══════════════════════ */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-light)}
+.empty-state .icon{font-size:3rem;margin-bottom:12px}
+.empty-state p{font-size:.9rem}
+
+/* ═══════════════════════ HEATMAP ═══════════════════════ */
+.heatmap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.heat-cell{aspect-ratio:1;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:1rem;font-weight:600;cursor:pointer;transition:transform .15s;position:relative}
+.heat-cell:hover{transform:scale(1.08)}
+.heat-tooltip{position:absolute;bottom:calc(100% + 8px);background:var(--green-dark);color:#fff;padding:4px 10px;border-radius:6px;font-size:.72rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s}
+.heat-cell:hover .heat-tooltip{opacity:1}
+.heat-legend{display:flex;justify-content:center;gap:16px;margin-top:16px}
+.heat-legend-item{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text-light)}
+.heat-legend-color{width:14px;height:14px;border-radius:4px}
+
+/* ═══════════════════════ FILTER TAB ═══════════════════════ */
+.exclude-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.exclude-cell{aspect-ratio:1;border:2px solid #e0e0dc;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;background:var(--white)}
+.exclude-cell.excluded{background:#fee;border-color:#e74c3c;color:#e74c3c}
+.exclude-cell:hover{border-color:var(--green-med)}
+.btn-reset-filters{margin-top:14px;padding:10px 20px;border:1.5px solid #e0e0dc;background:transparent;border-radius:var(--radius-sm);font-size:.82rem;cursor:pointer;color:var(--text-light);transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-reset-filters:hover{border-color:#e74c3c;color:#e74c3c}
+
+/* ═══════════════════════ RIGHT PANEL ═══════════════════════ */
+.ultimo-balls{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}
+.ultimo-balls .ball{width:32px;height:32px;font-size:.75rem}
+.resumo-row{display:flex;justify-content:space-between;font-size:.82rem;padding:4px 0;border-bottom:1px solid #f0f0ec}
+.resumo-row:last-child{border-bottom:none}
+.resumo-label{color:var(--text-light)}
+.resumo-value{font-weight:600;font-family:'DM Mono',monospace}
+
+.monte-carlo-bar{height:8px;background:#e8e8e4;border-radius:4px;overflow:hidden;margin:10px 0}
+.monte-carlo-fill{height:100%;background:linear-gradient(90deg,var(--green-med),var(--gold));width:0%;transition:width .1s linear;border-radius:4px}
+.monte-carlo-count{text-align:center;font-family:'DM Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--green-dark)}
+
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0ec}
+.stat-row:last-child{border-bottom:none}
+.stat-label{font-size:.82rem;color:var(--text-light)}
+.stat-value{font-family:'DM Mono',monospace;font-weight:600;font-size:.88rem}
+
+.top-num-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+.top-num-ball{width:30px;height:30px;border-radius:50%;background:var(--hot);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.78rem;font-weight:600;flex-shrink:0}
+.top-num-bar-wrap{flex:1;height:8px;background:#e8e8e4;border-radius:4px;overflow:hidden}
+.top-num-bar{height:100%;background:linear-gradient(90deg,var(--hot),var(--gold));border-radius:4px}
+.top-num-freq{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:600;color:var(--text-light);width:30px;text-align:right}
+
+/* ═══════════════════════ DONATION MODAL ═══════════════════════ */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--white);border-radius:var(--radius);padding:32px;max-width:420px;width:100%;box-shadow:var(--shadow-lg);text-align:center;animation:modalIn .3s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal h3{font-size:1.3rem;color:var(--green-dark);margin-bottom:8px}
+.modal .subtitle{color:var(--text-light);font-size:.88rem;margin-bottom:16px}
+.modal .body-text{font-size:.85rem;color:var(--text);line-height:1.6;margin-bottom:20px}
+.pix-key-wrap{background:#f5f5f2;border:1.5px dashed var(--gold);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px}
+.pix-key{font-family:'DM Mono',monospace;font-size:.9rem;font-weight:600;color:var(--green-dark);word-break:break-all}
+.btn-copy-pix{margin-top:10px;padding:8px 20px;background:var(--gold);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:.85rem;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-copy-pix:hover{background:#b8943f}
+.btn-copy-pix.copied{background:var(--green-med)}
+.qr-placeholder{width:160px;height:160px;background:#f5f5f2;border:2px dashed #ddd;border-radius:var(--radius-sm);margin:16px auto;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--text-light)}
+.modal-actions{display:flex;gap:10px;justify-content:center;margin-top:20px}
+.modal-actions button{padding:10px 20px;border-radius:var(--radius-sm);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-supported{background:var(--green-dark);color:#fff;border:none}
+.btn-supported:hover{background:#145229}
+.btn-later{background:transparent;border:1.5px solid #ddd;color:var(--text-light)}
+.btn-later:hover{border-color:var(--green-med);color:var(--green-med)}
+
+/* ═══════════════════════ MANUAL CHECK MODAL ═══════════════════════ */
+.manual-check-modal .modal{max-width:480px}
+.manual-input-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0}
+.manual-input-grid input{width:100%;padding:10px;border:1.5px solid #e0e0dc;border-radius:var(--radius-sm);text-align:center;font-family:'DM Mono',monospace;font-size:1rem;font-weight:600}
+.manual-input-grid input:focus{outline:none;border-color:var(--green-med)}
+.btn-confirm-manual{padding:12px 24px;background:var(--green-dark);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-size:.9rem;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-confirm-manual:hover{background:#145229}
+
+/* ═══════════════════════ MOBILE NAV ═══════════════════════ */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid #e0e0dc;z-index:100;padding:8px 0;padding-bottom:env(safe-area-inset-bottom,8px)}
+.mobile-nav-inner{display:flex;justify-content:space-around}
+.mobile-nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;padding:6px 12px;cursor:pointer;color:var(--text-light);font-size:.68rem;font-weight:600;font-family:'DM Sans',sans-serif;transition:color .2s}
+.mobile-nav-btn.active{color:var(--green-dark)}
+.mobile-nav-btn .nav-icon{font-size:1.3rem}
+
+/* ═══════════════════════ MOBILE COLLAPSIBLE ═══════════════════════ */
+.mobile-collapse-header{display:none;padding:14px 20px;background:var(--white);border-bottom:1px solid #e0e0dc;font-weight:600;font-size:.9rem;cursor:pointer;align-items:center;justify-content:space-between}
+.mobile-collapse-header .chevron{transition:transform .2s}
+.mobile-collapse-header.open .chevron{transform:rotate(180deg)}
+
+/* ═══════════════════════ RESPONSIVE ═══════════════════════ */
+@media(max-width:1024px){
+  .desktop-layout{grid-template-columns:260px 1fr;gap:16px;padding:16px}
+  .col-right{display:none}
+}
+@media(max-width:768px){
+  .header{padding:0 14px}
+  .header-logo .name{font-size:.95rem}
+  .concurso-badge{font-size:.68rem;padding:4px 10px}
+  .status-badge{font-size:.72rem}
+  .desktop-layout{grid-template-columns:1fr;padding:12px;gap:12px;padding-bottom:80px}
+  .col-left,.col-right{position:static;max-height:none;display:none}
+  .col-left.mobile-show,.col-right.mobile-show,.col-center.mobile-show{display:block!important}
+  .col-center{display:none}
+  .col-center.mobile-show{display:block}
+  .mobile-nav{display:block}
+  .mobile-collapse-header{display:flex}
+  .tabs-nav{overflow-x:auto;flex-wrap:nowrap}
+  .tab-btn{white-space:nowrap;font-size:.78rem;padding:8px 12px}
+  .ball{width:34px;height:34px;font-size:.78rem}
+  .game-card{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ TOAST CONTAINER ═══════════ -->
+<div id="toast-container"></div>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="header">
+  <div class="header-logo">
+    <div class="icon">🎯</div>
+    <span class="name">Lotofácil Estratégico</span>
+  </div>
+  <div class="header-right">
+    <div class="header-spinner" id="headerSpinner"></div>
+    <div class="offline-badge" id="offlineBadge">📡 Usando dados offline</div>
+    <div class="status-badge"><div class="status-dot"></div>Análise Ativa</div>
+    <div class="concurso-badge" id="concursoBadge">Concurso #--- — --/--/----</div>
+  </div>
+</header>
+
+<!-- ═══════════ APP ═══════════ -->
+<div class="app">
+  <div class="desktop-layout">
+
+    <!-- ═══════ LEFT COLUMN — CONFIG ═══════ -->
+    <aside class="col-left" id="colLeft">
+      <div class="card">
+        <div class="card-title">Configuração</div>
+
+        <!-- Quantidade -->
+        <div class="config-section">
+          <div class="config-label">Quantidade de Jogos</div>
+          <div class="select-wrap">
+            <select id="qtdJogos">
+              <option value="1">1 jogo</option>
+              <option value="3">3 jogos</option>
+              <option value="5" selected>5 jogos</option>
+              <option value="10">10 jogos</option>
+              <option value="20">20 jogos</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Modelo -->
+        <div class="config-section">
+          <div class="config-label">Modelo Estratégico</div>
+          <div class="modelo-grid">
+            <button class="modelo-btn" data-modelo="A" onclick="selectModelo('A')">
+              <div class="modelo-name">Modelo A</div>
+              <div class="modelo-desc">6 fora / 9 dentro — Conservador</div>
+            </button>
+            <button class="modelo-btn active" data-modelo="B" onclick="selectModelo('B')">
+              <div class="modelo-name">Modelo B</div>
+              <div class="modelo-desc">5 fora / 10 dentro — Equilibrado</div>
+            </button>
+            <button class="modelo-btn" data-modelo="C" onclick="selectModelo('C')">
+              <div class="modelo-name">Modelo C</div>
+              <div class="modelo-desc">7 fora / 8 dentro — Arrojado</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="config-section">
+          <div class="config-label">Filtros Inteligentes</div>
+          <div class="filter-toggle">
+            <label>Par/Ímpar (7P/8Í ou 8P/7Í)</label>
+            <div class="toggle-switch on" id="filterParImpar" onclick="toggleFilter(this)"></div>
+          </div>
+          <div class="filter-toggle">
+            <label>Controle de Soma (170–210)</label>
+            <div class="toggle-switch on" id="filterSoma" onclick="toggleFilter(this)"></div>
+          </div>
+          <div class="filter-toggle">
+            <label>Sequências Consecutivas (máx 4)</label>
+            <div class="toggle-switch on" id="filterConsec" onclick="toggleFilter(this)"></div>
+          </div>
+          <div class="filter-toggle">
+            <label>Repetição do Último (8–11)</label>
+            <div class="toggle-switch on" id="filterRepet" onclick="toggleFilter(this)"></div>
+          </div>
+        </div>
+
+        <!-- Janela de Análise -->
+        <div class="config-section">
+          <div class="config-label">Janela de Análise</div>
+          <div class="slider-wrap">
+            <input type="range" min="10" max="100" value="50" id="sliderJanela" oninput="updateSlider()">
+            <div class="slider-value" id="sliderValue">50 concursos</div>
+          </div>
+        </div>
+
+        <!-- Botão Gerar -->
+        <button class="btn-generate" id="btnGerar" onclick="gerarJogos()">⚡ Gerar Jogos Estratégicos</button>
+      </div>
+    </aside>
+
+    <!-- ═══════ CENTER COLUMN — MAIN ═══════ -->
+    <main class="col-center mobile-show" id="colCenter">
+      <!-- Tabs -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab('jogos')">🎲 Jogos Gerados</button>
+        <button class="tab-btn" onclick="switchTab('filtros')">🔧 Filtros</button>
+        <button class="tab-btn" onclick="switchTab('mapa')">🔥 Mapa de Calor</button>
+      </div>
+
+      <!-- Tab: Jogos -->
+      <div class="tab-content active" id="tabJogos">
+        <div class="empty-state" id="emptyState">
+          <div class="icon">🎯</div>
+          <p>Configure os parâmetros e clique em<br><strong>⚡ Gerar Jogos Estratégicos</strong></p>
+        </div>
+        <div id="jogosContainer"></div>
+      </div>
+
+      <!-- Tab: Filtros -->
+      <div class="tab-content" id="tabFiltros">
+        <div class="card">
+          <div class="card-title">Filtros Ativos</div>
+          <div id="filtrosAtivosResumo"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Excluir Números que Saíram</div>
+          <div class="exclude-grid" id="excludeDentro"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Excluir Números que Não Saíram</div>
+          <div class="exclude-grid" id="excludeFora"></div>
+        </div>
+        <button class="btn-reset-filters" onclick="resetExclusions()">↩ Resetar Exclusões</button>
+      </div>
+
+      <!-- Tab: Mapa de Calor -->
+      <div class="tab-content" id="tabMapa">
+        <div class="card">
+          <div class="card-title">Mapa de Calor — Frequência Histórica</div>
+          <div class="heatmap-grid" id="heatmapGrid"></div>
+          <div class="heat-legend">
+            <div class="heat-legend-item"><div class="heat-legend-color" style="background:#c0392b"></div>Frequente</div>
+            <div class="heat-legend-item"><div class="heat-legend-color" style="background:#f39c12"></div>Neutro</div>
+            <div class="heat-legend-item"><div class="heat-legend-color" style="background:#3498db"></div>Raro</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ═══════ RIGHT COLUMN — ANALYTICS ═══════ -->
+    <aside class="col-right" id="colRight">
+      <!-- Último Concurso -->
+      <div class="card" id="cardUltimo">
+        <div class="card-title">Último Concurso</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--green-dark)" id="ultimoNumero">Concurso #---</div>
+        <div style="font-size:.82rem;color:var(--text-light);margin-bottom:8px" id="ultimoData">--/--/----</div>
+        <div class="ultimo-balls" id="ultimoBalls"></div>
+        <div id="ultimoResumo"></div>
+      </div>
+
+      <!-- Monte Carlo -->
+      <div class="card">
+        <div class="card-title">Simulação Monte Carlo</div>
+        <div class="monte-carlo-count" id="monteCarloCount">0</div>
+        <div class="monte-carlo-bar"><div class="monte-carlo-fill" id="monteCarloFill"></div></div>
+        <div style="text-align:center;font-size:.75rem;color:var(--text-light)">simulações executadas</div>
+      </div>
+
+      <!-- Estatísticas -->
+      <div class="card">
+        <div class="card-title">Estatísticas da Sessão</div>
+        <div class="stat-row">
+          <span class="stat-label">Total de jogos</span>
+          <span class="stat-value" id="statTotal">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Score médio</span>
+          <span class="stat-value" id="statMedia">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Modelo mais usado</span>
+          <span class="stat-value" id="statModelo">—</span>
+        </div>
+      </div>
+
+      <!-- Top 5 -->
+      <div class="card">
+        <div class="card-title">Top 5 Números Quentes</div>
+        <div id="topNumerosContainer"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ═══════════ MOBILE NAV ═══════════ -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mobile-nav-btn" onclick="mobileNav('config')"><span class="nav-icon">⚙️</span>Configurar</button>
+    <button class="mobile-nav-btn active" onclick="mobileNav('jogos')"><span class="nav-icon">🎲</span>Jogos</button>
+    <button class="mobile-nav-btn" onclick="mobileNav('analise')"><span class="nav-icon">📊</span>Análise</button>
+  </div>
+</nav>
+
+<!-- ═══════════ DONATION MODAL ═══════════ -->
+<div class="modal-overlay" id="donationModal">
+  <div class="modal">
+    <h3 id="donationTitle">🎉 Parabéns!</h3>
+    <div class="subtitle" id="donationSubtitle">Este resultado foi gerado gratuitamente pela plataforma.</div>
+    <div class="body-text">Se esta ferramenta te ajudou, considere apoiar o projeto com uma doação via PIX. Isso mantém o serviço gratuito para todos.</div>
+    <div class="pix-key-wrap">
+      <div style="font-size:.75rem;color:var(--text-light);margin-bottom:6px">Chave PIX</div>
+      <div class="pix-key" id="pixKey">chatsagrado@gmail.com</div>
+      <button class="btn-copy-pix" id="btnCopyPix" onclick="copyPix()">📋 Copiar Chave PIX</button>
+    </div>
+    <div class="qr-placeholder">QR Code PIX<br><small>(substituir imagem)</small></div>
+    <div class="modal-actions">
+      <button class="btn-supported" onclick="closeDonation()">Já apoiei ✓</button>
+      <button class="btn-later" onclick="closeDonation()">Talvez depois</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MANUAL CHECK MODAL ═══════════ -->
+<div class="modal-overlay manual-check-modal" id="manualCheckModal">
+  <div class="modal">
+    <h3>✏️ Conferência Manual</h3>
+    <div class="subtitle">Digite os 15 números sorteados</div>
+    <div class="manual-input-grid" id="manualInputGrid"></div>
+    <button class="btn-confirm-manual" id="btnConfirmManual">Confirmar e Conferir</button>
+    <button class="btn-later" style="margin-top:10px" onclick="closeManualCheck()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   LOTOFÁCIL ESTRATÉGICO — CORE ENGINE
+   ═══════════════════════════════════════════════════════════════ */
+
+// ─── DATA ───
+const FREQ_BASE = {1:58,2:52,3:71,4:45,5:63,6:49,7:68,8:44,9:61,10:55,11:66,12:53,13:67,14:46,15:59,16:57,17:64,18:47,19:62,20:65,21:56,22:69,23:60,24:54,25:70};
+const ATRASO_BASE = {1:0,2:3,3:0,4:6,5:0,6:4,7:0,8:8,9:0,10:2,11:0,12:3,13:0,14:7,15:0,16:1,17:0,18:5,19:0,20:1,21:2,22:0,23:0,24:0,25:0};
+const FALLBACK_CONCURSO = { numero: 3287, data: "14/07/2025", numeros: [1,3,5,7,9,11,13,15,17,19,21,22,23,24,25] };
+
+const HOT_NUMS = [3,7,9,11,13,17,20,22,25];
+const COLD_NUMS = [4,8,14,18,24];
+const RISING_NUMS = [3,7,20,22,25];
+
+const MODELOS = { A: { fora: 6, dentro: 9 }, B: { fora: 5, dentro: 10 }, C: { fora: 7, dentro: 8 } };
+const PREMIOS = { 11: 'R$ 6,00', 12: 'R$ 12,00', 13: 'R$ 30,00', 14: 'R$ 1.700,00', 15: '🏆 JACKPOT' };
+
+// ─── STATE ───
+let ULTIMO_CONCURSO = null;
+let ATRASO = { ...ATRASO_BASE };
+let selectedModelo = 'B';
+let jogosGerados = [];
+let excludedNums = new Set();
+let sessionStats = { total: 0, scores: [], modelos: {} };
+let currentCheckGameIdx = null;
+
+// ─── INIT ───
+document.addEventListener('DOMContentLoaded', () => {
+  loadUltimoConcurso();
+  renderHeatmap();
+  renderTop5();
+  renderFilterTab();
+  initManualInputs();
+});
+
+// ─── API ───
+async function loadUltimoConcurso() {
+  const spinner = document.getElementById('headerSpinner');
+  spinner.style.display = 'block';
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch('https://loteriascaixa-api.herokuapp.com/api/lotofacil/latest', { signal: controller.signal });
+    clearTimeout(timeout);
+    const data = await res.json();
+    if (data && data.listaDezenas) {
+      ULTIMO_CONCURSO = {
+        numero: data.concurso || data.numero,
+        data: data.data || data.dataApuracao,
+        numeros: data.listaDezenas.map(Number).sort((a, b) => a - b)
+      };
+      showToast('✅ Dados atualizados via API');
+    } else {
+      throw new Error('Invalid data');
+    }
+  } catch (e) {
+    ULTIMO_CONCURSO = { ...FALLBACK_CONCURSO };
+    document.getElementById('offlineBadge').style.display = 'inline-block';
+    showToast('📡 Usando dados offline');
+  }
+  spinner.style.display = 'none';
+  updateAtraso();
+  updateUI();
+}
+
+function updateAtraso() {
+  for (let i = 1; i <= 25; i++) {
+    if (ULTIMO_CONCURSO.numeros.includes(i)) {
+      ATRASO[i] = 0;
+    } else {
+      ATRASO[i] = ATRASO_BASE[i] || 1;
+    }
+  }
+}
+
+function updateUI() {
+  const c = ULTIMO_CONCURSO;
+  document.getElementById('concursoBadge').textContent = `Concurso #${c.numero} — ${c.data}`;
+  document.getElementById('ultimoNumero').textContent = `Concurso #${c.numero}`;
+  document.getElementById('ultimoData').textContent = c.data;
+
+  const ballsContainer = document.getElementById('ultimoBalls');
+  ballsContainer.innerHTML = c.numeros.map(n => `<div class="ball ${getBallClass(n)}">${String(n).padStart(2,'0')}</div>`).join('');
+
+  const pares = c.numeros.filter(n => n % 2 === 0).length;
+  const impares = 15 - pares;
+  const soma = c.numeros.reduce((a, b) => a + b, 0);
+  document.getElementById('ultimoResumo').innerHTML = `
+    <div class="resumo-row"><span class="resumo-label">Pares</span><span class="resumo-value">${pares}</span></div>
+    <div class="resumo-row"><span class="resumo-label">Ímpares</span><span class="resumo-value">${impares}</span></div>
+    <div class="resumo-row"><span class="resumo-label">Soma</span><span class="resumo-value">${soma}</span></div>
+  `;
+
+  renderFilterTab();
+  renderHeatmap();
+  renderTop5();
+}
+
+// ─── BALL CLASSIFICATION ───
+function getBallClass(n) {
+  if (RISING_NUMS.includes(n)) return 'ball-rising';
+  if (HOT_NUMS.includes(n)) return 'ball-hot';
+  if (COLD_NUMS.includes(n)) return 'ball-cold';
+  return 'ball-neutral';
+}
+
+function getBallType(n) {
+  if (RISING_NUMS.includes(n)) return 'Ascensão';
+  if (HOT_NUMS.includes(n)) return 'Quente';
+  if (COLD_NUMS.includes(n)) return 'Frio';
+  return 'Neutro';
+}
+
+// ─── UI HELPERS ───
+function showToast(msg) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function selectModelo(m) {
+  selectedModelo = m;
+  document.querySelectorAll('.modelo-btn').forEach(b => b.classList.toggle('active', b.dataset.modelo === m));
+  showToast(`Modelo ${m} selecionado`);
+}
+
+function toggleFilter(el) {
+  el.classList.toggle('on');
+}
+
+function updateSlider() {
+  const val = document.getElementById('sliderJanela').value;
+  document.getElementById('sliderValue').textContent = `${val} concursos`;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const tabs = ['jogos', 'filtros', 'mapa'];
+    b.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab' + { jogos: 'Jogos', filtros: 'Filtros', mapa: 'Mapa' }[tab]).classList.add('active');
+}
+
+function mobileNav(section) {
+  document.querySelectorAll('.mobile-nav-btn').forEach((b, i) => {
+    const sections = ['config', 'jogos', 'analise'];
+    b.classList.toggle('active', sections[i] === section);
+  });
+  const left = document.getElementById('colLeft');
+  const center = document.getElementById('colCenter');
+  const right = document.getElementById('colRight');
+  [left, center, right].forEach(el => el.classList.remove('mobile-show'));
+  if (section === 'config') left.classList.add('mobile-show');
+  else if (section === 'jogos') center.classList.add('mobile-show');
+  else if (section === 'analise') right.classList.add('mobile-show');
+}
+
+// ─── GENERATION ENGINE ───
+function gerarJogos() {
+  if (!ULTIMO_CONCURSO) { showToast('⏳ Aguardando dados...'); return; }
+
+  const btn = document.getElementById('btnGerar');
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Gerando...';
+
+  setTimeout(() => {
+    const qtd = parseInt(document.getElementById('qtdJogos').value);
+    const modelo = MODELOS[selectedModelo];
+    const filters = {
+      parImpar: document.getElementById('filterParImpar').classList.contains('on'),
+      soma: document.getElementById('filterSoma').classList.contains('on'),
+      consec: document.getElementById('filterConsec').classList.contains('on'),
+      repet: document.getElementById('filterRepet').classList.contains('on')
+    };
+
+    const dentro = ULTIMO_CONCURSO.numeros.filter(n => !excludedNums.has(n));
+    const fora = [];
+    for (let i = 1; i <= 25; i++) {
+      if (!ULTIMO_CONCURSO.numeros.includes(i) && !excludedNums.has(i)) fora.push(i);
+    }
+
+    jogosGerados = [];
+    let attempts = 0;
+    const maxAttempts = qtd * 200;
+
+    while (jogosGerados.length < qtd && attempts < maxAttempts) {
+      attempts++;
+      const jogo = generateSingleGame(dentro, fora, modelo);
+      if (jogo && passFilters(jogo, filters)) {
+        jogosGerados.push(jogo);
+      }
+    }
+
+    // Stats
+    sessionStats.total += jogosGerados.length;
+    sessionStats.modelos[selectedModelo] = (sessionStats.modelos[selectedModelo] || 0) + jogosGerados.length;
+
+    jogosGerados.forEach(j => {
+      j.score = calcScore(j);
+      j.classification = classifyScore(j.score);
+      sessionStats.scores.push(j.score);
+    });
+
+    renderJogos();
+    updateStats();
+    animateMonteCarlo();
+
+    btn.classList.remove('loading');
+    btn.textContent = '⚡ Gerar Jogos Estratégicos';
+    showToast(`🎲 ${jogosGerados.length} jogos gerados`);
+  }, 400);
+}
+
+function generateSingleGame(dentro, fora, modelo) {
+  const weightedShuffle = (arr, key, factor) => {
+    return arr.map(n => ({ n, w: key(n) + Math.random() * factor * key(n) }))
+              .sort((a, b) => b.w - a.w)
+              .map(x => x.n);
+  };
+
+  const shuffledFora = weightedShuffle(fora, n => ATRASO[n] || 1, 0.35);
+  const shuffledDentro = weightedShuffle(dentro, n => FREQ_BASE[n] || 50, 0.35);
+
+  const foraCount = Math.min(modelo.fora, shuffledFora.length);
+  const dentroCount = 15 - foraCount;
+
+  if (shuffledDentro.length < dentroCount) return null;
+
+  const selected = [
+    ...shuffledFora.slice(0, foraCount),
+    ...shuffledDentro.slice(0, dentroCount)
+  ];
+
+  if (selected.length < 15) return null;
+
+  return selected.sort((a, b) => a - b);
+}
+
+function passFilters(jogo, filters) {
+  const pares = jogo.filter(n => n % 2 === 0).length;
+  const soma = jogo.reduce((a, b) => a + b, 0);
+  const repetidos = ULTIMO_CONCURSO ? jogo.filter(n => ULTIMO_CONCURSO.numeros.includes(n)).length : 0;
+
+  if (filters.parImpar && (pares < 6 || pares > 9)) return false;
+  if (filters.soma && (soma < 155 || soma > 225)) return false;
+  if (filters.consec) {
+    let maxSeq = 1, curSeq = 1;
+    for (let i = 1; i < jogo.length; i++) {
+      if (jogo[i] === jogo[i-1] + 1) { curSeq++; maxSeq = Math.max(maxSeq, curSeq); }
+      else curSeq = 1;
+    }
+    if (maxSeq > 4) return false;
+  }
+  if (filters.repet && (repetidos < 7 || repetidos > 12)) return false;
+  return true;
+}
+
+function calcScore(jogo) {
+  let score = 60;
+  const pares = jogo.filter(n => n % 2 === 0).length;
+  const soma = jogo.reduce((a, b) => a + b, 0);
+  const repetidos = ULTIMO_CONCURSO ? jogo.filter(n => ULTIMO_CONCURSO.numeros.includes(n)).length : 0;
+
+  if (pares === 7 || pares === 8) score += 12;
+  else if (pares === 6 || pares === 9) score += 6;
+
+  if (soma >= 170 && soma <= 210) score += 15;
+  else if (soma >= 155 && soma <= 225) score += 7;
+
+  if (repetidos >= 8 && repetidos <= 11) score += 13;
+  else if (repetidos >= 7 && repetidos <= 12) score += 6;
+
+  score += Math.floor(Math.random() * 9);
+  return Math.min(100, score);
+}
+
+function classifyScore(s) {
+  if (s >= 90) return { label: 'Excelente', cls: 'score-excelente' };
+  if (s >= 75) return { label: 'Muito Forte', cls: 'score-muitoforte' };
+  if (s >= 60) return { label: 'Forte', cls: 'score-forte' };
+  return { label: 'Regular', cls: 'score-regular' };
+}
+
+// ─── RENDER JOGOS ───
+function renderJogos() {
+  const container = document.getElementById('jogosContainer');
+  document.getElementById('emptyState').style.display = jogosGerados.length ? 'none' : 'block';
+
+  container.innerHTML = jogosGerados.map((jogo, idx) => {
+    const pares = jogo.filter(n => n % 2 === 0).length;
+    const impares = 15 - pares;
+    const soma = jogo.reduce((a, b) => a + b, 0);
+    const repetidos = ULTIMO_CONCURSO ? jogo.filter(n => ULTIMO_CONCURSO.numeros.includes(n)).length : 0;
+    const baixos = jogo.filter(n => n <= 13).length;
+    const altos = 15 - baixos;
+    const hasAlert = Math.random() < 0.08;
+
+    return `
+      <div class="game-card" style="animation-delay:${idx * 0.12}s" id="gameCard${idx}">
+        ${hasAlert ? '<div class="alert-historico">⚠️ Combinação semelhante a resultado histórico recente</div>' : ''}
+        <div class="game-header">
+          <div class="game-title">Jogo ${idx + 1} — Modelo ${selectedModelo}</div>
+          <span class="score-badge ${jogo.classification ? jogo.classification.cls : ''}">${jogo.score} — ${jogo.classification ? jogo.classification.label : ''}</span>
+        </div>
+        <div class="balls-row">
+          ${jogo.map(n => `<div class="ball ${getBallClass(n)}" title="${getBallType(n)}">${String(n).padStart(2, '0')}</div>`).join('')}
+        </div>
+        <div class="pills-row">
+          <span class="pill">${pares}P / ${impares}Í</span>
+          <span class="pill">Σ ${soma}</span>
+          <span class="pill">${repetidos} rep.</span>
+          <span class="pill">${baixos}B / ${altos}A</span>
+        </div>
+        <button class="btn-check-game" onclick="conferirJogo(${idx})">🔍 Conferir este jogo</button>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── CHECK GAME ───
+async function conferirJogo(idx) {
+  currentCheckGameIdx = idx;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch('https://loteriascaixa-api.herokuapp.com/api/lotofacil/latest', { signal: controller.signal });
+    clearTimeout(timeout);
+    const data = await res.json();
+    if (data && data.listaDezenas) {
+      const resultado = data.listaDezenas.map(Number).sort((a, b) => a - b);
+      showCheckResult(idx, resultado);
+    } else {
+      throw new Error('Invalid');
+    }
+  } catch (e) {
+    openManualCheck(idx);
+  }
+}
+
+function showCheckResult(idx, resultado) {
+  const jogo = jogosGerados[idx];
+  const acertos = jogo.filter(n => resultado.includes(n));
+  const card = document.getElementById('gameCard' + idx);
+
+  // Highlight hit balls
+  const balls = card.querySelectorAll('.ball');
+  balls.forEach(ball => {
+    const num = parseInt(ball.textContent);
+    if (acertos.includes(num)) ball.classList.add('ball-hit');
+  });
+
+  const premioText = PREMIOS[acertos.length] || 'Sem premiação';
+  const overlay = document.createElement('div');
+  overlay.className = 'check-overlay';
+  overlay.innerHTML = `
+    <div class="acertos-num">${acertos.length}</div>
+    <div class="acertos-label">acertos de 15</div>
+    <div class="balls-row" style="justify-content:center">
+      ${acertos.map(n => `<div class="ball ball-hit">${String(n).padStart(2, '0')}</div>`).join('')}
+    </div>
+    <div class="premio">${premioText}</div>
+    <button class="btn-close-overlay" onclick="this.parentElement.remove()">Fechar</button>
+  `;
+  card.appendChild(overlay);
+
+  // Donation modal trigger
+  if (acertos.length >= 11) {
+    setTimeout(() => {
+      document.getElementById('donationTitle').textContent = `🎉 Parabéns! Você teve ${acertos.length} acertos!`;
+      document.getElementById('donationModal').classList.add('show');
+    }, 1500);
+  }
+}
+
+// ─── MANUAL CHECK ───
+function initManualInputs() {
+  const grid = document.getElementById('manualInputGrid');
+  for (let i = 0; i < 15; i++) {
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = 1;
+    input.max = 25;
+    input.placeholder = String(i + 1).padStart(2, '0');
+    grid.appendChild(input);
+  }
+}
+
+function openManualCheck(idx) {
+  currentCheckGameIdx = idx;
+  document.getElementById('manualCheckModal').classList.add('show');
+  const inputs = document.querySelectorAll('#manualInputGrid input');
+  inputs.forEach(inp => inp.value = '');
+  inputs[0].focus();
+
+  document.getElementById('btnConfirmManual').onclick = () => {
+    const nums = [];
+    inputs.forEach(inp => {
+      const v = parseInt(inp.value);
+      if (v >= 1 && v <= 25 && !nums.includes(v)) nums.push(v);
+    });
+    if (nums.length === 15) {
+      closeManualCheck();
+      showCheckResult(currentCheckGameIdx, nums.sort((a, b) => a - b));
+    } else {
+      showToast('⚠️ Insira exatamente 15 números únicos (1–25)');
+    }
+  };
+}
+
+function closeManualCheck() {
+  document.getElementById('manualCheckModal').classList.remove('show');
+}
+
+// ─── DONATION ───
+function copyPix() {
+  const key = document.getElementById('pixKey').textContent;
+  navigator.clipboard.writeText(key).then(() => {
+    const btn = document.getElementById('btnCopyPix');
+    btn.textContent = '✅ Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copiar Chave PIX'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function closeDonation() {
+  document.getElementById('donationModal').classList.remove('show');
+}
+
+// ─── MONTE CARLO ANIMATION ───
+function animateMonteCarlo() {
+  const countEl = document.getElementById('monteCarloCount');
+  const fillEl = document.getElementById('monteCarloFill');
+  let current = 0;
+  const target = 10000;
+  const duration = 3000;
+  const steps = 60;
+  const interval = duration / steps;
+  const increment = target / steps;
+
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) {
+      current = target;
+      clearInterval(timer);
+    }
+    countEl.textContent = Math.floor(current).toLocaleString('pt-BR');
+    fillEl.style.width = (current / target * 100) + '%';
+  }, interval);
+}
+
+// ─── STATS ───
+function updateStats() {
+  document.getElementById('statTotal').textContent = sessionStats.total;
+
+  if (sessionStats.scores.length > 0) {
+    const avg = (sessionStats.scores.reduce((a, b) => a + b, 0) / sessionStats.scores.length).toFixed(1);
+    document.getElementById('statMedia').textContent = avg;
+  }
+
+  let topModelo = '—';
+  let topCount = 0;
+  for (const [m, c] of Object.entries(sessionStats.modelos)) {
+    if (c > topCount) { topModelo = `Modelo ${m}`; topCount = c; }
+  }
+  document.getElementById('statModelo').textContent = topModelo;
+}
+
+// ─── HEATMAP ───
+function renderHeatmap() {
+  const grid = document.getElementById('heatmapGrid');
+  const freqs = Object.values(FREQ_BASE);
+  const minF = Math.min(...freqs);
+  const maxF = Math.max(...freqs);
+
+  grid.innerHTML = '';
+  for (let i = 1; i <= 25; i++) {
+    const f = FREQ_BASE[i];
+    const ratio = (f - minF) / (maxF - minF);
+    let bg;
+    if (ratio > 0.66) bg = `rgba(192, 57, 43, ${0.3 + ratio * 0.5})`;
+    else if (ratio > 0.33) bg = `rgba(243, 156, 18, ${0.3 + ratio * 0.4})`;
+    else bg = `rgba(52, 152, 219, ${0.3 + (1 - ratio) * 0.4})`;
+
+    const cell = document.createElement('div');
+    cell.className = 'heat-cell';
+    cell.style.background = bg;
+    cell.style.color = ratio > 0.5 ? '#fff' : '#333';
+    cell.innerHTML = `${String(i).padStart(2, '0')}<div class="heat-tooltip">Nº ${String(i).padStart(2, '0')} — Freq: ${f}/100</div>`;
+    grid.appendChild(cell);
+  }
+}
+
+// ─── TOP 5 ───
+function renderTop5() {
+  const sorted = Object.entries(FREQ_BASE).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const maxFreq = sorted[0][1];
+  const container = document.getElementById('topNumerosContainer');
+  container.innerHTML = sorted.map(([num, freq]) => `
+    <div class="top-num-row">
+      <div class="top-num-ball">${String(num).padStart(2, '0')}</div>
+      <div class="top-num-bar-wrap"><div class="top-num-bar" style="width:${(freq / maxFreq * 100)}%"></div></div>
+      <div class="top-num-freq">${freq}</div>
+    </div>
+  `).join('');
+}
+
+// ─── FILTER TAB ───
+function renderFilterTab() {
+  // Active filters summary
+  const resumo = document.getElementById('filtrosAtivosResumo');
+  const filters = [
+    { id: 'filterParImpar', label: 'Par/Ímpar' },
+    { id: 'filterSoma', label: 'Controle de Soma' },
+    { id: 'filterConsec', label: 'Consecutivos' },
+    { id: 'filterRepet', label: 'Repetição' }
+  ];
+  resumo.innerHTML = filters.map(f => {
+    const active = document.getElementById(f.id).classList.contains('on');
+    return `<div style="padding:6px 0;font-size:.85rem;color:${active ? 'var(--green-dark)' : 'var(--text-light)'}">${active ? '✅' : '⬜'} ${f.label}</div>`;
+  }).join('');
+
+  // Exclude grids
+  if (!ULTIMO_CONCURSO) return;
+  const dentroGrid = document.getElementById('excludeDentro');
+  const foraGrid = document.getElementById('excludeFora');
+  dentroGrid.innerHTML = '';
+  foraGrid.innerHTML = '';
+
+  ULTIMO_CONCURSO.numeros.forEach(n => {
+    dentroGrid.appendChild(createExcludeCell(n));
+  });
+
+  for (let i = 1; i <= 25; i++) {
+    if (!ULTIMO_CONCURSO.numeros.includes(i)) {
+      foraGrid.appendChild(createExcludeCell(i));
+    }
+  }
+}
+
+function createExcludeCell(n) {
+  const cell = document.createElement('div');
+  cell.className = 'exclude-cell' + (excludedNums.has(n) ? ' excluded' : '');
+  cell.textContent = String(n).padStart(2, '0');
+  cell.onclick = () => {
+    if (excludedNums.has(n)) excludedNums.delete(n);
+    else excludedNums.add(n);
+    cell.classList.toggle('excluded');
+  };
+  return cell;
+}
+
+function resetExclusions() {
+  excludedNums.clear();
+  renderFilterTab();
+  showToast('↩ Exclusões resetadas');
+}
+
+// ─── PWA REGISTRATION ───
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('SW registered'))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
