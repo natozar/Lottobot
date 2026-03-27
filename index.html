@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#1a5c35">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="Gerador analítico de combinações para Lotofácil">
-<title>Lotofácil Estratégico</title>
+<meta name="description" content="Lottobot — Gerador analítico inteligente de combinações para Lotofácil">
+<title>Lottobot</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23c9a84c'/%3E%3Ctext x='96' y='120' font-size='100' text-anchor='middle'%3E🎯%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23c9a84c'/%3E%3Cstop offset='1' stop-color='%23a8872e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23g)'/%3E%3Ccircle cx='50' cy='42' r='24' fill='%231a5c35'/%3E%3Ccircle cx='50' cy='42' r='18' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='50' cy='42' r='11' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='50' cy='42' r='4' fill='%23fff'/%3E%3Crect x='22' y='72' width='56' height='14' rx='7' fill='%231a5c35'/%3E%3Ccircle cx='33' cy='79' r='3' fill='%234ade80'/%3E%3Ccircle cx='43' cy='79' r='3' fill='%234ade80'/%3E%3Ccircle cx='53' cy='79' r='3' fill='%234ade80'/%3E%3Ccircle cx='63' cy='79' r='3' fill='%23666'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23c9a84c'/%3E%3Cstop offset='1' stop-color='%23a8872e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='192' height='192' rx='38' fill='url(%23g)'/%3E%3Ccircle cx='96' cy='78' r='46' fill='%231a5c35'/%3E%3Ccircle cx='96' cy='78' r='35' fill='none' stroke='%23fff' stroke-width='3.5'/%3E%3Ccircle cx='96' cy='78' r='21' fill='none' stroke='%23fff' stroke-width='3.5'/%3E%3Ccircle cx='96' cy='78' r='8' fill='%23fff'/%3E%3Crect x='42' y='138' width='108' height='26' rx='13' fill='%231a5c35'/%3E%3Ccircle cx='63' cy='151' r='6' fill='%234ade80'/%3E%3Ccircle cx='83' cy='151' r='6' fill='%234ade80'/%3E%3Ccircle cx='103' cy='151' r='6' fill='%234ade80'/%3E%3Ccircle cx='123' cy='151' r='6' fill='%23666'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════ RESET & BASE ═══════════════════════ */
@@ -36,7 +36,7 @@ h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600}
 /* ═══════════════════════ HEADER ═══════════════════════ */
 .header{position:fixed;top:0;left:0;right:0;height:64px;background:var(--green-dark);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.2)}
 .header-logo{display:flex;align-items:center;gap:10px}
-.header-logo .icon{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.header-logo .icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
 .header-logo .name{font-family:'Playfair Display',serif;color:var(--white);font-size:1.15rem;font-weight:700}
 .header-right{display:flex;align-items:center;gap:16px}
 .status-badge{display:flex;align-items:center;gap:6px;color:#8fdfaa;font-size:.8rem;font-weight:500}
@@ -258,8 +258,8 @@ h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600}
 <!-- ═══════════ HEADER ═══════════ -->
 <header class="header">
   <div class="header-logo">
-    <div class="icon">🎯</div>
-    <span class="name">Lotofácil Estratégico</span>
+    <div class="icon"><svg viewBox="0 0 100 100" width="38" height="38"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9a84c"/><stop offset="1" stop-color="#a8872e"/></linearGradient></defs><rect width="100" height="100" rx="20" fill="url(#lg)"/><circle cx="50" cy="42" r="24" fill="#1a5c35"/><circle cx="50" cy="42" r="18" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="50" cy="42" r="11" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="50" cy="42" r="4" fill="#fff"/><rect x="22" y="72" width="56" height="14" rx="7" fill="#1a5c35"/><circle cx="33" cy="79" r="3.5" fill="#4ade80"/><circle cx="43" cy="79" r="3.5" fill="#4ade80"/><circle cx="53" cy="79" r="3.5" fill="#4ade80"/><circle cx="63" cy="79" r="3.5" fill="#666"/></svg></div>
+    <span class="name">Lottobot</span>
   </div>
   <div class="header-right">
     <div class="header-spinner" id="headerSpinner"></div>
