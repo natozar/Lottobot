@@ -1919,7 +1919,7 @@ async function requestPushPermission(){
   try{
     const permission=await Notification.requestPermission();
     if(permission!=='granted')return;
-    const token=await _messaging.getToken({vapidKey:''});
+    const token=await _messaging.getToken({vapidKey:'BB7lJFlNo8nGUE1g4G4-VpPPlgE9QOsfwBql6KS6vMiRP5YBsK5qnLUQ1qjm1_tP5xLJZT-GTPCx0LlEGMV9e6E'});
     if(!token)return;
     const ref=_db.collection('users').doc(currentUser.uid);
     await ref.update({fcmTokens:firebase.firestore.FieldValue.arrayUnion(token),notificationsEnabled:true});
