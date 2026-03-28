@@ -1105,35 +1105,120 @@
         grid-column: 1;
         grid-row: 2;
         border-right: none;
-        border-bottom: 1px solid var(--border-default);
-        padding: 20px;
-        max-height: 70vh;
+        padding: 16px;
+        overflow-y: auto;
+        max-height: calc(100vh - 116px);
       }
       .col-left.mobile-show { display: flex; }
       .col-center {
         grid-column: 1;
         grid-row: 2;
-        padding: 16px;
+        padding: 12px;
         padding-bottom: 80px;
+        overflow-y: auto;
       }
-      .col-center.mobile-show { display: flex; }
       .col-right {
         display: none;
         grid-column: 1;
         grid-row: 2;
         border-left: none;
-        border-bottom: 1px solid var(--border-default);
-        padding: 20px;
-        max-height: 70vh;
+        padding: 16px;
+        overflow-y: auto;
+        max-height: calc(100vh - 116px);
       }
       .col-right.mobile-show { display: flex; }
-      header { padding: 0 16px; }
-      .header-right { gap: 12px; }
+      header { padding: 0 12px; }
+      .header-left { gap: 8px; }
+      .header-logo { font-size: 1rem; }
+      .header-right { gap: 8px; font-size: 0.7rem; }
       .mobile-nav { display: flex; }
-      #jogosContainer { grid-template-columns: 1fr; }
-      .modelos-grid { grid-template-columns: 1fr; }
-      .tabs-header { overflow-x: auto; }
-      .tab-button { white-space: nowrap; }
+
+      /* Game cards responsive */
+      #jogosContainer { grid-template-columns: 1fr !important; gap: 10px; }
+      .game-card { padding: 14px; }
+      .balls-container { gap: 3px; }
+      .ball { width: 30px; height: 30px; font-size: 0.7rem; }
+      .game-meta { grid-template-columns: 1fr 1fr; gap: 6px; }
+      .game-header { margin-bottom: 8px; }
+      .game-actions-row { flex-wrap: wrap; }
+      .btn-action { padding: 6px 8px; font-size: 0.7rem; }
+
+      /* Export bar mobile */
+      #exportBar.show { flex-direction: column; align-items: stretch; gap: 8px; }
+      .export-buttons { flex-wrap: wrap; justify-content: center; }
+      .export-info { text-align: center; }
+
+      /* Tabs mobile */
+      .tabs-header { overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 0; }
+      .tab-button { white-space: nowrap; padding: 8px 12px; font-size: 0.78rem; flex-shrink: 0; }
+
+      /* Config mobile */
+      .modelos-grid { grid-template-columns: 1fr 1fr 1fr; }
+      .modelo-card { padding: 10px; font-size: 0.8rem; }
+
+      /* Numbers panel mobile */
+      .numeros-panel { padding: 12px; }
+      .numeros-grid { gap: 4px; }
+      .num-cell { font-size: 0.72rem; border-radius: 6px; }
+
+      /* Prize panel mobile */
+      .prize-panel { padding: 12px; }
+      .prize-row { font-size: 0.72rem; }
+      .prize-acumulado .value { font-size: 1.1rem; }
+
+      /* Analytics mobile */
+      .analytics-card { padding: 12px; }
+      .analytics-value { font-size: 1.4rem; }
+
+      /* Heatmap mobile */
+      .heatmap-cell { font-size: 0.7rem; }
+      .exclude-cell { font-size: 0.72rem; }
+
+      /* Modal mobile */
+      .modal { padding: 20px; margin: 10px; }
+      .modal h2 { font-size: 1.1rem; }
+
+      /* Toast mobile */
+      #toast-container { right: 10px; left: 10px; }
+      .toast { font-size: 0.78rem; padding: 8px 14px; }
+
+      /* Install banner mobile */
+      .install-banner { flex-direction: column; text-align: center; padding: 16px; gap: 12px; bottom: 70px; }
+      .install-banner-actions { justify-content: center; width: 100%; }
+      .install-banner-btn { flex: 1; }
+
+      /* Casino animation mobile */
+      .casino-machine { width: 96%; max-width: none; border-radius: 16px; }
+      .casino-header { padding: 12px; }
+      .casino-header h3 { font-size: 0.85rem; }
+      .casino-display { padding: 16px 12px; }
+      .casino-ball { width: 38px; height: 38px; font-size: 0.82rem; }
+      .casino-btn { padding: 8px 16px; font-size: 0.75rem; }
+      .casino-score-value { font-size: 1.3rem; }
+
+      /* Pre-gen summary mobile */
+      .pre-gen-summary { padding: 10px; font-size: 0.7rem; }
+
+      /* Filter info always visible on mobile (no hover) */
+      .toggle-row .filter-info { display: block; }
+      .mobile-fab { display: flex; }
+    }
+
+    @media (max-width: 480px) {
+      .casino-reels { max-width: 240px; gap: 4px; }
+      .casino-ball { font-size: 0.78rem; }
+      .casino-header h3 { font-size: 0.78rem; letter-spacing: 0.1em; }
+      .casino-lights { gap: 4px; }
+      .casino-light { width: 6px; height: 6px; }
+    }
+
+    @media (max-width: 380px) {
+      .ball { width: 26px; height: 26px; font-size: 0.65rem; }
+      .num-cell { font-size: 0.65rem; }
+      .casino-ball { width: 34px; height: 34px; font-size: 0.75rem; }
+      .modelo-card { padding: 8px; font-size: 0.75rem; }
+      header { height: 48px; }
+      .desktop-layout { grid-template-rows: 48px 1fr 56px; }
     }
 
     .text-muted { color: var(--text-muted); }
@@ -1196,13 +1281,11 @@
     @keyframes casinoChase{0%,100%{opacity:0.2;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2);box-shadow:0 0 8px currentColor}}
     .casino-display{padding:24px 20px;position:relative}
     .casino-progress{text-align:center;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px}
-    .casino-reels{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:20px;min-height:100px}
-    .casino-ball{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:800;font-size:0.95rem;color:#fff;position:relative;opacity:0;transform:translateY(-60px) rotateX(180deg);transition:none}
-    .casino-ball.spinning{opacity:1;transform:translateY(0);animation:ballSpin 0.8s cubic-bezier(0.17,0.67,0.35,1.2)}
-    .casino-ball.landed{opacity:1;transform:translateY(0) rotateX(0);animation:ballLand 0.4s cubic-bezier(0.34,1.56,0.64,1)}
-    .casino-ball.landed::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid rgba(212,168,83,0.6);animation:ballGlow 1s ease-out forwards}
-    @keyframes ballSpin{0%{opacity:0;transform:translateY(-80px) rotateX(720deg) scale(0.3)}40%{opacity:0.6;transform:translateY(10px) rotateX(180deg) scale(1.1)}70%{transform:translateY(-5px) rotateX(45deg) scale(0.95)}100%{opacity:1;transform:translateY(0) rotateX(0) scale(1)}}
-    @keyframes ballLand{0%{transform:scale(1.3);filter:brightness(2)}50%{transform:scale(0.9)}100%{transform:scale(1);filter:brightness(1)}}
+    .casino-reels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:20px;max-width:280px;margin-left:auto;margin-right:auto}
+    .casino-ball{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:800;font-size:0.9rem;color:rgba(255,255,255,0.15);position:relative;background:var(--bg-surface-3);border:1.5px solid rgba(255,255,255,0.06);transition:all 0.3s}
+    .casino-ball.selected{color:#fff;border-color:transparent;animation:ballSelect 0.5s cubic-bezier(0.34,1.56,0.64,1)}
+    .casino-ball.selected::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid rgba(212,168,83,0.5);animation:ballGlow 1.2s ease-out forwards}
+    @keyframes ballSelect{0%{transform:scale(0.6);filter:brightness(3)}50%{transform:scale(1.15)}100%{transform:scale(1);filter:brightness(1)}}
     @keyframes ballGlow{0%{border-color:rgba(212,168,83,0.8);box-shadow:0 0 15px rgba(212,168,83,0.5)}100%{border-color:rgba(212,168,83,0);box-shadow:0 0 0 rgba(212,168,83,0)}}
     .casino-score{text-align:center;padding:16px 0;border-top:1px solid rgba(255,255,255,0.06);opacity:0;transform:translateY(10px);transition:all 0.5s}
     .casino-score.show{opacity:1;transform:translateY(0)}
@@ -1475,21 +1558,27 @@
     </div>
   </div>
 
+  <button class="mobile-fab" id="mobileFab" onclick="document.getElementById('btnGerar').click()">🎲</button>
+
   <div class="mobile-nav">
     <div class="mobile-nav-buttons">
-      <button class="nav-button active" data-tab="jogos">
+      <button class="nav-button active" data-tab="jogos" data-col="center">
         <div class="nav-icon">🎲</div>
         <div>Jogos</div>
       </button>
-      <button class="nav-button" data-tab="filtros">
+      <button class="nav-button" data-tab="config" data-col="left">
         <div class="nav-icon">⚙️</div>
-        <div>Filtros</div>
+        <div>Config</div>
       </button>
-      <button class="nav-button" data-tab="mapa">
+      <button class="nav-button" data-tab="mapa" data-col="center">
         <div class="nav-icon">🔥</div>
         <div>Mapa</div>
       </button>
-      <button class="nav-button" data-tab="historico">
+      <button class="nav-button" data-tab="stats" data-col="right">
+        <div class="nav-icon">📊</div>
+        <div>Stats</div>
+      </button>
+      <button class="nav-button" data-tab="historico" data-col="center">
         <div class="nav-icon">💾</div>
         <div>Salvos</div>
       </button>
@@ -1548,6 +1637,8 @@ let checkIdx=null,concRef=null;
 // ══════ INIT ══════
 document.addEventListener('DOMContentLoaded',async()=>{
   loadSaved();setupEventListeners();
+  // Ensure center column is visible on mobile by default
+  document.querySelector('.col-center')?.classList.add('mobile-show');
   await loadAPI();
   updateUI();renderJogos();renderSaved();renderFilterTab();renderTop5();updateStats();
   if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(()=>{});
@@ -1566,10 +1657,16 @@ function setupEventListeners(){
   document.getElementById('btnGerar')?.addEventListener('click',function(){this.classList.add('loading');this.textContent='⏳ Gerando...';setTimeout(()=>{gerarJogos()},150)});
   document.querySelectorAll('.tab-button').forEach(b=>b.addEventListener('click',function(){switchTab(this.dataset.tab)}));
   document.querySelectorAll('.nav-button').forEach(b=>b.addEventListener('click',function(){
-    switchTab(this.dataset.tab);
-    document.querySelectorAll('.nav-button').forEach(x=>x.classList.remove('active'));this.classList.add('active');
-    document.querySelectorAll('.col-left,.col-right').forEach(c=>{c.classList.remove('mobile-show')});
-    document.querySelector('.col-center').classList.add('mobile-show');
+    const tab=this.dataset.tab;
+    const col=this.dataset.col;
+    document.querySelectorAll('.nav-button').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');
+    // Hide all columns
+    document.querySelectorAll('.col-left,.col-center,.col-right').forEach(c=>c.classList.remove('mobile-show'));
+    // Show correct column
+    if(col==='left') document.querySelector('.col-left').classList.add('mobile-show');
+    else if(col==='right') document.querySelector('.col-right').classList.add('mobile-show');
+    else { document.querySelector('.col-center').classList.add('mobile-show'); switchTab(tab); }
   }));
   document.querySelectorAll('.btn-close').forEach(b=>b.addEventListener('click',function(){this.closest('.modal-overlay').classList.remove('active')}));
   document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('active')}));
@@ -2053,14 +2150,15 @@ function slotMachineReveal(games, callback){
   document.body.appendChild(overlay);
   requestAnimationFrame(()=>overlay.classList.add('active'));
 
-  let currentIdx=0;
   let skipAll=false;
-  const sfx={tick:()=>{try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=800+Math.random()*400;o.type='sine';g.gain.value=0.08;o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.08);o.stop(a.currentTime+0.1)}catch(e){}},
-  win:()=>{try{const a=new AudioContext();[523,659,784,1047].forEach((f,i)=>{const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;o.type='sine';g.gain.value=0.06;o.start(a.currentTime+i*0.12);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+i*0.12+0.3);o.stop(a.currentTime+i*0.12+0.35)})}catch(e){}}};
+  const sfx={
+    tick:()=>{try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=600+Math.random()*600;o.type='triangle';g.gain.value=0.06;o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.1);o.stop(a.currentTime+0.12)}catch(e){}},
+    win:()=>{try{const a=new AudioContext();[523,659,784,1047].forEach((f,i)=>{const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;o.type='sine';g.gain.value=0.05;o.start(a.currentTime+i*0.12);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+i*0.12+0.3);o.stop(a.currentTime+i*0.12+0.35)})}catch(e){}}
+  };
 
   function spawnConfetti(container){
     const colors=['#d4a853','#4a7c59','#ef7d3a','#4a90d9','#ff4444','#44ff44'];
-    for(let i=0;i<20;i++){
+    for(let i=0;i<24;i++){
       const c=document.createElement('div');c.className='casino-confetti';
       c.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*30}%;background:${colors[i%colors.length]};animation-delay:${Math.random()*0.5}s;width:${4+Math.random()*6}px;height:${4+Math.random()*6}px`;
       container.appendChild(c);
@@ -2075,6 +2173,8 @@ function slotMachineReveal(games, callback){
       callback();return;
     }
     const game=games[idx];
+    const selectedSet=new Set(game.map(Number));
+
     overlay.innerHTML=`
       <div class="casino-machine">
         <div class="casino-header">
@@ -2084,6 +2184,7 @@ function slotMachineReveal(games, callback){
         <div class="casino-display">
           <div class="casino-progress">Jogo ${idx+1} de ${games.length}</div>
           <div class="casino-reels" id="casinoReels"></div>
+          <div class="casino-count" style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-bottom:12px"><span id="casinoCounter" style="color:var(--color-gold-primary);font-weight:700">0</span> / 15</div>
           <div class="casino-score" id="casinoScore">
             <div class="casino-score-value" id="casinoScoreVal"></div>
             <div class="casino-score-label"></div>
@@ -2101,38 +2202,51 @@ function slotMachineReveal(games, callback){
     const scoreLabel=overlay.querySelector('.casino-score-label');
     const skipBtn=overlay.querySelector('#casinoSkip');
     const nextBtn=overlay.querySelector('#casinoNext');
+    const counter=overlay.querySelector('#casinoCounter');
 
-    let revealed=0;
-    const totalBalls=game.length;
-
-    // Reveal each ball with staggered timing
-    game.forEach((n,i)=>{
+    // Build 5x5 grid of ALL 25 numbers
+    const balls={};
+    for(let n=1;n<=25;n++){
       const ball=document.createElement('div');
-      ball.className='casino-ball '+getBallClass(n);
+      ball.className='casino-ball';
       ball.textContent=String(n).padStart(2,'0');
+      ball.dataset.num=n;
       reels.appendChild(ball);
+      balls[n]=ball;
+    }
 
-      const delay=i*180+Math.random()*50;
+    // Create reveal order: shuffle the selected numbers for excitement
+    const selected=[...game].sort(()=>Math.random()-0.5);
+    let revealed=0;
+
+    // Reveal selected numbers one by one
+    selected.forEach((n,i)=>{
+      const delay=i*200+Math.random()*80;
       setTimeout(()=>{
-        ball.classList.add('spinning');
+        const ball=balls[n];
+        if(!ball)return;
+        ball.classList.add('selected');
+        // Apply color based on classification
+        const cls=getBallClass(n);
+        if(cls==='ball-hot') ball.style.background='var(--color-ball-hot)';
+        else if(cls==='ball-cold') ball.style.background='var(--color-ball-cold)';
+        else if(cls==='ball-rising') ball.style.background='var(--color-ball-rising)';
+        else ball.style.background='var(--color-ball-neutral)';
         sfx.tick();
-        setTimeout(()=>{
-          ball.classList.remove('spinning');
-          ball.classList.add('landed');
-          revealed++;
-          if(revealed===totalBalls){
-            // All revealed — show score
-            setTimeout(()=>{
-              sfx.win();
-              scoreVal.textContent=game.score+' pts';
-              scoreLabel.textContent=game.cls.label;
-              scoreDiv.classList.add('show');
-              nextBtn.style.display='';
-              skipBtn.style.display='none';
-              if(game.score>=75)spawnConfetti(overlay.querySelector('.casino-display'));
-            },300);
-          }
-        },700);
+        revealed++;
+        counter.textContent=revealed;
+
+        if(revealed===selected.length){
+          setTimeout(()=>{
+            sfx.win();
+            scoreVal.textContent=game.score+' pts';
+            scoreLabel.textContent=game.cls.label;
+            scoreDiv.classList.add('show');
+            nextBtn.style.display='';
+            skipBtn.style.display='none';
+            if(game.score>=70) spawnConfetti(overlay.querySelector('.casino-display'));
+          },400);
+        }
       },delay);
     });
 
