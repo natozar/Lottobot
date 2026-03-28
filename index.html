@@ -7,8 +7,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="Lottobot — Gerador analítico inteligente de combinações para Lotofácil">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://loteriascaixa-api.herokuapp.com; img-src 'self' data:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://loteriascaixa-api.herokuapp.com https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://*.cloudfunctions.net; img-src 'self' data: https://*.googleusercontent.com https://*.gstatic.com; frame-src https://lottobot-8d75e.firebaseapp.com https://www.google.com;">
   <meta name="apple-mobile-web-app-title" content="Lottobot">
+  <meta property="og:title" content="Lottobot — Lotofácil Intelligence">
+  <meta property="og:description" content="Gerador analítico inteligente de combinações para Lotofácil. Filtros estatísticos, heatmap, Monte Carlo e conferência automática.">
+  <meta property="og:image" content="icon-512.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
 
   <title>Lottobot v3 — Lotofácil Intelligence</title>
 
@@ -1392,6 +1397,30 @@
     #recaptchaContainer{margin-top:4px}
     .auth-admin-link{font-size:0.65rem;color:var(--color-gold-primary);text-decoration:none;opacity:0.7;display:none}
     .auth-admin-link.show{display:inline}
+
+    /* === ONBOARDING TUTORIAL === */
+    .onboard-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity 0.3s;backdrop-filter:blur(4px)}
+    .onboard-overlay.active{opacity:1}
+    .onboard-card{background:var(--bg-surface-1);border:1px solid rgba(212,168,83,0.3);border-radius:20px;max-width:420px;width:100%;overflow:hidden;animation:modalIn 0.3s ease-out}
+    .onboard-header{background:linear-gradient(135deg,rgba(212,168,83,0.15),rgba(74,124,89,0.1));padding:28px 24px 20px;text-align:center}
+    .onboard-header h2{font-size:1.3rem;font-weight:700;color:var(--text-primary);margin-bottom:4px}
+    .onboard-header p{font-size:0.78rem;color:var(--text-secondary)}
+    .onboard-body{padding:20px 24px}
+    .onboard-step{display:none;animation:fadeIn 0.25s ease-out}
+    .onboard-step.active{display:block}
+    .onboard-step-icon{font-size:2rem;margin-bottom:12px;text-align:center}
+    .onboard-step h3{font-size:1rem;font-weight:600;color:var(--color-gold-primary);margin-bottom:8px;text-align:center}
+    .onboard-step p{font-size:0.8rem;color:var(--text-secondary);line-height:1.6;text-align:center}
+    .onboard-step .tip{background:rgba(212,168,83,0.08);border:1px solid rgba(212,168,83,0.15);border-radius:8px;padding:10px 12px;margin-top:12px;font-size:0.72rem;color:var(--color-gold-primary);line-height:1.5}
+    .onboard-dots{display:flex;justify-content:center;gap:6px;margin-top:16px}
+    .onboard-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all 0.2s}
+    .onboard-dot.active{background:var(--color-gold-primary);width:24px;border-radius:4px}
+    .onboard-footer{padding:16px 24px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .onboard-btn{padding:10px 20px;border-radius:10px;font-size:0.8rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+    .onboard-btn.primary{background:var(--color-gold-primary);color:#09090b;flex:1}
+    .onboard-btn.primary:hover{background:#e5b863}
+    .onboard-btn.skip{background:none;color:var(--text-muted);border:none;font-size:0.75rem;cursor:pointer}
+    .onboard-btn.skip:hover{color:var(--text-secondary)}
   </style>
 </head>
 <body>
@@ -1784,11 +1813,12 @@ function updateAuthUI(){
     isAdmin=false;
     return;
   }
-  const name=currentUser.displayName||currentUser.phoneNumber||'User';
+  const name=esc(currentUser.displayName||currentUser.phoneNumber||'User');
   const photo=currentUser.photoURL;
+  const safePhoto=photo?photo.replace(/[^a-zA-Z0-9:\/\.\-_?=&%]/g,''):'';
   area.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
-    ${photo?'<img src="'+photo+'" class="auth-avatar" referrerpolicy="no-referrer">':'<div class="auth-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--color-gold-dim);color:var(--color-gold-primary);font-weight:700;font-size:0.7rem">'+name[0].toUpperCase()+'</div>'}
-    <span class="auth-user-name">${name.split(' ')[0]}</span>
+    ${safePhoto?'<img src="'+esc(safePhoto)+'" class="auth-avatar" referrerpolicy="no-referrer">':'<div class="auth-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--color-gold-dim);color:var(--color-gold-primary);font-weight:700;font-size:0.7rem">'+esc(name[0].toUpperCase())+'</div>'}
+    <span class="auth-user-name">${esc(name.split(' ')[0])}</span>
     <button class="auth-logout" onclick="doLogout()">Sair</button>
   </div>`;
   document.getElementById('authModal')?.classList.remove('active');
@@ -2824,5 +2854,81 @@ function slotMachineReveal(games, callback){
       <button class="install-banner-btn primary" onclick="doInstall()">Instalar</button>
     </div>
   </div>
+  <!-- ONBOARDING TUTORIAL -->
+  <div class="onboard-overlay" id="onboardOverlay">
+    <div class="onboard-card">
+      <div class="onboard-header">
+        <h2>Bem-vindo ao Lottobot</h2>
+        <p>Seu gerador inteligente para Lotofacil</p>
+      </div>
+      <div class="onboard-body">
+        <div class="onboard-step active" data-step="0">
+          <div class="onboard-step-icon">🎲</div>
+          <h3>Gere jogos inteligentes</h3>
+          <p>O Lottobot analisa o historico real dos sorteios e gera combinacoes otimizadas com base em frequencia, atraso e tendencia dos numeros.</p>
+          <div class="tip">Cada jogo recebe um Score de 0 a 100 — quanto maior, melhor a aderencia estatistica.</div>
+        </div>
+        <div class="onboard-step" data-step="1">
+          <div class="onboard-step-icon">⚙️</div>
+          <h3>Configure sua estrategia</h3>
+          <p>Escolha entre 3 modelos (Conservador, Equilibrado, Arrojado) e ative filtros como Par/Impar, Soma, Consecutivas e Primos para refinar seus jogos.</p>
+          <div class="tip">No celular, toque em "Config" na barra inferior para acessar todas as opcoes.</div>
+        </div>
+        <div class="onboard-step" data-step="2">
+          <div class="onboard-step-icon">📌</div>
+          <h3>Fixe e exclua numeros</h3>
+          <p>No painel "Saíram / Ficaram Fora", toque uma vez para fixar um numero (sempre presente), duas vezes para excluir (nunca aparece), tres vezes para voltar ao normal.</p>
+          <div class="tip">Numeros fixados aparecem em verde, excluidos em vermelho.</div>
+        </div>
+        <div class="onboard-step" data-step="3">
+          <div class="onboard-step-icon">🔍</div>
+          <h3>Confira seus resultados</h3>
+          <p>Apos o sorteio, clique em "Conferir" em qualquer jogo salvo. O app busca o resultado automaticamente e mostra seus acertos com animacao.</p>
+          <div class="tip">Se o resultado ainda nao saiu, voce pode conferir manualmente selecionando os 15 numeros.</div>
+        </div>
+        <div class="onboard-step" data-step="4">
+          <div class="onboard-step-icon">💾</div>
+          <h3>Salve e compartilhe</h3>
+          <p>Salve seus melhores jogos, exporte para WhatsApp, copie para a area de transferencia. Se fizer login, seus jogos ficam salvos na nuvem.</p>
+          <div class="tip">Faca login com Google ou telefone para sincronizar entre dispositivos e receber alertas de premiacoes.</div>
+        </div>
+      </div>
+      <div class="onboard-dots" id="onboardDots"></div>
+      <div class="onboard-footer">
+        <button class="onboard-btn skip" onclick="closeOnboard()">Pular</button>
+        <button class="onboard-btn primary" id="onboardNext" onclick="nextOnboardStep()">Proximo</button>
+      </div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    const KEY='lottobot_onboard_done';
+    if(localStorage.getItem(KEY))return;
+    const overlay=document.getElementById('onboardOverlay');
+    const steps=overlay.querySelectorAll('.onboard-step');
+    const dotsC=document.getElementById('onboardDots');
+    const btn=document.getElementById('onboardNext');
+    let cur=0;
+    steps.forEach((_,i)=>{const d=document.createElement('div');d.className='onboard-dot'+(i===0?' active':'');dotsC.appendChild(d)});
+    const dots=dotsC.querySelectorAll('.onboard-dot');
+    function show(i){
+      steps.forEach(s=>s.classList.remove('active'));
+      dots.forEach(d=>d.classList.remove('active'));
+      steps[i].classList.add('active');
+      dots[i].classList.add('active');
+      btn.textContent=i===steps.length-1?'Comecar!':'Proximo';
+    }
+    window.nextOnboardStep=function(){
+      if(cur<steps.length-1){cur++;show(cur)}
+      else closeOnboard();
+    };
+    window.closeOnboard=function(){
+      localStorage.setItem(KEY,'1');
+      overlay.classList.remove('active');
+      setTimeout(()=>overlay.remove(),300);
+    };
+    setTimeout(()=>overlay.classList.add('active'),600);
+  })();
+  </script>
 </body>
 </html>
