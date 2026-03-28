@@ -1139,6 +1139,55 @@
     .text-secondary { color: var(--text-secondary); }
     .text-gold { color: var(--color-gold-primary); }
     .mono { font-family: var(--font-mono); }
+
+    /* === NUMBERS PANEL (sortedados + fora) === */
+    .numeros-panel { background: var(--bg-surface-1); border: 1px solid var(--border-default); border-radius: var(--border-radius-lg); padding: 16px; margin-bottom: 16px; }
+    .numeros-panel-title { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .numeros-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .num-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 600; font-size: 0.8rem; background: var(--bg-surface-2); border: 1.5px solid var(--border-default); border-radius: 8px; cursor: pointer; color: var(--text-secondary); position: relative; user-select: none; transition: all 0.15s; }
+    .num-cell:hover { border-color: var(--border-hover); background: var(--bg-surface-3); }
+    .num-cell.fixed { background: rgba(74,124,89,0.15); border-color: var(--color-moss-primary); color: #6aac7e; }
+    .num-cell.fixed::after { content: '📌'; position: absolute; top: -5px; right: -3px; font-size: 0.45rem; }
+    .num-cell.excluded { background: rgba(220,60,60,0.08); border-color: rgba(220,60,60,0.4); color: #dc3c3c; opacity: 0.6; }
+    .num-cell.excluded::after { content: '✕'; position: absolute; top: -3px; right: 2px; font-size: 0.55rem; color: #dc3c3c; }
+    .num-cell-legend { display: flex; gap: 12px; margin-top: 8px; font-size: 0.65rem; color: var(--text-muted); }
+    .num-cell-legend span { display: flex; align-items: center; gap: 4px; }
+
+    /* === PRIZE PREDICTION === */
+    .prize-panel { background: var(--bg-surface-1); border: 1px solid var(--border-default); border-radius: var(--border-radius-lg); padding: 16px; margin-bottom: 16px; }
+    .prize-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.78rem; }
+    .prize-row .acertos { color: var(--text-muted); }
+    .prize-row .valor { font-family: var(--font-mono); font-weight: 600; color: var(--text-secondary); }
+    .prize-acumulado { margin-top: 10px; padding: 10px; background: rgba(212,168,83,0.1); border: 1px solid rgba(212,168,83,0.25); border-radius: 8px; text-align: center; animation: pulseGold 2s ease-in-out infinite; }
+    .prize-acumulado .label { font-size: 0.7rem; color: var(--color-gold-primary); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+    .prize-acumulado .value { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; color: var(--color-gold-primary); margin-top: 2px; }
+    @keyframes pulseGold { 0%,100% { box-shadow: 0 0 0 0 rgba(212,168,83,0); } 50% { box-shadow: 0 0 16px 2px rgba(212,168,83,0.15); } }
+
+    /* === FILTER EXPLANATIONS === */
+    .filter-info { font-size: 0.65rem; color: var(--text-muted); line-height: 1.3; margin-top: 2px; display: none; }
+    .toggle-row:hover .filter-info { display: block; }
+    .toggle-row { position: relative; }
+
+    /* === PRE-GENERATION SUMMARY === */
+    .pre-gen-summary { background: var(--bg-surface-2); border: 1px solid var(--border-default); border-radius: var(--border-radius-md); padding: 12px; margin-top: 12px; margin-bottom: 12px; font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6; display: none; }
+    .pre-gen-summary.show { display: block; }
+    .pre-gen-summary .summary-item { display: flex; justify-content: space-between; padding: 2px 0; }
+    .pre-gen-summary .summary-item .label { color: var(--text-muted); }
+    .pre-gen-summary .summary-item .value { font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); }
+
+    /* === SLOT MACHINE ANIMATION === */
+    .slot-overlay { position: fixed; inset: 0; background: rgba(9,9,11,0.92); z-index: 150; display: flex; align-items: center; justify-content: center; }
+    .slot-container { text-align: center; max-width: 500px; width: 90%; }
+    .slot-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 24px; }
+    .slot-balls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 24px; }
+    .slot-ball { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem; color: white; opacity: 0; transform: scale(0.3) rotate(180deg); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .slot-ball.revealed { opacity: 1; transform: scale(1) rotate(0deg); }
+    .slot-ball.revealing { animation: slotSpin 0.6s ease-out; }
+    @keyframes slotSpin { 0% { opacity: 0; transform: translateY(-40px) scale(0.5); } 60% { opacity: 1; transform: translateY(8px) scale(1.15); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    .slot-score { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
+    .slot-progress { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; }
+    .slot-skip { background: none; border: 1px solid var(--border-hover); color: var(--text-muted); padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-top: 16px; transition: all 0.2s; }
+    .slot-skip:hover { border-color: var(--color-gold-primary); color: var(--color-gold-primary); }
   </style>
 </head>
 <body>
@@ -1158,6 +1207,26 @@
 
   <div class="desktop-layout">
     <div class="col-left">
+      <!-- NÚMEROS DO ÚLTIMO SORTEIO -->
+      <div class="numeros-panel">
+        <div class="numeros-panel-title">
+          <span>✅ Saíram no Último</span>
+          <span id="numPanelConc" style="font-family:var(--font-mono);color:var(--text-secondary)">#0000</span>
+        </div>
+        <div class="numeros-grid" id="numDentro"></div>
+        <div style="margin-top: 14px;">
+          <div class="numeros-panel-title"><span>❌ Ficaram Fora</span></div>
+          <div class="numeros-grid" id="numFora"></div>
+        </div>
+        <div class="num-cell-legend">
+          <span>🖱️ 1x = fixar</span>
+          <span>🖱️ 2x = excluir</span>
+          <span>🖱️ 3x = normal</span>
+        </div>
+        <button style="width:100%;margin-top:10px;padding:6px;background:none;border:1px solid var(--border-default);border-radius:6px;color:var(--text-muted);font-size:0.72rem;cursor:pointer;" onclick="resetExclusions()">↩ Limpar seleções</button>
+      </div>
+
+      <!-- CONFIG -->
       <div class="config-section">
         <div class="section-title">Quantidade</div>
         <select id="qtdJogos">
@@ -1177,47 +1246,35 @@
           <div class="modelo-card" data-modelo="C">C</div>
         </div>
         <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4;">
-          A: Fora/Dentro 6/9<br>B: Balanceado 5/10<br>C: Dentro 7/8
+          A: Conservador (6 fora / 9 dentro)<br>B: Equilibrado (5 fora / 10 dentro)<br>C: Arrojado (7 fora / 8 dentro)
         </div>
       </div>
 
       <div class="config-section">
         <div class="section-title">Filtros de Validação</div>
         <div class="toggle-row">
-          <span class="toggle-label">Par/Ímpar</span>
-          <div id="filterParImpar" class="toggle-switch on">
-            <div class="toggle-knob"></div>
-          </div>
+          <div><span class="toggle-label">Par/Ímpar</span><div class="filter-info">Aceita jogos com 7 ou 8 números pares. Distribuição mais frequente na Lotofácil.</div></div>
+          <div id="filterParImpar" class="toggle-switch on"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <span class="toggle-label">Soma</span>
-          <div id="filterSoma" class="toggle-switch on">
-            <div class="toggle-knob"></div>
-          </div>
+          <div><span class="toggle-label">Soma</span><div class="filter-info">Soma dos 15 números entre 175 e 205. Faixa onde caem ~70% dos sorteios reais.</div></div>
+          <div id="filterSoma" class="toggle-switch on"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <span class="toggle-label">Consecutivas</span>
-          <div id="filterConsec" class="toggle-switch on">
-            <div class="toggle-knob"></div>
-          </div>
+          <div><span class="toggle-label">Consecutivas</span><div class="filter-info">Máximo de 4 números em sequência (ex: 5-6-7-8). Evita padrões raros.</div></div>
+          <div id="filterConsec" class="toggle-switch on"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <span class="toggle-label">Repetição</span>
-          <div id="filterRepet" class="toggle-switch on">
-            <div class="toggle-knob"></div>
-          </div>
+          <div><span class="toggle-label">Repetição</span><div class="filter-info">Entre 8 e 11 números repetidos do último sorteio. Média real: ~9-10 repetições.</div></div>
+          <div id="filterRepet" class="toggle-switch on"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <span class="toggle-label">Dezena</span>
-          <div id="filterDezena" class="toggle-switch">
-            <div class="toggle-knob"></div>
-          </div>
+          <div><span class="toggle-label">Dezena</span><div class="filter-info">Distribui números entre as 5 faixas (1-5, 6-10, 11-15, 16-20, 21-25). Evita concentração.</div></div>
+          <div id="filterDezena" class="toggle-switch"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <span class="toggle-label">Primos</span>
-          <div id="filterPrimos" class="toggle-switch">
-            <div class="toggle-knob"></div>
-          </div>
+          <div><span class="toggle-label">Primos</span><div class="filter-info">Mantém entre 4 e 6 números primos (2,3,5,7,11,13,17,19,23). Padrão mais comum.</div></div>
+          <div id="filterPrimos" class="toggle-switch"><div class="toggle-knob"></div></div>
         </div>
       </div>
 
@@ -1234,9 +1291,7 @@
       <div class="config-section">
         <div class="toggle-row">
           <span class="toggle-label">Melhor Ranking (Top N)</span>
-          <div id="toggleMelhorN" class="toggle-switch">
-            <div class="toggle-knob"></div>
-          </div>
+          <div id="toggleMelhorN" class="toggle-switch"><div class="toggle-knob"></div></div>
         </div>
         <div class="slider-wrapper">
           <div class="slider-header">
@@ -1245,6 +1300,17 @@
           </div>
           <input id="sliderMelhorN" type="range" min="50" max="200" value="100" disabled>
         </div>
+      </div>
+
+      <!-- PRE-GENERATION SUMMARY -->
+      <div id="preGenSummary" class="pre-gen-summary">
+        <div style="font-weight:600;color:var(--color-gold-primary);margin-bottom:6px;font-size:0.78rem;">📋 O que será feito:</div>
+        <div class="summary-item"><span class="label">Jogos</span><span class="value" id="sumQtd">5</span></div>
+        <div class="summary-item"><span class="label">Modelo</span><span class="value" id="sumModelo">B (Equilibrado)</span></div>
+        <div class="summary-item"><span class="label">Filtros ativos</span><span class="value" id="sumFiltros">4 de 6</span></div>
+        <div class="summary-item"><span class="label">Fixados</span><span class="value" id="sumFixed">0</span></div>
+        <div class="summary-item"><span class="label">Excluídos</span><span class="value" id="sumExcluded">0</span></div>
+        <div class="summary-item"><span class="label">Base histórica</span><span class="value" id="sumJanela">50 concursos</span></div>
       </div>
 
       <button id="btnGerar">🎲 Gerar Números</button>
@@ -1306,6 +1372,22 @@
     </div>
 
     <div class="col-right">
+      <!-- PREVISÃO DE PRÊMIO -->
+      <div class="prize-panel">
+        <div class="numeros-panel-title"><span>💰 Previsão Próximo Concurso</span></div>
+        <div id="prizeEstimate">
+          <div class="prize-row"><span class="acertos">15 acertos</span><span class="valor" id="prize15">—</span></div>
+          <div class="prize-row"><span class="acertos">14 acertos</span><span class="valor" id="prize14">—</span></div>
+          <div class="prize-row"><span class="acertos">13 acertos</span><span class="valor" id="prize13">—</span></div>
+          <div class="prize-row"><span class="acertos">12 acertos</span><span class="valor" id="prize12">—</span></div>
+          <div class="prize-row"><span class="acertos">11 acertos</span><span class="valor" id="prize11">—</span></div>
+        </div>
+        <div id="acumuladoPanel" class="prize-acumulado" style="display:none;">
+          <div class="label">🔥 Acumulado</div>
+          <div class="value" id="acumuladoValue">R$ 0</div>
+        </div>
+      </div>
+
       <div class="analytics-card">
         <div class="analytics-title">Último Sorteio</div>
         <div class="analytics-value" id="ultimoNumero">#0000</div>
@@ -1430,13 +1512,14 @@ document.addEventListener('DOMContentLoaded',async()=>{
 function setupEventListeners(){
   document.querySelectorAll('.modelo-card').forEach(el=>el.addEventListener('click',function(){selectModelo(this.dataset.modelo)}));
   ['filterParImpar','filterSoma','filterConsec','filterRepet','filterDezena','filterPrimos'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.addEventListener('click',function(){this.classList.toggle('on')})
+    const el=document.getElementById(id);if(el)el.addEventListener('click',function(){this.classList.toggle('on');updatePreGenSummary()})
   });
+  document.getElementById('qtdJogos')?.addEventListener('change',updatePreGenSummary);
   document.getElementById('sliderJanela')?.addEventListener('input',updateSlider);
   document.getElementById('sliderMelhorN')?.addEventListener('input',updateMelhorNSlider);
   const tMN=document.getElementById('toggleMelhorN');
-  if(tMN) tMN.addEventListener('click',function(){this.classList.toggle('on');const s=document.getElementById('sliderMelhorN');if(s)s.disabled=!this.classList.contains('on')});
-  document.getElementById('btnGerar')?.addEventListener('click',function(){this.classList.add('loading');this.textContent='⏳ Gerando...';setTimeout(()=>{gerarJogos();this.classList.remove('loading');this.textContent='🎲 Gerar Números'},150)});
+  if(tMN) tMN.addEventListener('click',function(){this.classList.toggle('on');const s=document.getElementById('sliderMelhorN');if(s)s.disabled=!this.classList.contains('on');updatePreGenSummary()});
+  document.getElementById('btnGerar')?.addEventListener('click',function(){this.classList.add('loading');this.textContent='⏳ Gerando...';setTimeout(()=>{gerarJogos()},150)});
   document.querySelectorAll('.tab-button').forEach(b=>b.addEventListener('click',function(){switchTab(this.dataset.tab)}));
   document.querySelectorAll('.nav-button').forEach(b=>b.addEventListener('click',function(){
     switchTab(this.dataset.tab);
@@ -1457,7 +1540,7 @@ async function apiFetch(url){const c=new AbortController();const t=setTimeout(()
 function parseDraw(d){
   const dz=d.listaDezenas||d.dezenas||d.numeros;
   if(!dz) return null;
-  return{numero:d.concurso||d.numero,data:d.data||d.dataApuracao||'',numeros:dz.map(Number).sort((a,b)=>a-b)};
+  return{numero:d.concurso||d.numero,data:d.data||d.dataApuracao||'',numeros:dz.map(Number).sort((a,b)=>a-b),acumulou:d.acumulou||false,valorEstimado:d.valorEstimadoProximoConcurso?'R$ '+Number(d.valorEstimadoProximoConcurso).toLocaleString('pt-BR'):null};
 }
 
 async function loadAPI(){
@@ -1540,7 +1623,14 @@ function gerarJogos(){
   jogos=pool;concRef=ULT.numero;
   stats.total+=jogos.length;stats.modelos[selectedModelo]=(stats.modelos[selectedModelo]||0)+jogos.length;
   jogos.forEach(j=>stats.scores.push(j.score));
-  renderJogos();updateStats();runHistoricalAnalysis();persist();
+  // Slot machine animation then render
+  const btn=document.getElementById('btnGerar');
+  if(jogos.length>0 && jogos.length<=5){
+    slotMachineReveal([...jogos],()=>{renderJogos();updateStats();runHistoricalAnalysis();persist();btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'});
+  } else {
+    renderJogos();updateStats();runHistoricalAnalysis();persist();
+    btn.classList.remove('loading');btn.textContent='🎲 Gerar Números';
+  }
   showToast('🎲 '+jogos.length+' jogos ('+att+' tentativas)');
 }
 
@@ -1740,7 +1830,7 @@ function updateUI(){
   if(balls)balls.innerHTML=ULT.numeros.map(n=>'<div class="ball '+getBallClass(n)+'">'+String(n).padStart(2,'0')+'</div>').join('');
   const res=document.getElementById('ultimoResumo');
   if(res){const p=ULT.numeros.filter(n=>n%2===0).length,s=ULT.numeros.reduce((a,b)=>a+b,0);res.innerHTML='Pares: '+p+' · Ímpares: '+(15-p)+' · Soma: '+s}
-  renderFilterTab();renderHeatmap();renderTop5();updateStats();
+  renderFilterTab();renderHeatmap();renderTop5();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();
 }
 
 function switchTab(tab){
@@ -1752,9 +1842,9 @@ function switchTab(tab){
   if(tab==='mapa')renderHeatmap();if(tab==='historico')renderSaved();if(tab==='filtros')renderFilterTab();
 }
 
-function selectModelo(m){selectedModelo=m;document.querySelectorAll('.modelo-card').forEach(el=>el.classList.toggle('active',el.dataset.modelo===m));showToast('Modelo '+m)}
-function updateSlider(){const s=document.getElementById('sliderJanela'),d=document.getElementById('sliderValue');if(s&&d)d.textContent=s.value}
-function updateMelhorNSlider(){const s=document.getElementById('sliderMelhorN'),d=document.getElementById('sliderMelhorNValue');if(s&&d)d.textContent=s.value}
+function selectModelo(m){selectedModelo=m;document.querySelectorAll('.modelo-card').forEach(el=>el.classList.toggle('active',el.dataset.modelo===m));updatePreGenSummary();showToast('Modelo '+m)}
+function updateSlider(){const s=document.getElementById('sliderJanela'),d=document.getElementById('sliderValue');if(s&&d)d.textContent=s.value;updatePreGenSummary()}
+function updateMelhorNSlider(){const s=document.getElementById('sliderMelhorN'),d=document.getElementById('sliderMelhorNValue');if(s&&d)d.textContent=s.value;updatePreGenSummary()}
 function updateStats(){
   const t=document.getElementById('statTotal'),m=document.getElementById('statMedia'),mo=document.getElementById('statModelo'),sv=document.getElementById('statSalvos');
   if(t)t.textContent=stats.total;
@@ -1799,6 +1889,106 @@ function persist(){try{localStorage.setItem(SK,JSON.stringify({saved,stats,exclu
 function loadSaved(){try{const d=JSON.parse(localStorage.getItem(SK)||'{}');if(d.saved)saved=d.saved;if(d.stats)stats=d.stats;if(d.excludedNums)excludedNums=new Set(d.excludedNums);if(d.fixedNums)fixedNums=new Set(d.fixedNums);if(d.selectedModelo){selectedModelo=d.selectedModelo;document.querySelector('[data-modelo="'+selectedModelo+'"]')?.classList.add('active')}}catch(e){}}
 function copyPix(){navigator.clipboard.writeText(document.getElementById('pixKey')?.textContent?.trim()||'').then(()=>showToast('📋 Chave PIX copiada!'))}
 function closeDonation(){document.getElementById('donationModal')?.classList.remove('active')}
+
+// ══════ NUMBERS PANEL (Sorteados + Fora) ══════
+function renderNumPanel(){
+  if(!ULT) return;
+  document.getElementById('numPanelConc').textContent='#'+ULT.numero;
+  const dg=document.getElementById('numDentro'),fg=document.getElementById('numFora');
+  if(dg){dg.innerHTML='';ULT.numeros.forEach(n=>dg.appendChild(mkNumCell(n)))}
+  if(fg){fg.innerHTML='';for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkNumCell(i))}
+}
+function mkNumCell(n){
+  const c=document.createElement('div');c.className='num-cell';
+  if(fixedNums.has(n))c.classList.add('fixed');else if(excludedNums.has(n))c.classList.add('excluded');
+  c.textContent=String(n).padStart(2,'0');
+  c.onclick=()=>{
+    if(fixedNums.has(n)){fixedNums.delete(n);excludedNums.add(n);c.classList.remove('fixed');c.classList.add('excluded')}
+    else if(excludedNums.has(n)){excludedNums.delete(n);c.classList.remove('excluded')}
+    else{fixedNums.add(n);c.classList.add('fixed')}
+    updatePreGenSummary();
+  };return c;
+}
+
+// ══════ PRE-GENERATION SUMMARY ══════
+function updatePreGenSummary(){
+  const panel=document.getElementById('preGenSummary');if(!panel)return;
+  panel.classList.add('show');
+  const qtd=document.getElementById('qtdJogos')?.value||5;
+  const modelNames={A:'A (Conservador)',B:'B (Equilibrado)',C:'C (Arrojado)'};
+  const activeFilters=['filterParImpar','filterSoma','filterConsec','filterRepet','filterDezena','filterPrimos'].filter(id=>document.getElementById(id)?.classList.contains('on')).length;
+  document.getElementById('sumQtd').textContent=qtd;
+  document.getElementById('sumModelo').textContent=modelNames[selectedModelo]||selectedModelo;
+  document.getElementById('sumFiltros').textContent=activeFilters+' de 6';
+  document.getElementById('sumFixed').textContent=fixedNums.size;
+  document.getElementById('sumExcluded').textContent=excludedNums.size;
+  document.getElementById('sumJanela').textContent=(document.getElementById('sliderJanela')?.value||50)+' concursos';
+}
+
+// ══════ PRIZE ESTIMATION ══════
+function updatePrizeEstimate(){
+  // Use last known prize values or estimates from API
+  // Lotofácil typical prizes (estimated, updated from API when available)
+  const prizes={15:'R$ 1.700.000',14:'R$ 1.700',13:'R$ 30',12:'R$ 12',11:'R$ 6'};
+  document.getElementById('prize15').textContent=prizes[15];
+  document.getElementById('prize14').textContent=prizes[14];
+  document.getElementById('prize13').textContent=prizes[13];
+  document.getElementById('prize12').textContent=prizes[12];
+  document.getElementById('prize11').textContent=prizes[11];
+  // Check if accumulated (estimate based on 15-acertos prize)
+  if(ULT&&ULT.acumulou){
+    document.getElementById('acumuladoPanel').style.display='block';
+    document.getElementById('acumuladoValue').textContent=ULT.valorEstimado||'R$ 1.700.000+';
+  }
+}
+
+// ══════ SLOT MACHINE ANIMATION ══════
+function slotMachineReveal(games, callback){
+  if(!games.length){callback();return}
+  const overlay=document.createElement('div');overlay.className='slot-overlay';
+  let currentGame=0;let skipAll=false;
+
+  function showGame(idx){
+    if(idx>=games.length||skipAll){overlay.remove();callback();return}
+    const game=games[idx];
+    overlay.innerHTML=`
+      <div class="slot-container">
+        <div class="slot-progress">Jogo ${idx+1} de ${games.length}</div>
+        <div class="slot-title">Revelando números...</div>
+        <div class="slot-balls" id="slotBalls"></div>
+        <div class="slot-score" id="slotScore" style="opacity:0"></div>
+        <button class="slot-skip" id="slotSkipBtn">${idx<games.length-1?'Pular ▸▸':'Finalizar'}</button>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const ballsDiv=overlay.querySelector('#slotBalls');
+    const scoreDiv=overlay.querySelector('#slotScore');
+    const skipBtn=overlay.querySelector('#slotSkipBtn');
+
+    skipBtn.onclick=()=>{
+      if(idx>=games.length-1){skipAll=true;overlay.remove();callback()}
+      else{overlay.remove();showGame(idx+1)}
+    };
+
+    // Reveal balls one by one
+    game.forEach((n,i)=>{
+      const ball=document.createElement('div');
+      ball.className='slot-ball '+getBallClass(n);
+      ball.textContent=String(n).padStart(2,'0');
+      ballsDiv.appendChild(ball);
+      setTimeout(()=>{ball.classList.add('revealing');setTimeout(()=>{ball.classList.remove('revealing');ball.classList.add('revealed')},500)},i*120);
+    });
+
+    // Show score after all balls
+    setTimeout(()=>{
+      scoreDiv.style.opacity='1';
+      scoreDiv.innerHTML='<span style="color:var(--color-gold-primary)">'+game.score+'</span> pts — '+game.cls.label;
+      skipBtn.textContent=idx<games.length-1?'Próximo ▸':'Finalizar';
+    },game.length*120+600);
+  }
+
+  showGame(0);
+}
   </script>
 </body>
 </html>
