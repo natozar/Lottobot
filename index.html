@@ -1326,13 +1326,13 @@
     .casino-btn.gold:hover{box-shadow:0 4px 24px rgba(212,168,83,0.5);transform:translateY(-1px)}
     .casino-btn.ghost{background:rgba(255,255,255,0.04);border:1px solid var(--border-hover);color:var(--text-muted)}
     .casino-btn.ghost:hover{border-color:var(--text-secondary);color:var(--text-secondary);background:rgba(255,255,255,0.06)}
-    .casino-confetti{position:absolute;pointer-events:none;will-change:transform,opacity;animation:confettiBurst var(--cDur,2.5s) cubic-bezier(0.15,0.85,0.25,1) forwards}
-    .casino-confetti.rect{border-radius:2px}
-    .casino-confetti.circle{border-radius:50%}
-    .casino-confetti.star{clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);border-radius:0}
-    .casino-confetti.diamond{clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);border-radius:0}
-    .casino-confetti.strip{border-radius:1px}
-    @keyframes confettiBurst{0%{opacity:1;transform:translateY(0) translateX(0) rotate(0deg) scale(1)}15%{opacity:1;transform:translateY(calc(var(--cy,180px)*0.1)) translateX(calc(var(--cx,0px)*0.3)) rotate(calc(var(--cr,720deg)*0.15)) scale(1.2)}50%{opacity:0.95;transform:translateY(calc(var(--cy,180px)*0.5)) translateX(calc(var(--cx,0px)*0.75)) rotate(calc(var(--cr,720deg)*0.5)) scale(1)}100%{opacity:0;transform:translateY(var(--cy,180px)) translateX(var(--cx,0px)) rotate(var(--cr,720deg)) scale(0.3)}}
+    .fw-spark{position:absolute;pointer-events:none;border-radius:50%;will-change:transform,opacity;animation:fwShoot var(--fwDur,1.8s) cubic-bezier(0.2,0.6,0.3,1) forwards}
+    .fw-spark::after{content:'';position:absolute;inset:-2px;border-radius:50%;background:inherit;filter:blur(3px);opacity:0.6}
+    .fw-trail{position:absolute;pointer-events:none;width:2px;border-radius:1px;will-change:transform,opacity;animation:fwTrail var(--fwDur,1.2s) ease-out forwards}
+    @keyframes fwShoot{0%{opacity:1;transform:translate(0,0) scale(1.5);filter:brightness(3)}15%{opacity:1;transform:translate(calc(var(--fx)*0.2),calc(var(--fy)*0.2)) scale(1.2);filter:brightness(2)}60%{opacity:0.8;transform:translate(calc(var(--fx)*0.75),calc(var(--fy)*0.75)) scale(0.8);filter:brightness(1.2)}100%{opacity:0;transform:translate(var(--fx),var(--fy)) scale(0);filter:brightness(0.5)}}
+    @keyframes fwTrail{0%{opacity:0.8;transform:translate(0,0) scaleY(1)}100%{opacity:0;transform:translate(calc(var(--fx)*0.4),calc(var(--fy)*0.4)) scaleY(0)}}
+    .fw-burst-ring{position:absolute;pointer-events:none;border-radius:50%;border:2px solid;will-change:transform,opacity;animation:fwRing 1s ease-out forwards}
+    @keyframes fwRing{0%{opacity:0.9;transform:scale(0)}40%{opacity:0.5;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
     /* === PWA INSTALL BANNER === */
     .install-banner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:180;background:linear-gradient(135deg,#1a2a1e 0%,#111113 50%,#1a1a10 100%);border:1px solid rgba(212,168,83,0.3);border-radius:16px;padding:20px 24px;display:none;align-items:center;gap:16px;max-width:440px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(212,168,83,0.1);backdrop-filter:blur(20px);animation:bannerIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
     .install-banner.show{display:flex}
@@ -2223,136 +2223,196 @@ function slotMachineReveal(games, callback){
     return _masterComp;
   }
 
-  // Synth sound engine — electronic/futuristic with reverb
+  // Synth sound engine — punchy electronic with impact
   const sfx={
     tick:(i,total)=>{const a=ax();const m=getMaster();if(!a||!m)return;const t=a.currentTime;
       const progress=i/total;
-      const freq=350+(progress*900);
-      // Main synth — layered saw+square for rich electronic character
+      const freq=400+(progress*1000);
+      // Digital snap — sharp attack sawtooth
       const o1=a.createOscillator();const g1=a.createGain();const f1=a.createBiquadFilter();
-      o1.type='sawtooth';o1.frequency.setValueAtTime(freq,t);o1.frequency.exponentialRampToValueAtTime(freq*2,t+0.035);
-      f1.type='lowpass';f1.frequency.setValueAtTime(freq*5,t);f1.frequency.exponentialRampToValueAtTime(freq*0.4,t+0.12);f1.Q.value=10;
-      g1.gain.setValueAtTime(0.09,t);g1.gain.exponentialRampToValueAtTime(0.001,t+0.14);
-      o1.connect(f1);f1.connect(g1);g1.connect(m);o1.start(t);o1.stop(t+0.18);
-      // Detuned layer for width
+      o1.type='sawtooth';o1.frequency.setValueAtTime(freq*1.5,t);o1.frequency.exponentialRampToValueAtTime(freq,t+0.02);
+      f1.type='lowpass';f1.frequency.setValueAtTime(freq*6,t);f1.frequency.exponentialRampToValueAtTime(freq*0.3,t+0.1);f1.Q.value=12;
+      g1.gain.setValueAtTime(0.12,t);g1.gain.exponentialRampToValueAtTime(0.001,t+0.13);
+      o1.connect(f1);f1.connect(g1);g1.connect(m);o1.start(t);o1.stop(t+0.16);
+      // Detuned square for stereo thickness
       const o1b=a.createOscillator();const g1b=a.createGain();
-      o1b.type='square';o1b.frequency.setValueAtTime(freq*1.005,t);o1b.frequency.exponentialRampToValueAtTime(freq*2.01,t+0.035);
-      g1b.gain.setValueAtTime(0.04,t);g1b.gain.exponentialRampToValueAtTime(0.001,t+0.12);
-      o1b.connect(f1);g1b.connect(m);o1b.connect(g1b);g1b.connect(m);o1b.start(t);o1b.stop(t+0.15);
-      // Sub bass punch
+      o1b.type='square';o1b.frequency.setValueAtTime(freq*1.502,t);o1b.frequency.exponentialRampToValueAtTime(freq*1.005,t+0.02);
+      g1b.gain.setValueAtTime(0.05,t);g1b.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+      o1b.connect(f1);o1b.connect(g1b);g1b.connect(m);o1b.start(t);o1b.stop(t+0.13);
+      // Punchy sub hit
       const o2=a.createOscillator();const g2=a.createGain();
-      o2.type='sine';o2.frequency.setValueAtTime(freq*0.5,t);o2.frequency.exponentialRampToValueAtTime(freq*0.2,t+0.09);
-      g2.gain.setValueAtTime(0.06,t);g2.gain.exponentialRampToValueAtTime(0.001,t+0.11);
-      o2.connect(g2);g2.connect(m);o2.start(t);o2.stop(t+0.14);
-      // High metallic sparkle — pitch rises with progress
-      const o3=a.createOscillator();const g3=a.createGain();const f3=a.createBiquadFilter();
-      o3.type='sine';o3.frequency.setValueAtTime(freq*3+progress*1200,t);o3.frequency.exponentialRampToValueAtTime(freq*4+progress*1500,t+0.04);
-      f3.type='highpass';f3.frequency.value=2000;f3.Q.value=2;
-      g3.gain.setValueAtTime(0.03,t);g3.gain.exponentialRampToValueAtTime(0.001,t+0.07);
-      o3.connect(f3);f3.connect(g3);g3.connect(m);o3.start(t);o3.stop(t+0.1);
+      o2.type='sine';o2.frequency.setValueAtTime(freq*0.6,t);o2.frequency.exponentialRampToValueAtTime(freq*0.15,t+0.07);
+      g2.gain.setValueAtTime(0.09,t);g2.gain.exponentialRampToValueAtTime(0.001,t+0.09);
+      o2.connect(g2);g2.connect(m);o2.start(t);o2.stop(t+0.12);
+      // Transient click noise for impact
+      const nb=a.createBuffer(1,Math.floor(a.sampleRate*0.015),a.sampleRate);
+      const nd=nb.getChannelData(0);for(let j=0;j<nd.length;j++)nd[j]=(Math.random()*2-1)*Math.pow(1-j/nd.length,3);
+      const ns=a.createBufferSource();ns.buffer=nb;
+      const nf=a.createBiquadFilter();nf.type='highpass';nf.frequency.value=3000+progress*4000;nf.Q.value=1;
+      const ng=a.createGain();ng.gain.setValueAtTime(0.08,t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.02);
+      ns.connect(nf);nf.connect(ng);ng.connect(m);ns.start(t);
+      // Crystal shimmer — gets brighter with each ball
+      const o3=a.createOscillator();const g3=a.createGain();
+      o3.type='sine';o3.frequency.setValueAtTime(freq*3+progress*2000,t);o3.frequency.exponentialRampToValueAtTime(freq*5+progress*2500,t+0.03);
+      g3.gain.setValueAtTime(0.025+progress*0.02,t);g3.gain.exponentialRampToValueAtTime(0.001,t+0.08);
+      o3.connect(g3);g3.connect(m);o3.start(t);o3.stop(t+0.1);
     },
     win:(score)=>{const a=ax();const m=getMaster();if(!a||!m)return;const t=a.currentTime;
       const isHigh=score>=70;
-      // Synth arpeggio — layered electronic victory fanfare
-      const notes=isHigh?[261,329,392,523,659,784,1047]:[330,415,523,659,784];
+      // Firework launch whistle
+      const ow=a.createOscillator();const gw=a.createGain();
+      ow.type='sine';ow.frequency.setValueAtTime(800,t);ow.frequency.exponentialRampToValueAtTime(3500,t+0.3);
+      gw.gain.setValueAtTime(0.06,t);gw.gain.exponentialRampToValueAtTime(0.001,t+0.35);
+      ow.connect(gw);gw.connect(m);ow.start(t);ow.stop(t+0.4);
+      // Explosion noise burst at peak
+      const eb=a.createBuffer(1,Math.floor(a.sampleRate*0.25),a.sampleRate);
+      const ed=eb.getChannelData(0);for(let j=0;j<ed.length;j++)ed[j]=(Math.random()*2-1)*Math.exp(-j/(a.sampleRate*0.04));
+      const es=a.createBufferSource();es.buffer=eb;
+      const ef=a.createBiquadFilter();ef.type='bandpass';ef.frequency.value=2500;ef.Q.value=0.8;
+      const eg=a.createGain();eg.gain.setValueAtTime(isHigh?0.12:0.08,t+0.3);eg.gain.exponentialRampToValueAtTime(0.001,t+0.6);
+      es.connect(ef);ef.connect(eg);eg.connect(m);es.start(t+0.3);
+      // Crackle — random pops like sparklers
+      for(let c=0;c<(isHigh?12:6);c++){
+        const cb=a.createBuffer(1,Math.floor(a.sampleRate*0.02),a.sampleRate);
+        const cd=cb.getChannelData(0);for(let j=0;j<cd.length;j++)cd[j]=(Math.random()*2-1)*Math.pow(1-j/cd.length,5);
+        const cs=a.createBufferSource();cs.buffer=cb;
+        const cf=a.createBiquadFilter();cf.type='highpass';cf.frequency.value=5000+Math.random()*4000;
+        const cg=a.createGain();const ct=t+0.35+Math.random()*0.8;
+        cg.gain.setValueAtTime(0.04+Math.random()*0.04,ct);cg.gain.exponentialRampToValueAtTime(0.001,ct+0.03);
+        cs.connect(cf);cf.connect(cg);cg.connect(m);cs.start(ct);
+      }
+      // Victory arpeggio — synth fanfare
+      const notes=isHigh?[523,659,784,1047,1318,1568]:[523,659,784,1047];
       notes.forEach((f,i)=>{
         const o=a.createOscillator();const g=a.createGain();const fl=a.createBiquadFilter();
         o.type=i%2===0?'sawtooth':'square';o.frequency.value=f;
-        // Detuned pair for stereo width
         const o2=a.createOscillator();const g2=a.createGain();
         o2.type=o.type;o2.frequency.value=f*1.006;
-        fl.type='lowpass';fl.frequency.setValueAtTime(f*6,t+i*0.1);fl.frequency.exponentialRampToValueAtTime(f*2,t+i*0.1+0.5);fl.Q.value=4;
-        const vol=isHigh?0.06:0.04;
-        g.gain.setValueAtTime(vol,t+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.5);
-        g2.gain.setValueAtTime(vol*0.5,t+i*0.1);g2.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.45);
-        o.connect(fl);fl.connect(g);g.connect(m);
-        o2.connect(g2);g2.connect(m);
-        o.start(t+i*0.1);o.stop(t+i*0.1+0.55);
-        o2.start(t+i*0.1);o2.stop(t+i*0.1+0.5);
+        fl.type='lowpass';fl.frequency.setValueAtTime(f*5,t+0.35+i*0.1);fl.frequency.exponentialRampToValueAtTime(f*1.5,t+0.35+i*0.1+0.45);fl.Q.value=5;
+        const vol=isHigh?0.07:0.05;
+        g.gain.setValueAtTime(vol,t+0.35+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,t+0.35+i*0.1+0.5);
+        g2.gain.setValueAtTime(vol*0.4,t+0.35+i*0.1);g2.gain.exponentialRampToValueAtTime(0.001,t+0.35+i*0.1+0.45);
+        o.connect(fl);fl.connect(g);g.connect(m);o2.connect(g2);g2.connect(m);
+        o.start(t+0.35+i*0.1);o.stop(t+0.35+i*0.1+0.55);
+        o2.start(t+0.35+i*0.1);o2.stop(t+0.35+i*0.1+0.5);
       });
-      // Bright sweep
-      for(let s=0;s<(isHigh?4:2);s++){
-        const o=a.createOscillator();const g=a.createGain();
-        o.type='sine';
-        o.frequency.setValueAtTime(1500+s*600,t+0.7+s*0.06);
-        o.frequency.exponentialRampToValueAtTime(5000+s*1000,t+0.85+s*0.06);
-        g.gain.setValueAtTime(0.03,t+0.7+s*0.06);
-        g.gain.exponentialRampToValueAtTime(0.001,t+1.1+s*0.06);
-        o.connect(g);g.connect(m);o.start(t+0.7+s*0.06);o.stop(t+1.2+s*0.06);
-      }
-      // Bass drop for high scores
+      // Deep bass drop
       if(isHigh){const ob=a.createOscillator();const gb=a.createGain();
-        ob.type='sine';ob.frequency.setValueAtTime(130,t+0.05);ob.frequency.exponentialRampToValueAtTime(35,t+0.45);
-        gb.gain.setValueAtTime(0.12,t+0.05);gb.gain.exponentialRampToValueAtTime(0.001,t+0.55);
-        ob.connect(gb);gb.connect(m);ob.start(t+0.05);ob.stop(t+0.6);
+        ob.type='sine';ob.frequency.setValueAtTime(150,t+0.3);ob.frequency.exponentialRampToValueAtTime(30,t+0.7);
+        gb.gain.setValueAtTime(0.14,t+0.3);gb.gain.exponentialRampToValueAtTime(0.001,t+0.75);
+        ob.connect(gb);gb.connect(m);ob.start(t+0.3);ob.stop(t+0.8);
       }
-      // Impact noise burst
-      const buf=a.createBuffer(1,a.sampleRate*0.08,a.sampleRate);
-      const d=buf.getChannelData(0);for(let j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*Math.exp(-j/(a.sampleRate*0.015));
-      const ns=a.createBufferSource();ns.buffer=buf;
-      const nf=a.createBiquadFilter();nf.type='bandpass';nf.frequency.value=4000;nf.Q.value=1;
-      const ng=a.createGain();ng.gain.setValueAtTime(isHigh?0.06:0.03,t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.1);
-      ns.connect(nf);nf.connect(ng);ng.connect(m);ns.start(t);
     },
     drumroll:()=>{const a=ax();const m=getMaster();if(!a||!m)return;const t=a.currentTime;
-      // Electronic drum roll — filtered noise bursts
-      for(let i=0;i<10;i++){
+      // Electronic tension build — accelerating hits
+      for(let i=0;i<12;i++){
         const o=a.createOscillator();const g=a.createGain();const f=a.createBiquadFilter();
-        o.type='square';o.frequency.value=55+i*10;
-        f.type='bandpass';f.frequency.value=180+i*60;f.Q.value=6;
-        const vol=0.03+i*0.005;
-        g.gain.setValueAtTime(vol,t+i*0.035);g.gain.exponentialRampToValueAtTime(0.001,t+i*0.035+0.04);
-        o.connect(f);f.connect(g);g.connect(m);o.start(t+i*0.035);o.stop(t+i*0.035+0.05);
+        o.type='square';o.frequency.value=50+i*12;
+        f.type='bandpass';f.frequency.value=150+i*80;f.Q.value=8;
+        const vol=0.025+i*0.006;
+        const dt=i*0.03*(1-i*0.02);
+        g.gain.setValueAtTime(vol,t+dt);g.gain.exponentialRampToValueAtTime(0.001,t+dt+0.035);
+        o.connect(f);f.connect(g);g.connect(m);o.start(t+dt);o.stop(t+dt+0.04);
       }
-      // Rising whoosh with resonance
+      // Rising whoosh — resonant sweep
       const ow=a.createOscillator();const gw=a.createGain();const fw=a.createBiquadFilter();
-      ow.type='sawtooth';ow.frequency.setValueAtTime(80,t);ow.frequency.exponentialRampToValueAtTime(900,t+0.38);
-      fw.type='lowpass';fw.frequency.setValueAtTime(150,t);fw.frequency.exponentialRampToValueAtTime(4000,t+0.38);fw.Q.value=6;
-      gw.gain.setValueAtTime(0.04,t);gw.gain.exponentialRampToValueAtTime(0.001,t+0.42);
-      ow.connect(fw);fw.connect(gw);gw.connect(m);ow.start(t);ow.stop(t+0.45);
-      // Cyber riser
-      const or=a.createOscillator();const gr=a.createGain();
-      or.type='sine';or.frequency.setValueAtTime(200,t);or.frequency.exponentialRampToValueAtTime(2000,t+0.4);
-      gr.gain.setValueAtTime(0.02,t);gr.gain.exponentialRampToValueAtTime(0.001,t+0.42);
-      or.connect(gr);gr.connect(m);or.start(t);or.stop(t+0.45);
+      ow.type='sawtooth';ow.frequency.setValueAtTime(60,t);ow.frequency.exponentialRampToValueAtTime(1200,t+0.4);
+      fw.type='lowpass';fw.frequency.setValueAtTime(100,t);fw.frequency.exponentialRampToValueAtTime(5000,t+0.4);fw.Q.value=8;
+      gw.gain.setValueAtTime(0.05,t);gw.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+      ow.connect(fw);fw.connect(gw);gw.connect(m);ow.start(t);ow.stop(t+0.48);
+      // Sub pressure build
+      const os=a.createOscillator();const gs=a.createGain();
+      os.type='sine';os.frequency.setValueAtTime(40,t);os.frequency.exponentialRampToValueAtTime(80,t+0.38);
+      gs.gain.setValueAtTime(0.08,t);gs.gain.exponentialRampToValueAtTime(0.001,t+0.42);
+      os.connect(gs);gs.connect(m);os.start(t);os.stop(t+0.45);
     }
   };
 
-  // Premium confetti — multi-wave explosion with vivid colors and variety
+  // Fireworks — luminous star bursts like real pyrotechnics
   function spawnConfetti(container){
-    const palette=[
-      '#FFD700','#FFAA00','#FF4444','#FF1493','#FF33CC','#FF6B9D',
-      '#33FF55','#00FF88','#00FFCC','#33CCFF','#4488FF','#6644FF',
-      '#9966FF','#CC33FF','#FF66AA','#FFEE33','#FFF','#E0F7FA'
+    const palettes=[
+      ['#FFD700','#FFAA00','#FFF5CC','#FFFFFF'],
+      ['#FF4444','#FF6B6B','#FF9999','#FFCCCC'],
+      ['#33CCFF','#66DDFF','#99EEFF','#FFFFFF'],
+      ['#FF33CC','#FF66DD','#FF99EE','#FFFFFF'],
+      ['#33FF55','#66FF88','#99FFBB','#FFFFFF'],
+      ['#9966FF','#BB99FF','#DDCCFF','#FFFFFF'],
+      ['#FFAA00','#FF6600','#FFDD44','#FFFFFF']
     ];
-    const shapes=['rect','circle','star','diamond','strip','circle','rect','star'];
-    const waves=[
-      {count:40,delayBase:0,spread:1.0,sizeScale:1.0},
-      {count:35,delayBase:0.15,spread:1.3,sizeScale:0.85},
-      {count:25,delayBase:0.35,spread:1.6,sizeScale:0.7}
+
+    // Launch multiple burst points (like firework shells)
+    const bursts=[
+      {x:'35%',y:'25%',delay:0},
+      {x:'65%',y:'20%',delay:0.25},
+      {x:'50%',y:'35%',delay:0.5},
+      {x:'25%',y:'40%',delay:0.7},
+      {x:'75%',y:'30%',delay:0.85}
     ];
-    waves.forEach(wave=>{
-      for(let i=0;i<wave.count;i++){
-        const c=document.createElement('div');
-        const shape=shapes[Math.floor(Math.random()*shapes.length)];
-        c.className='casino-confetti '+shape;
-        const angle=(Math.random()-0.5)*400;
-        const dist=(90+Math.random()*200)*wave.spread;
-        const cx=Math.sin(angle*Math.PI/180)*dist;
-        const cy=30+Math.random()*260;
-        const cr=(Math.random()>0.5?1:-1)*(400+Math.random()*1200);
-        let size,h;
-        if(shape==='star'||shape==='diamond'){size=(8+Math.random()*10)*wave.sizeScale;h=size}
-        else if(shape==='strip'){size=(12+Math.random()*18)*wave.sizeScale;h=2+Math.random()*3}
-        else{size=(4+Math.random()*9)*wave.sizeScale;h=shape==='rect'?size*(0.25+Math.random()*0.5):size}
-        const color=palette[Math.floor(Math.random()*palette.length)];
-        const dur=2.0+Math.random()*1.2;
-        const delay=wave.delayBase+Math.random()*0.3;
-        c.style.cssText=`left:50%;top:38%;width:${size}px;height:${h}px;background:${color};--cx:${cx}px;--cy:${cy}px;--cr:${cr}deg;--cDur:${dur}s;animation-delay:${delay}s;opacity:0.95;box-shadow:0 0 ${Math.floor(size*0.5)}px ${color}44`;
-        container.appendChild(c);
-        setTimeout(()=>c.remove(),3500);
+
+    bursts.forEach(burst=>{
+      const pal=palettes[Math.floor(Math.random()*palettes.length)];
+
+      // Expanding ring
+      const ring=document.createElement('div');
+      ring.className='fw-burst-ring';
+      const ringSize=60+Math.random()*40;
+      ring.style.cssText=`left:${burst.x};top:${burst.y};width:${ringSize}px;height:${ringSize}px;margin-left:${-ringSize/2}px;margin-top:${-ringSize/2}px;border-color:${pal[0]};animation-delay:${burst.delay}s;box-shadow:0 0 20px ${pal[0]}88,inset 0 0 20px ${pal[0]}44`;
+      container.appendChild(ring);
+      setTimeout(()=>ring.remove(),2000+burst.delay*1000);
+
+      // Spark particles radiating outward
+      const sparkCount=28+Math.floor(Math.random()*16);
+      for(let i=0;i<sparkCount;i++){
+        const spark=document.createElement('div');
+        spark.className='fw-spark';
+        const angle=(i/sparkCount)*360+Math.random()*15;
+        const dist=50+Math.random()*130;
+        const fx=Math.cos(angle*Math.PI/180)*dist;
+        const fy=Math.sin(angle*Math.PI/180)*dist;
+        const size=2+Math.random()*5;
+        const color=pal[Math.floor(Math.random()*pal.length)];
+        const dur=0.8+Math.random()*1.0;
+        const delay=burst.delay+Math.random()*0.15;
+        spark.style.cssText=`left:${burst.x};top:${burst.y};width:${size}px;height:${size}px;background:${color};--fx:${fx}px;--fy:${fy}px;--fwDur:${dur}s;animation-delay:${delay}s;box-shadow:0 0 ${size*2}px ${color},0 0 ${size*4}px ${color}88`;
+        container.appendChild(spark);
+        setTimeout(()=>spark.remove(),3000+burst.delay*1000);
+
+        // Trailing line behind each spark
+        if(i%3===0){
+          const trail=document.createElement('div');
+          trail.className='fw-trail';
+          const trailLen=8+Math.random()*14;
+          trail.style.cssText=`left:${burst.x};top:${burst.y};height:${trailLen}px;background:linear-gradient(to bottom,${color},transparent);--fx:${fx*0.6}px;--fy:${fy*0.6}px;--fwDur:${dur*0.6}s;animation-delay:${delay}s;transform-origin:top center;rotate:${angle+90}deg`;
+          container.appendChild(trail);
+          setTimeout(()=>trail.remove(),2500+burst.delay*1000);
+        }
       }
     });
+
+    // Second salvo after 1s for sustained wow factor
+    setTimeout(()=>{
+      const pal2=palettes[Math.floor(Math.random()*palettes.length)];
+      [{x:'45%',y:'28%'},{x:'55%',y:'22%'}].forEach((b,bi)=>{
+        const ring=document.createElement('div');
+        ring.className='fw-burst-ring';
+        ring.style.cssText=`left:${b.x};top:${b.y};width:70px;height:70px;margin-left:-35px;margin-top:-35px;border-color:${pal2[0]};box-shadow:0 0 25px ${pal2[0]}88`;
+        container.appendChild(ring);
+        setTimeout(()=>ring.remove(),2000);
+        for(let i=0;i<22;i++){
+          const spark=document.createElement('div');
+          spark.className='fw-spark';
+          const angle=(i/22)*360+Math.random()*20;
+          const dist=40+Math.random()*110;
+          const fx=Math.cos(angle*Math.PI/180)*dist;
+          const fy=Math.sin(angle*Math.PI/180)*dist;
+          const size=2+Math.random()*4;
+          const color=pal2[Math.floor(Math.random()*pal2.length)];
+          spark.style.cssText=`left:${b.x};top:${b.y};width:${size}px;height:${size}px;background:${color};--fx:${fx}px;--fy:${fy}px;--fwDur:${0.7+Math.random()*0.8}s;animation-delay:${bi*0.2}s;box-shadow:0 0 ${size*2}px ${color},0 0 ${size*4}px ${color}88`;
+          container.appendChild(spark);
+          setTimeout(()=>spark.remove(),3000);
+        }
+      });
+    },1000);
   }
 
   const overlay=document.createElement('div');
