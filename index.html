@@ -17,6 +17,26 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
+  <!-- Firebase SDK (compat for no-build PWA) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey:"AIzaSyAJ5GdmAKuBJQhHcbtn1dgN8Am5n--SJBo",
+      authDomain:"lottobot-8d75e.firebaseapp.com",
+      projectId:"lottobot-8d75e",
+      storageBucket:"lottobot-8d75e.firebasestorage.app",
+      messagingSenderId:"764623255861",
+      appId:"1:764623255861:web:0e741825f6316f0be3347c"
+    });
+    const _auth=firebase.auth();
+    const _db=firebase.firestore();
+    let _messaging=null;
+    try{_messaging=firebase.messaging()}catch(e){}
+  </script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1347,6 +1367,35 @@
     .install-banner-btn.primary:hover{background:#e5b863}
     .install-banner-btn.dismiss{background:transparent;color:var(--text-muted);border:1px solid var(--border-hover)}
     .install-banner-btn.dismiss:hover{color:var(--text-primary);border-color:var(--text-muted)}
+
+    /* === AUTH === */
+    .auth-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border-hover);background:rgba(255,255,255,0.04);color:var(--text-secondary);transition:all 0.2s;white-space:nowrap}
+    .auth-btn:hover{border-color:var(--color-gold-primary);color:var(--color-gold-primary);background:rgba(212,168,83,0.08)}
+    .auth-avatar{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--color-gold-primary)}
+    .auth-user-name{max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.72rem;font-weight:600;color:var(--text-primary)}
+    #authModal .modal{max-width:380px}
+    .auth-modal-body{display:flex;flex-direction:column;gap:14px;padding:20px}
+    .auth-provider-btn{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;border:1px solid var(--border-hover);background:var(--bg-surface-2);cursor:pointer;transition:all 0.2s;font-size:0.85rem;font-weight:500;color:var(--text-primary)}
+    .auth-provider-btn:hover{border-color:var(--color-gold-primary);background:rgba(212,168,83,0.06)}
+    .auth-provider-btn svg,.auth-provider-btn .auth-icon{width:22px;height:22px;flex-shrink:0}
+    .auth-provider-btn .auth-icon{font-size:1.2rem;text-align:center;line-height:22px}
+    .auth-phone-form{display:none;flex-direction:column;gap:10px}
+    .auth-phone-form.show{display:flex}
+    .auth-phone-input{background:var(--bg-surface-1);border:1px solid var(--border-hover);border-radius:8px;padding:12px 14px;color:var(--text-primary);font-size:0.9rem;font-family:var(--font-mono);outline:none;transition:border-color 0.2s}
+    .auth-phone-input:focus{border-color:var(--color-gold-primary)}
+    .auth-phone-input::placeholder{color:var(--text-muted)}
+    .auth-send-btn{padding:12px;border-radius:10px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;font-weight:600;font-size:0.85rem;border:none;cursor:pointer;transition:opacity 0.2s}
+    .auth-send-btn:hover{opacity:0.9}
+    .auth-send-btn:disabled{opacity:0.4;cursor:not-allowed}
+    .auth-divider{text-align:center;color:var(--text-muted);font-size:0.72rem;position:relative;margin:4px 0}
+    .auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:var(--border-default)}
+    .auth-divider::before{left:0}
+    .auth-divider::after{right:0}
+    .auth-logout{font-size:0.7rem;color:var(--text-muted);cursor:pointer;border:none;background:none;text-decoration:underline;padding:4px}
+    .auth-logout:hover{color:var(--color-gold-primary)}
+    #recaptchaContainer{margin-top:4px}
+    .auth-admin-link{font-size:0.65rem;color:var(--color-gold-primary);text-decoration:none;opacity:0.7;display:none}
+    .auth-admin-link.show{display:inline}
   </style>
 </head>
 <body>
@@ -1361,8 +1410,46 @@
       <div id="concursoBadge" class="text-muted" style="font-size: 0.8rem;">#0000</div>
       <div id="offlineBadge">📡 Offline</div>
       <div id="headerSpinner"></div>
+      <!-- Auth button -->
+      <div id="authArea">
+        <button class="auth-btn" id="authBtn" onclick="document.getElementById('authModal').classList.add('active')">Entrar</button>
+      </div>
+      <a href="admin.html" class="auth-admin-link" id="adminLink" target="_blank">Admin</a>
     </div>
   </header>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Entrar no Lottobot</h2>
+        <button class="btn-close" onclick="document.getElementById('authModal').classList.remove('active')">✕</button>
+      </div>
+      <div class="auth-modal-body">
+        <p style="color:var(--text-secondary);font-size:0.8rem;text-align:center;margin-bottom:4px">Salve seus jogos na nuvem e receba alertas de premiacoes.</p>
+
+        <button class="auth-provider-btn" id="btnGoogleLogin" onclick="loginGoogle()">
+          <svg class="auth-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Entrar com Google
+        </button>
+
+        <div class="auth-divider">ou</div>
+
+        <button class="auth-provider-btn" id="btnPhoneToggle" onclick="document.querySelector('.auth-phone-form').classList.add('show');this.style.display='none'">
+          <span class="auth-icon">📱</span>
+          Entrar com Telefone
+        </button>
+
+        <div class="auth-phone-form" id="phoneForm">
+          <input type="tel" class="auth-phone-input" id="phoneInput" placeholder="+55 11 99999-9999" maxlength="20">
+          <div id="recaptchaContainer"></div>
+          <button class="auth-send-btn" id="btnSendCode" onclick="sendPhoneCode()" disabled>Enviar codigo SMS</button>
+          <input type="text" class="auth-phone-input" id="codeInput" placeholder="Codigo de 6 digitos" maxlength="6" style="display:none">
+          <button class="auth-send-btn" id="btnVerifyCode" onclick="verifyPhoneCode()" style="display:none;background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b">Verificar codigo</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="desktop-layout">
     <div class="col-left">
@@ -1665,16 +1752,204 @@ let selectedModelo='B',jogos=[],previousJogos=[];
 let excludedNums=new Set(),fixedNums=new Set();
 let stats={total:0,scores:[],modelos:{}},saved=[];
 let checkIdx=null,concRef=null;
+let currentUser=null,isAdmin=false;
 
 // ══════ INIT ══════
 document.addEventListener('DOMContentLoaded',async()=>{
   loadSaved();setupEventListeners();
-  // Ensure center column is visible on mobile by default
   document.querySelector('.col-center')?.classList.add('mobile-show');
   await loadAPI();
   updateUI();renderJogos();renderSaved();renderFilterTab();renderTop5();updateStats();
   if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  // Firebase Auth listener
+  _auth.onAuthStateChanged(async user=>{
+    currentUser=user;
+    updateAuthUI();
+    if(user){
+      await syncUserDoc(user);
+      await loadSavedFromCloud();
+      await requestPushPermission();
+      checkNotifyParams();
+    }
+  });
 });
+
+// ══════ AUTH ══════
+function updateAuthUI(){
+  const area=document.getElementById('authArea');
+  const adminLink=document.getElementById('adminLink');
+  if(!currentUser){
+    area.innerHTML='<button class="auth-btn" onclick="document.getElementById(\'authModal\').classList.add(\'active\')">Entrar</button>';
+    adminLink?.classList.remove('show');
+    isAdmin=false;
+    return;
+  }
+  const name=currentUser.displayName||currentUser.phoneNumber||'User';
+  const photo=currentUser.photoURL;
+  area.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
+    ${photo?'<img src="'+photo+'" class="auth-avatar" referrerpolicy="no-referrer">':'<div class="auth-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--color-gold-dim);color:var(--color-gold-primary);font-weight:700;font-size:0.7rem">'+name[0].toUpperCase()+'</div>'}
+    <span class="auth-user-name">${name.split(' ')[0]}</span>
+    <button class="auth-logout" onclick="doLogout()">Sair</button>
+  </div>`;
+  document.getElementById('authModal')?.classList.remove('active');
+  if(isAdmin)adminLink?.classList.add('show');
+}
+
+async function syncUserDoc(user){
+  const ref=_db.collection('users').doc(user.uid);
+  const doc=await ref.get();
+  const data={
+    displayName:user.displayName||user.phoneNumber||'',
+    email:user.email||null,
+    phone:user.phoneNumber||null,
+    authProvider:user.providerData[0]?.providerId==='google.com'?'google':'phone',
+    lastLogin:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  if(!doc.exists){
+    data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
+    data.isAdmin=false;
+    data.fcmTokens=[];
+    data.notificationsEnabled=true;
+    await ref.set(data);
+  }else{
+    await ref.update(data);
+    isAdmin=doc.data().isAdmin||false;
+    document.getElementById('adminLink')?.classList.toggle('show',isAdmin);
+  }
+}
+
+function loginGoogle(){
+  const provider=new firebase.auth.GoogleAuthProvider();
+  _auth.signInWithPopup(provider).catch(e=>{
+    if(e.code==='auth/popup-blocked')_auth.signInWithRedirect(provider);
+    else showToast('Erro: '+e.message);
+  });
+}
+
+let _confirmationResult=null;
+let _recaptchaVerifier=null;
+
+function setupRecaptcha(){
+  if(_recaptchaVerifier)return;
+  _recaptchaVerifier=new firebase.auth.RecaptchaVerifier('recaptchaContainer',{
+    size:'normal',
+    callback:()=>{document.getElementById('btnSendCode').disabled=false},
+    'expired-callback':()=>{document.getElementById('btnSendCode').disabled=true}
+  });
+  _recaptchaVerifier.render();
+}
+
+// Show recaptcha when phone form is opened
+new MutationObserver(()=>{
+  if(document.querySelector('.auth-phone-form.show'))setupRecaptcha();
+}).observe(document.getElementById('phoneForm'),{attributes:true,attributeFilter:['class']});
+
+async function sendPhoneCode(){
+  const phone=document.getElementById('phoneInput').value.trim();
+  if(!phone||phone.length<10){showToast('Digite um numero valido');return}
+  const formatted=phone.startsWith('+')?phone:'+55'+phone.replace(/\D/g,'');
+  try{
+    document.getElementById('btnSendCode').disabled=true;
+    document.getElementById('btnSendCode').textContent='Enviando...';
+    _confirmationResult=await _auth.signInWithPhoneNumber(formatted,_recaptchaVerifier);
+    document.getElementById('codeInput').style.display='';
+    document.getElementById('btnVerifyCode').style.display='';
+    document.getElementById('btnSendCode').textContent='Codigo enviado!';
+    showToast('Codigo SMS enviado!');
+  }catch(e){
+    showToast('Erro: '+e.message);
+    document.getElementById('btnSendCode').disabled=false;
+    document.getElementById('btnSendCode').textContent='Enviar codigo SMS';
+  }
+}
+
+async function verifyPhoneCode(){
+  const code=document.getElementById('codeInput').value.trim();
+  if(code.length!==6){showToast('Digite o codigo de 6 digitos');return}
+  try{
+    await _confirmationResult.confirm(code);
+    showToast('Login realizado!');
+  }catch(e){showToast('Codigo invalido')}
+}
+
+function doLogout(){
+  _auth.signOut();
+  currentUser=null;isAdmin=false;
+  updateAuthUI();
+  showToast('Desconectado');
+}
+
+// ══════ CLOUD SYNC ══════
+async function loadSavedFromCloud(){
+  if(!currentUser)return;
+  try{
+    const snap=await _db.collection('users').doc(currentUser.uid).collection('savedGames').orderBy('createdAt','desc').limit(100).get();
+    if(snap.empty){
+      // First login — migrate localStorage to cloud
+      if(saved.length>0){
+        const batch=_db.batch();
+        saved.forEach(g=>{
+          const ref=_db.collection('users').doc(currentUser.uid).collection('savedGames').doc(String(g.id));
+          batch.set(ref,{numbers:g.n,score:g.score||0,modelo:g.mod||'B',concursoRef:g.ref||0,createdAt:firebase.firestore.Timestamp.fromDate(new Date(g.dt?g.dt.split('/').reverse().join('-'):Date.now())),checkedDraws:[]});
+        });
+        await batch.commit();
+        showToast('Jogos migrados para a nuvem!');
+      }
+      return;
+    }
+    // Load from cloud
+    saved=snap.docs.map(d=>{const g=d.data();return{n:g.numbers,score:g.score||0,mod:g.modelo||'B',ref:g.concursoRef||0,dt:g.createdAt?.toDate?.()?.toLocaleDateString('pt-BR')||'',id:parseInt(d.id)||Date.now()}});
+    persist();renderSaved();updateStats();
+  }catch(e){console.warn('Cloud sync error:',e)}
+}
+
+async function saveToCloud(game){
+  if(!currentUser)return;
+  try{
+    await _db.collection('users').doc(currentUser.uid).collection('savedGames').doc(String(game.id)).set({
+      numbers:game.n,score:game.score||0,modelo:game.mod||'B',concursoRef:game.ref||0,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),checkedDraws:[]
+    });
+  }catch(e){console.warn('Save to cloud error:',e)}
+}
+
+// ══════ PUSH NOTIFICATIONS (FCM) ══════
+async function requestPushPermission(){
+  if(!_messaging||!currentUser)return;
+  try{
+    const permission=await Notification.requestPermission();
+    if(permission!=='granted')return;
+    const token=await _messaging.getToken({vapidKey:''});
+    if(!token)return;
+    const ref=_db.collection('users').doc(currentUser.uid);
+    await ref.update({fcmTokens:firebase.firestore.FieldValue.arrayUnion(token),notificationsEnabled:true});
+  }catch(e){console.warn('FCM error:',e)}
+}
+
+// Handle foreground messages
+if(_messaging){
+  _messaging.onMessage(payload=>{
+    const{title,body}=payload.notification||{};
+    if(title)showToast(title+': '+body);
+    // If it's a win notification, show donation
+    if(payload.data?.type==='win'){
+      setTimeout(()=>document.getElementById('donationModal')?.classList.add('active'),2000);
+    }
+  });
+}
+
+// Check URL params from push notification click
+function checkNotifyParams(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('notify')==='win'){
+    const hits=params.get('hits');
+    const gameId=params.get('game');
+    showToast('Seu jogo acertou '+hits+' numeros!');
+    setTimeout(()=>document.getElementById('donationModal')?.classList.add('active'),2000);
+    // Clean URL
+    window.history.replaceState({},'',window.location.pathname);
+  }
+}
 
 function setupEventListeners(){
   document.querySelectorAll('.modelo-card').forEach(el=>el.addEventListener('click',function(){selectModelo(this.dataset.modelo)}));
@@ -1962,8 +2237,11 @@ function confirmManualCheck(){
 
 function salvar(i){
   const j=jogos[i];if(saved.some(s=>s.n.join(',')=== j.join(','))){showToast('⚠️ Já salvo');return}
-  saved.unshift({n:[...j],score:j.score,mod:selectedModelo,ref:concRef,dt:new Date().toLocaleDateString('pt-BR'),id:Date.now()});
-  if(saved.length>100)saved.pop();persist();updateStats();renderSaved();showToast('💾 Jogo salvo');
+  const game={n:[...j],score:j.score,mod:selectedModelo,ref:concRef,dt:new Date().toLocaleDateString('pt-BR'),id:Date.now()};
+  saved.unshift(game);
+  if(saved.length>100)saved.pop();persist();updateStats();renderSaved();
+  saveToCloud(game);
+  showToast(currentUser?'💾 Jogo salvo na nuvem':'💾 Jogo salvo (entre para sincronizar)');
 }
 
 function shareGame(i){

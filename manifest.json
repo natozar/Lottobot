@@ -8,6 +8,7 @@
   "theme_color": "#09090b",
   "orientation": "any",
   "categories": ["games", "utilities"],
+  "gcm_sender_id": "103953800507",
   "icons": [
     {
       "src": "icon-192.png",
