@@ -12,7 +12,8 @@
   <title>Lottobot v3 — Lotofácil Intelligence</title>
 
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23d4a853' opacity='0.8'/><circle cx='16' cy='16' r='8' fill='%234a7c59'/><path d='M16 10 L20 14 L16 18 L12 14 Z' fill='%23d4a853' opacity='0.9'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><radialGradient id='g1' cx='35%' cy='35%'><stop offset='0%' stop-color='%23e5b863'/><stop offset='100%' stop-color='%23c9a84c'/></radialGradient></defs><circle cx='96' cy='96' r='92' fill='url(%23g1)'/><circle cx='96' cy='96' r='72' fill='%23111113' opacity='0.95'/><text x='96' y='115' font-family='JetBrains Mono, monospace' font-size='52' font-weight='800' fill='%23d4a853' text-anchor='middle' letter-spacing='2'>LB</text><circle cx='96' cy='96' r='72' fill='none' stroke='%234a7c59' stroke-width='3' opacity='0.6'/></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><radialGradient id='g1' cx='35%' cy='35%'><stop offset='0%' stop-color='%23e5b863'/><stop offset='100%' stop-color='%23c9a84c'/></radialGradient></defs><circle cx='96' cy='96' r='92' fill='url(%23g1)'/><circle cx='96' cy='96' r='72' fill='%23111113' opacity='0.95'/><text x='96' y='115' font-family='JetBrains Mono, monospace' font-size='52' font-weight='800' fill='%23d4a853' text-anchor='middle' letter-spacing='2'>LB</text><circle cx='96' cy='96' r='72' fill='none' stroke='%234a7c59' stroke-width='3' opacity='0.6'/></svg>">
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -1175,19 +1176,62 @@
     .pre-gen-summary .summary-item .label { color: var(--text-muted); }
     .pre-gen-summary .summary-item .value { font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); }
 
-    /* === SLOT MACHINE ANIMATION === */
-    .slot-overlay { position: fixed; inset: 0; background: rgba(9,9,11,0.92); z-index: 150; display: flex; align-items: center; justify-content: center; }
-    .slot-container { text-align: center; max-width: 500px; width: 90%; }
-    .slot-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 24px; }
-    .slot-balls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 24px; }
-    .slot-ball { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem; color: white; opacity: 0; transform: scale(0.3) rotate(180deg); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .slot-ball.revealed { opacity: 1; transform: scale(1) rotate(0deg); }
-    .slot-ball.revealing { animation: slotSpin 0.6s ease-out; }
-    @keyframes slotSpin { 0% { opacity: 0; transform: translateY(-40px) scale(0.5); } 60% { opacity: 1; transform: translateY(8px) scale(1.15); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-    .slot-score { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
-    .slot-progress { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; }
-    .slot-skip { background: none; border: 1px solid var(--border-hover); color: var(--text-muted); padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-top: 16px; transition: all 0.2s; }
-    .slot-skip:hover { border-color: var(--color-gold-primary); color: var(--color-gold-primary); }
+    /* === LAS VEGAS CASINO ANIMATION === */
+    .casino-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s}
+    .casino-overlay.active{opacity:1}
+    .casino-machine{max-width:420px;width:92%;background:linear-gradient(180deg,#1a1a2e 0%,#0f0f1a 100%);border:2px solid rgba(212,168,83,0.4);border-radius:24px;padding:0;overflow:hidden;box-shadow:0 0 60px rgba(212,168,83,0.15),0 0 120px rgba(212,168,83,0.05),inset 0 1px 0 rgba(255,255,255,0.05)}
+    .casino-header{background:linear-gradient(135deg,#d4a853,#b8912e,#d4a853);padding:16px;text-align:center;position:relative;overflow:hidden}
+    .casino-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 10px,rgba(255,255,255,0.03) 10px,rgba(255,255,255,0.03) 20px)}
+    .casino-header h3{font-family:var(--font-mono);font-size:1rem;font-weight:800;color:#09090b;text-transform:uppercase;letter-spacing:0.15em;text-shadow:0 1px 0 rgba(255,255,255,0.3)}
+    .casino-lights{display:flex;justify-content:center;gap:6px;margin-top:8px}
+    .casino-light{width:8px;height:8px;border-radius:50%;animation:casinoChase 1.5s infinite}
+    .casino-light:nth-child(1){background:#ff4444;animation-delay:0s}
+    .casino-light:nth-child(2){background:#ffaa00;animation-delay:0.15s}
+    .casino-light:nth-child(3){background:#44ff44;animation-delay:0.3s}
+    .casino-light:nth-child(4){background:#4488ff;animation-delay:0.45s}
+    .casino-light:nth-child(5){background:#ff44ff;animation-delay:0.6s}
+    .casino-light:nth-child(6){background:#ffaa00;animation-delay:0.75s}
+    .casino-light:nth-child(7){background:#ff4444;animation-delay:0.9s}
+    .casino-light:nth-child(8){background:#44ff44;animation-delay:1.05s}
+    @keyframes casinoChase{0%,100%{opacity:0.2;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2);box-shadow:0 0 8px currentColor}}
+    .casino-display{padding:24px 20px;position:relative}
+    .casino-progress{text-align:center;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px}
+    .casino-reels{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:20px;min-height:100px}
+    .casino-ball{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:800;font-size:0.95rem;color:#fff;position:relative;opacity:0;transform:translateY(-60px) rotateX(180deg);transition:none}
+    .casino-ball.spinning{opacity:1;transform:translateY(0);animation:ballSpin 0.8s cubic-bezier(0.17,0.67,0.35,1.2)}
+    .casino-ball.landed{opacity:1;transform:translateY(0) rotateX(0);animation:ballLand 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+    .casino-ball.landed::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid rgba(212,168,83,0.6);animation:ballGlow 1s ease-out forwards}
+    @keyframes ballSpin{0%{opacity:0;transform:translateY(-80px) rotateX(720deg) scale(0.3)}40%{opacity:0.6;transform:translateY(10px) rotateX(180deg) scale(1.1)}70%{transform:translateY(-5px) rotateX(45deg) scale(0.95)}100%{opacity:1;transform:translateY(0) rotateX(0) scale(1)}}
+    @keyframes ballLand{0%{transform:scale(1.3);filter:brightness(2)}50%{transform:scale(0.9)}100%{transform:scale(1);filter:brightness(1)}}
+    @keyframes ballGlow{0%{border-color:rgba(212,168,83,0.8);box-shadow:0 0 15px rgba(212,168,83,0.5)}100%{border-color:rgba(212,168,83,0);box-shadow:0 0 0 rgba(212,168,83,0)}}
+    .casino-score{text-align:center;padding:16px 0;border-top:1px solid rgba(255,255,255,0.06);opacity:0;transform:translateY(10px);transition:all 0.5s}
+    .casino-score.show{opacity:1;transform:translateY(0)}
+    .casino-score-value{font-family:var(--font-mono);font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--color-gold-primary),#f0d080);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .casino-score-label{font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px}
+    .casino-footer{padding:16px 20px;display:flex;justify-content:center;gap:10px;border-top:1px solid rgba(255,255,255,0.04)}
+    .casino-btn{padding:10px 24px;border-radius:10px;font-size:0.8rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+    .casino-btn.gold{background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b}
+    .casino-btn.gold:hover{box-shadow:0 0 20px rgba(212,168,83,0.3)}
+    .casino-btn.ghost{background:transparent;border:1px solid var(--border-hover);color:var(--text-muted)}
+    .casino-btn.ghost:hover{border-color:var(--text-secondary);color:var(--text-secondary)}
+    .casino-jackpot{text-align:center;padding:12px;animation:jackpotPulse 0.8s ease-in-out 3}
+    @keyframes jackpotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .casino-jackpot span{font-family:var(--font-mono);font-size:1.1rem;font-weight:800;color:var(--color-gold-primary);text-shadow:0 0 10px rgba(212,168,83,0.5)}
+    .casino-confetti{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;animation:confettiFall 1.5s ease-in forwards}
+    @keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(200px) rotate(720deg)}}
+    /* === PWA INSTALL BANNER === */
+    .install-banner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);z-index:180;background:linear-gradient(135deg,#1a2a1e 0%,#111113 50%,#1a1a10 100%);border:1px solid rgba(212,168,83,0.3);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:16px;max-width:440px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(212,168,83,0.1);transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);backdrop-filter:blur(20px)}
+    .install-banner.show{transform:translateX(-50%) translateY(0)}
+    .install-banner-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--color-gold-primary),#a8872e);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+    .install-banner-text{flex:1}
+    .install-banner-title{font-weight:700;font-size:0.95rem;color:var(--color-gold-primary);margin-bottom:4px}
+    .install-banner-desc{font-size:0.78rem;color:var(--text-secondary);line-height:1.4}
+    .install-banner-actions{display:flex;gap:8px;flex-shrink:0}
+    .install-banner-btn{padding:10px 18px;border-radius:10px;font-size:0.8rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+    .install-banner-btn.primary{background:var(--color-gold-primary);color:#09090b}
+    .install-banner-btn.primary:hover{background:#e5b863}
+    .install-banner-btn.dismiss{background:transparent;color:var(--text-muted);border:1px solid var(--border-hover)}
+    .install-banner-btn.dismiss:hover{color:var(--text-primary);border-color:var(--text-muted)}
   </style>
 </head>
 <body>
@@ -1885,8 +1929,44 @@ function renderTop5(){
 }
 
 // ══════ PERSIST ══════
-function persist(){try{localStorage.setItem(SK,JSON.stringify({saved,stats,excludedNums:[...excludedNums],fixedNums:[...fixedNums],selectedModelo,t:Date.now()}))}catch(e){}}
-function loadSaved(){try{const d=JSON.parse(localStorage.getItem(SK)||'{}');if(d.saved)saved=d.saved;if(d.stats)stats=d.stats;if(d.excludedNums)excludedNums=new Set(d.excludedNums);if(d.fixedNums)fixedNums=new Set(d.fixedNums);if(d.selectedModelo){selectedModelo=d.selectedModelo;document.querySelector('[data-modelo="'+selectedModelo+'"]')?.classList.add('active')}}catch(e){}}
+function persist(){try{localStorage.setItem(SK,JSON.stringify({
+  saved,stats,
+  excludedNums:[...excludedNums],fixedNums:[...fixedNums],
+  selectedModelo,
+  filters:{
+    parImpar:document.getElementById('filterParImpar')?.checked,
+    soma:document.getElementById('filterSoma')?.checked,
+    consec:document.getElementById('filterConsec')?.checked,
+    repet:document.getElementById('filterRepet')?.checked,
+    dezena:document.getElementById('filterDezena')?.checked,
+    primos:document.getElementById('filterPrimos')?.checked,
+    janela:document.getElementById('sliderJanela')?.value,
+    melhorN:document.getElementById('toggleMelhorN')?.classList.contains('on'),
+    melhorNSize:document.getElementById('sliderMelhorN')?.value,
+    qtdJogos:document.getElementById('qtdJogos')?.value
+  },
+  t:Date.now()
+}))}catch(e){}}
+function loadSaved(){try{const d=JSON.parse(localStorage.getItem(SK)||'{}');
+  if(d.saved)saved=d.saved;
+  if(d.stats)stats=d.stats;
+  if(d.excludedNums)excludedNums=new Set(d.excludedNums);
+  if(d.fixedNums)fixedNums=new Set(d.fixedNums);
+  if(d.selectedModelo){selectedModelo=d.selectedModelo;document.querySelector('[data-modelo="'+selectedModelo+'"]')?.classList.add('active')}
+  if(d.filters){
+    const f=d.filters;
+    if(f.parImpar)document.getElementById('filterParImpar').checked=f.parImpar;
+    if(f.soma)document.getElementById('filterSoma').checked=f.soma;
+    if(f.consec)document.getElementById('filterConsec').checked=f.consec;
+    if(f.repet)document.getElementById('filterRepet').checked=f.repet;
+    if(f.dezena)document.getElementById('filterDezena').checked=f.dezena;
+    if(f.primos)document.getElementById('filterPrimos').checked=f.primos;
+    if(f.janela){const sl=document.getElementById('sliderJanela');sl.value=f.janela;document.getElementById('sliderValue').textContent=f.janela}
+    if(f.melhorN){document.getElementById('toggleMelhorN')?.classList.add('on');document.getElementById('sliderMelhorN').parentElement.style.display=''}
+    if(f.melhorNSize){const sn=document.getElementById('sliderMelhorN');sn.value=f.melhorNSize;document.getElementById('sliderMelhorNValue').textContent=f.melhorNSize}
+    if(f.qtdJogos)document.getElementById('qtdJogos').value=f.qtdJogos;
+  }
+}catch(e){}}
 function copyPix(){navigator.clipboard.writeText(document.getElementById('pixKey')?.textContent?.trim()||'').then(()=>showToast('📋 Chave PIX copiada!'))}
 function closeDonation(){document.getElementById('donationModal')?.classList.remove('active')}
 
@@ -1942,53 +2022,140 @@ function updatePrizeEstimate(){
   }
 }
 
-// ══════ SLOT MACHINE ANIMATION ══════
+// ══════ PWA INSTALL ══════
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  const dismissed=localStorage.getItem('lottobot_install_dismissed');
+  if(dismissed&&Date.now()-parseInt(dismissed)<7*24*60*60*1000)return;
+  setTimeout(()=>{document.getElementById('installBanner')?.classList.add('show')},3000);
+});
+function doInstall(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted')showToast('✅ Lottobot instalado!');
+    deferredPrompt=null;document.getElementById('installBanner')?.classList.remove('show');
+  });
+}
+function dismissInstall(){
+  localStorage.setItem('lottobot_install_dismissed',String(Date.now()));
+  document.getElementById('installBanner')?.classList.remove('show');
+}
+window.addEventListener('appinstalled',()=>{showToast('🎰 Lottobot instalado com sucesso!');document.getElementById('installBanner')?.classList.remove('show')});
+
+// ══════ LAS VEGAS CASINO ANIMATION ══════
 function slotMachineReveal(games, callback){
   if(!games.length){callback();return}
-  const overlay=document.createElement('div');overlay.className='slot-overlay';
-  let currentGame=0;let skipAll=false;
+
+  const overlay=document.createElement('div');
+  overlay.className='casino-overlay';
+  document.body.appendChild(overlay);
+  requestAnimationFrame(()=>overlay.classList.add('active'));
+
+  let currentIdx=0;
+  let skipAll=false;
+  const sfx={tick:()=>{try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=800+Math.random()*400;o.type='sine';g.gain.value=0.08;o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.08);o.stop(a.currentTime+0.1)}catch(e){}},
+  win:()=>{try{const a=new AudioContext();[523,659,784,1047].forEach((f,i)=>{const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;o.type='sine';g.gain.value=0.06;o.start(a.currentTime+i*0.12);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+i*0.12+0.3);o.stop(a.currentTime+i*0.12+0.35)})}catch(e){}}};
+
+  function spawnConfetti(container){
+    const colors=['#d4a853','#4a7c59','#ef7d3a','#4a90d9','#ff4444','#44ff44'];
+    for(let i=0;i<20;i++){
+      const c=document.createElement('div');c.className='casino-confetti';
+      c.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*30}%;background:${colors[i%colors.length]};animation-delay:${Math.random()*0.5}s;width:${4+Math.random()*6}px;height:${4+Math.random()*6}px`;
+      container.appendChild(c);
+      setTimeout(()=>c.remove(),2000);
+    }
+  }
 
   function showGame(idx){
-    if(idx>=games.length||skipAll){overlay.remove();callback();return}
+    if(idx>=games.length||skipAll){
+      overlay.classList.remove('active');
+      setTimeout(()=>overlay.remove(),300);
+      callback();return;
+    }
     const game=games[idx];
     overlay.innerHTML=`
-      <div class="slot-container">
-        <div class="slot-progress">Jogo ${idx+1} de ${games.length}</div>
-        <div class="slot-title">Revelando números...</div>
-        <div class="slot-balls" id="slotBalls"></div>
-        <div class="slot-score" id="slotScore" style="opacity:0"></div>
-        <button class="slot-skip" id="slotSkipBtn">${idx<games.length-1?'Pular ▸▸':'Finalizar'}</button>
+      <div class="casino-machine">
+        <div class="casino-header">
+          <h3>★ Lottobot Casino ★</h3>
+          <div class="casino-lights">${'<div class="casino-light"></div>'.repeat(8)}</div>
+        </div>
+        <div class="casino-display">
+          <div class="casino-progress">Jogo ${idx+1} de ${games.length}</div>
+          <div class="casino-reels" id="casinoReels"></div>
+          <div class="casino-score" id="casinoScore">
+            <div class="casino-score-value" id="casinoScoreVal"></div>
+            <div class="casino-score-label"></div>
+          </div>
+        </div>
+        <div class="casino-footer">
+          <button class="casino-btn ghost" id="casinoSkip">${idx<games.length-1?'Pular ▸▸':'Fechar'}</button>
+          <button class="casino-btn gold" id="casinoNext" style="display:none">${idx<games.length-1?'Próximo Jogo ▸':'★ Finalizar ★'}</button>
+        </div>
       </div>`;
-    document.body.appendChild(overlay);
 
-    const ballsDiv=overlay.querySelector('#slotBalls');
-    const scoreDiv=overlay.querySelector('#slotScore');
-    const skipBtn=overlay.querySelector('#slotSkipBtn');
+    const reels=overlay.querySelector('#casinoReels');
+    const scoreDiv=overlay.querySelector('#casinoScore');
+    const scoreVal=overlay.querySelector('#casinoScoreVal');
+    const scoreLabel=overlay.querySelector('.casino-score-label');
+    const skipBtn=overlay.querySelector('#casinoSkip');
+    const nextBtn=overlay.querySelector('#casinoNext');
 
-    skipBtn.onclick=()=>{
-      if(idx>=games.length-1){skipAll=true;overlay.remove();callback()}
-      else{overlay.remove();showGame(idx+1)}
-    };
+    let revealed=0;
+    const totalBalls=game.length;
 
-    // Reveal balls one by one
+    // Reveal each ball with staggered timing
     game.forEach((n,i)=>{
       const ball=document.createElement('div');
-      ball.className='slot-ball '+getBallClass(n);
+      ball.className='casino-ball '+getBallClass(n);
       ball.textContent=String(n).padStart(2,'0');
-      ballsDiv.appendChild(ball);
-      setTimeout(()=>{ball.classList.add('revealing');setTimeout(()=>{ball.classList.remove('revealing');ball.classList.add('revealed')},500)},i*120);
+      reels.appendChild(ball);
+
+      const delay=i*180+Math.random()*50;
+      setTimeout(()=>{
+        ball.classList.add('spinning');
+        sfx.tick();
+        setTimeout(()=>{
+          ball.classList.remove('spinning');
+          ball.classList.add('landed');
+          revealed++;
+          if(revealed===totalBalls){
+            // All revealed — show score
+            setTimeout(()=>{
+              sfx.win();
+              scoreVal.textContent=game.score+' pts';
+              scoreLabel.textContent=game.cls.label;
+              scoreDiv.classList.add('show');
+              nextBtn.style.display='';
+              skipBtn.style.display='none';
+              if(game.score>=75)spawnConfetti(overlay.querySelector('.casino-display'));
+            },300);
+          }
+        },700);
+      },delay);
     });
 
-    // Show score after all balls
-    setTimeout(()=>{
-      scoreDiv.style.opacity='1';
-      scoreDiv.innerHTML='<span style="color:var(--color-gold-primary)">'+game.score+'</span> pts — '+game.cls.label;
-      skipBtn.textContent=idx<games.length-1?'Próximo ▸':'Finalizar';
-    },game.length*120+600);
+    skipBtn.onclick=()=>{
+      if(idx>=games.length-1){skipAll=true;overlay.classList.remove('active');setTimeout(()=>overlay.remove(),300);callback()}
+      else showGame(idx+1);
+    };
+    nextBtn.onclick=()=>showGame(idx+1);
   }
 
   showGame(0);
 }
   </script>
+  <div class="install-banner" id="installBanner">
+    <div class="install-banner-icon">🎰</div>
+    <div class="install-banner-text">
+      <div class="install-banner-title">Instalar Lottobot</div>
+      <div class="install-banner-desc">Acesse mais rápido, direto da tela inicial. Funciona offline.</div>
+    </div>
+    <div class="install-banner-actions">
+      <button class="install-banner-btn dismiss" onclick="dismissInstall()">Depois</button>
+      <button class="install-banner-btn primary" onclick="doInstall()">Instalar</button>
+    </div>
+  </div>
 </body>
 </html>
