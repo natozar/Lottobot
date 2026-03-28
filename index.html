@@ -1280,46 +1280,53 @@
     .pre-gen-summary .summary-item .value { font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); }
 
     /* === LAS VEGAS CASINO ANIMATION === */
-    .casino-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s}
+    .casino-overlay{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(10,5,20,0.92),rgba(0,0,0,0.98));z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s}
     .casino-overlay.active{opacity:1}
-    .casino-machine{max-width:420px;width:92%;background:linear-gradient(180deg,#1a1a2e 0%,#0f0f1a 100%);border:2px solid rgba(212,168,83,0.4);border-radius:24px;padding:0;overflow:hidden;box-shadow:0 0 60px rgba(212,168,83,0.15),0 0 120px rgba(212,168,83,0.05),inset 0 1px 0 rgba(255,255,255,0.05)}
-    .casino-header{background:linear-gradient(135deg,#d4a853,#b8912e,#d4a853);padding:16px;text-align:center;position:relative;overflow:hidden}
-    .casino-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 10px,rgba(255,255,255,0.03) 10px,rgba(255,255,255,0.03) 20px)}
-    .casino-header h3{font-family:var(--font-mono);font-size:1rem;font-weight:800;color:#09090b;text-transform:uppercase;letter-spacing:0.15em;text-shadow:0 1px 0 rgba(255,255,255,0.3)}
-    .casino-lights{display:flex;justify-content:center;gap:6px;margin-top:8px}
-    .casino-light{width:8px;height:8px;border-radius:50%;animation:casinoChase 1.5s infinite}
-    .casino-light:nth-child(1){background:#ff4444;animation-delay:0s}
-    .casino-light:nth-child(2){background:#ffaa00;animation-delay:0.15s}
-    .casino-light:nth-child(3){background:#44ff44;animation-delay:0.3s}
-    .casino-light:nth-child(4){background:#4488ff;animation-delay:0.45s}
-    .casino-light:nth-child(5){background:#ff44ff;animation-delay:0.6s}
-    .casino-light:nth-child(6){background:#ffaa00;animation-delay:0.75s}
-    .casino-light:nth-child(7){background:#ff4444;animation-delay:0.9s}
-    .casino-light:nth-child(8){background:#44ff44;animation-delay:1.05s}
-    @keyframes casinoChase{0%,100%{opacity:0.2;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2);box-shadow:0 0 8px currentColor}}
-    .casino-display{padding:24px 20px;position:relative}
-    .casino-progress{text-align:center;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px}
-    .casino-reels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:20px;max-width:280px;margin-left:auto;margin-right:auto}
-    .casino-ball{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:800;font-size:0.9rem;color:rgba(255,255,255,0.15);position:relative;background:var(--bg-surface-3);border:1.5px solid rgba(255,255,255,0.06);transition:all 0.3s}
-    .casino-ball.selected{color:#fff;border-color:transparent;animation:ballSelect 0.5s cubic-bezier(0.34,1.56,0.64,1)}
-    .casino-ball.selected::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid rgba(212,168,83,0.5);animation:ballGlow 1.2s ease-out forwards}
-    @keyframes ballSelect{0%{transform:scale(0.6);filter:brightness(3)}50%{transform:scale(1.15)}100%{transform:scale(1);filter:brightness(1)}}
-    @keyframes ballGlow{0%{border-color:rgba(212,168,83,0.8);box-shadow:0 0 15px rgba(212,168,83,0.5)}100%{border-color:rgba(212,168,83,0);box-shadow:0 0 0 rgba(212,168,83,0)}}
-    .casino-score{text-align:center;padding:16px 0;border-top:1px solid rgba(255,255,255,0.06);opacity:0;transform:translateY(10px);transition:all 0.5s}
+    .casino-machine{max-width:420px;width:92%;background:linear-gradient(180deg,#12122a 0%,#0a0a18 100%);border:2px solid rgba(212,168,83,0.5);border-radius:24px;padding:0;overflow:hidden;box-shadow:0 0 80px rgba(212,168,83,0.12),0 0 160px rgba(212,168,83,0.04),0 20px 60px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.08)}
+    .casino-header{background:linear-gradient(135deg,#c9a04a,#d4a853 30%,#e8c36a 50%,#d4a853 70%,#b8912e);padding:14px 16px;text-align:center;position:relative;overflow:hidden}
+    .casino-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 8px,rgba(255,255,255,0.04) 8px,rgba(255,255,255,0.04) 16px)}
+    .casino-header::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.15) 0%,transparent 40%,transparent 60%,rgba(0,0,0,0.1) 100%)}
+    .casino-header h3{position:relative;z-index:1;font-family:var(--font-mono);font-size:1rem;font-weight:800;color:#1a0e00;text-transform:uppercase;letter-spacing:0.18em;text-shadow:0 1px 0 rgba(255,255,255,0.4)}
+    .casino-lights{position:relative;z-index:1;display:flex;justify-content:center;gap:5px;margin-top:8px}
+    .casino-light{width:7px;height:7px;border-radius:50%;animation:casinoChase 1.2s infinite}
+    .casino-light:nth-child(1){background:#ff3333;animation-delay:0s}
+    .casino-light:nth-child(2){background:#ffcc00;animation-delay:0.1s}
+    .casino-light:nth-child(3){background:#33ff55;animation-delay:0.2s}
+    .casino-light:nth-child(4){background:#3388ff;animation-delay:0.3s}
+    .casino-light:nth-child(5){background:#ff33cc;animation-delay:0.4s}
+    .casino-light:nth-child(6){background:#ffcc00;animation-delay:0.5s}
+    .casino-light:nth-child(7){background:#ff3333;animation-delay:0.6s}
+    .casino-light:nth-child(8){background:#33ff55;animation-delay:0.7s}
+    .casino-light:nth-child(9){background:#3388ff;animation-delay:0.8s}
+    .casino-light:nth-child(10){background:#ff33cc;animation-delay:0.9s}
+    @keyframes casinoChase{0%,100%{opacity:0.15;transform:scale(0.7)}50%{opacity:1;transform:scale(1.3);box-shadow:0 0 10px currentColor,0 0 20px currentColor}}
+    .casino-display{padding:20px 16px;position:relative;overflow:hidden}
+    .casino-progress{text-align:center;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px}
+    .casino-grid-labels{display:flex;justify-content:center;max-width:280px;margin:0 auto 4px}
+    .casino-grid-label{flex:1;text-align:center;font-family:var(--font-mono);font-size:0.55rem;color:rgba(255,255,255,0.18);font-weight:600;letter-spacing:0.05em}
+    .casino-reels{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:16px;max-width:280px;margin-left:auto;margin-right:auto}
+    .casino-ball{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:0.85rem;color:rgba(255,255,255,0.12);position:relative;background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.05);transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94)}
+    .casino-ball:hover{border-color:rgba(255,255,255,0.1)}
+    .casino-ball.selected{color:#fff;border-color:transparent;transform:scale(1);animation:ballPop 0.55s cubic-bezier(0.34,1.56,0.64,1)}
+    .casino-ball.selected::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,0.25),transparent 60%)}
+    .casino-ball.selected::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(212,168,83,0.6);animation:ringPulse 1.5s ease-out forwards}
+    @keyframes ballPop{0%{transform:scale(0.3);opacity:0;filter:brightness(4) blur(4px)}30%{transform:scale(1.2);opacity:1;filter:brightness(2) blur(0)}60%{transform:scale(0.92);filter:brightness(1.2)}100%{transform:scale(1);filter:brightness(1)}}
+    @keyframes ringPulse{0%{border-color:rgba(212,168,83,0.8);box-shadow:0 0 16px rgba(212,168,83,0.5);transform:scale(1)}60%{border-color:rgba(212,168,83,0.2);box-shadow:0 0 6px rgba(212,168,83,0.1);transform:scale(1.1)}100%{border-color:transparent;box-shadow:none;transform:scale(1.15);opacity:0}}
+    .casino-ball.dimmed{opacity:0.25;filter:saturate(0);transition:all 0.6s}
+    .casino-score{text-align:center;padding:16px 0 8px;opacity:0;transform:translateY(12px);transition:all 0.6s cubic-bezier(0.34,1.56,0.64,1)}
     .casino-score.show{opacity:1;transform:translateY(0)}
-    .casino-score-value{font-family:var(--font-mono);font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--color-gold-primary),#f0d080);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .casino-score-label{font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px}
-    .casino-footer{padding:16px 20px;display:flex;justify-content:center;gap:10px;border-top:1px solid rgba(255,255,255,0.04)}
+    .casino-score-value{font-family:var(--font-mono);font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#e8c36a,var(--color-gold-primary),#f0d080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 8px rgba(212,168,83,0.3))}
+    .casino-score-label{font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:6px}
+    .casino-score-stars{font-size:1.2rem;margin-top:4px;opacity:0;animation:starsIn 0.4s ease-out forwards;animation-delay:0.3s}
+    @keyframes starsIn{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
+    .casino-footer{padding:14px 20px;display:flex;justify-content:center;gap:10px;border-top:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.15)}
     .casino-btn{padding:10px 24px;border-radius:10px;font-size:0.8rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
-    .casino-btn.gold{background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b}
-    .casino-btn.gold:hover{box-shadow:0 0 20px rgba(212,168,83,0.3)}
-    .casino-btn.ghost{background:transparent;border:1px solid var(--border-hover);color:var(--text-muted)}
-    .casino-btn.ghost:hover{border-color:var(--text-secondary);color:var(--text-secondary)}
-    .casino-jackpot{text-align:center;padding:12px;animation:jackpotPulse 0.8s ease-in-out 3}
-    @keyframes jackpotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-    .casino-jackpot span{font-family:var(--font-mono);font-size:1.1rem;font-weight:800;color:var(--color-gold-primary);text-shadow:0 0 10px rgba(212,168,83,0.5)}
-    .casino-confetti{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;animation:confettiFall 1.5s ease-in forwards}
-    @keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(200px) rotate(720deg)}}
+    .casino-btn.gold{background:linear-gradient(135deg,#e8c36a,var(--color-gold-primary),#b8912e);color:#09090b;box-shadow:0 2px 12px rgba(212,168,83,0.3)}
+    .casino-btn.gold:hover{box-shadow:0 4px 24px rgba(212,168,83,0.5);transform:translateY(-1px)}
+    .casino-btn.ghost{background:rgba(255,255,255,0.04);border:1px solid var(--border-hover);color:var(--text-muted)}
+    .casino-btn.ghost:hover{border-color:var(--text-secondary);color:var(--text-secondary);background:rgba(255,255,255,0.06)}
+    .casino-confetti{position:absolute;pointer-events:none;border-radius:2px;animation:confettiBurst 1.8s ease-out forwards}
+    @keyframes confettiBurst{0%{opacity:1;transform:translateY(0) translateX(0) rotate(0deg) scale(1)}40%{opacity:1}100%{opacity:0;transform:translateY(var(--cy,180px)) translateX(var(--cx,0px)) rotate(var(--cr,720deg)) scale(0.3)}}
     /* === PWA INSTALL BANNER === */
     .install-banner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:180;background:linear-gradient(135deg,#1a2a1e 0%,#111113 50%,#1a1a10 100%);border:1px solid rgba(212,168,83,0.3);border-radius:16px;padding:20px 24px;display:none;align-items:center;gap:16px;max-width:440px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(212,168,83,0.1);backdrop-filter:blur(20px);animation:bannerIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
     .install-banner.show{display:flex}
@@ -2181,31 +2188,88 @@ window.addEventListener('appinstalled',()=>{showToast('🎰 Lottobot instalado c
 function slotMachineReveal(games, callback){
   if(!games.length){callback();return}
 
+  // Audio engine — reuse single context
+  let _actx=null;
+  function actx(){if(!_actx)try{_actx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}return _actx}
+
+  const sfx={
+    // Escalating pitch tick — each ball sounds higher
+    tick:(i,total)=>{const a=actx();if(!a)return;
+      const baseFreq=400+((i/total)*500);
+      // Main tone
+      const o=a.createOscillator();const g=a.createGain();
+      o.type='triangle';o.frequency.setValueAtTime(baseFreq,a.currentTime);
+      o.frequency.exponentialRampToValueAtTime(baseFreq*1.5,a.currentTime+0.06);
+      g.gain.setValueAtTime(0.08,a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.12);
+      o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+0.15);
+      // Harmonic shimmer
+      const o2=a.createOscillator();const g2=a.createGain();
+      o2.type='sine';o2.frequency.value=baseFreq*2;
+      g2.gain.setValueAtTime(0.03,a.currentTime);
+      g2.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.08);
+      o2.connect(g2);g2.connect(a.destination);o2.start();o2.stop(a.currentTime+0.1);
+    },
+    // Victory fanfare — C major arpeggio + shimmer
+    win:(score)=>{const a=actx();if(!a)return;
+      const isHigh=score>=75;
+      const notes=isHigh?[523,659,784,1047,1319]:[440,554,659,880];
+      notes.forEach((f,i)=>{
+        const o=a.createOscillator();const g=a.createGain();
+        o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(isHigh?0.07:0.05,a.currentTime+i*0.13);
+        g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+i*0.13+(isHigh?0.5:0.35));
+        o.connect(g);g.connect(a.destination);
+        o.start(a.currentTime+i*0.13);o.stop(a.currentTime+i*0.13+(isHigh?0.55:0.4));
+      });
+      // Sparkle sweep for high scores
+      if(isHigh){for(let s=0;s<3;s++){
+        const o=a.createOscillator();const g=a.createGain();
+        o.type='sine';o.frequency.setValueAtTime(2000+s*500,a.currentTime+0.6+s*0.08);
+        o.frequency.exponentialRampToValueAtTime(4000+s*800,a.currentTime+0.7+s*0.08);
+        g.gain.setValueAtTime(0.02,a.currentTime+0.6+s*0.08);
+        g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.9+s*0.08);
+        o.connect(g);g.connect(a.destination);o.start(a.currentTime+0.6+s*0.08);o.stop(a.currentTime+1+s*0.08);
+      }}
+    },
+    // Drum roll before reveal starts
+    drumroll:()=>{const a=actx();if(!a)return;
+      for(let i=0;i<6;i++){
+        const o=a.createOscillator();const g=a.createGain();
+        o.type='square';o.frequency.value=80+i*10;
+        g.gain.setValueAtTime(0.03,a.currentTime+i*0.06);
+        g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+i*0.06+0.05);
+        o.connect(g);g.connect(a.destination);o.start(a.currentTime+i*0.06);o.stop(a.currentTime+i*0.06+0.06);
+      }
+    }
+  };
+
+  function spawnConfetti(container){
+    const colors=['#d4a853','#e8c36a','#4a7c59','#6aac7e','#ef7d3a','#4a90d9','#ff4444','#ff33cc'];
+    for(let i=0;i<40;i++){
+      const c=document.createElement('div');c.className='casino-confetti';
+      const angle=(Math.random()-0.5)*120;
+      const dist=100+Math.random()*120;
+      const cx=Math.sin(angle*Math.PI/180)*dist;
+      const cy=-(50+Math.random()*150);
+      const cr=360+Math.random()*720;
+      const w=3+Math.random()*6;const h=w*(0.4+Math.random()*0.8);
+      c.style.cssText=`left:50%;top:50%;width:${w}px;height:${h}px;background:${colors[i%colors.length]};--cx:${cx}px;--cy:${-cy}px;--cr:${cr}deg;animation-delay:${Math.random()*0.3}s`;
+      container.appendChild(c);
+      setTimeout(()=>c.remove(),2200);
+    }
+  }
+
   const overlay=document.createElement('div');
   overlay.className='casino-overlay';
   document.body.appendChild(overlay);
   requestAnimationFrame(()=>overlay.classList.add('active'));
-
   let skipAll=false;
-  const sfx={
-    tick:()=>{try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=600+Math.random()*600;o.type='triangle';g.gain.value=0.06;o.start();g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.1);o.stop(a.currentTime+0.12)}catch(e){}},
-    win:()=>{try{const a=new AudioContext();[523,659,784,1047].forEach((f,i)=>{const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;o.type='sine';g.gain.value=0.05;o.start(a.currentTime+i*0.12);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+i*0.12+0.3);o.stop(a.currentTime+i*0.12+0.35)})}catch(e){}}
-  };
-
-  function spawnConfetti(container){
-    const colors=['#d4a853','#4a7c59','#ef7d3a','#4a90d9','#ff4444','#44ff44'];
-    for(let i=0;i<24;i++){
-      const c=document.createElement('div');c.className='casino-confetti';
-      c.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*30}%;background:${colors[i%colors.length]};animation-delay:${Math.random()*0.5}s;width:${4+Math.random()*6}px;height:${4+Math.random()*6}px`;
-      container.appendChild(c);
-      setTimeout(()=>c.remove(),2000);
-    }
-  }
 
   function showGame(idx){
     if(idx>=games.length||skipAll){
       overlay.classList.remove('active');
-      setTimeout(()=>overlay.remove(),300);
+      setTimeout(()=>overlay.remove(),400);
       callback();return;
     }
     const game=games[idx];
@@ -2215,15 +2279,17 @@ function slotMachineReveal(games, callback){
       <div class="casino-machine">
         <div class="casino-header">
           <h3>★ Lottobot Casino ★</h3>
-          <div class="casino-lights">${'<div class="casino-light"></div>'.repeat(8)}</div>
+          <div class="casino-lights">${'<div class="casino-light"></div>'.repeat(10)}</div>
         </div>
         <div class="casino-display">
           <div class="casino-progress">Jogo ${idx+1} de ${games.length}</div>
+          <div class="casino-grid-labels"><span class="casino-grid-label">C1</span><span class="casino-grid-label">C2</span><span class="casino-grid-label">C3</span><span class="casino-grid-label">C4</span><span class="casino-grid-label">C5</span></div>
           <div class="casino-reels" id="casinoReels"></div>
-          <div class="casino-count" style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-bottom:12px"><span id="casinoCounter" style="color:var(--color-gold-primary);font-weight:700">0</span> / 15</div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-bottom:12px"><span id="casinoCounter" style="color:var(--color-gold-primary);font-weight:700;font-size:1rem">0</span><span style="opacity:0.4"> / 15</span></div>
           <div class="casino-score" id="casinoScore">
             <div class="casino-score-value" id="casinoScoreVal"></div>
-            <div class="casino-score-label"></div>
+            <div class="casino-score-label" id="casinoScoreLabel"></div>
+            <div class="casino-score-stars" id="casinoStars"></div>
           </div>
         </div>
         <div class="casino-footer">
@@ -2235,62 +2301,70 @@ function slotMachineReveal(games, callback){
     const reels=overlay.querySelector('#casinoReels');
     const scoreDiv=overlay.querySelector('#casinoScore');
     const scoreVal=overlay.querySelector('#casinoScoreVal');
-    const scoreLabel=overlay.querySelector('.casino-score-label');
+    const scoreLabel=overlay.querySelector('#casinoScoreLabel');
+    const starsDiv=overlay.querySelector('#casinoStars');
     const skipBtn=overlay.querySelector('#casinoSkip');
     const nextBtn=overlay.querySelector('#casinoNext');
     const counter=overlay.querySelector('#casinoCounter');
 
-    // Build 5x5 grid of ALL 25 numbers
+    // Build 5×5 grid of ALL 25 numbers
     const balls={};
     for(let n=1;n<=25;n++){
       const ball=document.createElement('div');
       ball.className='casino-ball';
       ball.textContent=String(n).padStart(2,'0');
-      ball.dataset.num=n;
       reels.appendChild(ball);
       balls[n]=ball;
     }
 
-    // Create reveal order: shuffle the selected numbers for excitement
+    // Shuffle selected numbers for suspense
     const selected=[...game].sort(()=>Math.random()-0.5);
     let revealed=0;
+    const totalSel=selected.length;
 
-    // Reveal selected numbers one by one
+    // Drumroll then reveal
+    sfx.drumroll();
+
     selected.forEach((n,i)=>{
-      const delay=i*200+Math.random()*80;
+      const delay=400+i*180;
       setTimeout(()=>{
+        if(skipAll)return;
         const ball=balls[n];
         if(!ball)return;
         ball.classList.add('selected');
-        // Apply color based on classification
+        // Color by classification
         const cls=getBallClass(n);
-        if(cls==='ball-hot') ball.style.background='var(--color-ball-hot)';
-        else if(cls==='ball-cold') ball.style.background='var(--color-ball-cold)';
-        else if(cls==='ball-rising') ball.style.background='var(--color-ball-rising)';
-        else ball.style.background='var(--color-ball-neutral)';
-        sfx.tick();
+        const colorMap={'ball-hot':'linear-gradient(145deg,#ff8a3a,#ef6d1a)','ball-cold':'linear-gradient(145deg,#5a9de6,#3a7cbf)','ball-rising':'linear-gradient(145deg,#e8c36a,#c9a04a)','ball-neutral':'linear-gradient(145deg,#666,#4a4a4a)'};
+        ball.style.background=colorMap[cls]||colorMap['ball-neutral'];
+        sfx.tick(i,totalSel);
         revealed++;
         counter.textContent=revealed;
 
-        if(revealed===selected.length){
+        if(revealed===totalSel){
+          // Dim unselected balls
+          for(let m=1;m<=25;m++){if(!selectedSet.has(m))balls[m].classList.add('dimmed')}
           setTimeout(()=>{
-            sfx.win();
+            if(skipAll)return;
+            sfx.win(game.score);
             scoreVal.textContent=game.score+' pts';
             scoreLabel.textContent=game.cls.label;
+            // Stars based on score
+            const starCount=game.score>=80?5:game.score>=70?4:game.score>=60?3:game.score>=50?2:1;
+            starsDiv.textContent='★'.repeat(starCount)+'☆'.repeat(5-starCount);
+            starsDiv.style.color=starCount>=4?'var(--color-gold-primary)':'var(--text-muted)';
             scoreDiv.classList.add('show');
             nextBtn.style.display='';
             skipBtn.style.display='none';
-            if(game.score>=70) spawnConfetti(overlay.querySelector('.casino-display'));
-          },400);
+            if(game.score>=65) spawnConfetti(overlay.querySelector('.casino-display'));
+          },500);
         }
       },delay);
     });
 
     skipBtn.onclick=()=>{
-      if(idx>=games.length-1){skipAll=true;overlay.classList.remove('active');setTimeout(()=>overlay.remove(),300);callback()}
-      else showGame(idx+1);
+      skipAll=true;overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback();
     };
-    nextBtn.onclick=()=>showGame(idx+1);
+    nextBtn.onclick=()=>{skipAll=false;showGame(idx+1)};
   }
 
   showGame(0);
