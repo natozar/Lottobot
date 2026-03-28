@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="Lottobot — Gerador analítico inteligente de combinações para Lotofácil">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://loteriascaixa-api.herokuapp.com; img-src 'self' data:;">
   <meta name="apple-mobile-web-app-title" content="Lottobot">
 
   <title>Lottobot v3 — Lotofácil Intelligence</title>
@@ -51,7 +52,6 @@
       --text-secondary: #a1a1aa;
       --text-muted: #71717a;
       --color-moss-primary: #4a7c59;
-      --color-moss-dark: #2d5a3f;
       --color-gold-primary: #d4a853;
       --color-gold-dim: rgba(212,168,83,0.15);
       --color-ball-hot: #ef7d3a;
@@ -190,18 +190,6 @@
       gap: 24px;
     }
 
-    .card {
-      background: var(--bg-surface-1);
-      border: 1px solid var(--border-default);
-      border-radius: var(--border-radius-lg);
-      padding: 20px;
-      transition: border-color 0.2s, background 0.2s;
-    }
-
-    .card:hover {
-      border-color: var(--border-hover);
-    }
-
     .config-section {
       display: flex;
       flex-direction: column;
@@ -273,7 +261,12 @@
       align-items: center;
       justify-content: space-between;
       padding: 8px 0;
-      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .toggle-row > :first-child {
+      flex: 1;
+      min-width: 0;
     }
 
     .toggle-label {
@@ -286,7 +279,9 @@
 
     .toggle-switch {
       width: 40px;
+      min-width: 40px;
       height: 22px;
+      flex-shrink: 0;
       background: #27272a;
       border-radius: 11px;
       position: relative;
@@ -1050,7 +1045,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 60px;
+      height: calc(60px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       background: var(--bg-primary);
       border-top: 1px solid var(--border-default);
       z-index: var(--z-header);
@@ -1120,7 +1116,7 @@
     .mobile-fab {
       display: none;
       position: fixed;
-      bottom: 72px;
+      bottom: calc(72px + env(safe-area-inset-bottom, 0px));
       right: 16px;
       width: 56px;
       height: 56px;
@@ -1151,7 +1147,7 @@
         border-right: none;
         border-left: none;
         overflow-y: auto;
-        height: calc(100vh - 116px);
+        height: calc(100vh - 116px - env(safe-area-inset-bottom, 0px));
       }
       .col-left.mobile-show,
       .col-center.mobile-show,
@@ -1238,8 +1234,8 @@
       /* Pre-gen summary */
       .pre-gen-summary { padding: 10px; font-size: 0.7rem; }
 
-      /* Filter info always visible on mobile (no hover) */
-      .toggle-row .filter-info { display: block; }
+      /* Filter info: keep hidden on mobile too, no hover available */
+      .toggle-row .filter-info { display: none; }
     }
 
     @media (max-width: 480px) {
@@ -1275,8 +1271,8 @@
     .num-cell.fixed::after { content: '📌'; position: absolute; top: -5px; right: -3px; font-size: 0.45rem; }
     .num-cell.excluded { background: rgba(220,60,60,0.08); border-color: rgba(220,60,60,0.4); color: #dc3c3c; opacity: 0.6; }
     .num-cell.excluded::after { content: '✕'; position: absolute; top: -3px; right: 2px; font-size: 0.55rem; color: #dc3c3c; }
-    .num-cell-legend { display: flex; gap: 12px; margin-top: 8px; font-size: 0.65rem; color: var(--text-muted); }
-    .num-cell-legend span { display: flex; align-items: center; gap: 4px; }
+    .num-cell-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px; font-size: 0.65rem; color: var(--text-muted); }
+    .num-cell-legend span { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 
     /* === PRIZE PREDICTION === */
     .prize-panel { background: var(--bg-surface-1); border: 1px solid var(--border-default); border-radius: var(--border-radius-lg); padding: 16px; margin-bottom: 16px; }
@@ -1289,7 +1285,7 @@
     @keyframes pulseGold { 0%,100% { box-shadow: 0 0 0 0 rgba(212,168,83,0); } 50% { box-shadow: 0 0 16px 2px rgba(212,168,83,0.15); } }
 
     /* === FILTER EXPLANATIONS === */
-    .filter-info { font-size: 0.65rem; color: var(--text-muted); line-height: 1.3; margin-top: 2px; display: none; width: 100%; }
+    .filter-info { font-size: 0.65rem; color: var(--text-muted); line-height: 1.3; margin-top: 2px; display: none; }
     .toggle-row:hover .filter-info { display: block; }
 
     /* === PRE-GENERATION SUMMARY === */
@@ -1354,7 +1350,7 @@
     .fw-burst-ring{position:absolute;pointer-events:none;border-radius:50%;border:2px solid;will-change:transform,opacity;animation:fwRing 1s ease-out forwards}
     @keyframes fwRing{0%{opacity:0.9;transform:scale(0)}40%{opacity:0.5;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
     /* === PWA INSTALL BANNER === */
-    .install-banner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:180;background:linear-gradient(135deg,#1a2a1e 0%,#111113 50%,#1a1a10 100%);border:1px solid rgba(212,168,83,0.3);border-radius:16px;padding:20px 24px;display:none;align-items:center;gap:16px;max-width:440px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(212,168,83,0.1);backdrop-filter:blur(20px);animation:bannerIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
+    .install-banner{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);z-index:180;background:linear-gradient(135deg,#1a2a1e 0%,#111113 50%,#1a1a10 100%);border:1px solid rgba(212,168,83,0.3);border-radius:16px;padding:20px 24px;display:none;align-items:center;gap:16px;max-width:440px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(212,168,83,0.1);backdrop-filter:blur(20px);animation:bannerIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
     .install-banner.show{display:flex}
     @keyframes bannerIn{from{opacity:0;transform:translateX(-50%) translateY(40px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
     .install-banner-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--color-gold-primary),#a8872e);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
@@ -1465,11 +1461,11 @@
           <div class="numeros-grid" id="numFora"></div>
         </div>
         <div class="num-cell-legend">
-          <span>🖱️ 1x = fixar</span>
-          <span>🖱️ 2x = excluir</span>
-          <span>🖱️ 3x = normal</span>
+          <span>1x = fixar</span>
+          <span>2x = excluir</span>
+          <span>3x = limpar</span>
         </div>
-        <button style="width:100%;margin-top:10px;padding:6px;background:none;border:1px solid var(--border-default);border-radius:6px;color:var(--text-muted);font-size:0.72rem;cursor:pointer;" onclick="resetExclusions()">↩ Limpar seleções</button>
+        <button class="reset-exclusions" style="margin-top:10px;" onclick="resetExclusions()">↩ Limpar seleções</button>
       </div>
 
       <!-- CONFIG -->
@@ -1741,9 +1737,13 @@ const MODELOS={A:{fora:6,dentro:9,noise:0.2},B:{fora:5,dentro:10,noise:0.35},C:{
 const PREMIOS={11:'R$ 6,00',12:'R$ 12,00',13:'R$ 30,00',14:'R$ 1.700,00',15:'🏆 JACKPOT'};
 const PRIMOS=new Set([2,3,5,7,11,13,17,19,23]);
 const DEZENAS=[[1,5],[6,10],[11,15],[16,20],[21,25]];
+const FILTER_IDS=['filterParImpar','filterSoma','filterConsec','filterRepet','filterDezena','filterPrimos'];
 const SK='lottobot_v3';
 const CACHE_KEY='lottobot_cache';
 const CACHE_TTL=24*60*60*1000;
+const pad=n=>String(n).padStart(2,'0');
+const _escEl=document.createElement('div');
+function esc(s){_escEl.textContent=String(s);return _escEl.innerHTML}
 const FALLBACK={numero:3287,data:'14/07/2025',numeros:[1,3,5,7,9,11,13,15,17,19,21,22,23,24,25]};
 const FALLBACK_FREQ={1:58,2:52,3:71,4:45,5:63,6:49,7:68,8:44,9:61,10:55,11:66,12:53,13:67,14:46,15:59,16:57,17:64,18:47,19:62,20:65,21:56,22:69,23:60,24:54,25:70};
 
@@ -1953,7 +1953,7 @@ function checkNotifyParams(){
 
 function setupEventListeners(){
   document.querySelectorAll('.modelo-card').forEach(el=>el.addEventListener('click',function(){selectModelo(this.dataset.modelo)}));
-  ['filterParImpar','filterSoma','filterConsec','filterRepet','filterDezena','filterPrimos'].forEach(id=>{
+  FILTER_IDS.forEach(id=>{
     const el=document.getElementById(id);if(el)el.addEventListener('click',function(){this.classList.toggle('on');updatePreGenSummary()})
   });
   document.getElementById('qtdJogos')?.addEventListener('change',updatePreGenSummary);
@@ -2002,8 +2002,14 @@ async function apiFetch(url){const c=new AbortController();const t=setTimeout(()
 
 function parseDraw(d){
   const dz=d.listaDezenas||d.dezenas||d.numeros;
-  if(!dz) return null;
-  return{numero:d.concurso||d.numero,data:d.data||d.dataApuracao||'',numeros:dz.map(Number).sort((a,b)=>a-b),acumulou:d.acumulou||false,valorEstimado:d.valorEstimadoProximoConcurso?'R$ '+Number(d.valorEstimadoProximoConcurso).toLocaleString('pt-BR'):null};
+  if(!dz||!Array.isArray(dz)) return null;
+  const numero=parseInt(d.concurso||d.numero);
+  if(isNaN(numero))return null;
+  const nums=dz.map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=25).sort((a,b)=>a-b);
+  if(nums.length<15)return null;
+  const data=String(d.data||d.dataApuracao||'').replace(/[^0-9\/\-\.]/g,'');
+  const valEst=d.valorEstimadoProximoConcurso?'R$ '+Number(d.valorEstimadoProximoConcurso).toLocaleString('pt-BR'):null;
+  return{numero,data,numeros:nums,acumulou:!!d.acumulou,valorEstimado:valEst};
 }
 
 async function loadAPI(){
@@ -2015,7 +2021,7 @@ async function loadAPI(){
     const latest=parseDraw(raw);if(!latest)throw new Error('bad data');
     ULT=latest;
     historico=[{numero:ULT.numero,numeros:ULT.numeros}];
-    const N=Math.min(parseInt(document.getElementById('sliderJanela')?.value||50),50);
+    const N=parseInt(document.getElementById('sliderJanela')?.value||50);
     const promises=[];
     for(let i=1;i<N;i++) promises.push(apiFetch(API_BASE+'/'+(ULT.numero-i)).then(r=>{const p=parseDraw(r);return p}).catch(()=>null));
     const results=await Promise.all(promises);
@@ -2067,7 +2073,7 @@ function getBallClass(n){return classifyNum(n).cls}
 
 // ══════ GENERATION ══════
 function gerarJogos(){
-  if(!ULT){showToast('⏳ Aguardando dados...');return}
+  if(!ULT){showToast('⏳ Aguardando dados...');const btn=document.getElementById('btnGerar');if(btn){btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'}return}
   const qtd=parseInt(document.getElementById('qtdJogos').value);
   const mod=MODELOS[selectedModelo];
   const filters=getActiveFilters();
@@ -2086,6 +2092,7 @@ function gerarJogos(){
   jogos=pool;concRef=ULT.numero;
   stats.total+=jogos.length;stats.modelos[selectedModelo]=(stats.modelos[selectedModelo]||0)+jogos.length;
   jogos.forEach(j=>stats.scores.push(j.score));
+  if(stats.scores.length>500)stats.scores=stats.scores.slice(-500);
   // Slot machine animation then render
   const btn=document.getElementById('btnGerar');
   if(jogos.length>0 && jogos.length<=5){
@@ -2123,7 +2130,8 @@ function genOne(mod){
 }
 
 // ══════ FILTERS ══════
-function getActiveFilters(){return{pi:document.getElementById('filterParImpar')?.classList.contains('on'),so:document.getElementById('filterSoma')?.classList.contains('on'),co:document.getElementById('filterConsec')?.classList.contains('on'),re:document.getElementById('filterRepet')?.classList.contains('on'),dz:document.getElementById('filterDezena')?.classList.contains('on'),pr:document.getElementById('filterPrimos')?.classList.contains('on')}}
+function isFilterOn(id){return document.getElementById(id)?.classList.contains('on')}
+function getActiveFilters(){return{pi:isFilterOn('filterParImpar'),so:isFilterOn('filterSoma'),co:isFilterOn('filterConsec'),re:isFilterOn('filterRepet'),dz:isFilterOn('filterDezena'),pr:isFilterOn('filterPrimos')}}
 
 function passFilters(j,f){
   const p=j.filter(n=>n%2===0).length,s=j.reduce((a,b)=>a+b,0),r=ULT?j.filter(n=>ULT.numeros.includes(n)).length:0;
@@ -2177,7 +2185,7 @@ function renderJogos(){
     const pr=j.filter(n=>PRIMOS.has(n)).length;
     return `<div class="game-card" id="gc${i}" style="animation-delay:${i*0.05}s">
       <div class="game-header"><div class="game-number">#${i+1}</div><div class="score-badge ${j.cls.cls}">${j.score} · ${j.cls.label}</div></div>
-      <div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${classifyNum(n).type}: freq ${FREQ[n]||0}">${String(n).padStart(2,'0')}</div>`).join('')}</div>
+      <div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(pad(n))}</div>`).join('')}</div>
       <div class="game-meta">
         <div class="meta-item"><span class="meta-label">Par/Ímpar</span><span class="meta-value">${p}P/${15-p}I</span></div>
         <div class="meta-item"><span class="meta-label">Soma</span><span class="meta-value">Σ${s}</span></div>
@@ -2202,7 +2210,7 @@ async function conferir(i){
 }
 
 function showCheckResult(i,res,cn){
-  const j=jogos[i],ac=j.filter(n=>res.includes(n)),er=j.filter(n=>!res.includes(n));
+  const j=jogos[i],ac=j.filter(n=>res.includes(n));
   const card=document.getElementById('gc'+i);if(!card)return;
   card.querySelectorAll('.ball').forEach(b=>{const n=parseInt(b.textContent);b.classList.add(ac.map(Number).includes(n)?'ball-hit':'ball-miss')});
   const prize=PREMIOS[ac.length]||'Sem premiação';
@@ -2210,7 +2218,7 @@ function showCheckResult(i,res,cn){
   overlay.style.cssText='position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,10,10,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:5;border-radius:var(--border-radius-lg)';
   overlay.innerHTML=`<div style="font-size:2.5rem;font-weight:700;color:var(--color-gold-primary)">${ac.length}</div>
     <div style="color:rgba(255,255,255,0.6);margin-bottom:12px">acertos${cn?' · #'+cn:''}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px">${ac.map(n=>'<div class="ball ball-hit">'+String(n).padStart(2,'0')+'</div>').join('')}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px">${ac.map(n=>'<div class="ball ball-hit">'+pad(n)+'</div>').join('')}</div>
     <div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--color-gold-primary);margin-top:8px">${prize}</div>
     <button class="btn-action" style="margin-top:16px" onclick="this.parentElement.remove()">Fechar</button>`;
   card.style.position='relative';card.appendChild(overlay);
@@ -2220,7 +2228,7 @@ function showCheckResult(i,res,cn){
 function initManualGrid(){
   const grid=document.getElementById('manualInputGrid');if(!grid)return;
   for(let i=1;i<=25;i++){
-    const cell=document.createElement('div');cell.className='exclude-cell';cell.textContent=String(i).padStart(2,'0');cell.dataset.num=i;cell.dataset.selected='false';
+    const cell=document.createElement('div');cell.className='exclude-cell';cell.textContent=pad(i);cell.dataset.num=i;cell.dataset.selected='false';
     cell.onclick=function(){const sel=this.dataset.selected==='true';this.dataset.selected=sel?'false':'true';this.style.background=sel?'rgba(45,74,62,0.2)':'rgba(201,168,76,0.3)';this.style.borderColor=sel?'rgba(201,168,76,0.15)':'var(--color-gold-primary)';this.style.color=sel?'rgba(255,255,255,0.8)':'var(--color-gold-primary)'};
     grid.appendChild(cell);
   }
@@ -2245,17 +2253,17 @@ function salvar(i){
 }
 
 function shareGame(i){
-  const j=jogos[i];const t='🎯 Lottobot · Jogo '+(i+1)+'\n'+j.map(n=>String(n).padStart(2,'0')).join(' - ')+'\nScore: '+j.score+' · Modelo '+selectedModelo;
+  const j=jogos[i];const t='🎯 Lottobot · Jogo '+(i+1)+'\n'+j.map(n=>pad(n)).join(' - ')+'\nScore: '+j.score+' · Modelo '+selectedModelo;
   if(navigator.share)navigator.share({title:'Lottobot',text:t}).catch(()=>{});
   else navigator.clipboard.writeText(t).then(()=>showToast('📋 Copiado!'));
 }
 
 function exportCopy(){
-  const t='🎯 LOTTOBOT — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'Jogo '+(i+1)+': '+j.map(n=>String(n).padStart(2,'0')).join(' - ')+' ('+j.score+'pts)').join('\n');
+  const t='🎯 LOTTOBOT — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'Jogo '+(i+1)+': '+j.map(n=>pad(n)).join(' - ')+' ('+j.score+'pts)').join('\n');
   navigator.clipboard.writeText(t).then(()=>showToast('📋 Copiado!')).catch(()=>showToast('Erro ao copiar'));
 }
 function exportWhatsApp(){
-  const t='🎯 *LOTTOBOT* — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'*Jogo '+(i+1)+':* '+j.map(n=>String(n).padStart(2,'0')).join('-')+' _('+j.score+'pts)_').join('\n')+'\n\n_Gerado por Lottobot_';
+  const t='🎯 *LOTTOBOT* — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'*Jogo '+(i+1)+':* '+j.map(n=>pad(n)).join('-')+' _('+j.score+'pts)_').join('\n')+'\n\n_Gerado por Lottobot_';
   window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
 }
 function limparJogos(){previousJogos=[...jogos];jogos=[];concRef=null;renderJogos();persist();showToast('🗑️ Limpo')}
@@ -2266,7 +2274,7 @@ function renderSaved(){
   const c=document.getElementById('savedContainer');if(!c)return;
   if(!saved.length){c.innerHTML='<p class="text-small" style="text-align:center;padding:32px 0;opacity:.5">Nenhum jogo salvo. Use 💾 nos jogos gerados.</p>';return}
   c.innerHTML=saved.map(g=>`<div class="saved-item">
-    <div><div class="saved-nums">${g.n.map(n=>String(n).padStart(2,'0')).join('-')}</div><div class="saved-meta">${g.dt} · M${g.mod} · #${g.ref}</div></div>
+    <div><div class="saved-nums">${g.n.map(n=>pad(n)).join('-')}</div><div class="saved-meta">${g.dt} · M${g.mod} · #${g.ref}</div></div>
     <div class="saved-score">${g.score}</div></div>`).join('');
 }
 
@@ -2282,17 +2290,8 @@ function renderFilterTab(){
   if(dg){dg.innerHTML='';ULT.numeros.forEach(n=>dg.appendChild(mkExcl(n)))}
   if(fg){fg.innerHTML='';for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkExcl(i))}
 }
-function mkExcl(n){
-  const c=document.createElement('div');c.className='exclude-cell';
-  if(fixedNums.has(n))c.classList.add('fixed');else if(excludedNums.has(n))c.classList.add('excluded');
-  c.textContent=String(n).padStart(2,'0');
-  c.onclick=()=>{
-    if(fixedNums.has(n)){fixedNums.delete(n);excludedNums.add(n);c.classList.remove('fixed');c.classList.add('excluded')}
-    else if(excludedNums.has(n)){excludedNums.delete(n);c.classList.remove('excluded')}
-    else{fixedNums.add(n);c.classList.add('fixed')}
-  };return c;
-}
-function resetExclusions(){excludedNums.clear();fixedNums.clear();renderFilterTab();showToast('↩ Filtros resetados')}
+function mkExcl(n){return mkToggleCell(n,'exclude-cell')}
+function resetExclusions(){excludedNums.clear();fixedNums.clear();renderNumPanel();renderFilterTab();updatePreGenSummary();showToast('↩ Filtros resetados')}
 
 // ══════ UI UPDATES ══════
 function updateUI(){
@@ -2301,7 +2300,7 @@ function updateUI(){
   document.getElementById('ultimoNumero').textContent='Concurso #'+ULT.numero;
   document.getElementById('ultimoData').textContent=ULT.data;
   const balls=document.getElementById('ultimoBalls');
-  if(balls)balls.innerHTML=ULT.numeros.map(n=>'<div class="ball '+getBallClass(n)+'">'+String(n).padStart(2,'0')+'</div>').join('');
+  if(balls)balls.innerHTML=ULT.numeros.map(n=>'<div class="ball '+getBallClass(n)+'">'+pad(n)+'</div>').join('');
   const res=document.getElementById('ultimoResumo');
   if(res){const p=ULT.numeros.filter(n=>n%2===0).length,s=ULT.numeros.reduce((a,b)=>a+b,0);res.innerHTML='Pares: '+p+' · Ímpares: '+(15-p)+' · Soma: '+s}
   renderFilterTab();renderHeatmap();renderTop5();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();
@@ -2338,7 +2337,7 @@ function renderHeatmap(){
     const f=FREQ[i]||0,r=mx>mn?(f-mn)/(mx-mn):0.5;
     let bg;if(r>0.66)bg='rgba(192,57,43,'+(0.4+r*0.5)+')';else if(r>0.33)bg='rgba(243,156,18,'+(0.3+r*0.4)+')';else bg='rgba(52,152,219,'+(0.3+(1-r)*0.4)+')';
     const cell=document.createElement('div');cell.className='heatmap-cell';cell.style.background=bg;cell.style.color=r>0.4?'#fff':'#ccc';
-    cell.innerHTML=String(i).padStart(2,'0')+'<div style="position:absolute;bottom:calc(100%+6px);background:rgba(10,10,10,0.95);border:1px solid rgba(201,168,76,0.3);padding:4px 8px;border-radius:6px;font-size:.7rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10" class="ht">Nº'+String(i).padStart(2,'0')+' · Freq:'+f+' · Atraso:'+(ATRASO[i]||0)+'</div>';
+    cell.innerHTML=pad(i)+'<div style="position:absolute;bottom:calc(100%+6px);background:rgba(10,10,10,0.95);border:1px solid rgba(201,168,76,0.3);padding:4px 8px;border-radius:6px;font-size:.7rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10" class="ht">Nº'+pad(i)+' · Freq:'+f+' · Atraso:'+(ATRASO[i]||0)+'</div>';
     cell.style.position='relative';
     cell.onmouseenter=()=>cell.querySelector('.ht').style.opacity='1';
     cell.onmouseleave=()=>cell.querySelector('.ht').style.opacity='0';
@@ -2352,7 +2351,7 @@ function renderTop5(){
   const sorted=Object.entries(FREQ).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const mx=sorted[0]?.[1]||1;
   c.innerHTML=sorted.map(([n,f])=>`<div style="display:flex;align-items:center;gap:10px;padding:6px 0">
-    <div class="ball ball-hot" style="width:32px;height:32px;font-size:.75rem;flex-shrink:0">${String(n).padStart(2,'0')}</div>
+    <div class="ball ball-hot" style="width:32px;height:32px;font-size:.75rem;flex-shrink:0">${pad(n)}</div>
     <div style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><div style="width:${(f/mx*100)}%;height:100%;background:linear-gradient(90deg,var(--color-ball-hot),var(--color-gold-primary));border-radius:3px"></div></div>
     <span style="font-family:var(--font-mono);font-size:.78rem;font-weight:600;color:rgba(255,255,255,0.6);width:28px;text-align:right">${f}</span>
   </div>`).join('');
@@ -2364,12 +2363,12 @@ function persist(){try{localStorage.setItem(SK,JSON.stringify({
   excludedNums:[...excludedNums],fixedNums:[...fixedNums],
   selectedModelo,
   filters:{
-    parImpar:document.getElementById('filterParImpar')?.checked,
-    soma:document.getElementById('filterSoma')?.checked,
-    consec:document.getElementById('filterConsec')?.checked,
-    repet:document.getElementById('filterRepet')?.checked,
-    dezena:document.getElementById('filterDezena')?.checked,
-    primos:document.getElementById('filterPrimos')?.checked,
+    parImpar:isFilterOn('filterParImpar'),
+    soma:isFilterOn('filterSoma'),
+    consec:isFilterOn('filterConsec'),
+    repet:isFilterOn('filterRepet'),
+    dezena:isFilterOn('filterDezena'),
+    primos:isFilterOn('filterPrimos'),
     janela:document.getElementById('sliderJanela')?.value,
     melhorN:document.getElementById('toggleMelhorN')?.classList.contains('on'),
     melhorNSize:document.getElementById('sliderMelhorN')?.value,
@@ -2382,19 +2381,20 @@ function loadSaved(){try{const d=JSON.parse(localStorage.getItem(SK)||'{}');
   if(d.stats)stats=d.stats;
   if(d.excludedNums)excludedNums=new Set(d.excludedNums);
   if(d.fixedNums)fixedNums=new Set(d.fixedNums);
-  if(d.selectedModelo){selectedModelo=d.selectedModelo;document.querySelector('[data-modelo="'+selectedModelo+'"]')?.classList.add('active')}
+  if(d.selectedModelo){selectedModelo=d.selectedModelo;document.querySelectorAll('.modelo-card').forEach(el=>el.classList.remove('active'));document.querySelector('[data-modelo="'+selectedModelo+'"]')?.classList.add('active')}
   if(d.filters){
     const f=d.filters;
-    if(f.parImpar)document.getElementById('filterParImpar').checked=f.parImpar;
-    if(f.soma)document.getElementById('filterSoma').checked=f.soma;
-    if(f.consec)document.getElementById('filterConsec').checked=f.consec;
-    if(f.repet)document.getElementById('filterRepet').checked=f.repet;
-    if(f.dezena)document.getElementById('filterDezena').checked=f.dezena;
-    if(f.primos)document.getElementById('filterPrimos').checked=f.primos;
-    if(f.janela){const sl=document.getElementById('sliderJanela');sl.value=f.janela;document.getElementById('sliderValue').textContent=f.janela}
-    if(f.melhorN){document.getElementById('toggleMelhorN')?.classList.add('on');document.getElementById('sliderMelhorN').parentElement.style.display=''}
-    if(f.melhorNSize){const sn=document.getElementById('sliderMelhorN');sn.value=f.melhorNSize;document.getElementById('sliderMelhorNValue').textContent=f.melhorNSize}
-    if(f.qtdJogos)document.getElementById('qtdJogos').value=f.qtdJogos;
+    const toggleFilter=(id,val)=>{const el=document.getElementById(id);if(!el)return;if(val)el.classList.add('on');else el.classList.remove('on')};
+    toggleFilter('filterParImpar',f.parImpar);
+    toggleFilter('filterSoma',f.soma);
+    toggleFilter('filterConsec',f.consec);
+    toggleFilter('filterRepet',f.repet);
+    toggleFilter('filterDezena',f.dezena);
+    toggleFilter('filterPrimos',f.primos);
+    if(f.janela){const sl=document.getElementById('sliderJanela');if(sl){sl.value=f.janela;document.getElementById('sliderValue').textContent=f.janela}}
+    if(f.melhorN){document.getElementById('toggleMelhorN')?.classList.add('on');const sn=document.getElementById('sliderMelhorN');if(sn)sn.disabled=false}
+    if(f.melhorNSize){const sn=document.getElementById('sliderMelhorN');if(sn){sn.value=f.melhorNSize;document.getElementById('sliderMelhorNValue').textContent=f.melhorNSize}}
+    if(f.qtdJogos){const q=document.getElementById('qtdJogos');if(q)q.value=f.qtdJogos}
   }
 }catch(e){}}
 function copyPix(){navigator.clipboard.writeText(document.getElementById('pixKey')?.textContent?.trim()||'').then(()=>showToast('📋 Chave PIX copiada!'))}
@@ -2408,17 +2408,18 @@ function renderNumPanel(){
   if(dg){dg.innerHTML='';ULT.numeros.forEach(n=>dg.appendChild(mkNumCell(n)))}
   if(fg){fg.innerHTML='';for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkNumCell(i))}
 }
-function mkNumCell(n){
-  const c=document.createElement('div');c.className='num-cell';
+function mkToggleCell(n,cls){
+  const c=document.createElement('div');c.className=cls;
   if(fixedNums.has(n))c.classList.add('fixed');else if(excludedNums.has(n))c.classList.add('excluded');
-  c.textContent=String(n).padStart(2,'0');
+  c.textContent=pad(n);
   c.onclick=()=>{
-    if(fixedNums.has(n)){fixedNums.delete(n);excludedNums.add(n);c.classList.remove('fixed');c.classList.add('excluded')}
-    else if(excludedNums.has(n)){excludedNums.delete(n);c.classList.remove('excluded')}
-    else{fixedNums.add(n);c.classList.add('fixed')}
-    updatePreGenSummary();
+    if(fixedNums.has(n)){fixedNums.delete(n);excludedNums.add(n)}
+    else if(excludedNums.has(n)){excludedNums.delete(n)}
+    else{fixedNums.add(n)}
+    renderNumPanel();renderFilterTab();updatePreGenSummary();
   };return c;
 }
+function mkNumCell(n){return mkToggleCell(n,'num-cell')}
 
 // ══════ PRE-GENERATION SUMMARY ══════
 function updatePreGenSummary(){
@@ -2426,7 +2427,7 @@ function updatePreGenSummary(){
   panel.classList.add('show');
   const qtd=document.getElementById('qtdJogos')?.value||5;
   const modelNames={A:'A (Conservador)',B:'B (Equilibrado)',C:'C (Arrojado)'};
-  const activeFilters=['filterParImpar','filterSoma','filterConsec','filterRepet','filterDezena','filterPrimos'].filter(id=>document.getElementById(id)?.classList.contains('on')).length;
+  const activeFilters=FILTER_IDS.filter(isFilterOn).length;
   document.getElementById('sumQtd').textContent=qtd;
   document.getElementById('sumModelo').textContent=modelNames[selectedModelo]||selectedModelo;
   document.getElementById('sumFiltros').textContent=activeFilters+' de 6';
@@ -2745,7 +2746,7 @@ function slotMachineReveal(games, callback){
     for(let n=1;n<=25;n++){
       const ball=document.createElement('div');
       ball.className='casino-ball';
-      ball.textContent=String(n).padStart(2,'0');
+      ball.textContent=pad(n);
       reels.appendChild(ball);
       balls[n]=ball;
     }
