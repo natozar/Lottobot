@@ -17,6 +17,11 @@
 
   <title>Lottobot v3 — Lotofácil Intelligence</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://loteriascaixa-api.herokuapp.com">
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><radialGradient id='g1' cx='35%' cy='35%'><stop offset='0%' stop-color='%23e5b863'/><stop offset='100%' stop-color='%23c9a84c'/></radialGradient></defs><circle cx='96' cy='96' r='92' fill='url(%23g1)'/><circle cx='96' cy='96' r='72' fill='%23111113' opacity='0.95'/><text x='96' y='115' font-family='JetBrains Mono, monospace' font-size='52' font-weight='800' fill='%23d4a853' text-anchor='middle' letter-spacing='2'>LB</text><circle cx='96' cy='96' r='72' fill='none' stroke='%234a7c59' stroke-width='3' opacity='0.6'/></svg>">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><radialGradient id='g1' cx='35%' cy='35%'><stop offset='0%' stop-color='%23e5b863'/><stop offset='100%' stop-color='%23c9a84c'/></radialGradient></defs><circle cx='96' cy='96' r='92' fill='url(%23g1)'/><circle cx='96' cy='96' r='72' fill='%23111113' opacity='0.95'/><text x='96' y='115' font-family='JetBrains Mono, monospace' font-size='52' font-weight='800' fill='%23d4a853' text-anchor='middle' letter-spacing='2'>LB</text><circle cx='96' cy='96' r='72' fill='none' stroke='%234a7c59' stroke-width='3' opacity='0.6'/></svg>">
@@ -1444,7 +1449,7 @@
   </header>
 
   <!-- Auth Modal -->
-  <div id="authModal" class="modal-overlay">
+  <div id="authModal" class="modal-overlay" role="dialog" aria-label="Login">
     <div class="modal">
       <div class="modal-header">
         <h2>Entrar no Lottobot</h2>
@@ -1525,27 +1530,27 @@
         <div class="section-title">Filtros de Validação</div>
         <div class="toggle-row">
           <div><span class="toggle-label">Par/Ímpar</span><div class="filter-info">Aceita jogos com 7 ou 8 números pares. Distribuição mais frequente na Lotofácil.</div></div>
-          <div id="filterParImpar" class="toggle-switch on"><div class="toggle-knob"></div></div>
+          <div id="filterParImpar" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Par/Impar" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
           <div><span class="toggle-label">Soma</span><div class="filter-info">Soma dos 15 números entre 175 e 205. Faixa onde caem ~70% dos sorteios reais.</div></div>
-          <div id="filterSoma" class="toggle-switch on"><div class="toggle-knob"></div></div>
+          <div id="filterSoma" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Soma" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
           <div><span class="toggle-label">Consecutivas</span><div class="filter-info">Máximo de 4 números em sequência (ex: 5-6-7-8). Evita padrões raros.</div></div>
-          <div id="filterConsec" class="toggle-switch on"><div class="toggle-knob"></div></div>
+          <div id="filterConsec" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Consecutivas" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
           <div><span class="toggle-label">Repetição</span><div class="filter-info">Entre 8 e 11 números repetidos do último sorteio. Média real: ~9-10 repetições.</div></div>
-          <div id="filterRepet" class="toggle-switch on"><div class="toggle-knob"></div></div>
+          <div id="filterRepet" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Repeticao" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
           <div><span class="toggle-label">Dezena</span><div class="filter-info">Distribui números entre as 5 faixas (1-5, 6-10, 11-15, 16-20, 21-25). Evita concentração.</div></div>
-          <div id="filterDezena" class="toggle-switch"><div class="toggle-knob"></div></div>
+          <div id="filterDezena" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Dezena" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
           <div><span class="toggle-label">Primos</span><div class="filter-info">Mantém entre 4 e 6 números primos (2,3,5,7,11,13,17,19,23). Padrão mais comum.</div></div>
-          <div id="filterPrimos" class="toggle-switch"><div class="toggle-knob"></div></div>
+          <div id="filterPrimos" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Primos" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
       </div>
 
@@ -1588,11 +1593,11 @@
     </div>
 
     <div class="col-center">
-      <div class="tabs-header">
-        <button class="tab-button active" data-tab="jogos">Jogos</button>
-        <button class="tab-button" data-tab="filtros">Filtros</button>
-        <button class="tab-button" data-tab="mapa">Mapa</button>
-        <button class="tab-button" data-tab="historico">Salvos</button>
+      <div class="tabs-header" role="tablist" aria-label="Navegacao principal">
+        <button class="tab-button active" data-tab="jogos" role="tab" aria-selected="true" aria-controls="tabJogos">Jogos</button>
+        <button class="tab-button" data-tab="filtros" role="tab" aria-selected="false" aria-controls="tabFiltros">Filtros</button>
+        <button class="tab-button" data-tab="mapa" role="tab" aria-selected="false" aria-controls="tabMapa">Mapa</button>
+        <button class="tab-button" data-tab="historico" role="tab" aria-selected="false" aria-controls="tabHistorico">Salvos</button>
       </div>
 
       <div id="exportBar">
@@ -1608,7 +1613,7 @@
         </div>
       </div>
 
-      <div id="tabJogos" class="tab-content active">
+      <div id="tabJogos" class="tab-content active" role="tabpanel" aria-label="Jogos gerados">
         <div id="jogosContainer"></div>
         <div id="emptyState" class="show">
           <div style="font-size: 2.5rem; opacity: 0.15; margin-bottom: 12px;">🎲</div>
@@ -1616,7 +1621,7 @@
         </div>
       </div>
 
-      <div id="tabFiltros" class="tab-content">
+      <div id="tabFiltros" class="tab-content" role="tabpanel" aria-label="Filtros de numeros">
         <div id="filtrosAtivosResumo"></div>
         <div style="margin-bottom: 16px;">
           <div class="section-title">Dentro do Último Concurso</div>
@@ -1629,7 +1634,7 @@
         <button class="reset-exclusions" onclick="resetExclusions()">↩ Resetar Filtros</button>
       </div>
 
-      <div id="tabMapa" class="tab-content">
+      <div id="tabMapa" class="tab-content" role="tabpanel" aria-label="Mapa de frequencia">
         <div style="margin-bottom: 12px;">
           <div class="section-title">Frequência Histórica (Último Concurso)</div>
         </div>
@@ -1637,7 +1642,7 @@
         <p id="heatSource" class="text-muted" style="font-size: 0.75rem; text-align: center; margin-top: 8px;"></p>
       </div>
 
-      <div id="tabHistorico" class="tab-content">
+      <div id="tabHistorico" class="tab-content" role="tabpanel" aria-label="Jogos salvos">
         <div id="savedContainer"></div>
       </div>
     </div>
@@ -1692,6 +1697,10 @@
             <div style="font-weight: 600; color: var(--color-moss-primary); font-size: 1.2rem;" id="statSalvos">0</div>
             <div>Salvos</div>
           </div>
+          <div>
+            <div style="font-weight: 600; color: var(--color-ball-hot); font-size: 1.2rem;" id="statStreak">0🔥</div>
+            <div>Streak</div>
+          </div>
         </div>
       </div>
 
@@ -1704,7 +1713,7 @@
 
   <button class="mobile-fab" id="mobileFab" onclick="document.getElementById('btnGerar').click()">🎲</button>
 
-  <div class="mobile-nav">
+  <nav class="mobile-nav" aria-label="Navegacao mobile">
     <div class="mobile-nav-buttons">
       <button class="nav-button active" data-nav="jogos">
         <div class="nav-icon">🎲</div>
@@ -1727,9 +1736,9 @@
         <div>Salvos</div>
       </button>
     </div>
-  </div>
+  </nav>
 
-  <div id="donationModal" class="modal-overlay">
+  <div id="donationModal" class="modal-overlay" role="dialog" aria-label="Apoie o projeto">
     <div class="modal">
       <div class="modal-header">
         <h2 id="donationTitle">Apoie o Projeto</h2>
@@ -1743,7 +1752,7 @@
     </div>
   </div>
 
-  <div id="manualCheckModal" class="modal-overlay">
+  <div id="manualCheckModal" class="modal-overlay" role="dialog" aria-label="Conferencia manual">
     <div class="modal">
       <div class="modal-header">
         <h2>Conferência Manual</h2>
@@ -1963,7 +1972,7 @@ if(_messaging){
     if(title)showToast(title+': '+body);
     // If it's a win notification, show donation
     if(payload.data?.type==='win'){
-      setTimeout(()=>document.getElementById('donationModal')?.classList.add('active'),2000);
+      setTimeout(showDonation,2000);
     }
   });
 }
@@ -1975,7 +1984,7 @@ function checkNotifyParams(){
     const hits=params.get('hits');
     const gameId=params.get('game');
     showToast('Seu jogo acertou '+hits+' numeros!');
-    setTimeout(()=>document.getElementById('donationModal')?.classList.add('active'),2000);
+    setTimeout(showDonation,2000);
     // Clean URL
     window.history.replaceState({},'',window.location.pathname);
   }
@@ -1984,7 +1993,10 @@ function checkNotifyParams(){
 function setupEventListeners(){
   document.querySelectorAll('.modelo-card').forEach(el=>el.addEventListener('click',function(){selectModelo(this.dataset.modelo)}));
   FILTER_IDS.forEach(id=>{
-    const el=document.getElementById(id);if(el)el.addEventListener('click',function(){this.classList.toggle('on');updatePreGenSummary()})
+    const el=document.getElementById(id);if(!el)return;
+    const toggle=()=>{el.classList.toggle('on');el.setAttribute('aria-checked',el.classList.contains('on'));updatePreGenSummary()};
+    el.addEventListener('click',toggle);
+    el.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle()}});
   });
   document.getElementById('qtdJogos')?.addEventListener('change',updatePreGenSummary);
   document.getElementById('sliderJanela')?.addEventListener('input',updateSlider);
@@ -2120,7 +2132,7 @@ function gerarJogos(){
   }
   if(useMelhorN&&pool.length>qtd){pool.sort((a,b)=>b.score-a.score);pool=pool.slice(0,qtd)}
   jogos=pool;concRef=ULT.numero;
-  stats.total+=jogos.length;stats.modelos[selectedModelo]=(stats.modelos[selectedModelo]||0)+jogos.length;
+  stats.total+=jogos.length;stats.modelos[selectedModelo]=(stats.modelos[selectedModelo]||0)+jogos.length;bumpStreak();
   jogos.forEach(j=>stats.scores.push(j.score));
   if(stats.scores.length>500)stats.scores=stats.scores.slice(-500);
   // Slot machine animation then render
@@ -2252,7 +2264,7 @@ function showCheckResult(i,res,cn){
     <div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--color-gold-primary);margin-top:8px">${prize}</div>
     <button class="btn-action" style="margin-top:16px" onclick="this.parentElement.remove()">Fechar</button>`;
   card.style.position='relative';card.appendChild(overlay);
-  if(ac.length>=11)setTimeout(()=>document.getElementById('donationModal')?.classList.add('active'),1500);
+  if(ac.length>=11)setTimeout(showDonation,1500);
 }
 
 function initManualGrid(){
@@ -2303,9 +2315,18 @@ function undoJogos(){if(!previousJogos.length){showToast('Nada para desfazer');r
 function renderSaved(){
   const c=document.getElementById('savedContainer');if(!c)return;
   if(!saved.length){c.innerHTML='<p class="text-small" style="text-align:center;padding:32px 0;opacity:.5">Nenhum jogo salvo. Use 💾 nos jogos gerados.</p>';return}
-  c.innerHTML=saved.map(g=>`<div class="saved-item">
-    <div><div class="saved-nums">${g.n.map(n=>pad(n)).join('-')}</div><div class="saved-meta">${g.dt} · M${g.mod} · #${g.ref}</div></div>
-    <div class="saved-score">${g.score}</div></div>`).join('');
+  c.innerHTML=saved.map(g=>{
+    let checkHtml='';
+    if(ULT&&g.ref&&ULT.numero>g.ref){
+      const hits=g.n.filter(n=>ULT.numeros.includes(n)).length;
+      const prize=PREMIOS[hits]||'';
+      const color=hits>=14?'var(--color-gold-primary)':hits>=11?'#6aac7e':'var(--text-muted)';
+      checkHtml=`<div style="font-size:0.65rem;color:${color};margin-top:3px">${hits} acertos${prize?' · '+prize:''}</div>`;
+    }
+    return `<div class="saved-item">
+    <div><div class="saved-nums">${g.n.map(n=>pad(n)).join('-')}</div><div class="saved-meta">${g.dt} · M${g.mod} · #${g.ref}</div>${checkHtml}</div>
+    <div class="saved-score">${g.score}</div></div>`;
+  }).join('');
 }
 
 // ══════ FILTER TAB ══════
@@ -2321,7 +2342,10 @@ function renderFilterTab(){
   if(fg){fg.innerHTML='';for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkExcl(i))}
 }
 function mkExcl(n){return mkToggleCell(n,'exclude-cell')}
-function resetExclusions(){excludedNums.clear();fixedNums.clear();renderNumPanel();renderFilterTab();updatePreGenSummary();showToast('↩ Filtros resetados')}
+function resetExclusions(){
+  if(fixedNums.size+excludedNums.size>0&&!confirm('Limpar todas as selecoes (fixados + excluidos)?'))return;
+  excludedNums.clear();fixedNums.clear();renderNumPanel();renderFilterTab();updatePreGenSummary();showToast('↩ Filtros resetados');
+}
 
 // ══════ UI UPDATES ══════
 function updateUI(){
@@ -2338,10 +2362,10 @@ function updateUI(){
 
 function switchTab(tab){
   document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.tab-button').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-button').forEach(el=>{el.classList.remove('active');el.setAttribute('aria-selected','false')});
   const id='tab'+tab.charAt(0).toUpperCase()+tab.slice(1);
   document.getElementById(id)?.classList.add('active');
-  document.querySelectorAll('[data-tab="'+tab+'"]').forEach(el=>el.classList.add('active'));
+  document.querySelectorAll('[data-tab="'+tab+'"]').forEach(el=>{el.classList.add('active');el.setAttribute('aria-selected','true')});
   if(tab==='mapa')renderHeatmap();if(tab==='historico')renderSaved();if(tab==='filtros')renderFilterTab();
 }
 
@@ -2349,11 +2373,27 @@ function selectModelo(m){selectedModelo=m;document.querySelectorAll('.modelo-car
 function updateSlider(){const s=document.getElementById('sliderJanela'),d=document.getElementById('sliderValue');if(s&&d)d.textContent=s.value;updatePreGenSummary()}
 function updateMelhorNSlider(){const s=document.getElementById('sliderMelhorN'),d=document.getElementById('sliderMelhorNValue');if(s&&d)d.textContent=s.value;updatePreGenSummary()}
 function updateStats(){
-  const t=document.getElementById('statTotal'),m=document.getElementById('statMedia'),mo=document.getElementById('statModelo'),sv=document.getElementById('statSalvos');
+  const t=document.getElementById('statTotal'),m=document.getElementById('statMedia'),mo=document.getElementById('statModelo'),sv=document.getElementById('statSalvos'),sk=document.getElementById('statStreak');
   if(t)t.textContent=stats.total;
   if(m&&stats.scores.length)m.textContent=(stats.scores.reduce((a,b)=>a+b,0)/stats.scores.length).toFixed(1);
   if(mo){const cnt=stats.modelos[selectedModelo]||0;mo.textContent=selectedModelo+' ('+cnt+')'}
   if(sv)sv.textContent=saved.length;
+  if(sk)sk.textContent=getStreak()+'🔥';
+}
+
+function getStreak(){
+  const d=JSON.parse(localStorage.getItem('lottobot_streak')||'{"count":0,"last":""}');
+  return d.count||0;
+}
+function bumpStreak(){
+  const today=new Date().toISOString().slice(0,10);
+  const d=JSON.parse(localStorage.getItem('lottobot_streak')||'{"count":0,"last":""}');
+  if(d.last===today)return;
+  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  d.count=(d.last===yesterday)?d.count+1:1;
+  d.last=today;
+  localStorage.setItem('lottobot_streak',JSON.stringify(d));
+  if(d.count>1)showToast('🔥 Streak de '+d.count+' dias!');
 }
 
 function showToast(msg){const c=document.getElementById('toast-container');if(!c)return;const t=document.createElement('div');t.className='toast';t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),3000)}
@@ -2428,6 +2468,8 @@ function loadSaved(){try{const d=JSON.parse(localStorage.getItem(SK)||'{}');
   }
 }catch(e){}}
 function copyPix(){navigator.clipboard.writeText(document.getElementById('pixKey')?.textContent?.trim()||'').then(()=>showToast('📋 Chave PIX copiada!'))}
+let _donationShown=false;
+function showDonation(){if(_donationShown)return;_donationShown=true;document.getElementById('donationModal')?.classList.add('active')}
 function closeDonation(){document.getElementById('donationModal')?.classList.remove('active')}
 
 // ══════ NUMBERS PANEL (Sorteados + Fora) ══════
