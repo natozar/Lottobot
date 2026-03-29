@@ -3188,20 +3188,10 @@ function slotMachineReveal(games, callback){
             let sc=0;const target=game.score;
             const si=setInterval(()=>{sc+=Math.ceil((target-sc)*0.2);if(sc>=target){sc=target;clearInterval(si)}scoreVal.textContent=sc+' pts'},30);
             scoreLabel.textContent=game.cls.label;
-            const starCount=game.score>=85?5:game.score>=70?4:game.score>=55?3:game.score>=40?2:1;
-            starsDiv.innerHTML='';
-            for(let si2=0;si2<5;si2++){
-              const sp=document.createElement('span');
-              sp.textContent=si2<starCount?'★':'☆';
-              sp.style.cssText='display:inline-block;opacity:0;transform:scale(0) rotate(-30deg);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);color:'+(si2<starCount?(starCount>=4?'var(--color-gold-primary)':'var(--text-secondary)'):'var(--text-muted)');
-              starsDiv.appendChild(sp);
-              setTimeout(()=>{sp.style.opacity='1';sp.style.transform='scale(1) rotate(0)'},si2*120+200);
-            }
             scoreDiv.classList.add('show');
             skipBtn.style.display='none';
-            spawnCanvasFireworks(overlay.querySelector('.casino-display'));
-            // CTA fires fast — buttons hidden until after
-            setTimeout(triggerCTA,1200);
+            // Direto para o CTA com dedo 3D — sem estrelas, sem confetti
+            setTimeout(triggerCTA,800);
           },600);
         }
       },delay);
@@ -3211,53 +3201,67 @@ function slotMachineReveal(games, callback){
     nextBtn.onclick=()=>{skipAll=false;showGame(idx+1)};
 
     function triggerCTA(){
-      const cta=overlay.querySelector('#casinoCta');
-      const ctaText=overlay.querySelector('#ctaText');
-      const ctaBrand=overlay.querySelector('#ctaBrand');
-      if(!cta)return;
-      cta.classList.add('show');
-      // Impact boom
-      const a2=ax(),m2=gm();
-      if(a2&&m2){const t2=a2.currentTime;
-        const oi=a2.createOscillator(),gi=a2.createGain();
-        oi.type='sine';oi.frequency.setValueAtTime(300,t2);oi.frequency.exponentialRampToValueAtTime(20,t2+0.4);
-        gi.gain.setValueAtTime(0.2,t2);gi.gain.exponentialRampToValueAtTime(0.001,t2+0.5);
-        oi.connect(gi);gi.connect(m2);oi.start(t2);oi.stop(t2+0.6);
-        const nb=a2.createBuffer(1,Math.floor(a2.sampleRate*0.3),a2.sampleRate);
-        const nd=nb.getChannelData(0);for(let j=0;j<nd.length;j++)nd[j]=(Math.random()*2-1)*Math.exp(-j/(a2.sampleRate*0.06));
-        const ns=a2.createBufferSource(),nf=a2.createBiquadFilter(),ng=a2.createGain();ns.buffer=nb;
-        nf.type='bandpass';nf.frequency.setValueAtTime(500,t2);nf.frequency.exponentialRampToValueAtTime(3000,t2+0.15);nf.Q.value=2;
-        ng.gain.setValueAtTime(0.15,t2);ng.gain.exponentialRampToValueAtTime(0.001,t2+0.3);
-        ns.connect(nf);nf.connect(ng);ng.connect(m2);ns.start(t2);
+      const cta=document.getElementById('casinoCta');
+      if(!cta){
+        // Fallback — go next
+        if(idx<games.length-1){skipAll=false;showGame(idx+1)}
+        else{overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback()}
+        return;
       }
-      // Text immediately after finger lands
-      setTimeout(()=>{if(ctaText)ctaText.classList.add('show');if(ctaBrand)ctaBrand.classList.add('show')},450);
-      // Voice
-      setTimeout(()=>{
-        if('speechSynthesis' in window){
-          const voices=speechSynthesis.getVoices();
-          const utt=new SpeechSynthesisUtterance('A sorte, está com você!');
-          utt.lang='pt-BR';utt.rate=0.85;utt.pitch=0.6;utt.volume=1;
-          const ptVoice=voices.find(v=>v.lang.startsWith('pt'))||null;
-          if(ptVoice)utt.voice=ptVoice;
-          speechSynthesis.speak(utt);
+      const ctaText=document.getElementById('ctaText');
+      const ctaBrand=document.getElementById('ctaBrand');
+
+      // 1) Tela escurece, dedo 🫵 voa em 3D
+      cta.classList.add('show');
+
+      // 2) Boom de impacto
+      try{
+        const a2=ax(),m2=gm();
+        if(a2&&m2){const t2=a2.currentTime;
+          const o=a2.createOscillator(),g=a2.createGain();
+          o.type='sine';o.frequency.setValueAtTime(250,t2);o.frequency.exponentialRampToValueAtTime(20,t2+0.5);
+          g.gain.setValueAtTime(0.2,t2);g.gain.exponentialRampToValueAtTime(0.001,t2+0.6);
+          o.connect(g);g.connect(m2);o.start(t2);o.stop(t2+0.7);
         }
-      },550);
-      // Fade text
-      setTimeout(()=>{if(ctaText){ctaText.classList.add('fade');ctaText.classList.remove('show')}},2400);
-      let ctaClosed=false;
-      function closeCTA(){
-        if(ctaClosed)return;ctaClosed=true;
+      }catch(e){}
+
+      // 3) Texto aparece depois do dedo pousar
+      setTimeout(()=>{
+        if(ctaText)ctaText.classList.add('show');
+        if(ctaBrand)ctaBrand.classList.add('show');
+      },500);
+
+      // 4) Voz fala
+      setTimeout(()=>{
+        try{
+          if('speechSynthesis' in window){
+            speechSynthesis.cancel();
+            const utt=new SpeechSynthesisUtterance('A sorte, está com você!');
+            utt.lang='pt-BR';utt.rate=0.8;utt.pitch=0.6;utt.volume=1;
+            const voices=speechSynthesis.getVoices();
+            const v=voices.find(v=>v.lang.startsWith('pt'))||null;
+            if(v)utt.voice=v;
+            speechSynthesis.speak(utt);
+          }
+        }catch(e){}
+      },600);
+
+      // 5) Fade e avanca
+      setTimeout(()=>{if(ctaText)ctaText.classList.add('fade')},2500);
+
+      let closed=false;
+      function close(){
+        if(closed)return;closed=true;
         cta.classList.remove('show');
         if(ctaText){ctaText.classList.remove('show','fade')}
         if(ctaBrand)ctaBrand.classList.remove('show');
-        const finger=cta.querySelector('.cta-finger');
-        if(finger){finger.style.animation='none';finger.offsetHeight;finger.style.animation=''}
+        const f=cta.querySelector('.cta-finger');
+        if(f){f.style.animation='none';f.offsetHeight;f.style.animation=''}
         if(idx<games.length-1){skipAll=false;showGame(idx+1)}
         else{overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback()}
       }
-      setTimeout(closeCTA,3000);
-      cta.onclick=closeCTA;
+      setTimeout(close,3200);
+      cta.onclick=close;
     }
   }
 
