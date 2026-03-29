@@ -1494,6 +1494,21 @@
     .toggle-switch:focus-visible{outline:2px solid var(--color-gold-primary);outline-offset:2px}
     .tab-button:focus-visible,.nav-button:focus-visible,.btn-action:focus-visible,.btn-export:focus-visible{outline:2px solid var(--color-gold-primary);outline-offset:1px}
 
+    /* === MODO I.A. NEURAL ANIMATION === */
+    .ia-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:250;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.4s}
+    .ia-overlay.show{opacity:1;pointer-events:auto}
+    .ia-header{font-family:var(--font-mono);font-size:0.7rem;color:var(--color-gold-primary);text-transform:uppercase;letter-spacing:0.3em;margin-bottom:24px;opacity:0.7}
+    .ia-canvas{border-radius:12px;margin-bottom:20px}
+    .ia-status{font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);text-align:center;min-height:20px;letter-spacing:0.05em}
+    .ia-result{opacity:0;transform:translateY(20px);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);background:var(--bg-surface-1);border:1px solid rgba(212,168,83,0.2);border-radius:12px;padding:16px;margin:6px 16px;max-width:400px;width:100%}
+    .ia-result.show{opacity:1;transform:translateY(0)}
+    .ia-result-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .ia-result-label{font-family:var(--font-mono);font-size:0.7rem;color:var(--color-gold-primary);font-weight:700}
+    .ia-result-score{font-family:var(--font-mono);font-size:0.8rem;font-weight:700;color:var(--text-primary)}
+    .ia-result-nums{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+    .ia-result-reason{font-size:0.68rem;color:var(--text-muted);line-height:1.5;font-style:italic}
+    .ia-close{margin-top:16px;padding:10px 24px;background:var(--color-gold-primary);color:#09090b;border:none;border-radius:10px;font-weight:700;font-size:0.8rem;cursor:pointer}
+
     /* === SKELETON LOADING === */
     .skeleton{background:linear-gradient(90deg,var(--bg-surface-2) 25%,var(--bg-surface-3) 50%,var(--bg-surface-2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--border-radius-sm)}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -1670,10 +1685,11 @@
 
       <div class="config-section">
         <div class="section-title">Modelo Analítico</div>
-        <div class="modelos-grid">
+        <div class="modelos-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
           <div class="modelo-card" data-modelo="A">A</div>
           <div class="modelo-card active" data-modelo="B">B</div>
           <div class="modelo-card" data-modelo="C">C</div>
+          <div class="modelo-card" data-modelo="IA" style="background:linear-gradient(135deg,rgba(212,168,83,0.15),rgba(74,124,89,0.1));border-color:rgba(212,168,83,0.3);font-size:0.7rem">🧠 I.A.</div>
         </div>
         <div id="modeloDesc" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4;"></div>
       </div>
@@ -1952,29 +1968,29 @@ const LOTTERIES={
   lotofacil:{
     name:'Lotofacil',api:'https://loteriascaixa-api.herokuapp.com/api/lotofacil',
     total:25,pick:15,
-    modelos:{A:{fora:6,dentro:9,noise:0.2},B:{fora:5,dentro:10,noise:0.35},C:{fora:7,dentro:8,noise:0.5}},
+    modelos:{A:{fora:6,dentro:9,noise:0.2},B:{fora:5,dentro:10,noise:0.35},C:{fora:7,dentro:8,noise:0.5},IA:{fora:5,dentro:10,noise:0.4}},
     premios:{11:'R$ 6',12:'R$ 12',13:'R$ 30',14:'R$ 1.700',15:'JACKPOT'},
     primos:[2,3,5,7,11,13,17,19,23],
     dezenas:[[1,5],[6,10],[11,15],[16,20],[21,25]],
-    filters:{parImpar:[7,8],soma:[175,205],consec:4,repet:[8,11]}
+    filters:{parImpar:[7,8],soma:[175,210],consec:4,repet:[8,12]}
   },
   megasena:{
     name:'Mega-Sena',api:'https://loteriascaixa-api.herokuapp.com/api/megasena',
     total:60,pick:6,
-    modelos:{A:{fora:3,dentro:3,noise:0.2},B:{fora:2,dentro:4,noise:0.35},C:{fora:4,dentro:2,noise:0.5}},
+    modelos:{A:{fora:3,dentro:3,noise:0.2},B:{fora:2,dentro:4,noise:0.35},C:{fora:4,dentro:2,noise:0.5},IA:{fora:3,dentro:3,noise:0.4}},
     premios:{4:'R$ 1.000',5:'R$ 40.000',6:'JACKPOT'},
     primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59],
     dezenas:[[1,10],[11,20],[21,30],[31,40],[41,50],[51,60]],
-    filters:{parImpar:[3,3],soma:[100,260],consec:2,repet:[1,4]}
+    filters:{parImpar:[2,4],soma:[120,220],consec:3,repet:[0,3]}
   },
   quina:{
     name:'Quina',api:'https://loteriascaixa-api.herokuapp.com/api/quina',
     total:80,pick:5,
-    modelos:{A:{fora:2,dentro:3,noise:0.2},B:{fora:2,dentro:3,noise:0.35},C:{fora:3,dentro:2,noise:0.5}},
+    modelos:{A:{fora:2,dentro:3,noise:0.2},B:{fora:2,dentro:3,noise:0.35},C:{fora:3,dentro:2,noise:0.5},IA:{fora:2,dentro:3,noise:0.4}},
     premios:{2:'R$ 1',3:'R$ 20',4:'R$ 6.000',5:'JACKPOT'},
     primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79],
     dezenas:[[1,16],[17,32],[33,48],[49,64],[65,80]],
-    filters:{parImpar:[2,3],soma:[80,280],consec:2,repet:[1,3]}
+    filters:{parImpar:[2,3],soma:[100,250],consec:3,repet:[0,2]}
   }
 };
 let selectedLottery='lotofacil';
@@ -2440,6 +2456,12 @@ function getBallClass(n){return classifyNum(n).cls}
 // ══════ GENERATION ══════
 function gerarJogos(){
   if(!ULT){showToast('⏳ Aguardando dados...');const btn=document.getElementById('btnGerar');if(btn){btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'}return}
+  // MODO I.A. — fluxo separado
+  if(selectedModelo==='IA'){
+    const btn=document.getElementById('btnGerar');
+    gerarModoIA(()=>{btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'});
+    return;
+  }
   const qtd=parseInt(document.getElementById('qtdJogos').value);
   let mod=getModelos()[selectedModelo];
   if(!mod){selectedModelo='B';mod=getModelos()[selectedModelo]}
@@ -3077,6 +3099,160 @@ function dismissInstall(){
 window.addEventListener('appinstalled',()=>{showToast('🎰 Lottobot instalado com sucesso!');document.getElementById('installBanner')?.classList.remove('show')});
 
 // ══════ LAS VEGAS CASINO ANIMATION ══════
+// ══════ MODO I.A. — INTELLIGENT ANALYSIS ══════
+function gerarModoIA(callback){
+  const lot=getLottery();const pick=getPickSize();const mod=getModelos().IA||getModelos().B;
+  const filters=getActiveFilters();
+
+  // Phase 1: Generate 100 candidate games
+  const candidates=[];const seen=new Set();let att=0;
+  while(candidates.length<100&&att<5000){att++;
+    const j=genOne(mod);if(!j)continue;
+    const k=j.join(',');if(seen.has(k))continue;
+    if(passFilters(j,filters)){seen.add(k);j.score=calcScore(j);j.cls=classifyScore(j.score);candidates.push(j)}
+  }
+  if(candidates.length<3){showToast('⚠️ Nao foi possivel gerar candidatos suficientes. Ajuste os filtros.');callback();return}
+
+  // Phase 2: Sort by score, take top 20
+  candidates.sort((a,b)=>b.score-a.score);
+  const top20=candidates.slice(0,20);
+
+  // Phase 3: Select 3 most diverse from top 20 (maximize hamming distance)
+  const selected=[top20[0]];
+  for(let round=0;round<2;round++){
+    let bestIdx=-1,bestMinDist=-1;
+    for(let i=1;i<top20.length;i++){
+      if(selected.includes(top20[i]))continue;
+      const minDist=Math.min(...selected.map(s=>hammingDistance(top20[i],s)));
+      if(minDist>bestMinDist){bestMinDist=minDist;bestIdx=i}
+    }
+    if(bestIdx>=0)selected.push(top20[bestIdx]);
+  }
+
+  // Phase 4: Generate explanations
+  const explanations=selected.map((j,i)=>{
+    const hot=j.filter(n=>{const t=classifyNum(n).type;return t==='Quente'||t==='Ascensão'}).length;
+    const cold=j.filter(n=>classifyNum(n).type==='Frio').length;
+    const p=j.filter(n=>n%2===0).length;
+    const s=j.reduce((a,b)=>a+b,0);
+    const r=ULT?j.filter(n=>ULT.numeros.includes(n)).length:0;
+    const strategies=['Equilibrio estatistico','Tendencia de alta','Cobertura ampla'];
+    return{
+      strategy:strategies[i]||'Analise profunda',
+      reason:`Score ${j.score}/100 · ${hot} quentes, ${cold} frios · ${p}P/${pick-p}I · Σ${s} · ${r} repet. `+
+        (i===0?'Melhor score geral entre 100 candidatos.':
+         i===1?'Maximo distanciamento do jogo #1 — estrategia diversificada.':
+         'Terceira frente: numeros que os outros dois nao cobrem.')
+    };
+  });
+
+  // Phase 5: Show neural network animation
+  showIAAnimation(selected,explanations,callback);
+}
+
+function showIAAnimation(games,explanations,callback){
+  const lot=getLottery();
+  const overlay=document.createElement('div');
+  overlay.className='ia-overlay';
+  overlay.innerHTML=`
+    <div class="ia-header">🧠 MODO I.A. — ANALISANDO ${lot.total} NUMEROS</div>
+    <canvas class="ia-canvas" id="iaCanvas" width="360" height="240"></canvas>
+    <div class="ia-status" id="iaStatus">Processando padroes...</div>
+    <div id="iaResults" style="width:100%;display:flex;flex-direction:column;align-items:center"></div>
+    <button class="ia-close" id="iaClose" style="display:none" onclick="this.closest('.ia-overlay').classList.remove('show');setTimeout(()=>this.closest('.ia-overlay').remove(),300)">Aplicar Jogos</button>`;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(()=>overlay.classList.add('show'));
+
+  const cvs=document.getElementById('iaCanvas');
+  const ctx=cvs.getContext('2d');
+  const w=360,h=240;
+  const status=document.getElementById('iaStatus');
+
+  // Neural network nodes
+  const nodes=[];
+  for(let i=0;i<lot.total;i++){
+    nodes.push({x:30+Math.random()*(w-60),y:20+Math.random()*(h-40),r:3+Math.random()*3,pulse:Math.random()*Math.PI*2,active:false});
+  }
+
+  // Animate neural processing
+  let frame=0;const totalFrames=180;
+  const connections=[];
+  for(let i=0;i<40;i++){
+    connections.push({a:Math.floor(Math.random()*nodes.length),b:Math.floor(Math.random()*nodes.length),life:0,delay:Math.random()*120});
+  }
+
+  function drawFrame(){
+    ctx.clearRect(0,0,w,h);
+    frame++;
+
+    // Draw connections
+    connections.forEach(c=>{
+      if(frame<c.delay)return;
+      c.life=Math.min(1,(frame-c.delay)/30);
+      const a=nodes[c.a],b=nodes[c.b];
+      ctx.globalAlpha=c.life*0.15;
+      ctx.strokeStyle='#d4a853';ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+    });
+
+    // Draw nodes
+    nodes.forEach((n,i)=>{
+      n.pulse+=0.05;
+      const glow=0.3+Math.sin(n.pulse)*0.3;
+      const progress=frame/totalFrames;
+      const activated=i<lot.total*progress;
+      ctx.globalAlpha=activated?0.6+glow*0.4:0.1;
+      ctx.fillStyle=activated?'#d4a853':'#555';
+      ctx.shadowColor=activated?'rgba(212,168,83,0.5)':'transparent';
+      ctx.shadowBlur=activated?8:0;
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r*(activated?1.3:1),0,Math.PI*2);ctx.fill();
+    });
+    ctx.shadowBlur=0;ctx.globalAlpha=1;
+
+    // Progress text
+    const pct=Math.min(100,Math.floor(frame/totalFrames*100));
+    if(frame<totalFrames*0.3)status.textContent='Analisando frequencias... '+pct+'%';
+    else if(frame<totalFrames*0.6)status.textContent='Identificando padroes... '+pct+'%';
+    else if(frame<totalFrames*0.85)status.textContent='Otimizando combinacoes... '+pct+'%';
+    else status.textContent='Selecionando melhores jogos... '+pct+'%';
+
+    if(frame<totalFrames){
+      requestAnimationFrame(drawFrame);
+    }else{
+      status.textContent='✅ 3 combinacoes otimizadas encontradas';
+      // Reveal results one by one
+      const resultsDiv=document.getElementById('iaResults');
+      games.forEach((j,i)=>{
+        const div=document.createElement('div');
+        div.className='ia-result';
+        div.innerHTML=`
+          <div class="ia-result-head">
+            <span class="ia-result-label">🧠 ${explanations[i].strategy}</span>
+            <span class="ia-result-score">${j.score} pts</span>
+          </div>
+          <div class="ia-result-nums">${j.map(n=>'<div class="ball '+getBallClass(n)+'" style="width:28px;height:28px;font-size:0.65rem">'+pad(n)+'</div>').join('')}</div>
+          <div class="ia-result-reason">${explanations[i].reason}</div>`;
+        resultsDiv.appendChild(div);
+        setTimeout(()=>div.classList.add('show'),i*600+300);
+      });
+      // Show close button
+      setTimeout(()=>{document.getElementById('iaClose').style.display=''},games.length*600+600);
+      // Set jogos
+      jogos=games;concRef=ULT?.numero||0;
+      stats.total+=jogos.length;stats.modelos.IA=(stats.modelos.IA||0)+jogos.length;bumpStreak();
+      jogos.forEach(j=>stats.scores.push(j.score));
+      persist();
+    }
+  }
+  requestAnimationFrame(drawFrame);
+
+  // Close handler
+  overlay.querySelector('#iaClose').onclick=()=>{
+    overlay.classList.remove('show');
+    setTimeout(()=>{overlay.remove();renderJogos();updateStats();runHistoricalAnalysis();callback()},300);
+  };
+}
+
 function slotMachineReveal(games, callback){
   if(!games.length){callback();return}
 
