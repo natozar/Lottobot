@@ -1380,9 +1380,8 @@
     .casino-watermark{position:absolute;bottom:8px;right:12px;font-family:var(--font-mono);font-size:0.6rem;color:rgba(212,168,83,0.35);letter-spacing:0.1em;z-index:15;pointer-events:none;text-transform:uppercase}
     .casino-cta{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(0,0,0,0.96),rgba(0,0,0,0.99));z-index:250;opacity:0;transition:opacity 0.3s;pointer-events:none;perspective:800px}
     .casino-cta.show{opacity:1;pointer-events:auto}
-    .cta-finger{width:120px;height:120px;transform:translateZ(-600px) scale(4);opacity:0;transform-style:preserve-3d}
+    .cta-finger{font-size:6rem;line-height:1;transform:translateZ(-600px) scale(4);opacity:0;transform-style:preserve-3d}
     .casino-cta.show .cta-finger{animation:ctaFinger3D 0.45s cubic-bezier(0.15,0.85,0.25,1.3) forwards;filter:drop-shadow(0 0 50px rgba(212,168,83,0.9)) drop-shadow(0 0 100px rgba(212,168,83,0.4))}
-    .cta-finger svg{width:100%;height:100%}
     @keyframes ctaFinger3D{0%{transform:translateZ(-600px) scale(4) rotateX(20deg);opacity:0;filter:brightness(4) blur(12px) drop-shadow(0 0 80px rgba(212,168,83,1))}35%{transform:translateZ(60px) scale(1.2) rotateX(-8deg);opacity:1;filter:brightness(1.8) blur(0) drop-shadow(0 0 50px rgba(212,168,83,0.9))}60%{transform:translateZ(-15px) scale(0.92) rotateX(3deg);filter:brightness(1.2)}100%{transform:translateZ(0) scale(1) rotateX(0);filter:brightness(1) drop-shadow(0 0 35px rgba(212,168,83,0.6))}}
     .cta-finger-glow{position:absolute;width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-60%);background:radial-gradient(circle,rgba(212,168,83,0.3) 0%,transparent 70%);border-radius:50%;pointer-events:none;opacity:0}
     .casino-cta.show .cta-finger-glow{opacity:1;animation:fingerGlow 1.5s ease-in-out infinite}
@@ -3111,30 +3110,8 @@ function slotMachineReveal(games, callback){
         </div>
       </div>
       <div class="casino-cta" id="casinoCta">
-        <div style="position:relative;display:flex;align-items:center;justify-content:center">
-          <div class="cta-finger-glow"></div>
-          <div class="cta-finger" id="ctaFinger">
-            <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="skinG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f4c794"/><stop offset="50%" stop-color="#e8b07a"/><stop offset="100%" stop-color="#d49a6a"/></linearGradient>
-                <linearGradient id="nailG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fde8d0"/><stop offset="100%" stop-color="#e8c8a8"/></linearGradient>
-                <radialGradient id="glowG" cx="50%" cy="20%"><stop offset="0%" stop-color="rgba(255,215,0,0.6)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-                <filter id="handShadow"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,0.4)"/></filter>
-              </defs>
-              <ellipse cx="60" cy="8" rx="18" ry="8" fill="url(#glowG)"/>
-              <g filter="url(#handShadow)">
-                <rect x="48" y="8" width="24" height="60" rx="12" fill="url(#skinG)"/>
-                <rect x="50" y="4" width="20" height="16" rx="10" fill="url(#nailG)" opacity="0.7"/>
-                <ellipse cx="60" cy="10" rx="7" ry="3" fill="rgba(255,255,255,0.3)"/>
-                <rect x="38" y="65" width="44" height="22" rx="10" fill="url(#skinG)"/>
-                <rect x="34" y="72" width="14" height="18" rx="7" fill="url(#skinG)"/>
-                <rect x="72" y="72" width="14" height="18" rx="7" fill="url(#skinG)"/>
-                <rect x="42" y="82" width="36" height="24" rx="8" fill="url(#skinG)"/>
-                <rect x="42" y="100" width="36" height="16" rx="6" fill="url(#skinG)"/>
-              </g>
-            </svg>
-          </div>
-        </div>
+        <div class="cta-finger-glow"></div>
+        <div class="cta-finger" id="ctaFinger">🫵</div>
         <div class="cta-text" id="ctaText">A SORTE ESTA COM VOCE</div>
         <div class="cta-brand" id="ctaBrand">ENTRE AGORA — LOTTOBOT.APP</div>
       </div>`;
