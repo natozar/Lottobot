@@ -2184,6 +2184,8 @@ async function switchLottery(key){
   ULT=null;historico=[];FREQ={};ATRASO={};TENDENCIA={};invalidateClassifyCache();
   jogos=[];previousJogos=[];
   fixedNums.clear();excludedNums.clear();
+  // Update UI elements that don't depend on ULT immediately
+  updatePrizeEstimate();updateDynamicDescriptions();updateGridLayout();renderJogos();
   // Try cache first for instant switch
   const cached=localStorage.getItem(CACHE_KEY());
   if(cached){try{const c=JSON.parse(cached);if(Date.now()-c.timestamp<CACHE_TTL&&c.latest?.numeros){
@@ -2907,16 +2909,28 @@ function updateDynamicDescriptions(){
 
 // ══════ PRIZE ESTIMATION ══════
 function updatePrizeEstimate(){
-  const premios=getPremios();
+  const premios=getPremios();const lot=getLottery();
   const container=document.getElementById('prizeEstimate');
   if(!container)return;
   // Rebuild prize rows dynamically based on current lottery
   const keys=Object.keys(premios).map(Number).sort((a,b)=>b-a);
-  container.innerHTML=keys.map(k=>`<div class="prize-row"><span class="acertos">${k} acertos</span><span class="valor">${premios[k]}</span></div>`).join('');
+  container.innerHTML=keys.map(k=>{
+    let val=premios[k];
+    // Replace JACKPOT with estimated value from API if available
+    if(val==='JACKPOT'&&ULT&&ULT.valorEstimado)val=ULT.valorEstimado;
+    else if(val==='JACKPOT')val='💰 JACKPOT';
+    return `<div class="prize-row"><span class="acertos">${k} acertos</span><span class="valor">${val}</span></div>`;
+  }).join('');
+  // Update panel title with lottery name
+  const title=container.closest('.prize-panel')?.querySelector('.numeros-panel-title span');
+  if(title)title.textContent='💰 '+lot.name+' — Próximo Concurso';
   // Acumulado
   const acPanel=document.getElementById('acumuladoPanel');
   if(acPanel){
     if(ULT&&ULT.acumulou&&ULT.valorEstimado){
+      acPanel.style.display='block';
+      document.getElementById('acumuladoValue').textContent=ULT.valorEstimado;
+    }else if(ULT&&ULT.valorEstimado){
       acPanel.style.display='block';
       document.getElementById('acumuladoValue').textContent=ULT.valorEstimado;
     }else{
