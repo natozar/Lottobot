@@ -1,8 +1,6 @@
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
-const fetch = require("node-fetch");
 
 admin.initializeApp();
 const db = admin.firestore();
