@@ -3155,102 +3155,153 @@ function showIAAnimation(games,explanations,callback){
   const overlay=document.createElement('div');
   overlay.className='ia-overlay';
   overlay.innerHTML=`
-    <div class="ia-header">🧠 MODO I.A. — ANALISANDO ${lot.total} NUMEROS</div>
-    <canvas class="ia-canvas" id="iaCanvas" width="360" height="240"></canvas>
-    <div class="ia-status" id="iaStatus">Processando padroes...</div>
-    <div id="iaResults" style="width:100%;display:flex;flex-direction:column;align-items:center"></div>
-    <button class="ia-close" id="iaClose" style="display:none" onclick="this.closest('.ia-overlay').classList.remove('show');setTimeout(()=>this.closest('.ia-overlay').remove(),300)">Aplicar Jogos</button>`;
+    <div class="ia-header">🧠 MODO I.A. — PROCESSANDO</div>
+    <canvas class="ia-canvas" id="iaCanvas" width="400" height="400"></canvas>
+    <div class="ia-status" id="iaStatus">Inicializando...</div>`;
   document.body.appendChild(overlay);
   requestAnimationFrame(()=>overlay.classList.add('show'));
 
   const cvs=document.getElementById('iaCanvas');
   const ctx=cvs.getContext('2d');
-  const w=360,h=240;
+  const w=400,h=400,cx=w/2,cy=h/2;
   const status=document.getElementById('iaStatus');
 
-  // Neural network nodes
-  const nodes=[];
-  for(let i=0;i<lot.total;i++){
-    nodes.push({x:30+Math.random()*(w-60),y:20+Math.random()*(h-40),r:3+Math.random()*3,pulse:Math.random()*Math.PI*2,active:false});
+  // Tech sound engine
+  function techSound(){
+    try{
+      const a=window._lottoAudio||(window._lottoAudio=new(window.AudioContext||window.webkitAudioContext)());
+      if(a.state==='suspended')a.resume();
+      const t=a.currentTime;
+      // Low drone
+      const dr=a.createOscillator(),dg=a.createGain();
+      dr.type='sawtooth';dr.frequency.setValueAtTime(55,t);dr.frequency.linearRampToValueAtTime(80,t+4);
+      dg.gain.setValueAtTime(0.04,t);dg.gain.linearRampToValueAtTime(0.08,t+3);dg.gain.exponentialRampToValueAtTime(0.001,t+4.2);
+      dr.connect(dg);dg.connect(a.destination);dr.start(t);dr.stop(t+4.5);
+      // Rising sweep
+      const sw=a.createOscillator(),sg=a.createGain(),sf=a.createBiquadFilter();
+      sw.type='sawtooth';sw.frequency.setValueAtTime(100,t);sw.frequency.exponentialRampToValueAtTime(4000,t+3.8);
+      sf.type='lowpass';sf.frequency.setValueAtTime(200,t);sf.frequency.exponentialRampToValueAtTime(8000,t+3.8);sf.Q.value=6;
+      sg.gain.setValueAtTime(0.02,t);sg.gain.linearRampToValueAtTime(0.06,t+3);sg.gain.exponentialRampToValueAtTime(0.001,t+4);
+      sw.connect(sf);sf.connect(sg);sg.connect(a.destination);sw.start(t);sw.stop(t+4.2);
+      // Data bleeps
+      for(let i=0;i<20;i++){
+        const o=a.createOscillator(),g=a.createGain();
+        o.type='sine';o.frequency.value=800+Math.random()*3000;
+        const bt=t+0.3+i*0.18+Math.random()*0.1;
+        g.gain.setValueAtTime(0.03+Math.random()*0.02,bt);g.gain.exponentialRampToValueAtTime(0.001,bt+0.06);
+        o.connect(g);g.connect(a.destination);o.start(bt);o.stop(bt+0.08);
+      }
+      // Final impact
+      const io=a.createOscillator(),ig=a.createGain();
+      io.type='sine';io.frequency.setValueAtTime(200,t+3.8);io.frequency.exponentialRampToValueAtTime(30,t+4.3);
+      ig.gain.setValueAtTime(0.15,t+3.8);ig.gain.exponentialRampToValueAtTime(0.001,t+4.5);
+      io.connect(ig);ig.connect(a.destination);io.start(t+3.8);io.stop(t+4.6);
+    }catch(e){}
   }
+  techSound();
 
-  // Animate neural processing
-  let frame=0;const totalFrames=180;
-  const connections=[];
-  for(let i=0;i<40;i++){
-    connections.push({a:Math.floor(Math.random()*nodes.length),b:Math.floor(Math.random()*nodes.length),life:0,delay:Math.random()*120});
+  // Quantum particles
+  const particles=[];
+  for(let i=0;i<60;i++){
+    const angle=Math.random()*Math.PI*2;
+    const dist=60+Math.random()*120;
+    particles.push({angle,dist,speed:0.005+Math.random()*0.015,size:1+Math.random()*2.5,
+      brightness:Math.random(),orbit:dist,pulse:Math.random()*Math.PI*2});
   }
+  // Energy beams
+  const beams=[];
+  for(let i=0;i<12;i++){beams.push({angle:i*(Math.PI*2/12),life:0,delay:Math.random()*100,speed:0.02+Math.random()*0.01})}
 
-  function drawFrame(){
-    ctx.clearRect(0,0,w,h);
-    frame++;
+  let frame=0;const totalFrames=240;// ~4 seconds at 60fps
+  const msgs=['Escaneando historico...','Mapeando frequencias...','Calculando tendencias...','Cruzando padroes...','Otimizando combinacoes...','Selecionando melhores jogos...'];
 
-    // Draw connections
-    connections.forEach(c=>{
-      if(frame<c.delay)return;
-      c.life=Math.min(1,(frame-c.delay)/30);
-      const a=nodes[c.a],b=nodes[c.b];
-      ctx.globalAlpha=c.life*0.15;
-      ctx.strokeStyle='#d4a853';ctx.lineWidth=0.5;
-      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-    });
+  function draw(){
+    ctx.clearRect(0,0,w,h);frame++;
+    const progress=frame/totalFrames;
 
-    // Draw nodes
-    nodes.forEach((n,i)=>{
-      n.pulse+=0.05;
-      const glow=0.3+Math.sin(n.pulse)*0.3;
-      const progress=frame/totalFrames;
-      const activated=i<lot.total*progress;
-      ctx.globalAlpha=activated?0.6+glow*0.4:0.1;
-      ctx.fillStyle=activated?'#d4a853':'#555';
-      ctx.shadowColor=activated?'rgba(212,168,83,0.5)':'transparent';
-      ctx.shadowBlur=activated?8:0;
-      ctx.beginPath();ctx.arc(n.x,n.y,n.r*(activated?1.3:1),0,Math.PI*2);ctx.fill();
+    // Background pulse
+    const pulseR=80+Math.sin(frame*0.03)*20;
+    const bgGrad=ctx.createRadialGradient(cx,cy,0,cx,cy,pulseR+100);
+    bgGrad.addColorStop(0,'rgba(212,168,83,'+(0.03+progress*0.05)+')');
+    bgGrad.addColorStop(0.5,'rgba(74,124,89,'+(0.02+progress*0.03)+')');
+    bgGrad.addColorStop(1,'transparent');
+    ctx.fillStyle=bgGrad;ctx.fillRect(0,0,w,h);
+
+    // Core energy orb
+    const coreSize=15+Math.sin(frame*0.08)*5+progress*20;
+    const coreGrad=ctx.createRadialGradient(cx,cy,0,cx,cy,coreSize);
+    coreGrad.addColorStop(0,'rgba(255,255,255,'+(0.8+Math.sin(frame*0.1)*0.2)+')');
+    coreGrad.addColorStop(0.3,'rgba(212,168,83,'+(0.6+progress*0.3)+')');
+    coreGrad.addColorStop(0.7,'rgba(74,124,89,0.2)');
+    coreGrad.addColorStop(1,'transparent');
+    ctx.fillStyle=coreGrad;ctx.beginPath();ctx.arc(cx,cy,coreSize,0,Math.PI*2);ctx.fill();
+
+    // Orbiting particles
+    particles.forEach(p=>{
+      p.angle+=p.speed*(1+progress*2);
+      p.pulse+=0.08;
+      const wobble=Math.sin(p.pulse)*10;
+      const d=p.orbit+wobble-progress*30;
+      const x=cx+Math.cos(p.angle)*d;
+      const y=cy+Math.sin(p.angle)*d;
+      const alpha=0.3+Math.sin(p.pulse)*0.3+progress*0.3;
+      ctx.globalAlpha=Math.min(1,alpha);
+      ctx.fillStyle=p.brightness>0.5?'#d4a853':'#6aac7e';
+      ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=p.size*4;
+      ctx.beginPath();ctx.arc(x,y,p.size*(1+progress*0.5),0,Math.PI*2);ctx.fill();
+      // Trail
+      ctx.globalAlpha=alpha*0.2;
+      ctx.beginPath();ctx.arc(x-Math.cos(p.angle)*4,y-Math.sin(p.angle)*4,p.size*0.5,0,Math.PI*2);ctx.fill();
     });
     ctx.shadowBlur=0;ctx.globalAlpha=1;
 
-    // Progress text
-    const pct=Math.min(100,Math.floor(frame/totalFrames*100));
-    if(frame<totalFrames*0.3)status.textContent='Analisando frequencias... '+pct+'%';
-    else if(frame<totalFrames*0.6)status.textContent='Identificando padroes... '+pct+'%';
-    else if(frame<totalFrames*0.85)status.textContent='Otimizando combinacoes... '+pct+'%';
-    else status.textContent='Selecionando melhores jogos... '+pct+'%';
+    // Energy beams from core to edge
+    beams.forEach(b=>{
+      if(frame<b.delay)return;
+      b.life=Math.min(1,(frame-b.delay)*b.speed);
+      b.angle+=0.003;
+      const len=50+b.life*130;
+      const x2=cx+Math.cos(b.angle)*len;
+      const y2=cy+Math.sin(b.angle)*len;
+      ctx.globalAlpha=b.life*0.3*(0.5+Math.sin(frame*0.1+b.angle)*0.5);
+      ctx.strokeStyle='rgba(212,168,83,0.6)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x2,y2);ctx.stroke();
+      // Endpoint glow
+      ctx.fillStyle='rgba(212,168,83,0.4)';
+      ctx.beginPath();ctx.arc(x2,y2,2+b.life*2,0,Math.PI*2);ctx.fill();
+    });
+    ctx.globalAlpha=1;
+
+    // Scanning ring
+    if(progress<0.9){
+      const ringR=progress*180;
+      ctx.globalAlpha=0.15*(1-progress);
+      ctx.strokeStyle='#d4a853';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(cx,cy,ringR,0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+
+    // Status
+    const msgIdx=Math.min(msgs.length-1,Math.floor(progress*msgs.length));
+    const pct=Math.min(100,Math.floor(progress*100));
+    status.textContent=msgs[msgIdx]+' '+pct+'%';
 
     if(frame<totalFrames){
-      requestAnimationFrame(drawFrame);
+      requestAnimationFrame(draw);
     }else{
-      status.textContent='✅ 3 combinacoes otimizadas encontradas';
-      // Reveal results one by one
-      const resultsDiv=document.getElementById('iaResults');
-      games.forEach((j,i)=>{
-        const div=document.createElement('div');
-        div.className='ia-result';
-        div.innerHTML=`
-          <div class="ia-result-head">
-            <span class="ia-result-label">🧠 ${explanations[i].strategy}</span>
-            <span class="ia-result-score">${j.score} pts</span>
-          </div>
-          <div class="ia-result-nums">${j.map(n=>'<div class="ball '+getBallClass(n)+'" style="width:28px;height:28px;font-size:0.65rem">'+pad(n)+'</div>').join('')}</div>
-          <div class="ia-result-reason">${explanations[i].reason}</div>`;
-        resultsDiv.appendChild(div);
-        setTimeout(()=>div.classList.add('show'),i*600+300);
-      });
-      // Show close button
-      setTimeout(()=>{document.getElementById('iaClose').style.display=''},games.length*600+600);
-      // Set jogos
-      jogos=games;concRef=ULT?.numero||0;
-      stats.total+=jogos.length;stats.modelos.IA=(stats.modelos.IA||0)+jogos.length;bumpStreak();
-      jogos.forEach(j=>stats.scores.push(j.score));
-      persist();
+      // Suspense done — transition to Las Vegas animation
+      overlay.classList.remove('show');
+      setTimeout(()=>{
+        overlay.remove();
+        // Set games and run casino animation
+        jogos=games;concRef=ULT?.numero||0;
+        stats.total+=jogos.length;stats.modelos.IA=(stats.modelos.IA||0)+jogos.length;bumpStreak();
+        jogos.forEach(j=>stats.scores.push(j.score));
+        slotMachineReveal([...jogos],()=>{renderJogos();updateStats();runHistoricalAnalysis();persist();callback()});
+      },400);
     }
   }
-  requestAnimationFrame(drawFrame);
-
-  // Close handler
-  overlay.querySelector('#iaClose').onclick=()=>{
-    overlay.classList.remove('show');
-    setTimeout(()=>{overlay.remove();renderJogos();updateStats();runHistoricalAnalysis();callback()},300);
-  };
+  requestAnimationFrame(draw);
 }
 
 function slotMachineReveal(games, callback){
