@@ -1593,7 +1593,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2>Entrar no Lottobot</h2>
-        <button class="btn-close" onclick="document.getElementById('authModal').classList.remove('active')">✕</button>
+        <button class="btn-close" id="authCloseBtn" onclick="if(currentUser)document.getElementById('authModal').classList.remove('active')" style="display:none">✕</button>
       </div>
       <div class="auth-modal-body">
         <p style="color:var(--text-secondary);font-size:0.8rem;text-align:center;margin-bottom:4px">Salve seus jogos na nuvem e receba alertas de premiacoes.</p>
@@ -1621,7 +1621,7 @@
     </div>
   </div>
 
-  <div class="desktop-layout">
+  <div class="desktop-layout" id="appLayout" style="display:none">
     <div class="col-left">
       <!-- NÚMEROS DO ÚLTIMO SORTEIO -->
       <div class="numeros-panel">
@@ -1907,9 +1907,9 @@
     </div>
   </div>
 
-  <button class="mobile-fab" id="mobileFab" onclick="document.getElementById('btnGerar').click()">🎲</button>
+  <button class="mobile-fab" id="mobileFab" onclick="document.getElementById('btnGerar').click()" style="display:none">🎲</button>
 
-  <nav class="mobile-nav" aria-label="Navegacao mobile">
+  <nav class="mobile-nav" id="mobileNav" aria-label="Navegacao mobile" style="display:none">
     <div class="mobile-nav-buttons">
       <button class="nav-button active" data-nav="jogos">
         <div class="nav-icon">🎲</div>
@@ -2061,10 +2061,23 @@ document.addEventListener('DOMContentLoaded',async()=>{
     currentUser=user;
     updateAuthUI();
     if(user){
+      // Desbloquear app
+      document.getElementById('appLayout').style.display='';
+      document.getElementById('mobileFab').style.display='';
+      document.getElementById('mobileNav').style.display='';
+      document.getElementById('authModal').classList.remove('active');
+      document.getElementById('authCloseBtn').style.display='';
       await syncUserDoc(user);
       await loadSavedFromCloud();
       await requestPushPermission();
       checkNotifyParams();
+    }else{
+      // Bloquear app — exigir login
+      document.getElementById('appLayout').style.display='none';
+      document.getElementById('mobileFab').style.display='none';
+      document.getElementById('mobileNav').style.display='none';
+      document.getElementById('authCloseBtn').style.display='none';
+      document.getElementById('authModal').classList.add('active');
     }
   });
 });
@@ -2369,7 +2382,7 @@ function setupEventListeners(){
     }
   }));
   document.querySelectorAll('.btn-close').forEach(b=>b.addEventListener('click',function(){this.closest('.modal-overlay').classList.remove('active')}));
-  document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('active')}));
+  document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this){if(this.id==='authModal'&&!currentUser)return;this.classList.remove('active')}}));
   document.getElementById('btnCopyPix')?.addEventListener('click',copyPix);
   document.getElementById('btnConfirmManual')?.addEventListener('click',confirmManualCheck);
   initManualGrid();
