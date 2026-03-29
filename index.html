@@ -1380,11 +1380,12 @@
     .casino-watermark{position:absolute;bottom:8px;right:12px;font-family:var(--font-mono);font-size:0.6rem;color:rgba(212,168,83,0.35);letter-spacing:0.1em;z-index:15;pointer-events:none;text-transform:uppercase}
     .casino-cta{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(0,0,0,0.96),rgba(0,0,0,0.99));z-index:250;opacity:0;transition:opacity 0.3s;pointer-events:none;perspective:800px}
     .casino-cta.show{opacity:1;pointer-events:auto}
-    .cta-finger{width:180px;height:180px;transform:translateZ(-600px) scale(4);opacity:0;transform-style:preserve-3d}
-    .casino-cta.show .cta-finger{animation:ctaFinger3D 0.45s cubic-bezier(0.15,0.85,0.25,1.3) forwards;filter:drop-shadow(0 0 50px rgba(212,168,83,0.9)) drop-shadow(0 0 100px rgba(212,168,83,0.4))}
-    @keyframes ctaFinger3D{0%{transform:translateZ(-600px) scale(4) rotateX(20deg);opacity:0;filter:brightness(4) blur(12px) drop-shadow(0 0 80px rgba(212,168,83,1))}35%{transform:translateZ(60px) scale(1.2) rotateX(-8deg);opacity:1;filter:brightness(1.8) blur(0) drop-shadow(0 0 50px rgba(212,168,83,0.9))}60%{transform:translateZ(-15px) scale(0.92) rotateX(3deg);filter:brightness(1.2)}100%{transform:translateZ(0) scale(1) rotateX(0);filter:brightness(1) drop-shadow(0 0 35px rgba(212,168,83,0.6))}}
-    .cta-finger-glow{position:absolute;width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-60%);background:radial-gradient(circle,rgba(212,168,83,0.3) 0%,transparent 70%);border-radius:50%;pointer-events:none;opacity:0}
-    .casino-cta.show .cta-finger-glow{opacity:1;animation:fingerGlow 1.5s ease-in-out infinite}
+    .cta-finger{width:180px;height:180px;transform:translateZ(-800px) scale(0.1);opacity:0;transform-style:preserve-3d}
+    .casino-cta.show .cta-finger{animation:ctaFinger3D 1.4s cubic-bezier(0.05,0.7,0.2,1.05) forwards;filter:drop-shadow(0 0 50px rgba(212,168,83,0.9)) drop-shadow(0 0 100px rgba(212,168,83,0.4))}
+    @keyframes ctaFinger3D{0%{transform:translateZ(-800px) scale(0.1) rotateX(30deg) rotateY(-10deg);opacity:0;filter:brightness(6) blur(20px) drop-shadow(0 0 100px rgba(212,168,83,1))}15%{transform:translateZ(-400px) scale(0.3) rotateX(20deg) rotateY(-5deg);opacity:0.4;filter:brightness(3) blur(10px) drop-shadow(0 0 80px rgba(212,168,83,1))}40%{transform:translateZ(-50px) scale(0.85) rotateX(5deg) rotateY(2deg);opacity:0.9;filter:brightness(1.8) blur(2px) drop-shadow(0 0 60px rgba(212,168,83,0.9))}60%{transform:translateZ(80px) scale(1.15) rotateX(-8deg) rotateY(-3deg);opacity:1;filter:brightness(1.4) blur(0) drop-shadow(0 0 50px rgba(212,168,83,0.8))}78%{transform:translateZ(-20px) scale(0.95) rotateX(3deg);filter:brightness(1.1)}90%{transform:translateZ(15px) scale(1.03) rotateX(-1deg);filter:brightness(1.05)}100%{transform:translateZ(0) scale(1) rotateX(0) rotateY(0);filter:brightness(1) drop-shadow(0 0 35px rgba(212,168,83,0.6))}}
+    .cta-finger-glow{position:absolute;width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-60%) scale(0.1);background:radial-gradient(circle,rgba(212,168,83,0.4) 0%,rgba(255,215,0,0.15) 40%,transparent 70%);border-radius:50%;pointer-events:none;opacity:0}
+    .casino-cta.show .cta-finger-glow{animation:fingerGlowEntry 1.4s cubic-bezier(0.05,0.7,0.2,1.05) forwards,fingerGlow 1.5s 1.4s ease-in-out infinite}
+    @keyframes fingerGlowEntry{0%{opacity:0;transform:translate(-50%,-60%) scale(0.1)}40%{opacity:0.6;transform:translate(-50%,-60%) scale(0.9)}60%{opacity:1;transform:translate(-50%,-60%) scale(1.2)}100%{opacity:0.7;transform:translate(-50%,-60%) scale(1)}}
     @keyframes fingerGlow{0%,100%{opacity:0.5;transform:translate(-50%,-60%) scale(1)}50%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}}
     .cta-text{font-family:var(--font-mono);font-size:1.2rem;font-weight:800;text-transform:uppercase;letter-spacing:0.18em;margin-top:16px;background:linear-gradient(90deg,#FFD700,#FFF,#FFD700,#FFA500,#FFD700);background-size:400% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:ctaShine 1.5s linear infinite;opacity:0;transform:scale(0.8)}
     .cta-text.show{animation:ctaShine 1.5s linear infinite,ctaTextReveal 0.6s ease-out forwards}
@@ -3249,18 +3250,18 @@ function slotMachineReveal(games, callback){
         o.connect(g);g.connect(m2);o.start(t);o.stop(t+0.7);
       }}catch(e){}
 
-      // Texto + voz
+      // Texto + voz — sincronizado com animação do dedo (1.4s)
       const ctaText=document.getElementById('ctaText'),ctaBrand=document.getElementById('ctaBrand');
-      setTimeout(()=>{if(ctaText)ctaText.classList.add('show');if(ctaBrand)ctaBrand.classList.add('show')},500);
+      setTimeout(()=>{if(ctaText)ctaText.classList.add('show');if(ctaBrand)ctaBrand.classList.add('show')},800);
       setTimeout(()=>{try{if('speechSynthesis' in window&&_bestVoice){
         speechSynthesis.cancel();
         const u=new SpeechSynthesisUtterance('A sorte está com você!');
-        u.voice=_bestVoice;u.lang='pt-BR';u.rate=1.05;u.pitch=1.12;u.volume=1;
+        u.voice=_bestVoice;u.lang='pt-BR';u.rate=1.18;u.pitch=1.15;u.volume=1;
         speechSynthesis.speak(u);
-      }}catch(e){}},600);
+      }}catch(e){}},900);
 
-      // Fade + next
-      setTimeout(()=>{if(ctaText)ctaText.classList.add('fade')},2500);
+      // Fade + next — tempo estendido para acomodar animação
+      setTimeout(()=>{if(ctaText)ctaText.classList.add('fade')},3200);
       let closed=false;
       function close(){if(closed)return;closed=true;
         cta.classList.remove('show');
@@ -3270,7 +3271,7 @@ function slotMachineReveal(games, callback){
         if(f){f.style.animation='none';f.offsetHeight;f.style.animation=''}
         goNext();
       }
-      setTimeout(close,3200);cta.onclick=close;
+      setTimeout(close,4200);cta.onclick=close;
     }
   }
 
