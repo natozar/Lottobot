@@ -1377,6 +1377,18 @@
     .casino-ball.dimmed{opacity:0.08;filter:saturate(0) brightness(0.3) blur(1px);transform:scale(0.85);transition:all 1s cubic-bezier(0.4,0,0.2,1)}
     .casino-canvas{position:absolute;inset:0;pointer-events:none;z-index:10}
     .casino-scan-line{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(212,168,83,0.6),rgba(232,195,106,0.9),rgba(212,168,83,0.6),transparent);box-shadow:0 0 20px rgba(212,168,83,0.5),0 0 60px rgba(212,168,83,0.2);pointer-events:none;z-index:5;opacity:0;transition:opacity 0.15s}
+    .casino-watermark{position:absolute;bottom:8px;right:12px;font-family:var(--font-mono);font-size:0.6rem;color:rgba(212,168,83,0.35);letter-spacing:0.1em;z-index:15;pointer-events:none;text-transform:uppercase}
+    .casino-cta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(0,0,0,0.92),rgba(0,0,0,0.97));z-index:20;opacity:0;transition:opacity 0.6s;pointer-events:none}
+    .casino-cta.show{opacity:1;pointer-events:auto}
+    .cta-finger{font-size:3.5rem;animation:ctaPoint 1.2s cubic-bezier(0.34,1.56,0.64,1) forwards;transform:translateY(40px) scale(0);filter:drop-shadow(0 0 20px rgba(212,168,83,0.5))}
+    @keyframes ctaPoint{0%{transform:translateY(40px) scale(0) rotate(15deg);opacity:0}50%{transform:translateY(-5px) scale(1.15) rotate(-3deg);opacity:1}100%{transform:translateY(0) scale(1) rotate(0);opacity:1}}
+    .cta-text{font-family:var(--font-mono);font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.15em;margin-top:16px;background:linear-gradient(135deg,#FFD700,#FFA500,#FFD700,#FFEC8B);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:ctaShine 2s linear infinite,ctaTextIn 0.6s 0.3s ease-out both;filter:drop-shadow(0 0 12px rgba(212,168,83,0.4))}
+    @keyframes ctaShine{0%{background-position:300% 0}100%{background-position:0% 0}}
+    @keyframes ctaTextIn{from{opacity:0;transform:translateY(20px) scale(0.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .cta-sub{font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:8px;animation:ctaTextIn 0.5s 0.5s ease-out both;letter-spacing:0.05em}
+    .cta-install{margin-top:20px;padding:14px 32px;background:linear-gradient(135deg,#FFD700,#d4a853,#b8912e);color:#09090b;border:none;border-radius:14px;font-family:var(--font-mono);font-size:0.85rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;animation:ctaPulse 2s ease-in-out infinite,ctaTextIn 0.5s 0.7s ease-out both;box-shadow:0 0 30px rgba(212,168,83,0.4),0 4px 15px rgba(0,0,0,0.3)}
+    @keyframes ctaPulse{0%,100%{box-shadow:0 0 30px rgba(212,168,83,0.4),0 4px 15px rgba(0,0,0,0.3);transform:scale(1)}50%{box-shadow:0 0 50px rgba(212,168,83,0.6),0 6px 25px rgba(0,0,0,0.3);transform:scale(1.04)}}
+    .cta-brand{font-family:var(--font-mono);font-size:0.65rem;color:rgba(212,168,83,0.5);margin-top:16px;letter-spacing:0.2em;animation:ctaTextIn 0.4s 0.9s ease-out both}
     .casino-score{text-align:center;padding:16px 0 8px;opacity:0;transform:translateY(12px);transition:all 0.6s cubic-bezier(0.34,1.56,0.64,1)}
     .casino-score.show{opacity:1;transform:translateY(0)}
     .casino-score-value{font-family:var(--font-mono);font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#e8c36a,var(--color-gold-primary),#f0d080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 8px rgba(212,168,83,0.3))}
@@ -3090,11 +3102,19 @@ function slotMachineReveal(games, callback){
           <div class="casino-grid-labels"><span class="casino-grid-label">C1</span><span class="casino-grid-label">C2</span><span class="casino-grid-label">C3</span><span class="casino-grid-label">C4</span><span class="casino-grid-label">C5</span></div>
           <div class="casino-reels" id="casinoReels" style="position:relative"></div>
           <div class="casino-scan-line" id="scanLine"></div>
-          <div style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-bottom:12px"><span id="casinoCounter" style="color:var(--color-gold-primary);font-weight:700;font-size:1.1rem">0</span><span style="opacity:0.4"> / 15</span></div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-bottom:12px"><span id="casinoCounter" style="color:var(--color-gold-primary);font-weight:700;font-size:1.1rem">0</span><span style="opacity:0.4"> / ${getLottery().pick}</span></div>
           <div class="casino-score" id="casinoScore">
             <div class="casino-score-value" id="casinoScoreVal"></div>
             <div class="casino-score-label" id="casinoScoreLabel"></div>
             <div class="casino-score-stars" id="casinoStars"></div>
+          </div>
+          <div class="casino-watermark">lottobot.app</div>
+          <div class="casino-cta" id="casinoCta">
+            <div class="cta-finger">👆</div>
+            <div class="cta-text">A sorte esta com voce</div>
+            <div class="cta-sub">Gere seus numeros da sorte agora</div>
+            <button class="cta-install" id="ctaInstall">Quero meus numeros</button>
+            <div class="cta-brand">LOTTOBOT — INTELIGENCIA LOTOFACIL</div>
           </div>
         </div>
         <div class="casino-footer">
@@ -3187,6 +3207,16 @@ function slotMachineReveal(games, callback){
             scoreDiv.classList.add('show');
             nextBtn.style.display='';skipBtn.style.display='none';
             spawnCanvasFireworks(overlay.querySelector('.casino-display'));
+            // Show viral CTA on last game
+            if(idx===games.length-1){
+              setTimeout(()=>{
+                const cta=overlay.querySelector('#casinoCta');
+                if(cta){cta.classList.add('show');
+                  const ctaBtn=overlay.querySelector('#ctaInstall');
+                  if(ctaBtn)ctaBtn.onclick=()=>{cta.classList.remove('show')};
+                }
+              },2800);
+            }
           },600);
         }
       },delay);
