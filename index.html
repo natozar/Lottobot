@@ -98,7 +98,20 @@
       --color-ball-cold: #3a7cc0;
       --color-ball-rising: #b8912e;
       --color-ball-neutral: #9090a0;
+      color-scheme: light;
     }
+    [data-theme="light"] .toggle-switch{background:#d4d4d8}
+    [data-theme="light"] .toggle-switch:hover{background:#c4c4c8}
+    [data-theme="light"] .ball{color:#fff}
+    [data-theme="light"] ::-webkit-scrollbar-thumb{background:#c4c4c8}
+    [data-theme="light"] ::-webkit-scrollbar-thumb:hover{background:#a4a4a8}
+    [data-theme="light"] .casino-overlay{background:radial-gradient(ellipse at center,rgba(245,245,245,0.95),rgba(220,220,225,0.98))}
+    [data-theme="light"] .casino-machine{background:linear-gradient(180deg,#fff 0%,#f5f5f5 100%);border-color:rgba(184,145,46,0.4)}
+    [data-theme="light"] .casino-ball{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.08);color:rgba(0,0,0,0.15)}
+    [data-theme="light"] .casino-ball.dimmed{opacity:0.12}
+    [data-theme="light"] .casino-footer{background:rgba(0,0,0,0.03);border-top-color:rgba(0,0,0,0.06)}
+    [data-theme="light"] .toast{background:#fff;border-color:rgba(184,145,46,0.3);color:#1a1a1a;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    [data-theme="light"] .modal{background:#fff;border-color:rgba(0,0,0,0.1)}
 
     html, body {
       width: 100%;
@@ -1376,13 +1389,7 @@
     .casino-btn.gold:hover{box-shadow:0 4px 24px rgba(212,168,83,0.5);transform:translateY(-1px)}
     .casino-btn.ghost{background:rgba(255,255,255,0.04);border:1px solid var(--border-hover);color:var(--text-muted)}
     .casino-btn.ghost:hover{border-color:var(--text-secondary);color:var(--text-secondary);background:rgba(255,255,255,0.06)}
-    .fw-spark{position:absolute;pointer-events:none;border-radius:50%;will-change:transform,opacity;animation:fwShoot var(--fwDur,1.8s) cubic-bezier(0.2,0.6,0.3,1) forwards}
-    .fw-spark::after{content:'';position:absolute;inset:-2px;border-radius:50%;background:inherit;filter:blur(3px);opacity:0.6}
-    .fw-trail{position:absolute;pointer-events:none;width:2px;border-radius:1px;will-change:transform,opacity;animation:fwTrail var(--fwDur,1.2s) ease-out forwards}
-    @keyframes fwShoot{0%{opacity:1;transform:translate(0,0) scale(1.5);filter:brightness(3)}15%{opacity:1;transform:translate(calc(var(--fx)*0.2),calc(var(--fy)*0.2)) scale(1.2);filter:brightness(2)}60%{opacity:0.8;transform:translate(calc(var(--fx)*0.75),calc(var(--fy)*0.75)) scale(0.8);filter:brightness(1.2)}100%{opacity:0;transform:translate(var(--fx),var(--fy)) scale(0);filter:brightness(0.5)}}
-    @keyframes fwTrail{0%{opacity:0.8;transform:translate(0,0) scaleY(1)}100%{opacity:0;transform:translate(calc(var(--fx)*0.4),calc(var(--fy)*0.4)) scaleY(0)}}
-    .fw-burst-ring{position:absolute;pointer-events:none;border-radius:50%;border:2px solid;will-change:transform,opacity;animation:fwRing 1s ease-out forwards}
-    @keyframes fwRing{0%{opacity:0.9;transform:scale(0)}40%{opacity:0.5;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+    /* firework CSS removed — now using canvas particles */
     /* === PWA INSTALL BANNER === */
     .install-banner{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);z-index:180;background:linear-gradient(135deg,#1a2a1e 0%,#111113 50%,#1a1a10 100%);border:1px solid rgba(212,168,83,0.3);border-radius:16px;padding:20px 24px;display:none;align-items:center;gap:16px;max-width:440px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(212,168,83,0.1);backdrop-filter:blur(20px);animation:bannerIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
     .install-banner.show{display:flex}
@@ -1427,9 +1434,17 @@
     .auth-admin-link{font-size:0.65rem;color:var(--color-gold-primary);text-decoration:none;opacity:0.7;display:none}
     .auth-admin-link.show{display:inline}
 
+    /* === FOCUS VISIBLE === */
+    :focus-visible{outline:2px solid var(--color-gold-primary);outline-offset:2px;border-radius:4px}
+    .toggle-switch:focus-visible{outline:2px solid var(--color-gold-primary);outline-offset:2px}
+    .tab-button:focus-visible,.nav-button:focus-visible,.btn-action:focus-visible,.btn-export:focus-visible{outline:2px solid var(--color-gold-primary);outline-offset:1px}
+
     /* === SKELETON LOADING === */
     .skeleton{background:linear-gradient(90deg,var(--bg-surface-2) 25%,var(--bg-surface-3) 50%,var(--bg-surface-2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--border-radius-sm)}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .skeleton-ball{width:36px;height:36px;border-radius:50%}
+    .skeleton-text{height:12px;width:80%}
+    .skeleton-card{height:120px;border-radius:var(--border-radius-lg);margin-bottom:12px}
 
     /* === RIPPLE EFFECT === */
     .btn-action,.btn-export,.modelo-card,.nav-button,.casino-btn{position:relative;overflow:hidden}
@@ -1540,9 +1555,9 @@
       <div class="config-section">
         <div class="section-title">Loteria</div>
         <div class="modelos-grid">
-          <div class="modelo-card active" data-loteria="lotofacil" onclick="showToast('Lotofacil ativa')" style="font-size:0.72rem">Lotofacil</div>
-          <div class="modelo-card" data-loteria="megasena" onclick="showToast('Mega-Sena em breve!')" style="font-size:0.72rem;opacity:0.4">Mega-Sena</div>
-          <div class="modelo-card" data-loteria="quina" onclick="showToast('Quina em breve!')" style="font-size:0.72rem;opacity:0.4">Quina</div>
+          <div class="modelo-card active" data-loteria="lotofacil" onclick="switchLottery('lotofacil')" style="font-size:0.72rem">Lotofacil</div>
+          <div class="modelo-card" data-loteria="megasena" onclick="switchLottery('megasena')" style="font-size:0.72rem">Mega-Sena</div>
+          <div class="modelo-card" data-loteria="quina" onclick="switchLottery('quina')" style="font-size:0.72rem">Quina</div>
         </div>
       </div>
 
@@ -1718,7 +1733,7 @@
         <div class="analytics-title">Último Sorteio</div>
         <div class="analytics-value" id="ultimoNumero">#0000</div>
         <div class="analytics-label" id="ultimoData">—</div>
-        <div id="ultimoBalls"></div>
+        <div id="ultimoBalls"><div style="display:flex;gap:4px"><div class="skeleton skeleton-ball"></div><div class="skeleton skeleton-ball"></div><div class="skeleton skeleton-ball"></div><div class="skeleton skeleton-ball"></div><div class="skeleton skeleton-ball"></div></div></div>
         <div id="ultimoResumo" style="margin-top: 8px;"></div>
       </div>
 
@@ -1836,11 +1851,42 @@
 // ══════════════════════════════════════════════
 // LOTTOBOT V3 — ENGINE
 // ══════════════════════════════════════════════
-const API_BASE='https://loteriascaixa-api.herokuapp.com/api/lotofacil';
-const MODELOS={A:{fora:6,dentro:9,noise:0.2},B:{fora:5,dentro:10,noise:0.35},C:{fora:7,dentro:8,noise:0.5}};
-const PREMIOS={11:'R$ 6,00',12:'R$ 12,00',13:'R$ 30,00',14:'R$ 1.700,00',15:'🏆 JACKPOT'};
-const PRIMOS=new Set([2,3,5,7,11,13,17,19,23]);
-const DEZENAS=[[1,5],[6,10],[11,15],[16,20],[21,25]];
+const LOTTERIES={
+  lotofacil:{
+    name:'Lotofacil',api:'https://loteriascaixa-api.herokuapp.com/api/lotofacil',
+    total:25,pick:15,
+    modelos:{A:{fora:6,dentro:9,noise:0.2},B:{fora:5,dentro:10,noise:0.35},C:{fora:7,dentro:8,noise:0.5}},
+    premios:{11:'R$ 6',12:'R$ 12',13:'R$ 30',14:'R$ 1.700',15:'JACKPOT'},
+    primos:[2,3,5,7,11,13,17,19,23],
+    dezenas:[[1,5],[6,10],[11,15],[16,20],[21,25]],
+    filters:{parImpar:[7,8],soma:[175,205],consec:4,repet:[8,11]}
+  },
+  megasena:{
+    name:'Mega-Sena',api:'https://loteriascaixa-api.herokuapp.com/api/megasena',
+    total:60,pick:6,
+    modelos:{A:{fora:3,dentro:3,noise:0.2},B:{fora:2,dentro:4,noise:0.35},C:{fora:4,dentro:2,noise:0.5}},
+    premios:{4:'R$ 1.000',5:'R$ 40.000',6:'JACKPOT'},
+    primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59],
+    dezenas:[[1,10],[11,20],[21,30],[31,40],[41,50],[51,60]],
+    filters:{parImpar:[3,3],soma:[100,260],consec:2,repet:[1,4]}
+  },
+  quina:{
+    name:'Quina',api:'https://loteriascaixa-api.herokuapp.com/api/quina',
+    total:80,pick:5,
+    modelos:{A:{fora:2,dentro:3,noise:0.2},B:{fora:2,dentro:3,noise:0.35},C:{fora:3,dentro:2,noise:0.5}},
+    premios:{2:'R$ 1',3:'R$ 20',4:'R$ 6.000',5:'JACKPOT'},
+    primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79],
+    dezenas:[[1,16],[17,32],[33,48],[49,64],[65,80]],
+    filters:{parImpar:[2,3],soma:[80,280],consec:2,repet:[1,3]}
+  }
+};
+let selectedLottery='lotofacil';
+function getLottery(){return LOTTERIES[selectedLottery]}
+const API_BASE=LOTTERIES.lotofacil.api;
+const MODELOS=LOTTERIES.lotofacil.modelos;
+const PREMIOS=LOTTERIES.lotofacil.premios;
+const PRIMOS=new Set(LOTTERIES.lotofacil.primos);
+const DEZENAS=LOTTERIES.lotofacil.dezenas;
 const FILTER_IDS=['filterParImpar','filterSoma','filterConsec','filterRepet','filterDezena','filterPrimos'];
 const SK='lottobot_v3';
 const CACHE_KEY='lottobot_cache';
@@ -2068,6 +2114,20 @@ function checkNotifyParams(){
   }
 }
 
+// ══════ LOTTERY SWITCH ══════
+async function switchLottery(key){
+  if(key===selectedLottery)return;
+  selectedLottery=key;
+  document.querySelectorAll('[data-loteria]').forEach(el=>el.classList.toggle('active',el.dataset.loteria===key));
+  // Reset state
+  ULT=null;historico=[];FREQ={};ATRASO={};TENDENCIA={};invalidateClassifyCache();
+  jogos=[];previousJogos=[];
+  localStorage.removeItem(CACHE_KEY);
+  showToast('Carregando '+getLottery().name+'...');
+  await loadAPI();
+  updateUI();renderJogos();
+}
+
 // ══════ THEME TOGGLE ══════
 function toggleTheme(){
   const html=document.documentElement;
@@ -2158,8 +2218,9 @@ function parseDraw(d){
   if(!dz||!Array.isArray(dz)) return null;
   const numero=parseInt(d.concurso||d.numero);
   if(isNaN(numero))return null;
-  const nums=dz.map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=25).sort((a,b)=>a-b);
-  if(nums.length<15)return null;
+  const lot=getLottery();
+  const nums=dz.map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=lot.total).sort((a,b)=>a-b);
+  if(nums.length<lot.pick)return null;
   const data=String(d.data||d.dataApuracao||'').replace(/[^0-9\/\-\.]/g,'');
   const valEst=d.valorEstimadoProximoConcurso?'R$ '+Number(d.valorEstimadoProximoConcurso).toLocaleString('pt-BR'):null;
   return{numero,data,numeros:nums,acumulou:!!d.acumulou,valorEstimado:valEst};
@@ -2170,13 +2231,13 @@ async function loadAPI(){
   try{
     const cached=localStorage.getItem(CACHE_KEY);
     if(cached){const c=JSON.parse(cached);if(Date.now()-c.timestamp<CACHE_TTL&&c.latest?.numeros){ULT=c.latest;historico=c.historical||[];calcDynamic();const hb=document.getElementById('histBadge');if(hb)hb.textContent=historico.length+' concursos (cache)';if(sp)sp.classList.remove('active');return}}
-    const raw=await apiFetch(API_BASE+'/latest');
+    const raw=await apiFetch(getLottery().api+'/latest');
     const latest=parseDraw(raw);if(!latest)throw new Error('bad data');
     ULT=latest;
     historico=[{numero:ULT.numero,numeros:ULT.numeros}];
     const N=parseInt(document.getElementById('sliderJanela')?.value||50);
     const promises=[];
-    for(let i=1;i<N;i++) promises.push(apiFetch(API_BASE+'/'+(ULT.numero-i)).then(r=>{const p=parseDraw(r);return p}).catch(()=>null));
+    for(let i=1;i<N;i++) promises.push(apiFetch(getLottery().api+'/'+(ULT.numero-i)).then(r=>{const p=parseDraw(r);return p}).catch(()=>null));
     const results=await Promise.all(promises);
     results.forEach(r=>{if(r)historico.push(r)});
     historico.sort((a,b)=>a.numero-b.numero);
@@ -2187,8 +2248,8 @@ async function loadAPI(){
   }catch(e){
     console.warn('API offline:',e);
     ULT={...FALLBACK};FREQ={...FALLBACK_FREQ};historico=[FALLBACK];
-    for(let i=1;i<=25;i++)ATRASO[i]=ULT.numeros.includes(i)?0:1;
-    for(let i=1;i<=25;i++)TENDENCIA[i]=0;
+    for(let i=1;i<=getLottery().total;i++)ATRASO[i]=ULT.numeros.includes(i)?0:1;
+    for(let i=1;i<=getLottery().total;i++)TENDENCIA[i]=0;
     document.getElementById('offlineBadge')?.classList.add('show');
     showToast('📡 Dados offline');
   }
@@ -2199,13 +2260,13 @@ async function loadAPI(){
 // ══════ ANALYSIS ══════
 function calcDynamic(){
   FREQ={};ATRASO={};TENDENCIA={};invalidateClassifyCache();
-  for(let i=1;i<=25;i++){FREQ[i]=0;ATRASO[i]=historico.length}
+  for(let i=1;i<=getLottery().total;i++){FREQ[i]=0;ATRASO[i]=historico.length}
   historico.forEach(d=>d.numeros.forEach(n=>FREQ[n]=(FREQ[n]||0)+1));
   const sorted=[...historico].sort((a,b)=>b.numero-a.numero);
-  for(let i=1;i<=25;i++){ATRASO[i]=sorted.length;for(let j=0;j<sorted.length;j++){if(sorted[j].numeros.includes(i)){ATRASO[i]=j;break}}}
+  for(let i=1;i<=getLottery().total;i++){ATRASO[i]=sorted.length;for(let j=0;j<sorted.length;j++){if(sorted[j].numeros.includes(i)){ATRASO[i]=j;break}}}
   const last10=sorted.slice(0,Math.min(10,sorted.length));
   const mid20=sorted.slice(10,Math.min(20,sorted.length));
-  for(let i=1;i<=25;i++){
+  for(let i=1;i<=getLottery().total;i++){
     const f10=last10.filter(d=>d.numeros.includes(i)).length;
     const f20=mid20.filter(d=>d.numeros.includes(i)).length;
     TENDENCIA[i]=f10-f20;
@@ -2287,18 +2348,19 @@ function gerarJogos(){
 function hammingDistance(a,b){const s=new Set(b);return a.filter(n=>!s.has(n)).length}
 
 function genOne(mod){
-  const fixed=[...fixedNums];const need=15-fixed.length;
+  const pick=getLottery().pick;
+  const fixed=[...fixedNums];const need=pick-fixed.length;
   if(need<0)return null;if(need===0)return fixed.sort((a,b)=>a-b);
   const dentro=ULT.numeros.filter(n=>!excludedNums.has(n)&&!fixedNums.has(n));
-  const fora=[];for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i)&&!excludedNums.has(i)&&!fixedNums.has(i))fora.push(i);
+  const fora=[];for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i)&&!excludedNums.has(i)&&!fixedNums.has(i))fora.push(i);
   const w=n=>{const f=(FREQ[n]||0)/(historico.length||1);const a=(ATRASO[n]||0)/(historico.length||1);const t=(TENDENCIA[n]||0)/10;return 0.4*f+0.3*a+0.2*t+Math.random()*mod.noise};
   const sf=fora.map(n=>({n,w:w(n)})).sort((a,b)=>b.w-a.w).map(x=>x.n);
   const sd=dentro.map(n=>({n,w:w(n)})).sort((a,b)=>b.w-a.w).map(x=>x.n);
   const fc=Math.min(mod.fora,sf.length,need),dc=Math.min(need-fc,sd.length);
   if(fc+dc<need&&sf.length+sd.length<need)return null;
   const sel=[...fixed,...sf.slice(0,fc),...sd.slice(0,dc)];
-  if(sel.length<15){const rem=[...sf.slice(fc),...sd.slice(dc)];for(const n of rem){if(sel.length>=15)break;if(!sel.includes(n))sel.push(n)}}
-  return sel.length>=15?sel.sort((a,b)=>a-b):null;
+  if(sel.length<pick){const rem=[...sf.slice(fc),...sd.slice(dc)];for(const n of rem){if(sel.length>=pick)break;if(!sel.includes(n))sel.push(n)}}
+  return sel.length>=pick?sel.sort((a,b)=>a-b):null;
 }
 
 // ══════ FILTERS ══════
@@ -2375,7 +2437,7 @@ function renderJogos(){
 // ══════ CONFERIR / SALVAR / SHARE ══════
 async function conferir(i){
   try{
-    const raw=await apiFetch(API_BASE+'/latest');const d=parseDraw(raw);if(!d)throw 0;
+    const raw=await apiFetch(getLottery().api+'/latest');const d=parseDraw(raw);if(!d)throw 0;
     if(d.numero===concRef){checkIdx=i;document.getElementById('manualCheckModal').classList.add('active');showToast('⏳ Próximo sorteio ainda não saiu. Use conferência manual.');return}
     showCheckResult(i,d.numeros,d.numero);
   }catch(e){checkIdx=i;document.getElementById('manualCheckModal').classList.add('active')}
@@ -2399,7 +2461,7 @@ function showCheckResult(i,res,cn){
 
 function initManualGrid(){
   const grid=document.getElementById('manualInputGrid');if(!grid)return;
-  for(let i=1;i<=25;i++){
+  for(let i=1;i<=getLottery().total;i++){
     const cell=document.createElement('div');cell.className='exclude-cell';cell.textContent=pad(i);cell.dataset.num=i;cell.dataset.selected='false';
     cell.onclick=function(){const sel=this.dataset.selected==='true';this.dataset.selected=sel?'false':'true';this.style.background=sel?'rgba(45,74,62,0.2)':'rgba(201,168,76,0.3)';this.style.borderColor=sel?'rgba(201,168,76,0.15)':'var(--color-gold-primary)';this.style.color=sel?'rgba(255,255,255,0.8)':'var(--color-gold-primary)'};
     grid.appendChild(cell);
@@ -2409,7 +2471,7 @@ function initManualGrid(){
 function confirmManualCheck(){
   if(checkIdx===null)return;
   const nums=Array.from(document.querySelectorAll('#manualInputGrid .exclude-cell')).filter(c=>c.dataset.selected==='true').map(c=>parseInt(c.dataset.num)).sort((a,b)=>a-b);
-  if(nums.length!==15){showToast('⚠️ Selecione exatamente 15 números');return}
+  if(nums.length!==getLottery().pick){showToast('⚠️ Selecione exatamente '+getLottery().pick+' numeros');return}
   document.getElementById('manualCheckModal').classList.remove('active');
   document.querySelectorAll('#manualInputGrid .exclude-cell').forEach(c=>{c.dataset.selected='false';c.style.background='';c.style.borderColor='';c.style.color=''});
   showCheckResult(checkIdx,nums,null);
@@ -2540,7 +2602,7 @@ function renderFilterTab(){
   }
   const dg=document.getElementById('excludeDentro'),fg=document.getElementById('excludeFora');
   if(dg){dg.innerHTML='';ULT.numeros.forEach(n=>dg.appendChild(mkExcl(n)))}
-  if(fg){fg.innerHTML='';for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkExcl(i))}
+  if(fg){fg.innerHTML='';for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkExcl(i))}
 }
 function mkExcl(n){return mkToggleCell(n,'exclude-cell')}
 function resetExclusions(){
@@ -2604,7 +2666,7 @@ function renderHeatmap(){
   const g=document.getElementById('heatmapGrid');if(!g)return;
   const vals=Object.values(FREQ),mn=Math.min(...vals),mx=Math.max(...vals);
   g.innerHTML='';
-  for(let i=1;i<=25;i++){
+  for(let i=1;i<=getLottery().total;i++){
     const f=FREQ[i]||0,r=mx>mn?(f-mn)/(mx-mn):0.5;
     let bg;if(r>0.66)bg='rgba(192,57,43,'+(0.4+r*0.5)+')';else if(r>0.33)bg='rgba(243,156,18,'+(0.3+r*0.4)+')';else bg='rgba(52,152,219,'+(0.3+(1-r)*0.4)+')';
     const cell=document.createElement('div');cell.className='heatmap-cell';cell.style.background=bg;cell.style.color=r>0.4?'#fff':'#ccc';
@@ -2636,7 +2698,7 @@ function renderNumeroDoDia(){
   const today=new Date().toISOString().slice(0,10);
   const seed=[...today].reduce((a,c)=>a+c.charCodeAt(0),0);
   const scored=[];
-  for(let i=1;i<=25;i++){
+  for(let i=1;i<=getLottery().total;i++){
     const t=TENDENCIA[i]||0,f=(FREQ[i]||0)/(historico.length||1),a=(ATRASO[i]||0);
     scored.push({n:i,s:t*3+f*2+(a>2?1:0)+(seed%5===i%5?0.5:0)});
   }
@@ -2714,7 +2776,7 @@ function renderNumPanel(){
   document.getElementById('numPanelConc').textContent='#'+ULT.numero;
   const dg=document.getElementById('numDentro'),fg=document.getElementById('numFora');
   if(dg){dg.innerHTML='';ULT.numeros.forEach(n=>dg.appendChild(mkNumCell(n)))}
-  if(fg){fg.innerHTML='';for(let i=1;i<=25;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkNumCell(i))}
+  if(fg){fg.innerHTML='';for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkNumCell(i))}
 }
 function mkToggleCell(n,cls){
   const c=document.createElement('div');c.className=cls;
