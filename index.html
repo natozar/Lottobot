@@ -2891,47 +2891,61 @@ function slotMachineReveal(games, callback){
       o3.connect(g3);g3.connect(m);o3.start(t);o3.stop(t+0.08);
     },
     win:(score)=>{const a=ax(),m=gm();if(!a||!m)return;const t=a.currentTime;
-      const hi=score>=70;
-      // Whistle up
-      const ow=a.createOscillator(),gw=a.createGain();
-      ow.type='sine';ow.frequency.setValueAtTime(600,t);ow.frequency.exponentialRampToValueAtTime(4000,t+0.25);
-      gw.gain.setValueAtTime(0.06,t);gw.gain.exponentialRampToValueAtTime(0.001,t+0.3);
-      ow.connect(gw);gw.connect(m);ow.start(t);ow.stop(t+0.35);
-      // Explosion burst
-      const eb=a.createBuffer(1,Math.floor(a.sampleRate*0.3),a.sampleRate);
-      const ed=eb.getChannelData(0);for(let j=0;j<ed.length;j++)ed[j]=(Math.random()*2-1)*Math.exp(-j/(a.sampleRate*0.035));
-      const es=a.createBufferSource(),ef=a.createBiquadFilter(),eg=a.createGain();es.buffer=eb;
-      ef.type='bandpass';ef.frequency.value=2800;ef.Q.value=0.6;
-      eg.gain.setValueAtTime(hi?0.14:0.09,t+0.25);eg.gain.exponentialRampToValueAtTime(0.001,t+0.6);
-      es.connect(ef);ef.connect(eg);eg.connect(m);es.start(t+0.25);
-      // Sparkler crackle
-      for(let c=0;c<(hi?16:8);c++){
-        const cb=a.createBuffer(1,Math.floor(a.sampleRate*0.018),a.sampleRate);
-        const cd=cb.getChannelData(0);for(let j=0;j<cd.length;j++)cd[j]=(Math.random()*2-1)*Math.pow(1-j/cd.length,6);
-        const cs=a.createBufferSource(),cf=a.createBiquadFilter(),cg=a.createGain();cs.buffer=cb;
-        cf.type='highpass';cf.frequency.value=6000+Math.random()*5000;
-        const ct=t+0.3+Math.random()*1.0;
-        cg.gain.setValueAtTime(0.03+Math.random()*0.05,ct);cg.gain.exponentialRampToValueAtTime(0.001,ct+0.025);
-        cs.connect(cf);cf.connect(cg);cg.connect(m);cs.start(ct);
+      const hi=score>=70;const ultra=score>=85;
+      // Luxury coin cascade — metallic shimmer
+      for(let c=0;c<(hi?8:4);c++){
+        const o=a.createOscillator(),g=a.createGain(),f=a.createBiquadFilter();
+        o.type='triangle';o.frequency.value=4000+Math.random()*4000;
+        f.type='bandpass';f.frequency.value=6000+Math.random()*3000;f.Q.value=15;
+        const ct=t+c*0.05;
+        g.gain.setValueAtTime(0.03,ct);g.gain.exponentialRampToValueAtTime(0.001,ct+0.12);
+        o.connect(f);f.connect(g);g.connect(m);o.start(ct);o.stop(ct+0.15);
       }
-      // Fanfare arpeggio
-      const notes=hi?[523,659,784,1047,1318,1568,2093]:[523,659,784,1047];
-      notes.forEach((f,i)=>{
+      // Cymbal swell
+      const cb=a.createBuffer(2,Math.floor(a.sampleRate*0.8),a.sampleRate);
+      for(let ch=0;ch<2;ch++){const d=cb.getChannelData(ch);for(let j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*Math.exp(-j/(a.sampleRate*0.15))*(0.5+ch*0.2)}
+      const cs=a.createBufferSource(),cf=a.createBiquadFilter(),cg=a.createGain();cs.buffer=cb;
+      cf.type='highpass';cf.frequency.value=3000;
+      cg.gain.setValueAtTime(0,t);cg.gain.linearRampToValueAtTime(hi?0.08:0.05,t+0.15);cg.gain.exponentialRampToValueAtTime(0.001,t+0.8);
+      cs.connect(cf);cf.connect(cg);cg.connect(m);cs.start(t);
+      // Orchestral chord — major with 7th
+      const chord=hi?[262,330,392,494,523,659,784,988,1047]:[262,330,392,523];
+      chord.forEach((f,i)=>{
         const o=a.createOscillator(),g=a.createGain(),fl=a.createBiquadFilter();
-        o.type=i%2===0?'sawtooth':'square';o.frequency.value=f;
-        const o2=a.createOscillator(),g2=a.createGain();o2.type=o.type;o2.frequency.value=f*1.005;
-        fl.type='lowpass';fl.frequency.setValueAtTime(f*6,t+0.3+i*0.08);fl.frequency.exponentialRampToValueAtTime(f*1.2,t+0.3+i*0.08+0.4);fl.Q.value=6;
-        const v=hi?0.065:0.045;
-        g.gain.setValueAtTime(v,t+0.3+i*0.08);g.gain.exponentialRampToValueAtTime(0.001,t+0.3+i*0.08+0.45);
-        g2.gain.setValueAtTime(v*0.35,t+0.3+i*0.08);g2.gain.exponentialRampToValueAtTime(0.001,t+0.3+i*0.08+0.4);
-        o.connect(fl);fl.connect(g);g.connect(m);o2.connect(g2);g2.connect(m);
-        o.start(t+0.3+i*0.08);o.stop(t+0.3+i*0.08+0.5);o2.start(t+0.3+i*0.08);o2.stop(t+0.3+i*0.08+0.45);
+        o.type=i<4?'sawtooth':'sine';o.frequency.value=f;o.detune.value=(Math.random()-0.5)*8;
+        fl.type='lowpass';fl.frequency.setValueAtTime(f*4,t+0.1);fl.frequency.exponentialRampToValueAtTime(f*0.8,t+1.2);fl.Q.value=2;
+        const v=(hi?0.04:0.03)*(i<4?1:0.5);
+        g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.08);g.gain.exponentialRampToValueAtTime(0.001,t+1.2);
+        o.connect(fl);fl.connect(g);g.connect(m);o.start(t+0.05);o.stop(t+1.3);
       });
-      // Bass drop
-      if(hi){const ob=a.createOscillator(),gb=a.createGain();
-        ob.type='sine';ob.frequency.setValueAtTime(180,t+0.25);ob.frequency.exponentialRampToValueAtTime(25,t+0.7);
-        gb.gain.setValueAtTime(0.16,t+0.25);gb.gain.exponentialRampToValueAtTime(0.001,t+0.75);
-        ob.connect(gb);gb.connect(m);ob.start(t+0.25);ob.stop(t+0.8)}
+      // Bass drop — deep cinema impact
+      const ob=a.createOscillator(),gb=a.createGain();
+      ob.type='sine';ob.frequency.setValueAtTime(hi?200:120,t+0.1);ob.frequency.exponentialRampToValueAtTime(20,t+0.8);
+      gb.gain.setValueAtTime(hi?0.18:0.12,t+0.1);gb.gain.exponentialRampToValueAtTime(0.001,t+0.9);
+      ob.connect(gb);gb.connect(m);ob.start(t+0.1);ob.stop(t+1.0);
+      // Sparkler crackle — sustained
+      for(let c=0;c<(ultra?24:hi?16:8);c++){
+        const sb=a.createBuffer(1,Math.floor(a.sampleRate*0.015),a.sampleRate);
+        const sd=sb.getChannelData(0);for(let j=0;j<sd.length;j++)sd[j]=(Math.random()*2-1)*Math.pow(1-j/sd.length,7);
+        const ss=a.createBufferSource(),sf2=a.createBiquadFilter(),sg=a.createGain();ss.buffer=sb;
+        sf2.type='highpass';sf2.frequency.value=7000+Math.random()*6000;
+        const st=t+0.2+Math.random()*1.5;
+        sg.gain.setValueAtTime(0.025+Math.random()*0.04,st);sg.gain.exponentialRampToValueAtTime(0.001,st+0.02);
+        ss.connect(sf2);sf2.connect(sg);sg.connect(m);ss.start(st);
+      }
+      // Ascending fanfare — luxury arpeggio
+      const fanfare=ultra?[523,659,784,988,1047,1318,1568,1976,2093]:(hi?[523,659,784,1047,1318,1568]:[523,659,784,1047]);
+      fanfare.forEach((f,i)=>{
+        const o=a.createOscillator(),g=a.createGain();
+        o.type='sawtooth';o.frequency.value=f;
+        const o2=a.createOscillator(),g2=a.createGain();o2.type='square';o2.frequency.value=f*1.003;
+        const v=ultra?0.05:hi?0.04:0.03;
+        const dt=t+0.25+i*0.07;
+        g.gain.setValueAtTime(v,dt);g.gain.exponentialRampToValueAtTime(0.001,dt+0.5);
+        g2.gain.setValueAtTime(v*0.3,dt);g2.gain.exponentialRampToValueAtTime(0.001,dt+0.4);
+        o.connect(g);g.connect(m);o2.connect(g2);g2.connect(m);
+        o.start(dt);o.stop(dt+0.55);o2.start(dt);o2.stop(dt+0.45);
+      });
     },
     drumroll:()=>{const a=ax(),m=gm();if(!a||!m)return;const t=a.currentTime;
       for(let i=0;i<16;i++){const o=a.createOscillator(),g=a.createGain(),f=a.createBiquadFilter();
@@ -2945,53 +2959,111 @@ function slotMachineReveal(games, callback){
       ow.connect(fw);fw.connect(gw);gw.connect(m);ow.start(t);ow.stop(t+0.5)}
   };
 
-  // Canvas particle system — high-performance fireworks
+  // Canvas particle system — luxury casino fireworks
   function spawnCanvasFireworks(container){
     const cvs=document.createElement('canvas');cvs.className='casino-canvas';
     const w=container.offsetWidth,h=container.offsetHeight;
-    cvs.width=w*2;cvs.height=h*2;cvs.style.width=w+'px';cvs.style.height=h+'px';
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    cvs.width=w*dpr;cvs.height=h*dpr;cvs.style.width=w+'px';cvs.style.height=h+'px';
     container.appendChild(cvs);
-    const ctx=cvs.getContext('2d');ctx.scale(2,2);
-    const particles=[];
-    const palettes=[['#FFD700','#FFAA00','#FFF5CC','#FFF'],['#FF4444','#FF6B6B','#FFAA88','#FFF'],['#33CCFF','#66DDFF','#AAEEFF','#FFF'],['#FF33CC','#FF66DD','#FFAAEE','#FFF'],['#33FF55','#66FF88','#AAFFCC','#FFF'],['#9966FF','#BB99FF','#DDCCFF','#FFF']];
+    const ctx=cvs.getContext('2d');ctx.scale(dpr,dpr);
+    const particles=[];const rings=[];
+    const goldPal=['#FFD700','#FFAA00','#FFF5CC','#FFFFFF','#F0E68C','#DAA520'];
+    const richPals=[goldPal,['#FF4444','#FF6B6B','#FFAA88','#FFF'],['#33CCFF','#66DDFF','#AAEEFF','#FFF'],['#FF33CC','#FF66DD','#FFAAEE','#FFF'],['#33FF55','#66FF88','#AAFFCC','#FFF'],['#9966FF','#BB99FF','#DDCCFF','#FFF'],['#FF8800','#FFAA33','#FFCC66','#FFF']];
 
-    function burst(cx,cy,count,pal){
-      for(let i=0;i<count;i++){
-        const angle=Math.random()*Math.PI*2,speed=1.5+Math.random()*4,size=1+Math.random()*3;
-        particles.push({x:cx,y:cy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-1,size,color:pal[Math.floor(Math.random()*pal.length)],life:1,decay:0.008+Math.random()*0.012,gravity:0.03+Math.random()*0.02});
+    function star(ctx,cx,cy,spikes,or,ir){
+      ctx.beginPath();
+      for(let i=0;i<spikes*2;i++){
+        const r=i%2===0?or:ir;
+        const a=(i*Math.PI/spikes)-Math.PI/2;
+        i===0?ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
       }
+      ctx.closePath();
     }
 
-    // Staggered bursts
-    const bPoints=[[w*0.3,h*0.25],[w*0.7,h*0.2],[w*0.5,h*0.35],[w*0.2,h*0.4],[w*0.8,h*0.3],[w*0.5,h*0.15],[w*0.4,h*0.45]];
-    bPoints.forEach((p,i)=>setTimeout(()=>burst(p[0],p[1],40+Math.random()*20,palettes[i%palettes.length]),i*180));
-    // Second wave
+    function burst(cx,cy,count,pal,type){
+      for(let i=0;i<count;i++){
+        const angle=Math.random()*Math.PI*2,speed=(type==='star'?1:1.5)+Math.random()*(type==='star'?3:5);
+        const size=type==='star'?(2+Math.random()*4):(1+Math.random()*3);
+        particles.push({x:cx,y:cy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-0.8,size,
+          color:pal[Math.floor(Math.random()*pal.length)],life:1,decay:0.005+Math.random()*0.01,
+          gravity:0.02+Math.random()*0.015,type:type||'circle',rot:Math.random()*Math.PI*2,rotSpeed:(Math.random()-0.5)*0.15,
+          trail:[],maxTrail:type==='golden'?8:4});
+      }
+      // Shockwave ring
+      rings.push({x:cx,y:cy,r:0,maxR:40+Math.random()*30,life:1,color:pal[0],speed:3+Math.random()*2});
+    }
+
+    // Grand spectacle — 3 waves
+    // Wave 1: Golden center explosion
+    setTimeout(()=>burst(w*0.5,h*0.3,50,goldPal,'golden'),0);
+    // Wave 1b: Side bursts
+    setTimeout(()=>burst(w*0.25,h*0.25,35,richPals[1],'circle'),150);
+    setTimeout(()=>burst(w*0.75,h*0.2,35,richPals[2],'circle'),280);
+    // Wave 2: Star explosions
+    setTimeout(()=>burst(w*0.4,h*0.4,25,goldPal,'star'),500);
+    setTimeout(()=>burst(w*0.6,h*0.15,25,richPals[4],'star'),650);
+    setTimeout(()=>burst(w*0.3,h*0.35,20,richPals[3],'circle'),750);
+    // Wave 3: Grand finale — multiple rapid bursts
     setTimeout(()=>{
-      [[w*0.35,h*0.2],[w*0.65,h*0.25],[w*0.5,h*0.1]].forEach((p,i)=>
-        setTimeout(()=>burst(p[0],p[1],35,palettes[(i+3)%palettes.length]),i*150));
-    },900);
+      [w*0.5,w*0.3,w*0.7,w*0.2,w*0.8].forEach((x,i)=>
+        setTimeout(()=>burst(x,h*(0.15+Math.random()*0.2),40+Math.random()*15,richPals[i%richPals.length],i%2===0?'golden':'star'),i*100));
+    },1100);
+    // Wave 4: Cascade shower
+    setTimeout(()=>{
+      for(let i=0;i<30;i++){
+        const x=Math.random()*w,y=-10;
+        particles.push({x,y,vx:(Math.random()-0.5)*0.8,vy:1+Math.random()*2,size:1.5+Math.random()*2,
+          color:goldPal[Math.floor(Math.random()*goldPal.length)],life:1,decay:0.006+Math.random()*0.006,
+          gravity:0.04,type:'circle',rot:0,rotSpeed:0,trail:[],maxTrail:6});
+      }
+    },1800);
 
     let raf;
     function draw(){
       ctx.clearRect(0,0,w,h);
+      // Draw shockwave rings
+      for(let i=rings.length-1;i>=0;i--){
+        const r=rings[i];
+        r.r+=r.speed;r.life-=0.03;
+        if(r.life<=0){rings.splice(i,1);continue}
+        ctx.globalAlpha=r.life*0.4;
+        ctx.strokeStyle=r.color;ctx.lineWidth=2*r.life;
+        ctx.shadowColor=r.color;ctx.shadowBlur=15*r.life;
+        ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,Math.PI*2);ctx.stroke();
+      }
+      // Draw particles
       for(let i=particles.length-1;i>=0;i--){
         const p=particles[i];
-        p.x+=p.vx;p.y+=p.vy;p.vy+=p.gravity;p.vx*=0.99;p.life-=p.decay;
+        // Store trail position
+        p.trail.push({x:p.x,y:p.y,life:p.life});
+        if(p.trail.length>p.maxTrail)p.trail.shift();
+        p.x+=p.vx;p.y+=p.vy;p.vy+=p.gravity;p.vx*=0.995;p.life-=p.decay;p.rot+=p.rotSpeed;
         if(p.life<=0){particles.splice(i,1);continue}
+        // Draw trail
+        for(let j=0;j<p.trail.length-1;j++){
+          const tp=p.trail[j],a=tp.life*(j/p.trail.length)*0.25;
+          ctx.globalAlpha=a;ctx.fillStyle=p.color;
+          ctx.beginPath();ctx.arc(tp.x,tp.y,p.size*0.4*(j/p.trail.length),0,Math.PI*2);ctx.fill();
+        }
+        // Draw particle
         ctx.globalAlpha=p.life*p.life;
         ctx.fillStyle=p.color;
-        ctx.shadowColor=p.color;ctx.shadowBlur=p.size*4*p.life;
-        ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fill();
-        // Trail
-        ctx.globalAlpha=p.life*0.3;
-        ctx.beginPath();ctx.arc(p.x-p.vx*2,p.y-p.vy*2,p.size*p.life*0.5,0,Math.PI*2);ctx.fill();
+        ctx.shadowColor=p.color;ctx.shadowBlur=p.size*(p.type==='golden'?8:5)*p.life;
+        if(p.type==='star'){
+          ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+          star(ctx,0,0,5,p.size*p.life*1.5,p.size*p.life*0.6);
+          ctx.fill();ctx.restore();
+        }else{
+          ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life*(p.type==='golden'?1.3:1),0,Math.PI*2);ctx.fill();
+        }
       }
       ctx.shadowBlur=0;ctx.globalAlpha=1;
-      if(particles.length>0)raf=requestAnimationFrame(draw);
+      if(particles.length>0||rings.length>0)raf=requestAnimationFrame(draw);
       else setTimeout(()=>cvs.remove(),100);
     }
     raf=requestAnimationFrame(draw);
-    setTimeout(()=>{cancelAnimationFrame(raf);cvs.remove()},4000);
+    setTimeout(()=>{cancelAnimationFrame(raf);cvs.remove()},5000);
   }
 
   const overlay=document.createElement('div');
@@ -3103,9 +3175,15 @@ function slotMachineReveal(games, callback){
             let sc=0;const target=game.score;
             const si=setInterval(()=>{sc+=Math.ceil((target-sc)*0.2);if(sc>=target){sc=target;clearInterval(si)}scoreVal.textContent=sc+' pts'},30);
             scoreLabel.textContent=game.cls.label;
-            const starCount=game.score>=80?5:game.score>=70?4:game.score>=60?3:game.score>=50?2:1;
-            starsDiv.textContent='★'.repeat(starCount)+'☆'.repeat(5-starCount);
-            starsDiv.style.color=starCount>=4?'var(--color-gold-primary)':'var(--text-muted)';
+            const starCount=game.score>=85?5:game.score>=70?4:game.score>=55?3:game.score>=40?2:1;
+            starsDiv.innerHTML='';
+            for(let si2=0;si2<5;si2++){
+              const sp=document.createElement('span');
+              sp.textContent=si2<starCount?'★':'☆';
+              sp.style.cssText='display:inline-block;opacity:0;transform:scale(0) rotate(-30deg);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);color:'+(si2<starCount?(starCount>=4?'var(--color-gold-primary)':'var(--text-secondary)'):'var(--text-muted)');
+              starsDiv.appendChild(sp);
+              setTimeout(()=>{sp.style.opacity='1';sp.style.transform='scale(1) rotate(0)'},si2*120+200);
+            }
             scoreDiv.classList.add('show');
             nextBtn.style.display='';skipBtn.style.display='none';
             spawnCanvasFireworks(overlay.querySelector('.casino-display'));
