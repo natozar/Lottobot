@@ -759,6 +759,8 @@
       gap: 6px;
       margin-bottom: 16px;
     }
+    #excludeDentro.grid-8, #excludeFora.grid-8 { grid-template-columns: repeat(8, 1fr); gap: 4px; }
+    #excludeDentro.grid-10, #excludeFora.grid-10 { grid-template-columns: repeat(10, 1fr); gap: 3px; }
 
     .exclude-cell {
       aspect-ratio: 1;
@@ -817,6 +819,9 @@
       gap: 6px;
       margin-bottom: 12px;
     }
+    #heatmapGrid.grid-8 { grid-template-columns: repeat(8, 1fr); gap: 4px; }
+    #heatmapGrid.grid-10 { grid-template-columns: repeat(10, 1fr); gap: 3px; }
+    #heatmapGrid.grid-8 .heatmap-cell, #heatmapGrid.grid-10 .heatmap-cell { font-size: 0.65rem; }
 
     .heatmap-cell {
       aspect-ratio: 1;
@@ -1011,6 +1016,9 @@
       gap: 6px;
       margin: 16px 0;
     }
+    #manualInputGrid.grid-8 { grid-template-columns: repeat(8, 1fr); gap: 4px; }
+    #manualInputGrid.grid-10 { grid-template-columns: repeat(10, 1fr); gap: 3px; }
+    #manualInputGrid.grid-8 .exclude-cell, #manualInputGrid.grid-10 .exclude-cell { font-size: 0.65rem; }
 
     #btnConfirmManual {
       width: 100%;
@@ -1309,6 +1317,10 @@
     .numeros-panel { background: var(--bg-surface-1); border: 1px solid var(--border-default); border-radius: var(--border-radius-lg); padding: 16px; margin-bottom: 16px; }
     .numeros-panel-title { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
     .numeros-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .numeros-grid.grid-8 { grid-template-columns: repeat(8, 1fr); gap: 4px; }
+    .numeros-grid.grid-10 { grid-template-columns: repeat(10, 1fr); gap: 3px; }
+    .numeros-grid.grid-8 .num-cell, .numeros-grid.grid-10 .num-cell,
+    .numeros-grid.grid-8 .exclude-cell, .numeros-grid.grid-10 .exclude-cell { font-size: 0.65rem; border-radius: 6px; }
     .num-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 600; font-size: 0.8rem; background: var(--bg-surface-2); border: 1.5px solid var(--border-default); border-radius: 8px; cursor: pointer; color: var(--text-secondary); position: relative; user-select: none; transition: all 0.15s; }
     .num-cell:hover { border-color: var(--border-hover); background: var(--bg-surface-3); }
     .num-cell.fixed { background: rgba(74,124,89,0.15); border-color: var(--color-moss-primary); color: #6aac7e; }
@@ -1597,35 +1609,33 @@
           <div class="modelo-card active" data-modelo="B">B</div>
           <div class="modelo-card" data-modelo="C">C</div>
         </div>
-        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4;">
-          A: Conservador (6 fora / 9 dentro)<br>B: Equilibrado (5 fora / 10 dentro)<br>C: Arrojado (7 fora / 8 dentro)
-        </div>
+        <div id="modeloDesc" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4;"></div>
       </div>
 
       <div class="config-section">
         <div class="section-title">Filtros de Validação</div>
         <div class="toggle-row">
-          <div><span class="toggle-label">Par/Ímpar</span><div class="filter-info">Aceita jogos com 7 ou 8 números pares. Distribuição mais frequente na Lotofácil.</div></div>
+          <div><span class="toggle-label">Par/Ímpar</span><div class="filter-info" id="filterDescPI"></div></div>
           <div id="filterParImpar" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Par/Impar" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <div><span class="toggle-label">Soma</span><div class="filter-info">Soma dos 15 números entre 175 e 205. Faixa onde caem ~70% dos sorteios reais.</div></div>
+          <div><span class="toggle-label">Soma</span><div class="filter-info" id="filterDescSoma"></div></div>
           <div id="filterSoma" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Soma" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <div><span class="toggle-label">Consecutivas</span><div class="filter-info">Máximo de 4 números em sequência (ex: 5-6-7-8). Evita padrões raros.</div></div>
+          <div><span class="toggle-label">Consecutivas</span><div class="filter-info" id="filterDescConsec"></div></div>
           <div id="filterConsec" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Consecutivas" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <div><span class="toggle-label">Repetição</span><div class="filter-info">Entre 8 e 11 números repetidos do último sorteio. Média real: ~9-10 repetições.</div></div>
+          <div><span class="toggle-label">Repetição</span><div class="filter-info" id="filterDescRepet"></div></div>
           <div id="filterRepet" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Repeticao" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <div><span class="toggle-label">Dezena</span><div class="filter-info">Distribui números entre as 5 faixas (1-5, 6-10, 11-15, 16-20, 21-25). Evita concentração.</div></div>
+          <div><span class="toggle-label">Dezena</span><div class="filter-info" id="filterDescDz"></div></div>
           <div id="filterDezena" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Dezena" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
         <div class="toggle-row">
-          <div><span class="toggle-label">Primos</span><div class="filter-info">Mantém entre 4 e 6 números primos (2,3,5,7,11,13,17,19,23). Padrão mais comum.</div></div>
+          <div><span class="toggle-label">Primos</span><div class="filter-info" id="filterDescPrimos"></div></div>
           <div id="filterPrimos" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Primos" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
       </div>
@@ -1916,6 +1926,12 @@ const FALLBACKS={
 };
 function getFallback(){return FALLBACKS[selectedLottery]||FALLBACKS.lotofacil}
 function getFallbackFreq(){const f={};const lot=getLottery();for(let i=1;i<=lot.total;i++)f[i]=Math.floor(Math.random()*30)+30;return f}
+// ══════ DYNAMIC HELPERS (multi-lottery) ══════
+function idealPairs(){const pk=getLottery().pick;const mid=Math.round(pk/2);return[mid-1,mid+1]}
+function idealSumCenter(){const f=getLottery().filters;return Math.round((f.soma[0]+f.soma[1])/2)}
+function idealRepeat(){const f=getLottery().filters;return f.repet}
+function minPrizeHits(){return Math.min(...Object.keys(getPremios()).map(Number))}
+function maxPrizeHits(){return Math.max(...Object.keys(getPremios()).map(Number))}
 
 let ULT=null,historico=[],FREQ={},ATRASO={},TENDENCIA={};
 let selectedModelo='B',jogos=[],previousJogos=[];
@@ -2156,10 +2172,16 @@ async function switchLottery(key){
   ULT=null;historico=[];FREQ={};ATRASO={};TENDENCIA={};invalidateClassifyCache();
   jogos=[];previousJogos=[];
   fixedNums.clear();excludedNums.clear();
-  localStorage.removeItem(CACHE_KEY());
+  // Try cache first for instant switch
+  const cached=localStorage.getItem(CACHE_KEY());
+  if(cached){try{const c=JSON.parse(cached);if(Date.now()-c.timestamp<CACHE_TTL&&c.latest?.numeros){
+    ULT=c.latest;historico=c.historical||[];calcDynamic();
+    updateUI();renderJogos();initManualGrid();
+    showToast('✅ '+getLottery().name+' (cache)');return;
+  }}catch(e){}}
   showToast('Carregando '+getLottery().name+'...');
   await loadAPI();
-  updateUI();renderJogos();
+  updateUI();renderJogos();initManualGrid();
 }
 
 // ══════ THEME TOGGLE ══════
@@ -2350,7 +2372,7 @@ function gerarJogos(){
   if(stats.scores.length>500)stats.scores=stats.scores.slice(-500);
   // Slot machine animation then render
   const btn=document.getElementById('btnGerar');
-  if(jogos.length>0 && jogos.length<=5){
+  if(jogos.length>0 && jogos.length<=5 && getLottery().total<=30){
     slotMachineReveal([...jogos],()=>{renderJogos();updateStats();runHistoricalAnalysis();persist();btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'});
   } else {
     renderJogos();updateStats();runHistoricalAnalysis();persist();
@@ -2406,15 +2428,25 @@ function passFilters(j,f){
 
 // ══════ SCORING ══════
 function calcScore(j){
+  const pk=getLottery().pick;const flt=getLottery().filters;
   let s=0;const p=j.filter(n=>n%2===0).length,sm=j.reduce((a,b)=>a+b,0),r=ULT?j.filter(n=>ULT.numeros.includes(n)).length:0;
-  s+=(p===7||p===8)?20:(p===6||p===9)?10:2;
-  const sd=Math.abs(sm-190);s+=sd<=10?25:sd<=20?18:sd<=35?10:2;
-  s+=(r>=9&&r<=10)?20:(r===8||r===11)?14:(r===7||r===12)?6:1;
+  // Par/Ímpar — ideal range from filters
+  const ip=idealPairs();s+=(p>=ip[0]&&p<=ip[1])?20:(p>=ip[0]-1&&p<=ip[1]+1)?10:2;
+  // Soma — distance from ideal center
+  const sc=idealSumCenter();const range=flt.soma[1]-flt.soma[0];
+  const sd=Math.abs(sm-sc);s+=sd<=range*0.07?25:sd<=range*0.15?18:sd<=range*0.25?10:2;
+  // Repetição — ideal range from filters
+  const ir=flt.repet;s+=(r>=ir[0]&&r<=ir[1])?20:(r>=ir[0]-1&&r<=ir[1]+1)?14:(r>=Math.max(0,ir[0]-2)&&r<=ir[1]+2)?6:1;
+  // Hot numbers — proportional to pick
   const hot=j.filter(n=>{const t=classifyNum(n).type;return t==='Quente'||t==='Ascensão'}).length;
-  s+=(hot>=5&&hot<=8)?15:(hot>=4&&hot<=10)?8:2;
-  let ds=10;for(const[lo,hi]of getDezenas()){const c=j.filter(n=>n>=lo&&n<=hi).length;if(c===0||c>4)ds-=3;else if(c===2||c===4)ds-=1}
+  const hotIdeal=Math.round(pk*0.4);s+=(Math.abs(hot-hotIdeal)<=1)?15:(Math.abs(hot-hotIdeal)<=2)?8:2;
+  // Dezenas — proportional
+  const maxPerDz=Math.ceil(pk/getDezenas().length)+1;
+  let ds=10;for(const[lo,hi]of getDezenas()){const c=j.filter(n=>n>=lo&&n<=hi).length;if(c===0||c>maxPerDz)ds-=3;else if(c>=maxPerDz-1)ds-=1}
   s+=Math.max(0,Math.min(10,ds));
-  const pr=j.filter(n=>getPrimos().has(n)).length;s+=(pr>=4&&pr<=6)?10:(pr===3||pr===7)?5:1;
+  // Primos — proportional
+  const prSet=getPrimos();const pr=j.filter(n=>prSet.has(n)).length;
+  const prIdeal=Math.round(pk*0.3);s+=(Math.abs(pr-prIdeal)<=1)?10:(Math.abs(pr-prIdeal)<=2)?5:1;
   return Math.min(100,Math.max(0,s));
 }
 function classifyScore(s){if(s>=85)return{label:'Excelente',cls:'score-excelente'};if(s>=70)return{label:'Muito Forte',cls:'score-muitoforte'};if(s>=50)return{label:'Forte',cls:'score-forte'};return{label:'Regular',cls:'score-regular'}}
@@ -2424,11 +2456,14 @@ function runHistoricalAnalysis(){
   if(!jogos.length||historico.length<3)return;
   const fe=document.getElementById('monteCarloFill'),de=document.getElementById('monteCarloDetail');
   if(!fe||!de)return;
-  const wins=[0,0,0,0,0];const total=jogos.length*historico.length;
-  jogos.forEach(j=>{historico.forEach(d=>{const h=j.filter(n=>d.numeros.includes(n)).length;if(h>=15)wins[4]++;else if(h>=14)wins[3]++;else if(h>=13)wins[2]++;else if(h>=12)wins[1]++;else if(h>=11)wins[0]++})});
-  const any=wins.reduce((a,b)=>a+b,0);const pct=((any/total)*100).toFixed(1);
+  const tiers=Object.keys(getPremios()).map(Number).sort((a,b)=>a-b);
+  const wins={};tiers.forEach(t=>wins[t]=0);
+  const total=jogos.length*historico.length;
+  jogos.forEach(j=>{historico.forEach(d=>{const h=j.filter(n=>d.numeros.includes(n)).length;for(let ti=tiers.length-1;ti>=0;ti--){if(h>=tiers[ti]){wins[tiers[ti]]++;break}}})});
+  const any=Object.values(wins).reduce((a,b)=>a+b,0);const pct=((any/total)*100).toFixed(1);
   fe.style.width=Math.min(100,pct*5)+'%';
-  de.innerHTML='<strong style="color:var(--color-gold-primary)">'+pct+'%</strong> aderência ≥11 acertos<br><span style="font-size:.7rem;opacity:.7">11:'+wins[0]+' · 12:'+wins[1]+' · 13:'+wins[2]+' · 14:'+wins[3]+' · 15:'+wins[4]+'</span><br><span style="font-size:.65rem;opacity:.5">Base: '+historico.length+' concursos reais</span>';
+  const detail=tiers.map(t=>t+':'+wins[t]).join(' · ');
+  de.innerHTML='<strong style="color:var(--color-gold-primary)">'+pct+'%</strong> aderência ≥'+tiers[0]+' acertos<br><span style="font-size:.7rem;opacity:.7">'+detail+'</span><br><span style="font-size:.65rem;opacity:.5">Base: '+historico.length+' concursos reais</span>';
 }
 
 // ══════ RENDER GAMES ══════
@@ -2447,7 +2482,7 @@ function renderJogos(){
       <div class="game-header"><div class="game-number">#${i+1}</div><div class="score-badge ${j.cls.cls}">${j.score} · ${j.cls.label}</div></div>
       <div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(pad(n))}</div>`).join('')}</div>
       <div class="game-meta">
-        <div class="meta-item"><span class="meta-label">Par/Ímpar</span><span class="meta-value">${p}P/${15-p}I</span></div>
+        <div class="meta-item"><span class="meta-label">Par/Ímpar</span><span class="meta-value">${p}P/${j.length-p}I</span></div>
         <div class="meta-item"><span class="meta-label">Soma</span><span class="meta-value">Σ${s}</span></div>
         <div class="meta-item"><span class="meta-label">Repet</span><span class="meta-value">${r}</span></div>
         <div class="meta-item"><span class="meta-label">Primos</span><span class="meta-value">${pr}</span></div>
@@ -2482,11 +2517,12 @@ function showCheckResult(i,res,cn){
     <div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--color-gold-primary);margin-top:8px">${prize}</div>
     <button class="btn-action" style="margin-top:16px" onclick="this.parentElement.remove()">Fechar</button>`;
   card.style.position='relative';card.appendChild(overlay);
-  if(ac.length>=11)setTimeout(showDonation,1500);
+  if(ac.length>=minPrizeHits())setTimeout(showDonation,1500);
 }
 
 function initManualGrid(){
   const grid=document.getElementById('manualInputGrid');if(!grid)return;
+  grid.innerHTML='';
   for(let i=1;i<=getLottery().total;i++){
     const cell=document.createElement('div');cell.className='exclude-cell';cell.textContent=pad(i);cell.dataset.num=i;cell.dataset.selected='false';
     cell.onclick=function(){const sel=this.dataset.selected==='true';this.dataset.selected=sel?'false':'true';this.style.background=sel?'rgba(45,74,62,0.2)':'rgba(201,168,76,0.3)';this.style.borderColor=sel?'rgba(201,168,76,0.15)':'var(--color-gold-primary)';this.style.color=sel?'rgba(255,255,255,0.8)':'var(--color-gold-primary)'};
@@ -2543,7 +2579,7 @@ function exportPDF(){
     <h1>🎲 Lottobot — ${jogos.length} Jogos</h1>
     <h2>Ref: #${concRef} · Modelo ${selectedModelo} · ${new Date().toLocaleDateString('pt-BR')}</h2>
     ${jogos.map((j,i)=>{const p=j.filter(n=>n%2===0).length,s=j.reduce((a,b)=>a+b,0);
-      return '<div class="game"><div class="game-head"><span>Jogo '+(i+1)+'</span><span>'+j.score+' pts · '+j.cls.label+'</span></div><div class="nums">'+j.map(n=>'<div class="num">'+pad(n)+'</div>').join('')+'</div><div class="meta"><span>'+p+'P/'+(15-p)+'I</span><span>Σ'+s+'</span></div></div>'}).join('')}
+      return '<div class="game"><div class="game-head"><span>Jogo '+(i+1)+'</span><span>'+j.score+' pts · '+j.cls.label+'</span></div><div class="nums">'+j.map(n=>'<div class="num">'+pad(n)+'</div>').join('')+'</div><div class="meta"><span>'+p+'P/'+(j.length-p)+'I</span><span>Σ'+s+'</span></div></div>'}).join('')}
     <div class="footer">Gerado por Lottobot — lottobot.app · Boa sorte!</div>
     <script>setTimeout(()=>window.print(),300)<\/script>
   </body></html>`);
@@ -2609,7 +2645,7 @@ function renderSaved(){
     if(ULT&&g.ref&&ULT.numero>g.ref){
       const hits=g.n.filter(n=>ULT.numeros.includes(n)).length;
       const prize=getPremios()[hits]||'';
-      const color=hits>=14?'var(--color-gold-primary)':hits>=11?'#6aac7e':'var(--text-muted)';
+      const color=hits>=maxPrizeHits()-1?'var(--color-gold-primary)':hits>=minPrizeHits()?'#6aac7e':'var(--text-muted)';
       checkHtml=`<div style="font-size:0.65rem;color:${color};margin-top:3px">${hits} acertos${prize?' · '+prize:''}</div>`;
     }
     return `<div class="saved-item">
@@ -2623,7 +2659,8 @@ function renderFilterTab(){
   if(!ULT)return;
   const r=document.getElementById('filtrosAtivosResumo');
   if(r){
-    const filters=[{id:'filterParImpar',l:'Par/Ímpar (7-8P)'},{id:'filterSoma',l:'Soma (175-205)'},{id:'filterConsec',l:'Consecutivas (máx 4)'},{id:'filterRepet',l:'Repetição (8-11)'},{id:'filterDezena',l:'Distribuição por Dezena'},{id:'filterPrimos',l:'Primos (4-6)'}];
+    const flt=getLottery().filters;const ip=idealPairs();
+    const filters=[{id:'filterParImpar',l:'Par/Ímpar ('+ip[0]+'-'+ip[1]+'P)'},{id:'filterSoma',l:'Soma ('+flt.soma[0]+'-'+flt.soma[1]+')'},{id:'filterConsec',l:'Consecutivas (máx '+flt.consec+')'},{id:'filterRepet',l:'Repetição ('+flt.repet[0]+'-'+flt.repet[1]+')'},{id:'filterDezena',l:'Distribuição por Dezena'},{id:'filterPrimos',l:'Primos'}];
     r.innerHTML=filters.map(f=>{const on=document.getElementById(f.id)?.classList.contains('on');return '<div style="padding:4px 0;color:'+(on?'var(--color-gold-primary)':'rgba(255,255,255,0.4)')+'">'+(on?'✅':'⬜')+' '+f.l+'</div>'}).join('');
   }
   const dg=document.getElementById('excludeDentro'),fg=document.getElementById('excludeFora');
@@ -2646,7 +2683,7 @@ function updateUI(){
   if(balls)balls.innerHTML=ULT.numeros.map(n=>'<div class="ball '+getBallClass(n)+'">'+pad(n)+'</div>').join('');
   const res=document.getElementById('ultimoResumo');
   if(res){const p=ULT.numeros.filter(n=>n%2===0).length,s=ULT.numeros.reduce((a,b)=>a+b,0);res.innerHTML='Pares: '+p+' · Ímpares: '+(ULT.numeros.length-p)+' · Soma: '+s}
-  renderFilterTab();renderHeatmap();renderTop5();renderNumeroDoDia();renderHistoricoTimeline();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();
+  updateGridLayout();renderFilterTab();renderHeatmap();renderTop5();renderNumeroDoDia();renderHistoricoTimeline();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();updateDynamicDescriptions();
 }
 
 function switchTab(tab){
@@ -2830,6 +2867,30 @@ function updatePreGenSummary(){
   document.getElementById('sumFixed').textContent=fixedNums.size;
   document.getElementById('sumExcluded').textContent=excludedNums.size;
   document.getElementById('sumJanela').textContent=(document.getElementById('sliderJanela')?.value||50)+' concursos';
+}
+
+// ══════ DYNAMIC DESCRIPTIONS ══════
+function updateGridLayout(){
+  const t=getLottery().total;const cls=t>50?'grid-10':t>30?'grid-8':'';
+  document.querySelectorAll('.numeros-grid,#heatmapGrid,#manualInputGrid,#excludeDentro,#excludeFora').forEach(g=>{
+    g.classList.remove('grid-8','grid-10');if(cls)g.classList.add(cls);
+  });
+}
+function updateDynamicDescriptions(){
+  const lot=getLottery();const flt=lot.filters;const mod=getModelos();const ip=idealPairs();
+  // Model descriptions
+  const md=document.getElementById('modeloDesc');
+  if(md){const names={A:'Conservador',B:'Equilibrado',C:'Arrojado'};
+    md.innerHTML=Object.entries(mod).map(([k,v])=>k+': '+names[k]+' ('+v.fora+' fora / '+v.dentro+' dentro)').join('<br>')}
+  // Filter descriptions
+  const el=id=>document.getElementById(id);
+  const d1=el('filterDescPI');if(d1)d1.textContent='Aceita jogos com '+ip[0]+' ou '+ip[1]+' números pares.';
+  const d2=el('filterDescSoma');if(d2)d2.textContent='Soma dos '+lot.pick+' números entre '+flt.soma[0]+' e '+flt.soma[1]+'.';
+  const d3=el('filterDescConsec');if(d3)d3.textContent='Máximo de '+flt.consec+' números em sequência. Evita padrões raros.';
+  const d4=el('filterDescRepet');if(d4)d4.textContent='Entre '+flt.repet[0]+' e '+flt.repet[1]+' números repetidos do último sorteio.';
+  const dzStr=getDezenas().map(([a,b])=>a+'-'+b).join(', ');
+  const d5=el('filterDescDz');if(d5)d5.textContent='Distribui números entre as faixas ('+dzStr+'). Evita concentração.';
+  const d6=el('filterDescPrimos');if(d6)d6.textContent='Controla quantidade de números primos no jogo.';
 }
 
 // ══════ PRIZE ESTIMATION ══════
@@ -3150,7 +3211,8 @@ function slotMachineReveal(games, callback){
     const counter=overlay.querySelector('#casinoCounter');
 
     const balls={};
-    for(let n=1;n<=25;n++){
+    const lotTotal=getLottery().total;
+    for(let n=1;n<=lotTotal;n++){
       const ball=document.createElement('div');ball.className='casino-ball';ball.textContent=pad(n);
       reels.appendChild(ball);balls[n]=ball;
     }
@@ -3201,7 +3263,7 @@ function slotMachineReveal(games, callback){
 
         if(revealed===totalSel){
           // Dim non-selected with stagger
-          const unsel=[];for(let k=1;k<=25;k++)if(!selectedSet.has(k))unsel.push(k);
+          const unsel=[];for(let k=1;k<=lotTotal;k++)if(!selectedSet.has(k))unsel.push(k);
           unsel.forEach((k,di)=>setTimeout(()=>balls[k].classList.add('dimmed'),di*40));
 
           setTimeout(()=>{
