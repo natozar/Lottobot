@@ -1571,9 +1571,9 @@
       <div class="config-section">
         <div class="section-title">Loteria</div>
         <div class="modelos-grid">
-          <div class="modelo-card active" data-loteria="lotofacil" onclick="switchLottery('lotofacil')" style="font-size:0.72rem">Lotofacil</div>
-          <div class="modelo-card" data-loteria="megasena" onclick="switchLottery('megasena')" style="font-size:0.72rem">Mega-Sena</div>
-          <div class="modelo-card" data-loteria="quina" onclick="switchLottery('quina')" style="font-size:0.72rem">Quina</div>
+          <div class="modelo-card loteria-card active" data-loteria="lotofacil" onclick="switchLottery('lotofacil')" style="font-size:0.72rem">Lotofacil</div>
+          <div class="modelo-card loteria-card" data-loteria="megasena" onclick="switchLottery('megasena')" style="font-size:0.72rem">Mega-Sena</div>
+          <div class="modelo-card loteria-card" data-loteria="quina" onclick="switchLottery('quina')" style="font-size:0.72rem">Quina</div>
         </div>
       </div>
 
@@ -2151,7 +2151,7 @@ function checkNotifyParams(){
 async function switchLottery(key){
   if(key===selectedLottery)return;
   selectedLottery=key;
-  document.querySelectorAll('[data-loteria]').forEach(el=>el.classList.toggle('active',el.dataset.loteria===key));
+  document.querySelectorAll('.loteria-card').forEach(el=>el.classList.toggle('active',el.dataset.loteria===key));
   // Reset state
   ULT=null;historico=[];FREQ={};ATRASO={};TENDENCIA={};invalidateClassifyCache();
   jogos=[];previousJogos=[];
@@ -2645,7 +2645,7 @@ function updateUI(){
   const balls=document.getElementById('ultimoBalls');
   if(balls)balls.innerHTML=ULT.numeros.map(n=>'<div class="ball '+getBallClass(n)+'">'+pad(n)+'</div>').join('');
   const res=document.getElementById('ultimoResumo');
-  if(res){const p=ULT.numeros.filter(n=>n%2===0).length,s=ULT.numeros.reduce((a,b)=>a+b,0);res.innerHTML='Pares: '+p+' · Ímpares: '+(15-p)+' · Soma: '+s}
+  if(res){const p=ULT.numeros.filter(n=>n%2===0).length,s=ULT.numeros.reduce((a,b)=>a+b,0);res.innerHTML='Pares: '+p+' · Ímpares: '+(ULT.numeros.length-p)+' · Soma: '+s}
   renderFilterTab();renderHeatmap();renderTop5();renderNumeroDoDia();renderHistoricoTimeline();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();
 }
 
@@ -2658,7 +2658,7 @@ function switchTab(tab){
   if(tab==='mapa')renderHeatmap();if(tab==='historico')renderSaved();if(tab==='filtros')renderFilterTab();
 }
 
-function selectModelo(m){selectedModelo=m;document.querySelectorAll('.modelo-card').forEach(el=>el.classList.toggle('active',el.dataset.modelo===m));updatePreGenSummary();showToast('Modelo '+m)}
+function selectModelo(m){selectedModelo=m;document.querySelectorAll('.modelo-card[data-modelo]').forEach(el=>el.classList.toggle('active',el.dataset.modelo===m));updatePreGenSummary();showToast('Modelo '+m)}
 function updateSlider(){const s=document.getElementById('sliderJanela'),d=document.getElementById('sliderValue');if(s&&d)d.textContent=s.value;updatePreGenSummary()}
 function updateMelhorNSlider(){const s=document.getElementById('sliderMelhorN'),d=document.getElementById('sliderMelhorNValue');if(s&&d)d.textContent=s.value;updatePreGenSummary()}
 function updateStats(){
@@ -2834,18 +2834,21 @@ function updatePreGenSummary(){
 
 // ══════ PRIZE ESTIMATION ══════
 function updatePrizeEstimate(){
-  // Use last known prize values or estimates from API
-  // Lotofácil typical prizes (estimated, updated from API when available)
-  const prizes={15:'R$ 1.700.000',14:'R$ 1.700',13:'R$ 30',12:'R$ 12',11:'R$ 6'};
-  document.getElementById('prize15').textContent=prizes[15];
-  document.getElementById('prize14').textContent=prizes[14];
-  document.getElementById('prize13').textContent=prizes[13];
-  document.getElementById('prize12').textContent=prizes[12];
-  document.getElementById('prize11').textContent=prizes[11];
-  // Check if accumulated (estimate based on 15-acertos prize)
-  if(ULT&&ULT.acumulou){
-    document.getElementById('acumuladoPanel').style.display='block';
-    document.getElementById('acumuladoValue').textContent=ULT.valorEstimado||'R$ 1.700.000+';
+  const premios=getPremios();
+  const container=document.getElementById('prizeEstimate');
+  if(!container)return;
+  // Rebuild prize rows dynamically based on current lottery
+  const keys=Object.keys(premios).map(Number).sort((a,b)=>b-a);
+  container.innerHTML=keys.map(k=>`<div class="prize-row"><span class="acertos">${k} acertos</span><span class="valor">${premios[k]}</span></div>`).join('');
+  // Acumulado
+  const acPanel=document.getElementById('acumuladoPanel');
+  if(acPanel){
+    if(ULT&&ULT.acumulou&&ULT.valorEstimado){
+      acPanel.style.display='block';
+      document.getElementById('acumuladoValue').textContent=ULT.valorEstimado;
+    }else{
+      acPanel.style.display='none';
+    }
   }
 }
 
