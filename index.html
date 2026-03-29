@@ -1920,6 +1920,19 @@ let stats={total:0,scores:[],modelos:{}},saved=[];
 let checkIdx=null,concRef=null;
 let currentUser=null,isAdmin=false;
 
+// Pre-cache best female voice for CTA
+let _bestVoice=null;
+function cacheBestVoice(){
+  const voices=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('pt'));
+  if(!voices.length)return;
+  // Priority: Google female > any female > first pt voice
+  _bestVoice=voices.find(v=>/google.*br|google.*pt/i.test(v.name)&&!/male/i.test(v.name))
+    ||voices.find(v=>/femin|female|luciana|vitoria|francisca|tessa/i.test(v.name))
+    ||voices.find(v=>!/male|daniel|masc|jorge/i.test(v.name))
+    ||voices[0];
+}
+if('speechSynthesis' in window){cacheBestVoice();speechSynthesis.addEventListener('voiceschanged',cacheBestVoice)}
+
 // ══════ INIT ══════
 document.addEventListener('DOMContentLoaded',async()=>{
   loadSaved();setupEventListeners();
@@ -3239,13 +3252,11 @@ function slotMachineReveal(games, callback){
       // Texto + voz
       const ctaText=document.getElementById('ctaText'),ctaBrand=document.getElementById('ctaBrand');
       setTimeout(()=>{if(ctaText)ctaText.classList.add('show');if(ctaBrand)ctaBrand.classList.add('show')},500);
-      setTimeout(()=>{try{if('speechSynthesis' in window){
+      setTimeout(()=>{try{if('speechSynthesis' in window&&_bestVoice){
         speechSynthesis.cancel();
-        const u=new SpeechSynthesisUtterance('A sorte, está com você!');
-        u.lang='pt-BR';u.rate=1.0;u.pitch=1.15;u.volume=1;
-        const voices=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('pt'));
-        const fem=voices.find(v=>/google.*femin|google.*br/i.test(v.name))||voices.find(v=>/femin|female|luciana|vitoria|francisca/i.test(v.name))||voices.find(v=>!/male|daniel|masc/i.test(v.name))||voices[0];
-        if(fem)u.voice=fem;speechSynthesis.speak(u);
+        const u=new SpeechSynthesisUtterance('A sorte está com você!');
+        u.voice=_bestVoice;u.lang='pt-BR';u.rate=1.05;u.pitch=1.12;u.volume=1;
+        speechSynthesis.speak(u);
       }}catch(e){}},600);
 
       // Fade + next
