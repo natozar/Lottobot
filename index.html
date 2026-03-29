@@ -3369,13 +3369,22 @@ function slotMachineReveal(games, callback){
       if(ctaText)ctaText.textContent=phrase.text.replace('!','').toUpperCase();
 
       let speechDone=false;
-      try{if('speechSynthesis' in window&&_ptVoices.length){
+      try{if('speechSynthesis' in window){
         speechSynthesis.cancel();
         const u=new SpeechSynthesisUtterance(phrase.text);
-        // Voz diferente para cada frase (rotaciona entre as disponiveis)
-        const voiceIdx=(_ctaPhraseIdx-1)%Math.max(1,_ptVoices.length);
-        u.voice=_ptVoices[voiceIdx];
-        u.lang='pt-BR';u.rate=phrase.rate;u.pitch=phrase.pitch;u.volume=1;
+        u.lang='pt-BR';u.volume=1;
+        // Variar voz real: usa todas as vozes do sistema (pt + es + en)
+        const allVoices=speechSynthesis.getVoices().filter(v=>/^(pt|es)/i.test(v.lang));
+        if(allVoices.length>1){
+          u.voice=allVoices[(_ctaPhraseIdx-1)%allVoices.length];
+        }else if(_ptVoices.length){
+          u.voice=_ptVoices[0];
+        }
+        // Pitch e rate variam bastante para soar diferente
+        const pitchVariants=[1.0,1.25,0.9,1.35,1.1];
+        const rateVariants=[1.1,1.2,1.05,1.25,1.15];
+        u.pitch=pitchVariants[(_ctaPhraseIdx-1)%5];
+        u.rate=rateVariants[(_ctaPhraseIdx-1)%5];
         u.onend=()=>{speechDone=true;instantClose()};
         speechSynthesis.speak(u);
       }else{speechDone=true}}catch(e){speechDone=true}
