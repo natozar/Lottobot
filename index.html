@@ -1427,6 +1427,15 @@
     .auth-admin-link{font-size:0.65rem;color:var(--color-gold-primary);text-decoration:none;opacity:0.7;display:none}
     .auth-admin-link.show{display:inline}
 
+    /* === SKELETON LOADING === */
+    .skeleton{background:linear-gradient(90deg,var(--bg-surface-2) 25%,var(--bg-surface-3) 50%,var(--bg-surface-2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--border-radius-sm)}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* === RIPPLE EFFECT === */
+    .btn-action,.btn-export,.modelo-card,.nav-button,.casino-btn{position:relative;overflow:hidden}
+    .ripple{position:absolute;border-radius:50%;background:rgba(212,168,83,0.25);transform:scale(0);animation:rippleAnim 0.5s ease-out;pointer-events:none}
+    @keyframes rippleAnim{to{transform:scale(4);opacity:0}}
+
     /* === ONBOARDING TUTORIAL === */
     .onboard-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity 0.3s;backdrop-filter:blur(4px)}
     .onboard-overlay.active{opacity:1}
@@ -1464,6 +1473,7 @@
       <div id="concursoBadge" class="text-muted" style="font-size: 0.8rem;">#0000</div>
       <div id="offlineBadge">📡 Offline</div>
       <div id="headerSpinner"></div>
+      <button id="themeToggle" onclick="toggleTheme()" style="background:none;border:none;font-size:1rem;cursor:pointer;padding:4px" aria-label="Alternar tema" title="Tema claro/escuro">🌙</button>
       <!-- Auth button -->
       <div id="authArea">
         <button class="auth-btn" id="authBtn" onclick="document.getElementById('authModal').classList.add('active')">Entrar</button>
@@ -1635,6 +1645,8 @@
         <div class="export-buttons">
           <button class="btn-export" onclick="exportCopy()">📋 Copiar</button>
           <button class="btn-export" onclick="exportWhatsApp()">💬 WhatsApp</button>
+          <button class="btn-export" onclick="exportPDF()">📄 PDF</button>
+          <button class="btn-export" onclick="exportShareCard()">📸 Card</button>
           <button class="btn-export" onclick="undoJogos()">↩ Desfazer</button>
           <button class="btn-export" onclick="limparJogos()">🗑️ Limpar</button>
         </div>
@@ -1734,6 +1746,22 @@
       <div class="analytics-card">
         <div class="analytics-title">Top 5 Quentes</div>
         <div id="topNumerosContainer"></div>
+      </div>
+
+      <div class="analytics-card" id="numeroDoDiaCard" style="display:none">
+        <div class="analytics-title">Numero do Dia</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="ball ball-hot" style="width:44px;height:44px;font-size:1rem;flex-shrink:0" id="numeroDoDia">—</div>
+          <div>
+            <div style="font-weight:600;color:var(--text-primary);font-size:0.85rem" id="nddLabel">—</div>
+            <div style="font-size:0.7rem;color:var(--text-muted)" id="nddReason">Baseado na tendencia recente</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analytics-card" id="historicoCard" style="display:none">
+        <div class="analytics-title">Ultimos Sorteios</div>
+        <div id="historicoTimeline" style="display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto"></div>
       </div>
     </div>
   </div>
@@ -2017,6 +2045,39 @@ function checkNotifyParams(){
   }
 }
 
+// ══════ THEME TOGGLE ══════
+function toggleTheme(){
+  const html=document.documentElement;
+  const isLight=html.getAttribute('data-theme')==='light';
+  html.setAttribute('data-theme',isLight?'dark':'light');
+  document.getElementById('themeToggle').textContent=isLight?'🌙':'☀️';
+  localStorage.setItem('lottobot_theme',isLight?'dark':'light');
+}
+(function(){const t=localStorage.getItem('lottobot_theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');const btn=document.getElementById('themeToggle');if(btn)btn.textContent='☀️'}})();
+
+// ══════ RIPPLE EFFECT ══════
+document.addEventListener('click',function(e){
+  const btn=e.target.closest('.btn-action,.btn-export,.modelo-card,.nav-button,.casino-btn');
+  if(!btn)return;
+  const rect=btn.getBoundingClientRect();
+  const r=document.createElement('span');r.className='ripple';
+  const size=Math.max(rect.width,rect.height);
+  r.style.width=r.style.height=size+'px';
+  r.style.left=(e.clientX-rect.left-size/2)+'px';
+  r.style.top=(e.clientY-rect.top-size/2)+'px';
+  btn.appendChild(r);setTimeout(()=>r.remove(),500);
+  // Haptic feedback
+  if(navigator.vibrate)navigator.vibrate(10);
+});
+
+// ══════ MODEL RECOMMENDATION ══════
+function getModelRecommendation(){
+  if(stats.total<10)return null;
+  const models=Object.entries(stats.modelos||{}).sort((a,b)=>b[1]-a[1]);
+  if(!models.length)return null;
+  return models[0][0];
+}
+
 function setupEventListeners(){
   document.querySelectorAll('.modelo-card').forEach(el=>el.addEventListener('click',function(){selectModelo(this.dataset.modelo)}));
   FILTER_IDS.forEach(id=>{
@@ -2148,6 +2209,17 @@ function getBallClass(n){return classifyNum(n).cls}
 // ══════ GENERATION ══════
 function gerarJogos(){
   if(!ULT){showToast('⏳ Aguardando dados...');const btn=document.getElementById('btnGerar');if(btn){btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'}return}
+  // Freemium: 5 free generations per day
+  const today=new Date().toISOString().slice(0,10);
+  const freeData=JSON.parse(localStorage.getItem('lottobot_free')||'{"date":"","count":0}');
+  if(freeData.date!==today){freeData.date=today;freeData.count=0}
+  const isPro=currentUser&&localStorage.getItem('lottobot_pro')==='1';
+  if(!isPro&&freeData.count>=5){
+    showToast('Limite diario atingido (5/dia). Faca login para desbloquear!');
+    const btn=document.getElementById('btnGerar');if(btn){btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'}
+    document.getElementById('authModal')?.classList.add('active');return;
+  }
+  freeData.count++;localStorage.setItem('lottobot_free',JSON.stringify(freeData));
   const qtd=parseInt(document.getElementById('qtdJogos').value);
   const mod=MODELOS[selectedModelo];
   const filters=getActiveFilters();
@@ -2176,6 +2248,9 @@ function gerarJogos(){
     btn.classList.remove('loading');btn.textContent='🎲 Gerar Números';
   }
   showToast('🎲 '+jogos.length+' jogos ('+att+' tentativas)');
+  // Model recommendation
+  const rec=getModelRecommendation();
+  if(rec&&rec!==selectedModelo&&stats.total>20&&stats.total%10===0)showToast('💡 Modelo '+rec+' tem melhor desempenho no seu historico');
   // On mobile: auto-navigate to Jogos tab after generating
   if(window.innerWidth<=768){
     document.querySelectorAll('.col-left,.col-center,.col-right').forEach(c=>c.classList.remove('mobile-show'));
@@ -2340,6 +2415,68 @@ function exportWhatsApp(){
   const t='🎯 *LOTTOBOT* — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'*Jogo '+(i+1)+':* '+j.map(n=>pad(n)).join('-')+' _('+j.score+'pts)_').join('\n')+'\n\n_Gerado por Lottobot_';
   window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
 }
+function exportPDF(){
+  if(!jogos.length){showToast('Gere jogos primeiro');return}
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>Lottobot - Jogos</title><style>
+    *{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:20px;color:#1a1a1a}
+    h1{font-size:18px;margin-bottom:4px}h2{font-size:12px;color:#666;margin-bottom:16px}
+    .game{border:1.5px solid #ddd;border-radius:8px;padding:12px;margin-bottom:10px;page-break-inside:avoid}
+    .game-head{display:flex;justify-content:space-between;margin-bottom:8px;font-size:11px;color:#888}
+    .nums{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+    .num{width:28px;height:28px;border-radius:50%;background:#b8912e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+    .meta{display:flex;gap:12px;font-size:10px;color:#666;border-top:1px solid #eee;padding-top:6px}
+    .footer{text-align:center;font-size:9px;color:#aaa;margin-top:16px;padding-top:8px;border-top:1px solid #eee}
+    @media print{body{padding:10px}.game{border-width:1px}}
+  </style></head><body>
+    <h1>🎲 Lottobot — ${jogos.length} Jogos</h1>
+    <h2>Ref: #${concRef} · Modelo ${selectedModelo} · ${new Date().toLocaleDateString('pt-BR')}</h2>
+    ${jogos.map((j,i)=>{const p=j.filter(n=>n%2===0).length,s=j.reduce((a,b)=>a+b,0);
+      return '<div class="game"><div class="game-head"><span>Jogo '+(i+1)+'</span><span>'+j.score+' pts · '+j.cls.label+'</span></div><div class="nums">'+j.map(n=>'<div class="num">'+pad(n)+'</div>').join('')+'</div><div class="meta"><span>'+p+'P/'+(15-p)+'I</span><span>Σ'+s+'</span></div></div>'}).join('')}
+    <div class="footer">Gerado por Lottobot — lottobot.app · Boa sorte!</div>
+    <script>setTimeout(()=>window.print(),300)<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+function exportShareCard(){
+  if(!jogos.length){showToast('Gere jogos primeiro');return}
+  const cvs=document.createElement('canvas');cvs.width=600;cvs.height=400;
+  const ctx=cvs.getContext('2d');
+  // Background
+  ctx.fillStyle='#09090b';ctx.fillRect(0,0,600,400);
+  ctx.fillStyle='#111113';ctx.fillRect(0,0,600,60);
+  // Header
+  ctx.fillStyle='#d4a853';ctx.font='bold 18px Inter,sans-serif';ctx.fillText('🎲 LOTTOBOT',20,38);
+  ctx.fillStyle='#8a8a94';ctx.font='12px Inter,sans-serif';ctx.fillText(jogos.length+' jogos · Modelo '+selectedModelo+' · #'+concRef,200,38);
+  // Games (max 5)
+  const show=jogos.slice(0,5);
+  show.forEach((j,gi)=>{
+    const y=75+gi*62;
+    ctx.fillStyle='#18181b';ctx.beginPath();ctx.roundRect(15,y,570,52,8);ctx.fill();
+    ctx.fillStyle='#8a8a94';ctx.font='bold 11px monospace';ctx.fillText('Jogo '+(gi+1),22,y+16);
+    ctx.fillStyle='#d4a853';ctx.fillText(j.score+'pts · '+j.cls.label,510,y+16);
+    j.forEach((n,ni)=>{
+      const x=22+ni*36,cy=y+37;
+      const cls=classifyNum(n);
+      ctx.fillStyle=cls.cls==='ball-hot'?'#ef7d3a':cls.cls==='ball-cold'?'#4a90d9':cls.cls==='ball-rising'?'#d4a853':'#52525b';
+      ctx.beginPath();ctx.arc(x+12,cy,12,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#fff';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText(pad(n),x+12,cy+4);ctx.textAlign='left';
+    });
+  });
+  // Footer
+  ctx.fillStyle='#8a8a94';ctx.font='10px Inter,sans-serif';ctx.fillText('Gerado por Lottobot · '+new Date().toLocaleDateString('pt-BR'),20,385);
+  // Download
+  cvs.toBlob(blob=>{
+    if(navigator.share&&navigator.canShare?.({files:[new File([blob],'lottobot.png',{type:'image/png'})]})){
+      navigator.share({files:[new File([blob],'lottobot.png',{type:'image/png'})],title:'Lottobot'}).catch(()=>{});
+    }else{
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lottobot-jogos.png';a.click();
+      showToast('📸 Imagem salva!');
+    }
+  },'image/png');
+}
+
 function limparJogos(){previousJogos=[...jogos];jogos=[];concRef=null;renderJogos();persist();showToast('🗑️ Limpo')}
 function undoJogos(){if(!previousJogos.length){showToast('Nada para desfazer');return}jogos=[...previousJogos];previousJogos=[];renderJogos();updateStats();persist();showToast('↩ Desfeito')}
 
@@ -2389,7 +2526,7 @@ function updateUI(){
   if(balls)balls.innerHTML=ULT.numeros.map(n=>'<div class="ball '+getBallClass(n)+'">'+pad(n)+'</div>').join('');
   const res=document.getElementById('ultimoResumo');
   if(res){const p=ULT.numeros.filter(n=>n%2===0).length,s=ULT.numeros.reduce((a,b)=>a+b,0);res.innerHTML='Pares: '+p+' · Ímpares: '+(15-p)+' · Soma: '+s}
-  renderFilterTab();renderHeatmap();renderTop5();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();
+  renderFilterTab();renderHeatmap();renderTop5();renderNumeroDoDia();renderHistoricoTimeline();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();
 }
 
 function switchTab(tab){
@@ -2457,6 +2594,41 @@ function renderTop5(){
     <div style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><div style="width:${(f/mx*100)}%;height:100%;background:linear-gradient(90deg,var(--color-ball-hot),var(--color-gold-primary));border-radius:3px"></div></div>
     <span style="font-family:var(--font-mono);font-size:.78rem;font-weight:600;color:rgba(255,255,255,0.6);width:28px;text-align:right">${f}</span>
   </div>`).join('');
+}
+
+// ══════ NUMERO DO DIA ══════
+function renderNumeroDoDia(){
+  if(!Object.keys(TENDENCIA).length)return;
+  const card=document.getElementById('numeroDoDiaCard');if(!card)return;
+  // Pick number with highest combined trend + frequency, seeded by today's date
+  const today=new Date().toISOString().slice(0,10);
+  const seed=[...today].reduce((a,c)=>a+c.charCodeAt(0),0);
+  const scored=[];
+  for(let i=1;i<=25;i++){
+    const t=TENDENCIA[i]||0,f=(FREQ[i]||0)/(historico.length||1),a=(ATRASO[i]||0);
+    scored.push({n:i,s:t*3+f*2+(a>2?1:0)+(seed%5===i%5?0.5:0)});
+  }
+  scored.sort((a,b)=>b.s-a.s);
+  const pick=scored[0];
+  const cls=classifyNum(pick.n);
+  document.getElementById('numeroDoDia').textContent=pad(pick.n);
+  document.getElementById('numeroDoDia').className='ball '+cls.cls;
+  document.getElementById('numeroDoDia').style.cssText='width:44px;height:44px;font-size:1rem;flex-shrink:0';
+  document.getElementById('nddLabel').textContent=cls.type+' — Freq: '+(FREQ[pick.n]||0)+', Atraso: '+(ATRASO[pick.n]||0);
+  card.style.display='';
+}
+
+// ══════ HISTORICO TIMELINE ══════
+function renderHistoricoTimeline(){
+  if(historico.length<2)return;
+  const card=document.getElementById('historicoCard');if(!card)return;
+  const tl=document.getElementById('historicoTimeline');if(!tl)return;
+  const last10=[...historico].sort((a,b)=>b.numero-a.numero).slice(0,10);
+  tl.innerHTML=last10.map(d=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-default)">
+    <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);min-width:42px">#${d.numero}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:2px">${d.numeros.map(n=>{const c=classifyNum(n).cls;return '<div class="ball '+c+'" style="width:20px;height:20px;font-size:0.55rem">'+pad(n)+'</div>'}).join('')}</div>
+  </div>`).join('');
+  card.style.display='';
 }
 
 // ══════ PERSIST ══════
