@@ -1380,7 +1380,7 @@
     .casino-watermark{position:absolute;bottom:8px;right:12px;font-family:var(--font-mono);font-size:0.6rem;color:rgba(212,168,83,0.35);letter-spacing:0.1em;z-index:15;pointer-events:none;text-transform:uppercase}
     .casino-cta{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(0,0,0,0.96),rgba(0,0,0,0.99));z-index:250;opacity:0;transition:opacity 0.3s;pointer-events:none;perspective:800px}
     .casino-cta.show{opacity:1;pointer-events:auto}
-    .cta-finger{width:160px;height:160px;transform:translateZ(-600px) scale(4);opacity:0;transform-style:preserve-3d}
+    .cta-finger{width:180px;height:180px;transform:translateZ(-600px) scale(4);opacity:0;transform-style:preserve-3d}
     .casino-cta.show .cta-finger{animation:ctaFinger3D 0.45s cubic-bezier(0.15,0.85,0.25,1.3) forwards;filter:drop-shadow(0 0 50px rgba(212,168,83,0.9)) drop-shadow(0 0 100px rgba(212,168,83,0.4))}
     @keyframes ctaFinger3D{0%{transform:translateZ(-600px) scale(4) rotateX(20deg);opacity:0;filter:brightness(4) blur(12px) drop-shadow(0 0 80px rgba(212,168,83,1))}35%{transform:translateZ(60px) scale(1.2) rotateX(-8deg);opacity:1;filter:brightness(1.8) blur(0) drop-shadow(0 0 50px rgba(212,168,83,0.9))}60%{transform:translateZ(-15px) scale(0.92) rotateX(3deg);filter:brightness(1.2)}100%{transform:translateZ(0) scale(1) rotateX(0);filter:brightness(1) drop-shadow(0 0 35px rgba(212,168,83,0.6))}}
     .cta-finger-glow{position:absolute;width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-60%);background:radial-gradient(circle,rgba(212,168,83,0.3) 0%,transparent 70%);border-radius:50%;pointer-events:none;opacity:0}
@@ -3111,7 +3111,7 @@ function slotMachineReveal(games, callback){
       </div>
       <div class="casino-cta" id="casinoCta">
         <div class="cta-finger-glow"></div>
-        <div class="cta-finger" id="ctaFinger"><canvas id="fingerCanvas" width="512" height="512" style="width:100%;height:100%"></canvas></div>
+        <div class="cta-finger" id="ctaFinger"><canvas id="fingerCanvas" width="768" height="768" style="width:100%;height:100%"></canvas></div>
         <div class="cta-text" id="ctaText">A SORTE ESTA COM VOCE</div>
         <div class="cta-brand" id="ctaBrand">ENTRE AGORA — LOTTOBOT.APP</div>
       </div>`;
@@ -3204,101 +3204,62 @@ function slotMachineReveal(games, callback){
 
     function triggerCTA(){
       const cta=document.getElementById('casinoCta');
-      if(!cta){
-        // Fallback — go next
-        if(idx<games.length-1){skipAll=false;showGame(idx+1)}
-        else{overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback()}
-        return;
-      }
-      const ctaText=document.getElementById('ctaText');
-      const ctaBrand=document.getElementById('ctaBrand');
+      const goNext=()=>{if(idx<games.length-1){skipAll=false;showGame(idx+1)}else{overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback()}};
+      if(!cta){goNext();return}
 
-      // Render emoji 4K no canvas com glow e reflexo
-      try{
-        const fc=document.getElementById('fingerCanvas');
-        if(fc){
-          const ctx=fc.getContext('2d');
-          const s=512;
-          ctx.clearRect(0,0,s,s);
-          // Glow dourado atras
-          const grd=ctx.createRadialGradient(s/2,s/2,40,s/2,s/2,220);
-          grd.addColorStop(0,'rgba(212,168,83,0.4)');
-          grd.addColorStop(0.5,'rgba(212,168,83,0.1)');
-          grd.addColorStop(1,'transparent');
-          ctx.fillStyle=grd;ctx.fillRect(0,0,s,s);
-          // Emoji grande e nitido
-          ctx.font='280px serif';
-          ctx.textAlign='center';ctx.textBaseline='middle';
-          // Sombra volumetrica
-          ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=40;ctx.shadowOffsetY=12;
-          ctx.fillText('🫵',s/2,s/2-10);
-          // Reflexo especular (brilho no topo)
-          ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-          ctx.globalCompositeOperation='lighter';
-          const shine=ctx.createLinearGradient(s/2-80,s/2-140,s/2+80,s/2-60);
-          shine.addColorStop(0,'rgba(255,255,255,0)');
-          shine.addColorStop(0.5,'rgba(255,255,255,0.15)');
-          shine.addColorStop(1,'rgba(255,255,255,0)');
-          ctx.fillStyle=shine;
-          ctx.beginPath();ctx.ellipse(s/2,s/2-80,100,50,0,0,Math.PI*2);ctx.fill();
-          ctx.globalCompositeOperation='source-over';
-          // Anel dourado ao redor
-          ctx.strokeStyle='rgba(212,168,83,0.3)';ctx.lineWidth=3;
-          ctx.beginPath();ctx.arc(s/2,s/2,200,0,Math.PI*2);ctx.stroke();
-        }
-      }catch(e){}
+      // Render 🫵 em canvas 768px — 4K nítido
+      const fc=document.getElementById('fingerCanvas');
+      if(fc){try{
+        const c=fc.getContext('2d'),s=768;
+        c.clearRect(0,0,s,s);
+        // Glow
+        const g=c.createRadialGradient(s/2,s/2,60,s/2,s/2,350);
+        g.addColorStop(0,'rgba(255,215,0,0.35)');g.addColorStop(1,'transparent');
+        c.fillStyle=g;c.fillRect(0,0,s,s);
+        // Emoji HD
+        c.font='420px serif';c.textAlign='center';c.textBaseline='middle';
+        c.shadowColor='rgba(0,0,0,0.7)';c.shadowBlur=60;c.shadowOffsetY=16;
+        c.fillText('🫵',s/2,s/2);
+        c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetY=0;
+        // Brilho
+        c.globalCompositeOperation='lighter';
+        c.fillStyle='rgba(255,255,255,0.08)';
+        c.beginPath();c.ellipse(s/2,s/2-100,140,60,0,0,Math.PI*2);c.fill();
+        c.globalCompositeOperation='source-over';
+      }catch(e){}}
 
-      // 1) Tela escurece, dedo voa em 3D
+      // Show + boom
       cta.classList.add('show');
+      try{const a2=ax(),m2=gm();if(a2&&m2){const t=a2.currentTime;
+        const o=a2.createOscillator(),g=a2.createGain();
+        o.type='sine';o.frequency.setValueAtTime(250,t);o.frequency.exponentialRampToValueAtTime(18,t+0.5);
+        g.gain.setValueAtTime(0.22,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.6);
+        o.connect(g);g.connect(m2);o.start(t);o.stop(t+0.7);
+      }}catch(e){}
 
-      // 2) Boom de impacto
-      try{
-        const a2=ax(),m2=gm();
-        if(a2&&m2){const t2=a2.currentTime;
-          const o=a2.createOscillator(),g=a2.createGain();
-          o.type='sine';o.frequency.setValueAtTime(250,t2);o.frequency.exponentialRampToValueAtTime(20,t2+0.5);
-          g.gain.setValueAtTime(0.2,t2);g.gain.exponentialRampToValueAtTime(0.001,t2+0.6);
-          o.connect(g);g.connect(m2);o.start(t2);o.stop(t2+0.7);
-        }
-      }catch(e){}
+      // Texto + voz
+      const ctaText=document.getElementById('ctaText'),ctaBrand=document.getElementById('ctaBrand');
+      setTimeout(()=>{if(ctaText)ctaText.classList.add('show');if(ctaBrand)ctaBrand.classList.add('show')},500);
+      setTimeout(()=>{try{if('speechSynthesis' in window){
+        speechSynthesis.cancel();
+        const u=new SpeechSynthesisUtterance('A sorte, está com você!');
+        u.lang='pt-BR';u.rate=0.8;u.pitch=0.6;u.volume=1;
+        const v=speechSynthesis.getVoices().find(v=>v.lang.startsWith('pt'));
+        if(v)u.voice=v;speechSynthesis.speak(u);
+      }}catch(e){}},600);
 
-      // 3) Texto aparece depois do dedo pousar
-      setTimeout(()=>{
-        if(ctaText)ctaText.classList.add('show');
-        if(ctaBrand)ctaBrand.classList.add('show');
-      },500);
-
-      // 4) Voz fala
-      setTimeout(()=>{
-        try{
-          if('speechSynthesis' in window){
-            speechSynthesis.cancel();
-            const utt=new SpeechSynthesisUtterance('A sorte, está com você!');
-            utt.lang='pt-BR';utt.rate=0.8;utt.pitch=0.6;utt.volume=1;
-            const voices=speechSynthesis.getVoices();
-            const v=voices.find(v=>v.lang.startsWith('pt'))||null;
-            if(v)utt.voice=v;
-            speechSynthesis.speak(utt);
-          }
-        }catch(e){}
-      },600);
-
-      // 5) Fade e avanca
+      // Fade + next
       setTimeout(()=>{if(ctaText)ctaText.classList.add('fade')},2500);
-
       let closed=false;
-      function close(){
-        if(closed)return;closed=true;
+      function close(){if(closed)return;closed=true;
         cta.classList.remove('show');
-        if(ctaText){ctaText.classList.remove('show','fade')}
+        if(ctaText)ctaText.classList.remove('show','fade');
         if(ctaBrand)ctaBrand.classList.remove('show');
         const f=cta.querySelector('.cta-finger');
         if(f){f.style.animation='none';f.offsetHeight;f.style.animation=''}
-        if(idx<games.length-1){skipAll=false;showGame(idx+1)}
-        else{overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback()}
+        goNext();
       }
-      setTimeout(close,3200);
-      cta.onclick=close;
+      setTimeout(close,3200);cta.onclick=close;
     }
   }
 
