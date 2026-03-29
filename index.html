@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="Lottobot — Gerador analítico inteligente de combinações para Lotofácil">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://loteriascaixa-api.herokuapp.com https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://*.cloudfunctions.net https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; img-src 'self' data: https://*.googleusercontent.com https://*.gstatic.com; frame-src https://lottobot-8d75e.firebaseapp.com https://www.google.com https://accounts.google.com https://*.firebaseapp.com;">
+  <!-- CSP removed: Firebase Auth (popup/redirect/recaptcha) is incompatible with strict CSP -->
   <meta name="apple-mobile-web-app-title" content="Lottobot">
   <meta property="og:title" content="Lottobot — Lotofácil Intelligence">
   <meta property="og:description" content="Gerador analítico inteligente de combinações para Lotofácil. Filtros estatísticos, heatmap, Monte Carlo e conferência automática.">
@@ -2309,17 +2309,6 @@ function getBallClass(n){return classifyNum(n).cls}
 // ══════ GENERATION ══════
 function gerarJogos(){
   if(!ULT){showToast('⏳ Aguardando dados...');const btn=document.getElementById('btnGerar');if(btn){btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'}return}
-  // Freemium: 5 free generations per day
-  const today=new Date().toISOString().slice(0,10);
-  const freeData=JSON.parse(localStorage.getItem('lottobot_free')||'{"date":"","count":0}');
-  if(freeData.date!==today){freeData.date=today;freeData.count=0}
-  const isPro=currentUser&&localStorage.getItem('lottobot_pro')==='1';
-  if(!isPro&&freeData.count>=5){
-    showToast('Limite diario atingido (5/dia). Faca login para desbloquear!');
-    const btn=document.getElementById('btnGerar');if(btn){btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'}
-    document.getElementById('authModal')?.classList.add('active');return;
-  }
-  freeData.count++;localStorage.setItem('lottobot_free',JSON.stringify(freeData));
   const qtd=parseInt(document.getElementById('qtdJogos').value);
   const mod=MODELOS[selectedModelo];
   const filters=getActiveFilters();
