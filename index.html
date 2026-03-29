@@ -3204,10 +3204,10 @@ function slotMachineReveal(games, callback){
               setTimeout(()=>{sp.style.opacity='1';sp.style.transform='scale(1) rotate(0)'},si2*120+200);
             }
             scoreDiv.classList.add('show');
-            nextBtn.style.display='';skipBtn.style.display='none';
+            skipBtn.style.display='none';
             spawnCanvasFireworks(overlay.querySelector('.casino-display'));
-            // CTA after every game's fireworks
-            setTimeout(triggerCTA,2000);
+            // CTA fires fast — buttons hidden until after
+            setTimeout(triggerCTA,1200);
           },600);
         }
       },delay);
@@ -3236,29 +3236,33 @@ function slotMachineReveal(games, callback){
         ng.gain.setValueAtTime(0.15,t2);ng.gain.exponentialRampToValueAtTime(0.001,t2+0.3);
         ns.connect(nf);nf.connect(ng);ng.connect(m2);ns.start(t2);
       }
-      setTimeout(()=>{if(ctaText)ctaText.classList.add('show');if(ctaBrand)ctaBrand.classList.add('show')},500);
+      // Text immediately after finger lands
+      setTimeout(()=>{if(ctaText)ctaText.classList.add('show');if(ctaBrand)ctaBrand.classList.add('show')},450);
+      // Voice
       setTimeout(()=>{
         if('speechSynthesis' in window){
           const voices=speechSynthesis.getVoices();
           const utt=new SpeechSynthesisUtterance('A sorte, está com você!');
-          utt.lang='pt-BR';utt.rate=0.8;utt.pitch=0.65;utt.volume=1;
+          utt.lang='pt-BR';utt.rate=0.85;utt.pitch=0.6;utt.volume=1;
           const ptVoice=voices.find(v=>v.lang.startsWith('pt'))||null;
           if(ptVoice)utt.voice=ptVoice;
           speechSynthesis.speak(utt);
         }
-      },700);
-      setTimeout(()=>{if(ctaText){ctaText.classList.add('fade');ctaText.classList.remove('show')}},2800);
+      },550);
+      // Fade text
+      setTimeout(()=>{if(ctaText){ctaText.classList.add('fade');ctaText.classList.remove('show')}},2400);
+      let ctaClosed=false;
       function closeCTA(){
+        if(ctaClosed)return;ctaClosed=true;
         cta.classList.remove('show');
         if(ctaText){ctaText.classList.remove('show','fade')}
         if(ctaBrand)ctaBrand.classList.remove('show');
-        // Reset finger animation for next game
         const finger=cta.querySelector('.cta-finger');
         if(finger){finger.style.animation='none';finger.offsetHeight;finger.style.animation=''}
         if(idx<games.length-1){skipAll=false;showGame(idx+1)}
         else{overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback()}
       }
-      setTimeout(closeCTA,3500);
+      setTimeout(closeCTA,3000);
       cta.onclick=closeCTA;
     }
   }
