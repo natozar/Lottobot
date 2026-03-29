@@ -2835,7 +2835,24 @@ function switchTab(tab){
   if(tab==='mapa')renderHeatmap();if(tab==='historico')renderSaved();if(tab==='filtros')renderFilterTab();
 }
 
-function selectModelo(m){selectedModelo=m;document.querySelectorAll('.modelo-card[data-modelo]').forEach(el=>el.classList.toggle('active',el.dataset.modelo===m));updatePreGenSummary();showToast('Modelo '+m)}
+function selectModelo(m){
+  selectedModelo=m;
+  document.querySelectorAll('.modelo-card[data-modelo]').forEach(el=>el.classList.toggle('active',el.dataset.modelo===m));
+  const desc=document.getElementById('modeloDesc');
+  const descs={A:'Conservador — prioriza numeros do ultimo sorteio',B:'Equilibrado — balanco entre dentro e fora',C:'Arrojado — mais numeros novos',IA:'A I.A. define tudo por voce.'};
+  if(desc)desc.textContent=descs[m]||'';
+  // MODO I.A.: desativar todos os filtros e bloquear
+  const filterSection=document.querySelector('.config-section:has(#filterParImpar)')|| document.getElementById('filterParImpar')?.closest('.config-section');
+  if(m==='IA'){
+    FILTER_IDS.forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('on');el.setAttribute('aria-checked','false');el.style.pointerEvents='none';el.style.opacity='0.3'}});
+    if(filterSection)filterSection.style.opacity='0.4';
+    showToast('🧠 Modo I.A. ativado — filtros desabilitados');
+  }else{
+    FILTER_IDS.forEach(id=>{const el=document.getElementById(id);if(el){el.style.pointerEvents='';el.style.opacity=''}});
+    if(filterSection)filterSection.style.opacity='';
+  }
+  updatePreGenSummary();
+}
 function updateSlider(){const s=document.getElementById('sliderJanela'),d=document.getElementById('sliderValue');if(s&&d)d.textContent=s.value;updatePreGenSummary()}
 function updateMelhorNSlider(){const s=document.getElementById('sliderMelhorN'),d=document.getElementById('sliderMelhorNValue');if(s&&d)d.textContent=s.value;updatePreGenSummary()}
 function updateStats(){
@@ -3102,16 +3119,17 @@ window.addEventListener('appinstalled',()=>{showToast('🎰 Lottobot instalado c
 // ══════ MODO I.A. — INTELLIGENT ANALYSIS ══════
 function gerarModoIA(callback){
   const lot=getLottery();const pick=getPickSize();const mod=getModelos().IA||getModelos().B;
-  const filters=getActiveFilters();
 
-  // Phase 1: Generate 100 candidate games
+  // I.A. ignora filtros do usuario — decide sozinha
   const candidates=[];const seen=new Set();let att=0;
   while(candidates.length<100&&att<5000){att++;
     const j=genOne(mod);if(!j)continue;
     const k=j.join(',');if(seen.has(k))continue;
-    if(passFilters(j,filters)){seen.add(k);j.score=calcScore(j);j.cls=classifyScore(j.score);candidates.push(j)}
+    // I.A. aplica seus proprios criterios (score > 0)
+    j.score=calcScore(j);j.cls=classifyScore(j.score);
+    seen.add(k);candidates.push(j);
   }
-  if(candidates.length<3){showToast('⚠️ Nao foi possivel gerar candidatos suficientes. Ajuste os filtros.');callback();return}
+  if(candidates.length<3){showToast('⚠️ Dados insuficientes para analise I.A.');callback();return}
 
   // Phase 2: Sort by score, take top 20
   candidates.sort((a,b)=>b.score-a.score);
