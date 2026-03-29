@@ -2056,6 +2056,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   await loadAPI();
   updateUI();renderJogos();renderSaved();renderFilterTab();renderTop5();updateStats();
   if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  // Garantir persistencia de login entre sessoes e atualizacoes
+  try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(e){}
   // Firebase Auth listener
   _auth.onAuthStateChanged(async user=>{
     currentUser=user;
