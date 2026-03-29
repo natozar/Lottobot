@@ -1648,6 +1648,26 @@
         </select>
       </div>
 
+      <div class="config-section" id="pickSizeSection">
+        <div class="section-title">Números por Jogo</div>
+        <label for="pickSize" class="sr-only">Numeros por jogo</label>
+        <select id="pickSize" onchange="updatePickSize()">
+          <option value="15" selected>15 números — R$ 3,00</option>
+          <option value="16">16 números — R$ 48,00</option>
+          <option value="17">17 números — R$ 408,00</option>
+          <option value="18">18 números — R$ 2.448,00</option>
+          <option value="19">19 números — R$ 11.628,00</option>
+        </select>
+        <div id="pickSizeInfo" style="font-size:0.65rem;color:var(--text-muted);margin-top:6px;line-height:1.5;display:none">
+          <div style="color:var(--color-gold-primary);font-weight:600;margin-bottom:4px">Estatísticas de vencedores:</div>
+          <div>~92% dos ganhadores jogaram com 15 números</div>
+          <div>~5% jogaram com 16 números</div>
+          <div>~2% jogaram com 17 números</div>
+          <div>~1% jogaram com 18-19 números</div>
+          <div style="margin-top:4px;color:var(--color-ball-hot)">Mais números = mais chances, mas custo muito maior.</div>
+        </div>
+      </div>
+
       <div class="config-section">
         <div class="section-title">Modelo Analítico</div>
         <div class="modelos-grid">
@@ -1667,6 +1687,11 @@
         <div class="toggle-row">
           <div><span class="toggle-label">Soma</span><div class="filter-info" id="filterDescSoma"></div></div>
           <div id="filterSoma" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Soma" tabindex="0"><div class="toggle-knob"></div></div>
+        </div>
+        <div id="somaExataRow" style="display:flex;align-items:center;gap:8px;padding:0 0 8px;font-size:0.75rem">
+          <span style="color:var(--text-muted);white-space:nowrap">Soma exata:</span>
+          <input type="number" id="somaExata" placeholder="Ex: 202" min="100" max="300" style="width:80px;padding:5px 8px;background:var(--bg-surface-2);border:1px solid var(--border-default);border-radius:6px;color:var(--text-primary);font-family:var(--font-mono);font-size:0.78rem">
+          <span style="color:var(--text-muted);font-size:0.65rem">(vazio = faixa padrão)</span>
         </div>
         <div class="toggle-row">
           <div><span class="toggle-label">Consecutivas</span><div class="filter-info" id="filterDescConsec"></div></div>
@@ -2239,6 +2264,17 @@ async function switchLottery(key){
   updateUI();renderJogos();initManualGrid();
 }
 
+// ══════ PICK SIZE (15-19 números) ══════
+let customPickSize=0;
+function getPickSize(){return customPickSize||getLottery().pick}
+function updatePickSize(){
+  const v=parseInt(document.getElementById('pickSize')?.value||0);
+  const info=document.getElementById('pickSizeInfo');
+  if(v>15){customPickSize=v;if(info)info.style.display='block'}
+  else{customPickSize=0;if(info)info.style.display='none'}
+  updatePreGenSummary();
+}
+
 // ══════ THEME TOGGLE ══════
 function toggleTheme(){
   const html=document.documentElement;
@@ -2429,7 +2465,7 @@ function gerarJogos(){
   if(!pool.length){
     btn.classList.remove('loading');btn.textContent='🎲 Gerar Números';
     const available=lot.total-excludedNums.size;
-    const needed=lot.pick;
+    const needed=getPickSize();
     let msg='';
     if(available<needed){
       msg='Voce excluiu numeros demais. Precisa de pelo menos '+needed+' numeros disponiveis, mas so tem '+available+'. Remova algumas exclusoes.';
@@ -2475,7 +2511,7 @@ function gerarJogos(){
 function hammingDistance(a,b){const s=new Set(b);return a.filter(n=>!s.has(n)).length}
 
 function genOne(mod){
-  const pick=getLottery().pick;
+  const pick=getPickSize();
   const fixed=[...fixedNums];const need=pick-fixed.length;
   if(need<0)return null;if(need===0)return fixed.sort((a,b)=>a-b);
   const dentro=ULT.numeros.filter(n=>!excludedNums.has(n)&&!fixedNums.has(n));
@@ -2498,7 +2534,9 @@ function passFilters(j,f){
   const lot=getLottery();const flt=lot.filters;
   const p=j.filter(n=>n%2===0).length,s=j.reduce((a,b)=>a+b,0),r=ULT?j.filter(n=>ULT.numeros.includes(n)).length:0;
   if(f.pi&&(p<flt.parImpar[0]||p>flt.parImpar[1]))return false;
-  if(f.so&&(s<flt.soma[0]||s>flt.soma[1]))return false;
+  const somaExata=parseInt(document.getElementById('somaExata')?.value)||0;
+  if(somaExata>0){if(s!==somaExata)return false}
+  else if(f.so&&(s<flt.soma[0]||s>flt.soma[1]))return false;
   if(f.co){let mx=1,c=1;for(let i=1;i<j.length;i++){j[i]===j[i-1]+1?(c++,mx=Math.max(mx,c)):c=1}if(mx>flt.consec)return false}
   if(f.re&&(r<flt.repet[0]||r>flt.repet[1]))return false;
   if(f.dz){const maxPerDz=Math.ceil(lot.pick/getDezenas().length)+1;for(const[lo,hi]of getDezenas()){const cnt=j.filter(n=>n>=lo&&n<=hi).length;if(cnt>maxPerDz)return false}}
@@ -2508,7 +2546,7 @@ function passFilters(j,f){
 
 // ══════ SCORING ══════
 function calcScore(j){
-  const pk=getLottery().pick;const flt=getLottery().filters;
+  const pk=getPickSize();const flt=getLottery().filters;
   let s=0;const p=j.filter(n=>n%2===0).length,sm=j.reduce((a,b)=>a+b,0),r=ULT?j.filter(n=>ULT.numeros.includes(n)).length:0;
   // Par/Ímpar — ideal range from filters
   const ip=idealPairs();s+=(p>=ip[0]&&p<=ip[1])?20:(p>=ip[0]-1&&p<=ip[1]+1)?10:2;
@@ -2613,7 +2651,7 @@ function initManualGrid(){
 function confirmManualCheck(){
   if(checkIdx===null)return;
   const nums=Array.from(document.querySelectorAll('#manualInputGrid .exclude-cell')).filter(c=>c.dataset.selected==='true').map(c=>parseInt(c.dataset.num)).sort((a,b)=>a-b);
-  if(nums.length!==getLottery().pick){showToast('⚠️ Selecione exatamente '+getLottery().pick+' numeros');return}
+  if(nums.length!==getPickSize()){showToast('⚠️ Selecione exatamente '+getPickSize()+' numeros');return}
   document.getElementById('manualCheckModal').classList.remove('active');
   document.querySelectorAll('#manualInputGrid .exclude-cell').forEach(c=>{c.dataset.selected='false';c.style.background='';c.style.borderColor='';c.style.color=''});
   showCheckResult(checkIdx,nums,null);
@@ -2947,6 +2985,17 @@ function updatePreGenSummary(){
   document.getElementById('sumFixed').textContent=fixedNums.size;
   document.getElementById('sumExcluded').textContent=excludedNums.size;
   document.getElementById('sumJanela').textContent=(document.getElementById('sliderJanela')?.value||50)+' concursos';
+  // Pick size e soma exata
+  const ps=getPickSize();
+  if(ps>getLottery().pick){
+    const el=document.getElementById('sumQtd');
+    if(el)el.textContent=qtd+' ('+ps+' nums)';
+  }
+  const se=parseInt(document.getElementById('somaExata')?.value)||0;
+  if(se>0){
+    const sf=document.getElementById('sumFiltros');
+    if(sf)sf.textContent=activeFilters+' de 6 + Σ'+se;
+  }
 }
 
 // ══════ DYNAMIC DESCRIPTIONS ══════
@@ -3272,7 +3321,7 @@ function slotMachineReveal(games, callback){
           <div class="casino-grid-labels"><span class="casino-grid-label">C1</span><span class="casino-grid-label">C2</span><span class="casino-grid-label">C3</span><span class="casino-grid-label">C4</span><span class="casino-grid-label">C5</span></div>
           <div class="casino-reels" id="casinoReels" style="position:relative"></div>
           <div class="casino-scan-line" id="scanLine"></div>
-          <div style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-bottom:12px"><span id="casinoCounter" style="color:var(--color-gold-primary);font-weight:700;font-size:1.1rem">0</span><span style="opacity:0.4"> / ${getLottery().pick}</span></div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-bottom:12px"><span id="casinoCounter" style="color:var(--color-gold-primary);font-weight:700;font-size:1.1rem">0</span><span style="opacity:0.4"> / ${getPickSize()}</span></div>
           <div class="casino-score" id="casinoScore">
             <div class="casino-score-value" id="casinoScoreVal"></div>
             <div class="casino-score-label" id="casinoScoreLabel"></div>
