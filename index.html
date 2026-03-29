@@ -6,16 +6,30 @@
   <meta name="theme-color" content="#09090b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Lottobot — Gerador analítico inteligente de combinações para Lotofácil">
-  <!-- CSP removed: Firebase Auth (popup/redirect/recaptcha) is incompatible with strict CSP -->
+  <meta name="description" content="Lottobot — Gerador analítico inteligente para Lotofácil, Mega-Sena e Quina. Filtros estatísticos, heatmap, Monte Carlo e conferência automática.">
+  <meta name="keywords" content="lotofácil, mega-sena, quina, loteria, gerador, números, sorteio, probabilidade, estatística">
+  <meta name="author" content="Lottobot">
+  <meta name="robots" content="index, follow">
   <meta name="apple-mobile-web-app-title" content="Lottobot">
-  <meta property="og:title" content="Lottobot — Lotofácil Intelligence">
-  <meta property="og:description" content="Gerador analítico inteligente de combinações para Lotofácil. Filtros estatísticos, heatmap, Monte Carlo e conferência automática.">
-  <meta property="og:image" content="icon-512.png">
+  <!-- Open Graph -->
+  <meta property="og:title" content="Lottobot — Seus números da sorte com inteligência">
+  <meta property="og:description" content="Gere combinações otimizadas para Lotofácil, Mega-Sena e Quina. Análise estatística real, filtros avançados e conferência automática. Grátis.">
+  <meta property="og:image" content="https://natozar.github.io/Lottobot/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://natozar.github.io/Lottobot/">
   <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="Lottobot">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Lottobot — Seus números da sorte com inteligência">
+  <meta name="twitter:description" content="Gere combinações otimizadas para Lotofácil com análise estatística real. Grátis.">
+  <meta name="twitter:image" content="https://natozar.github.io/Lottobot/og-image.png">
+  <!-- Structured Data -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lottobot","description":"Gerador analítico inteligente de combinações para Lotofácil, Mega-Sena e Quina","url":"https://natozar.github.io/Lottobot/","applicationCategory":"GameApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"author":{"@type":"Organization","name":"Lottobot"}}</script>
 
-  <title>Lottobot v3 — Lotofácil Intelligence</title>
+  <title>Lottobot — Gerador Inteligente para Lotofácil, Mega-Sena e Quina</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,8 +37,9 @@
   <link rel="preconnect" href="https://loteriascaixa-api.herokuapp.com">
   <link rel="dns-prefetch" href="https://firestore.googleapis.com">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><radialGradient id='g1' cx='35%' cy='35%'><stop offset='0%' stop-color='%23e5b863'/><stop offset='100%' stop-color='%23c9a84c'/></radialGradient></defs><circle cx='96' cy='96' r='92' fill='url(%23g1)'/><circle cx='96' cy='96' r='72' fill='%23111113' opacity='0.95'/><text x='96' y='115' font-family='JetBrains Mono, monospace' font-size='52' font-weight='800' fill='%23d4a853' text-anchor='middle' letter-spacing='2'>LB</text><circle cx='96' cy='96' r='72' fill='none' stroke='%234a7c59' stroke-width='3' opacity='0.6'/></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><radialGradient id='g1' cx='35%' cy='35%'><stop offset='0%' stop-color='%23e5b863'/><stop offset='100%' stop-color='%23c9a84c'/></radialGradient></defs><circle cx='96' cy='96' r='92' fill='url(%23g1)'/><circle cx='96' cy='96' r='72' fill='%23111113' opacity='0.95'/><text x='96' y='115' font-family='JetBrains Mono, monospace' font-size='52' font-weight='800' fill='%23d4a853' text-anchor='middle' letter-spacing='2'>LB</text><circle cx='96' cy='96' r='72' fill='none' stroke='%234a7c59' stroke-width='3' opacity='0.6'/></svg>">
+  <link rel="canonical" href="https://natozar.github.io/Lottobot/">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%2309090b'/><g transform='translate(256,256) rotate(-15)'><rect x='-120' y='-120' width='240' height='240' rx='40' fill='%23d4a853' stroke='%23b8912e' stroke-width='8'/><rect x='-120' y='-120' width='240' height='240' rx='40' fill='url(%23dg)' opacity='0.4'/><circle cx='-50' cy='-50' r='18' fill='%2309090b'/><circle cx='50' cy='-50' r='18' fill='%2309090b'/><circle cx='0' cy='0' r='18' fill='%2309090b'/><circle cx='-50' cy='50' r='18' fill='%2309090b'/><circle cx='50' cy='50' r='18' fill='%2309090b'/><defs><linearGradient id='dg' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%23fff' stop-opacity='0.3'/><stop offset='100%25' stop-color='transparent'/></linearGradient></defs></g></svg>">
+  <link rel="apple-touch-icon" href="icon-192.png">
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -1490,6 +1505,25 @@
     .btn-action,.btn-export,.modelo-card,.nav-button,.casino-btn{position:relative;overflow:hidden}
     .ripple{position:absolute;border-radius:50%;background:rgba(212,168,83,0.25);transform:scale(0);animation:rippleAnim 0.5s ease-out;pointer-events:none}
     @keyframes rippleAnim{to{transform:scale(4);opacity:0}}
+
+    /* === LGPD COOKIE BANNER === */
+    .lgpd-banner{position:fixed;bottom:0;left:0;right:0;background:var(--bg-surface-1);border-top:1px solid var(--border-default);padding:16px 24px;z-index:280;display:none;align-items:center;justify-content:space-between;gap:16px;font-size:0.78rem;color:var(--text-secondary)}
+    .lgpd-banner.show{display:flex}
+    .lgpd-banner a{color:var(--color-gold-primary);text-decoration:underline;cursor:pointer}
+    .lgpd-btns{display:flex;gap:8px;flex-shrink:0}
+    .lgpd-btn{padding:8px 16px;border-radius:8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:none}
+    .lgpd-btn.accept{background:var(--color-gold-primary);color:#09090b}
+    .lgpd-btn.reject{background:transparent;border:1px solid var(--border-hover);color:var(--text-muted)}
+    /* === LEGAL MODALS === */
+    .legal-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:290;display:none;align-items:center;justify-content:center;padding:16px;pointer-events:none}
+    .legal-modal.show{display:flex;pointer-events:auto}
+    .legal-content{background:var(--bg-surface-1);border:1px solid var(--border-default);border-radius:16px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;padding:32px}
+    .legal-content h2{font-size:1.2rem;font-weight:700;color:var(--text-primary);margin-bottom:16px}
+    .legal-content h3{font-size:0.9rem;font-weight:600;color:var(--color-gold-primary);margin:16px 0 8px}
+    .legal-content p,.legal-content li{font-size:0.8rem;color:var(--text-secondary);line-height:1.7;margin-bottom:8px}
+    .legal-content ul{padding-left:20px}
+    .legal-close{position:sticky;top:0;float:right;background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer}
+    @media(max-width:768px){.lgpd-banner{flex-direction:column;text-align:center;padding:12px 16px;bottom:60px}.lgpd-btns{width:100%;justify-content:center}}
 
     /* === ONBOARDING TUTORIAL === */
     .onboard-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(4px)}
@@ -3434,6 +3468,82 @@ function slotMachineReveal(games, callback){
       <button class="install-banner-btn primary" onclick="doInstall()">Instalar</button>
     </div>
   </div>
+  <!-- LGPD COOKIE BANNER -->
+  <div class="lgpd-banner" id="lgpdBanner">
+    <div>Este site usa cookies e armazena dados localmente para melhorar sua experiencia. Ao continuar, voce concorda com nossa <a onclick="document.getElementById('privacyModal').classList.add('show')">Politica de Privacidade</a> e <a onclick="document.getElementById('termsModal').classList.add('show')">Termos de Uso</a>.</div>
+    <div class="lgpd-btns">
+      <button class="lgpd-btn reject" onclick="rejectLgpd()">Recusar</button>
+      <button class="lgpd-btn accept" onclick="acceptLgpd()">Aceitar</button>
+    </div>
+  </div>
+
+  <!-- POLITICA DE PRIVACIDADE -->
+  <div class="legal-modal" id="privacyModal">
+    <div class="legal-content">
+      <button class="legal-close" onclick="this.closest('.legal-modal').classList.remove('show')">✕</button>
+      <h2>Politica de Privacidade</h2>
+      <p><strong>Ultima atualizacao:</strong> Março de 2026</p>
+      <h3>1. Dados Coletados</h3>
+      <p>O Lottobot coleta apenas os dados necessarios para o funcionamento do servico:</p>
+      <ul>
+        <li><strong>Dados de autenticacao:</strong> nome, email ou telefone (quando voce faz login via Google ou SMS)</li>
+        <li><strong>Jogos salvos:</strong> combinacoes numericas geradas e salvas por voce</li>
+        <li><strong>Preferencias:</strong> modelo analitico, filtros ativos, tema visual</li>
+        <li><strong>Dados de uso:</strong> quantidade de jogos gerados, streak diario</li>
+      </ul>
+      <h3>2. Armazenamento</h3>
+      <p>Seus dados sao armazenados localmente no navegador (localStorage) e, quando autenticado, sincronizados com o Firebase Firestore (servidores Google, em conformidade com LGPD/GDPR).</p>
+      <h3>3. Compartilhamento</h3>
+      <p>Nao vendemos, alugamos ou compartilhamos seus dados pessoais com terceiros. Seus jogos sao privados.</p>
+      <h3>4. Cookies</h3>
+      <p>Utilizamos apenas cookies essenciais para autenticacao e preferencias. Nao utilizamos cookies de rastreamento ou publicidade.</p>
+      <h3>5. Seus Direitos (LGPD)</h3>
+      <p>Voce pode a qualquer momento:</p>
+      <ul>
+        <li>Acessar seus dados (jogos salvos, perfil)</li>
+        <li>Corrigir informacoes incorretas</li>
+        <li>Excluir sua conta e todos os dados associados</li>
+        <li>Revogar consentimento de cookies</li>
+      </ul>
+      <p>Para exercer esses direitos, entre em contato: <strong>chatsagrado@gmail.com</strong></p>
+      <h3>6. Seguranca</h3>
+      <p>Utilizamos Firebase Authentication e Firestore com criptografia em transito (TLS) e em repouso. Seus dados sao protegidos pelos padroes de seguranca do Google Cloud.</p>
+    </div>
+  </div>
+
+  <!-- TERMOS DE USO -->
+  <div class="legal-modal" id="termsModal">
+    <div class="legal-content">
+      <button class="legal-close" onclick="this.closest('.legal-modal').classList.remove('show')">✕</button>
+      <h2>Termos de Uso</h2>
+      <p><strong>Ultima atualizacao:</strong> Março de 2026</p>
+      <h3>1. Sobre o Servico</h3>
+      <p>O Lottobot e um gerador analitico de combinacoes numericas para loterias brasileiras (Lotofacil, Mega-Sena, Quina). O servico utiliza analise estatistica de sorteios passados para gerar combinacoes otimizadas.</p>
+      <h3>2. Isenção de Responsabilidade</h3>
+      <p><strong>O Lottobot NAO garante premiacoes.</strong> Loterias sao jogos de azar e os resultados sao aleatorios. As analises estatisticas e scores sao ferramentas de apoio, nao previsoes. Jogue com responsabilidade.</p>
+      <h3>3. Uso Adequado</h3>
+      <ul>
+        <li>O servico e destinado a maiores de 18 anos</li>
+        <li>Nao utilize o servico para fins ilegais</li>
+        <li>Nao tente manipular ou explorar vulnerabilidades do sistema</li>
+      </ul>
+      <h3>4. Propriedade Intelectual</h3>
+      <p>O Lottobot, incluindo seu codigo, design, animacoes e marca, sao propriedade de seus criadores. E proibida a reproducao sem autorizacao.</p>
+      <h3>5. Disponibilidade</h3>
+      <p>O servico e oferecido "como esta". Nao garantimos disponibilidade ininterrupta. Podemos modificar ou descontinuar funcionalidades a qualquer momento.</p>
+      <h3>6. Doacoes</h3>
+      <p>O Lottobot e gratuito. Doacoes via PIX sao voluntarias e nao conferem direitos adicionais sobre o servico.</p>
+      <h3>7. Contato</h3>
+      <p>Duvidas ou sugestoes: <strong>chatsagrado@gmail.com</strong></p>
+    </div>
+  </div>
+
+  <script>
+  function acceptLgpd(){localStorage.setItem('lottobot_lgpd','accepted');document.getElementById('lgpdBanner').classList.remove('show')}
+  function rejectLgpd(){localStorage.setItem('lottobot_lgpd','rejected');document.getElementById('lgpdBanner').classList.remove('show')}
+  if(!localStorage.getItem('lottobot_lgpd')){setTimeout(()=>document.getElementById('lgpdBanner').classList.add('show'),2000)}
+  </script>
+
   <!-- ONBOARDING TUTORIAL -->
   <div class="onboard-overlay" id="onboardOverlay">
     <div class="onboard-card">
