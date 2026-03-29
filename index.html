@@ -1280,6 +1280,8 @@
       .casino-header h3 { font-size: 0.85rem; }
       .casino-display { padding: 16px 12px; }
       .casino-reels { max-width: 260px; }
+      .casino-reels.reels-8 { max-width: 320px; }
+      .casino-reels.reels-10 { max-width: 360px; }
       .casino-btn { padding: 8px 16px; font-size: 0.75rem; }
       .casino-score-value { font-size: 1.3rem; }
 
@@ -1292,6 +1294,8 @@
 
     @media (max-width: 480px) {
       .casino-reels { max-width: 220px; gap: 3px; }
+      .casino-reels.reels-8 { max-width: 280px; }
+      .casino-reels.reels-10 { max-width: 320px; }
       .casino-header h3 { font-size: 0.78rem; letter-spacing: 0.1em; }
       .casino-lights { gap: 4px; }
       .casino-light { width: 6px; height: 6px; }
@@ -1306,6 +1310,8 @@
       header { height: 48px; }
       .desktop-layout { grid-template-rows: 48px 1fr 56px; }
       .casino-reels { max-width: 190px; gap: 2px; }
+      .casino-reels.reels-8 { max-width: 240px; }
+      .casino-reels.reels-10 { max-width: 280px; }
     }
 
     .text-muted { color: var(--text-muted); }
@@ -1377,7 +1383,13 @@
     .casino-grid-labels{display:flex;justify-content:center;max-width:280px;margin:0 auto 4px}
     .casino-grid-label{flex:1;text-align:center;font-family:var(--font-mono);font-size:0.55rem;color:rgba(255,255,255,0.18);font-weight:600;letter-spacing:0.05em}
     .casino-reels{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:16px;max-width:280px;margin-left:auto;margin-right:auto}
+    .casino-reels.reels-8{grid-template-columns:repeat(8,1fr);max-width:380px;gap:3px}
+    .casino-reels.reels-10{grid-template-columns:repeat(10,1fr);max-width:420px;gap:2px}
     .casino-ball{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:0.85rem;color:rgba(255,255,255,0.12);position:relative;background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.05);transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94)}
+    .casino-reels.reels-8 .casino-ball{font-size:0.65rem}
+    .casino-reels.reels-10 .casino-ball{font-size:0.55rem}
+    .casino-reels.reels-8 .casino-ball.selected::after,.casino-reels.reels-10 .casino-ball.selected::after{inset:-3px;border-width:1.5px}
+    .casino-reels.reels-8 .casino-ball.selected,.casino-reels.reels-10 .casino-ball.selected{box-shadow:0 0 12px var(--ball-glow,rgba(212,168,83,0.7)),0 0 28px var(--ball-glow2,rgba(212,168,83,0.2))}
     .casino-ball.scanning{border-color:rgba(212,168,83,0.4);background:rgba(212,168,83,0.06);transition:all 0.12s}
     .casino-ball.selected{color:#fff;border-color:transparent;animation:ballPop 0.55s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 0 24px var(--ball-glow,rgba(212,168,83,0.7)),0 0 56px var(--ball-glow2,rgba(212,168,83,0.3)),0 0 90px var(--ball-glow2,rgba(212,168,83,0.1))}
     .casino-ball.selected::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.5),transparent 55%)}
@@ -2372,7 +2384,7 @@ function gerarJogos(){
   if(stats.scores.length>500)stats.scores=stats.scores.slice(-500);
   // Slot machine animation then render
   const btn=document.getElementById('btnGerar');
-  if(jogos.length>0 && jogos.length<=5 && getLottery().total<=30){
+  if(jogos.length>0 && jogos.length<=5){
     slotMachineReveal([...jogos],()=>{renderJogos();updateStats();runHistoricalAnalysis();persist();btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'});
   } else {
     renderJogos();updateStats();runHistoricalAnalysis();persist();
@@ -3212,6 +3224,9 @@ function slotMachineReveal(games, callback){
 
     const balls={};
     const lotTotal=getLottery().total;
+    // Adapt grid for larger lotteries
+    if(lotTotal>50)reels.classList.add('reels-10');
+    else if(lotTotal>30)reels.classList.add('reels-8');
     for(let n=1;n<=lotTotal;n++){
       const ball=document.createElement('div');ball.className='casino-ball';ball.textContent=pad(n);
       reels.appendChild(ball);balls[n]=ball;
@@ -3233,8 +3248,9 @@ function slotMachineReveal(games, callback){
     // Scanning wave before reveal sequence
     const scanDelay=380;
     setTimeout(()=>{if(!skipAll){scanLine.style.opacity='1';scanLine.style.top='0';scanLine.style.transition='top 0.5s linear';requestAnimationFrame(()=>scanLine.style.top='100%');
-      // Brief scan highlight on all balls
-      Object.values(balls).forEach((b,i)=>setTimeout(()=>{if(!skipAll)b.classList.add('scanning');setTimeout(()=>b.classList.remove('scanning'),120)},i*18));
+      // Brief scan highlight on all balls — faster for larger grids
+      const scanInterval=lotTotal>50?6:lotTotal>30?10:18;
+      Object.values(balls).forEach((b,i)=>setTimeout(()=>{if(!skipAll)b.classList.add('scanning');setTimeout(()=>b.classList.remove('scanning'),80)},i*scanInterval));
       sfx.scan();
       setTimeout(()=>scanLine.style.opacity='0',550);
     }},200);
