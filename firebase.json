@@ -1,4 +1,21 @@
 {
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "firebase-MSI.json",
+      "firestore.rules",
+      "firestore-MSI.rules",
+      ".firebaserc",
+      "-MSI.firebaserc",
+      "functions",
+      "node_modules",
+      "setup.sh",
+      "package.json",
+      "package-lock.json",
+      "**/.*"
+    ]
+  },
   "firestore": {
     "rules": "firestore.rules"
   },
