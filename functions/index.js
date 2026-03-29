@@ -94,12 +94,14 @@ exports.processDrawResults = onDocumentCreated({
       // Send push if 11+ hits
       if (bestHits >= 11 && user.fcmTokens && user.fcmTokens.length > 0 && user.notificationsEnabled) {
         const prizeLabels = { 11: "R$ 6", 12: "R$ 12", 13: "R$ 30", 14: "R$ 1.700", 15: "JACKPOT!" };
-        const title = bestHits >= 14
-          ? `${bestHits} ACERTOS! Voce pode ter ganhado!`
-          : `${bestHits} acertos no concurso ${drawId}!`;
-        const body = bestHits >= 14
-          ? `Premio estimado: ${prizeLabels[bestHits]}. Confira agora!`
-          : `Seu jogo acertou ${bestHits} numeros (${prizeLabels[bestHits]}). Confira!`;
+        let title, body;
+        if (bestHits >= 14) {
+          title = `🏆 ${bestHits} ACERTOS! Voce pode ter ganhado!`;
+          body = `Premio estimado: ${prizeLabels[bestHits]}. Confira agora! Se o Lottobot te ajudou, considere fazer uma doacao via PIX: chatsagrado@gmail.com`;
+        } else {
+          title = `🎯 ${bestHits} acertos no concurso ${drawId}!`;
+          body = `Seu jogo acertou ${bestHits} numeros (${prizeLabels[bestHits]}). Confira! Gostou do Lottobot? Apoie via PIX: chatsagrado@gmail.com`;
+        }
 
         try {
           const result = await messaging.sendEachForMulticast({
