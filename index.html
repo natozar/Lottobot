@@ -3373,10 +3373,12 @@ function slotMachineReveal(games, callback){
         speechSynthesis.cancel();
         const u=new SpeechSynthesisUtterance(phrase.text);
         u.lang='pt-BR';u.volume=1;
-        // Usar TODAS as vozes do sistema para variedade maxima
-        const allVoices=speechSynthesis.getVoices();
-        if(allVoices.length>1){
-          u.voice=allVoices[(_ctaPhraseIdx-1)%allVoices.length];
+        // Todas as vozes em portugues (femininas + masculinas)
+        const allPt=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('pt'));
+        if(allPt.length>1){
+          u.voice=allPt[(_ctaPhraseIdx-1)%allPt.length];
+        }else if(allPt.length===1){
+          u.voice=allPt[0];
         }
         // Pitch e rate variam bastante para soar diferente
         const pitchVariants=[1.0,1.25,0.9,1.35,1.1];
