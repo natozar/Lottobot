@@ -1536,6 +1536,16 @@
         <button class="reset-exclusions" style="margin-top:10px;" onclick="resetExclusions()">↩ Limpar seleções</button>
       </div>
 
+      <!-- LOTTERY SELECTOR -->
+      <div class="config-section">
+        <div class="section-title">Loteria</div>
+        <div class="modelos-grid">
+          <div class="modelo-card active" data-loteria="lotofacil" onclick="showToast('Lotofacil ativa')" style="font-size:0.72rem">Lotofacil</div>
+          <div class="modelo-card" data-loteria="megasena" onclick="showToast('Mega-Sena em breve!')" style="font-size:0.72rem;opacity:0.4">Mega-Sena</div>
+          <div class="modelo-card" data-loteria="quina" onclick="showToast('Quina em breve!')" style="font-size:0.72rem;opacity:0.4">Quina</div>
+        </div>
+      </div>
+
       <!-- CONFIG -->
       <div class="config-section">
         <div class="section-title">Quantidade</div>
@@ -1647,6 +1657,7 @@
           <button class="btn-export" onclick="exportWhatsApp()">💬 WhatsApp</button>
           <button class="btn-export" onclick="exportPDF()">📄 PDF</button>
           <button class="btn-export" onclick="exportShareCard()">📸 Card</button>
+          <button class="btn-export" onclick="shareBolao()">🎯 Bolao</button>
           <button class="btn-export" onclick="undoJogos()">↩ Desfazer</button>
           <button class="btn-export" onclick="limparJogos()">🗑️ Limpar</button>
         </div>
@@ -2035,12 +2046,24 @@ if(_messaging){
 // Check URL params from push notification click
 function checkNotifyParams(){
   const params=new URLSearchParams(window.location.search);
+  // Bolao import
+  if(params.get('bolao')){
+    try{
+      const data=atob(params.get('bolao'));
+      const imported=data.split(';').map(g=>g.split(',').map(Number));
+      imported.forEach(j=>{j.score=calcScore(j);j.cls=classifyScore(j.score)});
+      jogos=imported;concRef=ULT?.numero||0;
+      renderJogos();updateStats();
+      showToast('🎯 Bolao recebido! '+imported.length+' jogos');
+    }catch(e){showToast('Link de bolao invalido')}
+    window.history.replaceState({},'',window.location.pathname);
+    return;
+  }
   if(params.get('notify')==='win'){
     const hits=params.get('hits');
     const gameId=params.get('game');
     showToast('Seu jogo acertou '+hits+' numeros!');
     setTimeout(showDonation,2000);
-    // Clean URL
     window.history.replaceState({},'',window.location.pathname);
   }
 }
@@ -2475,6 +2498,15 @@ function exportShareCard(){
       showToast('📸 Imagem salva!');
     }
   },'image/png');
+}
+
+function shareBolao(){
+  if(!jogos.length){showToast('Gere jogos primeiro');return}
+  const data=jogos.map(j=>j.join(',')).join(';');
+  const encoded=btoa(data);
+  const url=window.location.origin+window.location.pathname+'?bolao='+encoded;
+  if(navigator.share)navigator.share({title:'Lottobot Bolao',text:'Confira esses jogos!',url}).catch(()=>{});
+  else navigator.clipboard.writeText(url).then(()=>showToast('🎯 Link do bolao copiado!'));
 }
 
 function limparJogos(){previousJogos=[...jogos];jogos=[];concRef=null;renderJogos();persist();showToast('🗑️ Limpo')}
