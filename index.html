@@ -1340,8 +1340,8 @@
     .pre-gen-summary .summary-item .value { font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); }
 
     /* === LAS VEGAS CASINO ANIMATION === */
-    .casino-overlay{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(10,5,20,0.92),rgba(0,0,0,0.98));z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s}
-    .casino-overlay.active{opacity:1}
+    .casino-overlay{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(10,5,20,0.92),rgba(0,0,0,0.98));z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.4s}
+    .casino-overlay.active{opacity:1;pointer-events:auto}
     .casino-machine{max-width:420px;width:92%;background:linear-gradient(180deg,#12122a 0%,#0a0a18 100%);border:2px solid rgba(212,168,83,0.5);border-radius:24px;padding:0;overflow:hidden;box-shadow:0 0 80px rgba(212,168,83,0.12),0 0 160px rgba(212,168,83,0.04),0 20px 60px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.08)}
     .casino-header{background:linear-gradient(135deg,#c9a04a,#d4a853 30%,#e8c36a 50%,#d4a853 70%,#b8912e);padding:14px 16px;text-align:center;position:relative;overflow:hidden}
     .casino-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 8px,rgba(255,255,255,0.04) 8px,rgba(255,255,255,0.04) 16px)}
@@ -1465,8 +1465,8 @@
     @keyframes rippleAnim{to{transform:scale(4);opacity:0}}
 
     /* === ONBOARDING TUTORIAL === */
-    .onboard-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity 0.3s;backdrop-filter:blur(4px)}
-    .onboard-overlay.active{opacity:1}
+    .onboard-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(4px)}
+    .onboard-overlay.active{opacity:1;pointer-events:auto}
     .onboard-card{background:var(--bg-surface-1);border:1px solid rgba(212,168,83,0.3);border-radius:20px;max-width:420px;width:100%;overflow:hidden;animation:modalIn 0.3s ease-out}
     .onboard-header{background:linear-gradient(135deg,rgba(212,168,83,0.15),rgba(74,124,89,0.1));padding:28px 24px 20px;text-align:center}
     .onboard-header h2{font-size:1.3rem;font-weight:700;color:var(--text-primary);margin-bottom:4px}
@@ -3322,7 +3322,7 @@ function slotMachineReveal(games, callback){
   <script>
   (function(){
     const KEY='lottobot_onboard_done';
-    if(localStorage.getItem(KEY))return;
+    if(localStorage.getItem(KEY)){document.getElementById('onboardOverlay')?.remove();return}
     const overlay=document.getElementById('onboardOverlay');
     const steps=overlay.querySelectorAll('.onboard-step');
     const dotsC=document.getElementById('onboardDots');
