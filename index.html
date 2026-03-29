@@ -3184,14 +3184,16 @@ function slotMachineReveal(games, callback){
           setTimeout(()=>{
             if(skipAll)return;
             sfx.win(game.score);
-            // Animated score counter (0 → score)
+            // FASE 1: Score counter animado
             let sc=0;const target=game.score;
             const si=setInterval(()=>{sc+=Math.ceil((target-sc)*0.2);if(sc>=target){sc=target;clearInterval(si)}scoreVal.textContent=sc+' pts'},30);
             scoreLabel.textContent=game.cls.label;
             scoreDiv.classList.add('show');
             skipBtn.style.display='none';
-            // Direto para o CTA com dedo 3D — sem estrelas, sem confetti
-            setTimeout(triggerCTA,800);
+            // FASE 2: Fireworks (canvas) — 1s depois do score
+            setTimeout(()=>{if(!skipAll)spawnCanvasFireworks(overlay.querySelector('.casino-display'))},400);
+            // FASE 3: CTA dedo 3D — 2s depois do score (fireworks ainda rolando)
+            setTimeout(()=>{if(!skipAll)triggerCTA()},2000);
           },600);
         }
       },delay);
