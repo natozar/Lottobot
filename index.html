@@ -2421,19 +2421,44 @@ function gerarJogos(){
     if(passFilters(j,filters)){seen.add(k);j.score=calcScore(j);j.cls=classifyScore(j.score);pool.push(j)}
   }
   if(useMelhorN&&pool.length>qtd){pool.sort((a,b)=>b.score-a.score);pool=pool.slice(0,qtd)}
+
+  const btn=document.getElementById('btnGerar');
+  const lot=getLottery();
+
+  // Se não conseguiu gerar nenhum jogo — orientar o usuário
+  if(!pool.length){
+    btn.classList.remove('loading');btn.textContent='🎲 Gerar Números';
+    const available=lot.total-excludedNums.size;
+    const needed=lot.pick;
+    let msg='';
+    if(available<needed){
+      msg='Voce excluiu numeros demais. Precisa de pelo menos '+needed+' numeros disponiveis, mas so tem '+available+'. Remova algumas exclusoes.';
+    }else if(fixedNums.size>needed){
+      msg='Voce fixou '+fixedNums.size+' numeros, mas o jogo so usa '+needed+'. Remova alguns fixados.';
+    }else{
+      const activeCount=FILTER_IDS.filter(isFilterOn).length;
+      if(activeCount>=4){
+        msg='Seus filtros estao muito restritivos ('+activeCount+'/6 ativos). Desative 1 ou 2 filtros, ou mude o modelo analitico.';
+      }else{
+        msg='Nao foi possivel gerar jogos com essa combinacao de filtros e numeros. Tente ajustar as configuracoes.';
+      }
+    }
+    showToast('⚠️ '+msg);
+    return;
+  }
+
   jogos=pool;concRef=ULT.numero;
   stats.total+=jogos.length;stats.modelos[selectedModelo]=(stats.modelos[selectedModelo]||0)+jogos.length;bumpStreak();
   jogos.forEach(j=>stats.scores.push(j.score));
   if(stats.scores.length>500)stats.scores=stats.scores.slice(-500);
   // Slot machine animation then render
-  const btn=document.getElementById('btnGerar');
   if(jogos.length>0 && jogos.length<=5){
     slotMachineReveal([...jogos],()=>{renderJogos();updateStats();runHistoricalAnalysis();persist();btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'});
   } else {
     renderJogos();updateStats();runHistoricalAnalysis();persist();
     btn.classList.remove('loading');btn.textContent='🎲 Gerar Números';
   }
-  showToast('🎲 '+jogos.length+' jogos ('+att+' tentativas)');
+  showToast('🎲 '+jogos.length+' jogos gerados');
   // Model recommendation
   const rec=getModelRecommendation();
   if(rec&&rec!==selectedModelo&&stats.total>20&&stats.total%10===0)showToast('💡 Modelo '+rec+' tem melhor desempenho no seu historico');
