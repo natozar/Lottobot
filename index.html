@@ -1332,14 +1332,17 @@
     .casino-grid-label{flex:1;text-align:center;font-family:var(--font-mono);font-size:0.55rem;color:rgba(255,255,255,0.18);font-weight:600;letter-spacing:0.05em}
     .casino-reels{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:16px;max-width:280px;margin-left:auto;margin-right:auto}
     .casino-ball{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:0.85rem;color:rgba(255,255,255,0.12);position:relative;background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.05);transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94)}
-    .casino-ball.selected{color:#fff;border-color:transparent;animation:ballPop 0.6s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 0 24px var(--ball-glow,rgba(212,168,83,0.7)),0 0 56px var(--ball-glow2,rgba(212,168,83,0.3)),0 0 90px var(--ball-glow2,rgba(212,168,83,0.1))}
+    .casino-ball.scanning{border-color:rgba(212,168,83,0.4);background:rgba(212,168,83,0.06);transition:all 0.12s}
+    .casino-ball.selected{color:#fff;border-color:transparent;animation:ballPop 0.55s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 0 24px var(--ball-glow,rgba(212,168,83,0.7)),0 0 56px var(--ball-glow2,rgba(212,168,83,0.3)),0 0 90px var(--ball-glow2,rgba(212,168,83,0.1))}
     .casino-ball.selected::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.5),transparent 55%)}
     .casino-ball.selected::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2.5px solid var(--ball-ring,rgba(212,168,83,0.9));animation:ringPulse 2s ease-out forwards}
-    .casino-ball.just-selected{animation:ballPop 0.6s cubic-bezier(0.34,1.56,0.64,1),ballGlowPulse 0.8s ease-out}
-    @keyframes ballPop{0%{transform:scale(0.15);opacity:0;filter:brightness(6) blur(8px)}20%{transform:scale(1.35);opacity:1;filter:brightness(3) blur(0)}50%{transform:scale(0.88);filter:brightness(1.5)}75%{transform:scale(1.06);filter:brightness(1.15)}100%{transform:scale(1);filter:brightness(1)}}
-    @keyframes ballGlowPulse{0%{box-shadow:0 0 40px var(--ball-glow,rgba(212,168,83,0.9)),0 0 80px var(--ball-glow,rgba(212,168,83,0.5)),0 0 120px var(--ball-glow2,rgba(212,168,83,0.2))}100%{box-shadow:0 0 24px var(--ball-glow,rgba(212,168,83,0.7)),0 0 56px var(--ball-glow2,rgba(212,168,83,0.3)),0 0 90px var(--ball-glow2,rgba(212,168,83,0.1))}}
+    .casino-ball.just-selected{animation:ballPop 0.55s cubic-bezier(0.34,1.56,0.64,1),ballGlowPulse 0.7s ease-out}
+    @keyframes ballPop{0%{transform:scale(0.1) rotate(-20deg);opacity:0;filter:brightness(8) blur(10px)}15%{transform:scale(1.4) rotate(5deg);opacity:1;filter:brightness(3.5) blur(0)}40%{transform:scale(0.85) rotate(-2deg);filter:brightness(1.6)}65%{transform:scale(1.08) rotate(0);filter:brightness(1.2)}100%{transform:scale(1) rotate(0);filter:brightness(1)}}
+    @keyframes ballGlowPulse{0%{box-shadow:0 0 50px var(--ball-glow,rgba(212,168,83,0.95)),0 0 100px var(--ball-glow,rgba(212,168,83,0.5)),0 0 150px var(--ball-glow2,rgba(212,168,83,0.2))}100%{box-shadow:0 0 24px var(--ball-glow,rgba(212,168,83,0.7)),0 0 56px var(--ball-glow2,rgba(212,168,83,0.3)),0 0 90px var(--ball-glow2,rgba(212,168,83,0.1))}}
     @keyframes ringPulse{0%{border-color:var(--ball-ring,rgba(212,168,83,0.9));box-shadow:0 0 30px var(--ball-glow,rgba(212,168,83,0.8));transform:scale(1)}40%{border-color:rgba(212,168,83,0.25);box-shadow:0 0 8px rgba(212,168,83,0.1);transform:scale(1.2)}100%{border-color:transparent;box-shadow:none;transform:scale(1.35);opacity:0}}
-    .casino-ball.dimmed{opacity:0.15;filter:saturate(0) brightness(0.5);transition:all 0.8s}
+    .casino-ball.dimmed{opacity:0.08;filter:saturate(0) brightness(0.3) blur(1px);transform:scale(0.85);transition:all 1s cubic-bezier(0.4,0,0.2,1)}
+    .casino-canvas{position:absolute;inset:0;pointer-events:none;z-index:10}
+    .casino-scan-line{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(212,168,83,0.6),rgba(232,195,106,0.9),rgba(212,168,83,0.6),transparent);box-shadow:0 0 20px rgba(212,168,83,0.5),0 0 60px rgba(212,168,83,0.2);pointer-events:none;z-index:5;opacity:0;transition:opacity 0.15s}
     .casino-score{text-align:center;padding:16px 0 8px;opacity:0;transform:translateY(12px);transition:all 0.6s cubic-bezier(0.34,1.56,0.64,1)}
     .casino-score.show{opacity:1;transform:translateY(0)}
     .casino-score-value{font-family:var(--font-mono);font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#e8c36a,var(--color-gold-primary),#f0d080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 8px rgba(212,168,83,0.3))}
@@ -2551,219 +2554,149 @@ window.addEventListener('appinstalled',()=>{showToast('🎰 Lottobot instalado c
 function slotMachineReveal(games, callback){
   if(!games.length){callback();return}
 
-  // Robust AudioContext — re-init if needed (fixes mobile sound dropping)
   function ax(){
     let a=window._lottoAudio;
-    if(!a||a.state==='closed'){
-      try{a=new(window.AudioContext||window.webkitAudioContext)();window._lottoAudio=a}catch(e){return null}
-    }
-    if(a.state==='suspended')a.resume();
-    return a;
+    if(!a||a.state==='closed'){try{a=new(window.AudioContext||window.webkitAudioContext)();window._lottoAudio=a}catch(e){return null}}
+    if(a.state==='suspended')a.resume();return a;
   }
+  let _mc=null;
+  function gm(){const a=ax();if(!a)return null;if(!_mc||_mc.context!==a){_mc=a.createDynamicsCompressor();_mc.threshold.value=-20;_mc.knee.value=10;_mc.ratio.value=8;_mc.attack.value=0.002;_mc.release.value=0.12;_mc.connect(a.destination)}return _mc}
 
-  // Master compressor for consistent volume across all games
-  let _masterComp=null;
-  function getMaster(){
-    const a=ax();if(!a)return null;
-    if(!_masterComp||_masterComp.context!==a){
-      _masterComp=a.createDynamicsCompressor();
-      _masterComp.threshold.value=-24;_masterComp.knee.value=12;
-      _masterComp.ratio.value=6;_masterComp.attack.value=0.003;_masterComp.release.value=0.15;
-      _masterComp.connect(a.destination);
-    }
-    return _masterComp;
-  }
-
-  // Synth sound engine — punchy electronic with impact
   const sfx={
-    tick:(i,total)=>{const a=ax();const m=getMaster();if(!a||!m)return;const t=a.currentTime;
-      const progress=i/total;
-      const freq=400+(progress*1000);
-      // Digital snap — sharp attack sawtooth
-      const o1=a.createOscillator();const g1=a.createGain();const f1=a.createBiquadFilter();
-      o1.type='sawtooth';o1.frequency.setValueAtTime(freq*1.5,t);o1.frequency.exponentialRampToValueAtTime(freq,t+0.02);
-      f1.type='lowpass';f1.frequency.setValueAtTime(freq*6,t);f1.frequency.exponentialRampToValueAtTime(freq*0.3,t+0.1);f1.Q.value=12;
-      g1.gain.setValueAtTime(0.12,t);g1.gain.exponentialRampToValueAtTime(0.001,t+0.13);
-      o1.connect(f1);f1.connect(g1);g1.connect(m);o1.start(t);o1.stop(t+0.16);
-      // Detuned square for stereo thickness
-      const o1b=a.createOscillator();const g1b=a.createGain();
-      o1b.type='square';o1b.frequency.setValueAtTime(freq*1.502,t);o1b.frequency.exponentialRampToValueAtTime(freq*1.005,t+0.02);
-      g1b.gain.setValueAtTime(0.05,t);g1b.gain.exponentialRampToValueAtTime(0.001,t+0.1);
-      o1b.connect(f1);o1b.connect(g1b);g1b.connect(m);o1b.start(t);o1b.stop(t+0.13);
-      // Punchy sub hit
-      const o2=a.createOscillator();const g2=a.createGain();
-      o2.type='sine';o2.frequency.setValueAtTime(freq*0.6,t);o2.frequency.exponentialRampToValueAtTime(freq*0.15,t+0.07);
-      g2.gain.setValueAtTime(0.09,t);g2.gain.exponentialRampToValueAtTime(0.001,t+0.09);
-      o2.connect(g2);g2.connect(m);o2.start(t);o2.stop(t+0.12);
-      // Transient click noise for impact
-      const nb=a.createBuffer(1,Math.floor(a.sampleRate*0.015),a.sampleRate);
-      const nd=nb.getChannelData(0);for(let j=0;j<nd.length;j++)nd[j]=(Math.random()*2-1)*Math.pow(1-j/nd.length,3);
-      const ns=a.createBufferSource();ns.buffer=nb;
-      const nf=a.createBiquadFilter();nf.type='highpass';nf.frequency.value=3000+progress*4000;nf.Q.value=1;
-      const ng=a.createGain();ng.gain.setValueAtTime(0.08,t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.02);
-      ns.connect(nf);nf.connect(ng);ng.connect(m);ns.start(t);
-      // Crystal shimmer — gets brighter with each ball
-      const o3=a.createOscillator();const g3=a.createGain();
-      o3.type='sine';o3.frequency.setValueAtTime(freq*3+progress*2000,t);o3.frequency.exponentialRampToValueAtTime(freq*5+progress*2500,t+0.03);
-      g3.gain.setValueAtTime(0.025+progress*0.02,t);g3.gain.exponentialRampToValueAtTime(0.001,t+0.08);
-      o3.connect(g3);g3.connect(m);o3.start(t);o3.stop(t+0.1);
+    scan:()=>{const a=ax(),m=gm();if(!a||!m)return;const t=a.currentTime;
+      const o=a.createOscillator(),g=a.createGain(),f=a.createBiquadFilter();
+      o.type='sine';o.frequency.setValueAtTime(200,t);o.frequency.exponentialRampToValueAtTime(2000,t+0.15);
+      f.type='bandpass';f.frequency.value=1200;f.Q.value=3;
+      g.gain.setValueAtTime(0.04,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.18);
+      o.connect(f);f.connect(g);g.connect(m);o.start(t);o.stop(t+0.2);
     },
-    win:(score)=>{const a=ax();const m=getMaster();if(!a||!m)return;const t=a.currentTime;
-      const isHigh=score>=70;
-      // Firework launch whistle
-      const ow=a.createOscillator();const gw=a.createGain();
-      ow.type='sine';ow.frequency.setValueAtTime(800,t);ow.frequency.exponentialRampToValueAtTime(3500,t+0.3);
-      gw.gain.setValueAtTime(0.06,t);gw.gain.exponentialRampToValueAtTime(0.001,t+0.35);
-      ow.connect(gw);gw.connect(m);ow.start(t);ow.stop(t+0.4);
-      // Explosion noise burst at peak
-      const eb=a.createBuffer(1,Math.floor(a.sampleRate*0.25),a.sampleRate);
-      const ed=eb.getChannelData(0);for(let j=0;j<ed.length;j++)ed[j]=(Math.random()*2-1)*Math.exp(-j/(a.sampleRate*0.04));
-      const es=a.createBufferSource();es.buffer=eb;
-      const ef=a.createBiquadFilter();ef.type='bandpass';ef.frequency.value=2500;ef.Q.value=0.8;
-      const eg=a.createGain();eg.gain.setValueAtTime(isHigh?0.12:0.08,t+0.3);eg.gain.exponentialRampToValueAtTime(0.001,t+0.6);
-      es.connect(ef);ef.connect(eg);eg.connect(m);es.start(t+0.3);
-      // Crackle — random pops like sparklers
-      for(let c=0;c<(isHigh?12:6);c++){
-        const cb=a.createBuffer(1,Math.floor(a.sampleRate*0.02),a.sampleRate);
-        const cd=cb.getChannelData(0);for(let j=0;j<cd.length;j++)cd[j]=(Math.random()*2-1)*Math.pow(1-j/cd.length,5);
-        const cs=a.createBufferSource();cs.buffer=cb;
-        const cf=a.createBiquadFilter();cf.type='highpass';cf.frequency.value=5000+Math.random()*4000;
-        const cg=a.createGain();const ct=t+0.35+Math.random()*0.8;
-        cg.gain.setValueAtTime(0.04+Math.random()*0.04,ct);cg.gain.exponentialRampToValueAtTime(0.001,ct+0.03);
+    tick:(i,total)=>{const a=ax(),m=gm();if(!a||!m)return;const t=a.currentTime;
+      const p=i/total,freq=300+p*1200;
+      // Impact hit
+      const o1=a.createOscillator(),g1=a.createGain(),f1=a.createBiquadFilter();
+      o1.type='sawtooth';o1.frequency.setValueAtTime(freq*2,t);o1.frequency.exponentialRampToValueAtTime(freq,t+0.015);
+      f1.type='lowpass';f1.frequency.setValueAtTime(freq*8,t);f1.frequency.exponentialRampToValueAtTime(freq*0.2,t+0.08);f1.Q.value=15;
+      g1.gain.setValueAtTime(0.14+p*0.04,t);g1.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+      o1.connect(f1);f1.connect(g1);g1.connect(m);o1.start(t);o1.stop(t+0.12);
+      // Sub thump
+      const o2=a.createOscillator(),g2=a.createGain();
+      o2.type='sine';o2.frequency.setValueAtTime(freq*0.5,t);o2.frequency.exponentialRampToValueAtTime(40,t+0.06);
+      g2.gain.setValueAtTime(0.1+p*0.05,t);g2.gain.exponentialRampToValueAtTime(0.001,t+0.08);
+      o2.connect(g2);g2.connect(m);o2.start(t);o2.stop(t+0.1);
+      // Transient click
+      const nb=a.createBuffer(1,Math.floor(a.sampleRate*0.012),a.sampleRate);
+      const nd=nb.getChannelData(0);for(let j=0;j<nd.length;j++)nd[j]=(Math.random()*2-1)*Math.pow(1-j/nd.length,4);
+      const ns=a.createBufferSource(),nf=a.createBiquadFilter(),ng=a.createGain();ns.buffer=nb;
+      nf.type='highpass';nf.frequency.value=4000+p*6000;ng.gain.setValueAtTime(0.09,t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.015);
+      ns.connect(nf);nf.connect(ng);ng.connect(m);ns.start(t);
+      // Shimmer (escalates)
+      const o3=a.createOscillator(),g3=a.createGain();
+      o3.type='sine';o3.frequency.setValueAtTime(freq*4+p*3000,t);o3.frequency.exponentialRampToValueAtTime(freq*6+p*4000,t+0.025);
+      g3.gain.setValueAtTime(0.02+p*0.03,t);g3.gain.exponentialRampToValueAtTime(0.001,t+0.07);
+      o3.connect(g3);g3.connect(m);o3.start(t);o3.stop(t+0.08);
+    },
+    win:(score)=>{const a=ax(),m=gm();if(!a||!m)return;const t=a.currentTime;
+      const hi=score>=70;
+      // Whistle up
+      const ow=a.createOscillator(),gw=a.createGain();
+      ow.type='sine';ow.frequency.setValueAtTime(600,t);ow.frequency.exponentialRampToValueAtTime(4000,t+0.25);
+      gw.gain.setValueAtTime(0.06,t);gw.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+      ow.connect(gw);gw.connect(m);ow.start(t);ow.stop(t+0.35);
+      // Explosion burst
+      const eb=a.createBuffer(1,Math.floor(a.sampleRate*0.3),a.sampleRate);
+      const ed=eb.getChannelData(0);for(let j=0;j<ed.length;j++)ed[j]=(Math.random()*2-1)*Math.exp(-j/(a.sampleRate*0.035));
+      const es=a.createBufferSource(),ef=a.createBiquadFilter(),eg=a.createGain();es.buffer=eb;
+      ef.type='bandpass';ef.frequency.value=2800;ef.Q.value=0.6;
+      eg.gain.setValueAtTime(hi?0.14:0.09,t+0.25);eg.gain.exponentialRampToValueAtTime(0.001,t+0.6);
+      es.connect(ef);ef.connect(eg);eg.connect(m);es.start(t+0.25);
+      // Sparkler crackle
+      for(let c=0;c<(hi?16:8);c++){
+        const cb=a.createBuffer(1,Math.floor(a.sampleRate*0.018),a.sampleRate);
+        const cd=cb.getChannelData(0);for(let j=0;j<cd.length;j++)cd[j]=(Math.random()*2-1)*Math.pow(1-j/cd.length,6);
+        const cs=a.createBufferSource(),cf=a.createBiquadFilter(),cg=a.createGain();cs.buffer=cb;
+        cf.type='highpass';cf.frequency.value=6000+Math.random()*5000;
+        const ct=t+0.3+Math.random()*1.0;
+        cg.gain.setValueAtTime(0.03+Math.random()*0.05,ct);cg.gain.exponentialRampToValueAtTime(0.001,ct+0.025);
         cs.connect(cf);cf.connect(cg);cg.connect(m);cs.start(ct);
       }
-      // Victory arpeggio — synth fanfare
-      const notes=isHigh?[523,659,784,1047,1318,1568]:[523,659,784,1047];
+      // Fanfare arpeggio
+      const notes=hi?[523,659,784,1047,1318,1568,2093]:[523,659,784,1047];
       notes.forEach((f,i)=>{
-        const o=a.createOscillator();const g=a.createGain();const fl=a.createBiquadFilter();
+        const o=a.createOscillator(),g=a.createGain(),fl=a.createBiquadFilter();
         o.type=i%2===0?'sawtooth':'square';o.frequency.value=f;
-        const o2=a.createOscillator();const g2=a.createGain();
-        o2.type=o.type;o2.frequency.value=f*1.006;
-        fl.type='lowpass';fl.frequency.setValueAtTime(f*5,t+0.35+i*0.1);fl.frequency.exponentialRampToValueAtTime(f*1.5,t+0.35+i*0.1+0.45);fl.Q.value=5;
-        const vol=isHigh?0.07:0.05;
-        g.gain.setValueAtTime(vol,t+0.35+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,t+0.35+i*0.1+0.5);
-        g2.gain.setValueAtTime(vol*0.4,t+0.35+i*0.1);g2.gain.exponentialRampToValueAtTime(0.001,t+0.35+i*0.1+0.45);
+        const o2=a.createOscillator(),g2=a.createGain();o2.type=o.type;o2.frequency.value=f*1.005;
+        fl.type='lowpass';fl.frequency.setValueAtTime(f*6,t+0.3+i*0.08);fl.frequency.exponentialRampToValueAtTime(f*1.2,t+0.3+i*0.08+0.4);fl.Q.value=6;
+        const v=hi?0.065:0.045;
+        g.gain.setValueAtTime(v,t+0.3+i*0.08);g.gain.exponentialRampToValueAtTime(0.001,t+0.3+i*0.08+0.45);
+        g2.gain.setValueAtTime(v*0.35,t+0.3+i*0.08);g2.gain.exponentialRampToValueAtTime(0.001,t+0.3+i*0.08+0.4);
         o.connect(fl);fl.connect(g);g.connect(m);o2.connect(g2);g2.connect(m);
-        o.start(t+0.35+i*0.1);o.stop(t+0.35+i*0.1+0.55);
-        o2.start(t+0.35+i*0.1);o2.stop(t+0.35+i*0.1+0.5);
+        o.start(t+0.3+i*0.08);o.stop(t+0.3+i*0.08+0.5);o2.start(t+0.3+i*0.08);o2.stop(t+0.3+i*0.08+0.45);
       });
-      // Deep bass drop
-      if(isHigh){const ob=a.createOscillator();const gb=a.createGain();
-        ob.type='sine';ob.frequency.setValueAtTime(150,t+0.3);ob.frequency.exponentialRampToValueAtTime(30,t+0.7);
-        gb.gain.setValueAtTime(0.14,t+0.3);gb.gain.exponentialRampToValueAtTime(0.001,t+0.75);
-        ob.connect(gb);gb.connect(m);ob.start(t+0.3);ob.stop(t+0.8);
-      }
+      // Bass drop
+      if(hi){const ob=a.createOscillator(),gb=a.createGain();
+        ob.type='sine';ob.frequency.setValueAtTime(180,t+0.25);ob.frequency.exponentialRampToValueAtTime(25,t+0.7);
+        gb.gain.setValueAtTime(0.16,t+0.25);gb.gain.exponentialRampToValueAtTime(0.001,t+0.75);
+        ob.connect(gb);gb.connect(m);ob.start(t+0.25);ob.stop(t+0.8)}
     },
-    drumroll:()=>{const a=ax();const m=getMaster();if(!a||!m)return;const t=a.currentTime;
-      // Electronic tension build — accelerating hits
-      for(let i=0;i<12;i++){
-        const o=a.createOscillator();const g=a.createGain();const f=a.createBiquadFilter();
-        o.type='square';o.frequency.value=50+i*12;
-        f.type='bandpass';f.frequency.value=150+i*80;f.Q.value=8;
-        const vol=0.025+i*0.006;
-        const dt=i*0.03*(1-i*0.02);
-        g.gain.setValueAtTime(vol,t+dt);g.gain.exponentialRampToValueAtTime(0.001,t+dt+0.035);
-        o.connect(f);f.connect(g);g.connect(m);o.start(t+dt);o.stop(t+dt+0.04);
-      }
-      // Rising whoosh — resonant sweep
-      const ow=a.createOscillator();const gw=a.createGain();const fw=a.createBiquadFilter();
-      ow.type='sawtooth';ow.frequency.setValueAtTime(60,t);ow.frequency.exponentialRampToValueAtTime(1200,t+0.4);
-      fw.type='lowpass';fw.frequency.setValueAtTime(100,t);fw.frequency.exponentialRampToValueAtTime(5000,t+0.4);fw.Q.value=8;
-      gw.gain.setValueAtTime(0.05,t);gw.gain.exponentialRampToValueAtTime(0.001,t+0.45);
-      ow.connect(fw);fw.connect(gw);gw.connect(m);ow.start(t);ow.stop(t+0.48);
-      // Sub pressure build
-      const os=a.createOscillator();const gs=a.createGain();
-      os.type='sine';os.frequency.setValueAtTime(40,t);os.frequency.exponentialRampToValueAtTime(80,t+0.38);
-      gs.gain.setValueAtTime(0.08,t);gs.gain.exponentialRampToValueAtTime(0.001,t+0.42);
-      os.connect(gs);gs.connect(m);os.start(t);os.stop(t+0.45);
-    }
+    drumroll:()=>{const a=ax(),m=gm();if(!a||!m)return;const t=a.currentTime;
+      for(let i=0;i<16;i++){const o=a.createOscillator(),g=a.createGain(),f=a.createBiquadFilter();
+        o.type='square';o.frequency.value=40+i*15;f.type='bandpass';f.frequency.value=120+i*100;f.Q.value=10;
+        const dt=i*0.025*(1-i*0.015);g.gain.setValueAtTime(0.02+i*0.007,t+dt);g.gain.exponentialRampToValueAtTime(0.001,t+dt+0.03);
+        o.connect(f);f.connect(g);g.connect(m);o.start(t+dt);o.stop(t+dt+0.035)}
+      const ow=a.createOscillator(),gw=a.createGain(),fw=a.createBiquadFilter();
+      ow.type='sawtooth';ow.frequency.setValueAtTime(50,t);ow.frequency.exponentialRampToValueAtTime(1500,t+0.45);
+      fw.type='lowpass';fw.frequency.setValueAtTime(80,t);fw.frequency.exponentialRampToValueAtTime(6000,t+0.45);fw.Q.value=10;
+      gw.gain.setValueAtTime(0.055,t);gw.gain.exponentialRampToValueAtTime(0.001,t+0.48);
+      ow.connect(fw);fw.connect(gw);gw.connect(m);ow.start(t);ow.stop(t+0.5)}
   };
 
-  // Fireworks — luminous star bursts like real pyrotechnics
-  function spawnConfetti(container){
-    const palettes=[
-      ['#FFD700','#FFAA00','#FFF5CC','#FFFFFF'],
-      ['#FF4444','#FF6B6B','#FF9999','#FFCCCC'],
-      ['#33CCFF','#66DDFF','#99EEFF','#FFFFFF'],
-      ['#FF33CC','#FF66DD','#FF99EE','#FFFFFF'],
-      ['#33FF55','#66FF88','#99FFBB','#FFFFFF'],
-      ['#9966FF','#BB99FF','#DDCCFF','#FFFFFF'],
-      ['#FFAA00','#FF6600','#FFDD44','#FFFFFF']
-    ];
+  // Canvas particle system — high-performance fireworks
+  function spawnCanvasFireworks(container){
+    const cvs=document.createElement('canvas');cvs.className='casino-canvas';
+    const w=container.offsetWidth,h=container.offsetHeight;
+    cvs.width=w*2;cvs.height=h*2;cvs.style.width=w+'px';cvs.style.height=h+'px';
+    container.appendChild(cvs);
+    const ctx=cvs.getContext('2d');ctx.scale(2,2);
+    const particles=[];
+    const palettes=[['#FFD700','#FFAA00','#FFF5CC','#FFF'],['#FF4444','#FF6B6B','#FFAA88','#FFF'],['#33CCFF','#66DDFF','#AAEEFF','#FFF'],['#FF33CC','#FF66DD','#FFAAEE','#FFF'],['#33FF55','#66FF88','#AAFFCC','#FFF'],['#9966FF','#BB99FF','#DDCCFF','#FFF']];
 
-    // Launch multiple burst points (like firework shells)
-    const bursts=[
-      {x:'35%',y:'25%',delay:0},
-      {x:'65%',y:'20%',delay:0.25},
-      {x:'50%',y:'35%',delay:0.5},
-      {x:'25%',y:'40%',delay:0.7},
-      {x:'75%',y:'30%',delay:0.85}
-    ];
-
-    bursts.forEach(burst=>{
-      const pal=palettes[Math.floor(Math.random()*palettes.length)];
-
-      // Expanding ring
-      const ring=document.createElement('div');
-      ring.className='fw-burst-ring';
-      const ringSize=60+Math.random()*40;
-      ring.style.cssText=`left:${burst.x};top:${burst.y};width:${ringSize}px;height:${ringSize}px;margin-left:${-ringSize/2}px;margin-top:${-ringSize/2}px;border-color:${pal[0]};animation-delay:${burst.delay}s;box-shadow:0 0 20px ${pal[0]}88,inset 0 0 20px ${pal[0]}44`;
-      container.appendChild(ring);
-      setTimeout(()=>ring.remove(),2000+burst.delay*1000);
-
-      // Spark particles radiating outward
-      const sparkCount=28+Math.floor(Math.random()*16);
-      for(let i=0;i<sparkCount;i++){
-        const spark=document.createElement('div');
-        spark.className='fw-spark';
-        const angle=(i/sparkCount)*360+Math.random()*15;
-        const dist=50+Math.random()*130;
-        const fx=Math.cos(angle*Math.PI/180)*dist;
-        const fy=Math.sin(angle*Math.PI/180)*dist;
-        const size=2+Math.random()*5;
-        const color=pal[Math.floor(Math.random()*pal.length)];
-        const dur=0.8+Math.random()*1.0;
-        const delay=burst.delay+Math.random()*0.15;
-        spark.style.cssText=`left:${burst.x};top:${burst.y};width:${size}px;height:${size}px;background:${color};--fx:${fx}px;--fy:${fy}px;--fwDur:${dur}s;animation-delay:${delay}s;box-shadow:0 0 ${size*2}px ${color},0 0 ${size*4}px ${color}88`;
-        container.appendChild(spark);
-        setTimeout(()=>spark.remove(),3000+burst.delay*1000);
-
-        // Trailing line behind each spark
-        if(i%3===0){
-          const trail=document.createElement('div');
-          trail.className='fw-trail';
-          const trailLen=8+Math.random()*14;
-          trail.style.cssText=`left:${burst.x};top:${burst.y};height:${trailLen}px;background:linear-gradient(to bottom,${color},transparent);--fx:${fx*0.6}px;--fy:${fy*0.6}px;--fwDur:${dur*0.6}s;animation-delay:${delay}s;transform-origin:top center;rotate:${angle+90}deg`;
-          container.appendChild(trail);
-          setTimeout(()=>trail.remove(),2500+burst.delay*1000);
-        }
+    function burst(cx,cy,count,pal){
+      for(let i=0;i<count;i++){
+        const angle=Math.random()*Math.PI*2,speed=1.5+Math.random()*4,size=1+Math.random()*3;
+        particles.push({x:cx,y:cy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-1,size,color:pal[Math.floor(Math.random()*pal.length)],life:1,decay:0.008+Math.random()*0.012,gravity:0.03+Math.random()*0.02});
       }
-    });
+    }
 
-    // Second salvo after 1s for sustained wow factor
+    // Staggered bursts
+    const bPoints=[[w*0.3,h*0.25],[w*0.7,h*0.2],[w*0.5,h*0.35],[w*0.2,h*0.4],[w*0.8,h*0.3],[w*0.5,h*0.15],[w*0.4,h*0.45]];
+    bPoints.forEach((p,i)=>setTimeout(()=>burst(p[0],p[1],40+Math.random()*20,palettes[i%palettes.length]),i*180));
+    // Second wave
     setTimeout(()=>{
-      const pal2=palettes[Math.floor(Math.random()*palettes.length)];
-      [{x:'45%',y:'28%'},{x:'55%',y:'22%'}].forEach((b,bi)=>{
-        const ring=document.createElement('div');
-        ring.className='fw-burst-ring';
-        ring.style.cssText=`left:${b.x};top:${b.y};width:70px;height:70px;margin-left:-35px;margin-top:-35px;border-color:${pal2[0]};box-shadow:0 0 25px ${pal2[0]}88`;
-        container.appendChild(ring);
-        setTimeout(()=>ring.remove(),2000);
-        for(let i=0;i<22;i++){
-          const spark=document.createElement('div');
-          spark.className='fw-spark';
-          const angle=(i/22)*360+Math.random()*20;
-          const dist=40+Math.random()*110;
-          const fx=Math.cos(angle*Math.PI/180)*dist;
-          const fy=Math.sin(angle*Math.PI/180)*dist;
-          const size=2+Math.random()*4;
-          const color=pal2[Math.floor(Math.random()*pal2.length)];
-          spark.style.cssText=`left:${b.x};top:${b.y};width:${size}px;height:${size}px;background:${color};--fx:${fx}px;--fy:${fy}px;--fwDur:${0.7+Math.random()*0.8}s;animation-delay:${bi*0.2}s;box-shadow:0 0 ${size*2}px ${color},0 0 ${size*4}px ${color}88`;
-          container.appendChild(spark);
-          setTimeout(()=>spark.remove(),3000);
-        }
-      });
-    },1000);
+      [[w*0.35,h*0.2],[w*0.65,h*0.25],[w*0.5,h*0.1]].forEach((p,i)=>
+        setTimeout(()=>burst(p[0],p[1],35,palettes[(i+3)%palettes.length]),i*150));
+    },900);
+
+    let raf;
+    function draw(){
+      ctx.clearRect(0,0,w,h);
+      for(let i=particles.length-1;i>=0;i--){
+        const p=particles[i];
+        p.x+=p.vx;p.y+=p.vy;p.vy+=p.gravity;p.vx*=0.99;p.life-=p.decay;
+        if(p.life<=0){particles.splice(i,1);continue}
+        ctx.globalAlpha=p.life*p.life;
+        ctx.fillStyle=p.color;
+        ctx.shadowColor=p.color;ctx.shadowBlur=p.size*4*p.life;
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fill();
+        // Trail
+        ctx.globalAlpha=p.life*0.3;
+        ctx.beginPath();ctx.arc(p.x-p.vx*2,p.y-p.vy*2,p.size*p.life*0.5,0,Math.PI*2);ctx.fill();
+      }
+      ctx.shadowBlur=0;ctx.globalAlpha=1;
+      if(particles.length>0)raf=requestAnimationFrame(draw);
+      else setTimeout(()=>cvs.remove(),100);
+    }
+    raf=requestAnimationFrame(draw);
+    setTimeout(()=>{cancelAnimationFrame(raf);cvs.remove()},4000);
   }
 
   const overlay=document.createElement('div');
@@ -2774,9 +2707,7 @@ function slotMachineReveal(games, callback){
 
   function showGame(idx){
     if(idx>=games.length||skipAll){
-      overlay.classList.remove('active');
-      setTimeout(()=>overlay.remove(),400);
-      callback();return;
+      overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback();return;
     }
     const game=games[idx];
     const selectedSet=new Set(game.map(Number));
@@ -2790,7 +2721,8 @@ function slotMachineReveal(games, callback){
         <div class="casino-display">
           <div class="casino-progress">Jogo ${idx+1} de ${games.length}</div>
           <div class="casino-grid-labels"><span class="casino-grid-label">C1</span><span class="casino-grid-label">C2</span><span class="casino-grid-label">C3</span><span class="casino-grid-label">C4</span><span class="casino-grid-label">C5</span></div>
-          <div class="casino-reels" id="casinoReels"></div>
+          <div class="casino-reels" id="casinoReels" style="position:relative"></div>
+          <div class="casino-scan-line" id="scanLine"></div>
           <div style="text-align:center;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);margin-bottom:12px"><span id="casinoCounter" style="color:var(--color-gold-primary);font-weight:700;font-size:1.1rem">0</span><span style="opacity:0.4"> / 15</span></div>
           <div class="casino-score" id="casinoScore">
             <div class="casino-score-value" id="casinoScoreVal"></div>
@@ -2800,11 +2732,12 @@ function slotMachineReveal(games, callback){
         </div>
         <div class="casino-footer">
           <button class="casino-btn ghost" id="casinoSkip">${idx<games.length-1?'Pular ▸▸':'Fechar'}</button>
-          <button class="casino-btn gold" id="casinoNext" style="display:none">${idx<games.length-1?'Próximo Jogo ▸':'★ Finalizar ★'}</button>
+          <button class="casino-btn gold" id="casinoNext" style="display:none">${idx<games.length-1?'Proximo Jogo ▸':'★ Finalizar ★'}</button>
         </div>
       </div>`;
 
     const reels=overlay.querySelector('#casinoReels');
+    const scanLine=overlay.querySelector('#scanLine');
     const scoreDiv=overlay.querySelector('#casinoScore');
     const scoreVal=overlay.querySelector('#casinoScoreVal');
     const scoreLabel=overlay.querySelector('#casinoScoreLabel');
@@ -2813,17 +2746,12 @@ function slotMachineReveal(games, callback){
     const nextBtn=overlay.querySelector('#casinoNext');
     const counter=overlay.querySelector('#casinoCounter');
 
-    // Build 5×5 grid
     const balls={};
     for(let n=1;n<=25;n++){
-      const ball=document.createElement('div');
-      ball.className='casino-ball';
-      ball.textContent=pad(n);
-      reels.appendChild(ball);
-      balls[n]=ball;
+      const ball=document.createElement('div');ball.className='casino-ball';ball.textContent=pad(n);
+      reels.appendChild(ball);balls[n]=ball;
     }
 
-    // Ball color + glow mapping
     const colorCfg={
       'ball-hot':{bg:'linear-gradient(145deg,#ff8a3a,#ef5a1a)',glow:'rgba(239,125,58,0.5)',glow2:'rgba(239,125,58,0.15)',ring:'rgba(255,140,60,0.7)'},
       'ball-cold':{bg:'linear-gradient(145deg,#5aaae8,#2a7cd4)',glow:'rgba(74,144,217,0.5)',glow2:'rgba(74,144,217,0.15)',ring:'rgba(90,160,230,0.7)'},
@@ -2835,16 +2763,27 @@ function slotMachineReveal(games, callback){
     let revealed=0;
     const totalSel=selected.length;
 
-    // Ensure audio is alive before each game (critical for mobile)
-    ax();
-    sfx.drumroll();
+    ax();sfx.drumroll();
 
+    // Scanning wave before reveal sequence
+    const scanDelay=380;
+    setTimeout(()=>{if(!skipAll){scanLine.style.opacity='1';scanLine.style.top='0';scanLine.style.transition='top 0.5s linear';requestAnimationFrame(()=>scanLine.style.top='100%');
+      // Brief scan highlight on all balls
+      Object.values(balls).forEach((b,i)=>setTimeout(()=>{if(!skipAll)b.classList.add('scanning');setTimeout(()=>b.classList.remove('scanning'),120)},i*18));
+      sfx.scan();
+      setTimeout(()=>scanLine.style.opacity='0',550);
+    }},200);
+
+    // Accelerating timing: starts slow, ends fast (cinematic tension)
     selected.forEach((n,i)=>{
-      const delay=450+i*190;
+      const baseDelay=scanDelay+500;
+      // Easing: first balls slow (250ms), last balls fast (90ms)
+      let cumDelay=0;for(let k=0;k<i;k++)cumDelay+=250-k*(160/totalSel);
+      const delay=baseDelay+Math.max(cumDelay,i*90);
+
       setTimeout(()=>{
         if(skipAll)return;
-        const ball=balls[n];
-        if(!ball)return;
+        const ball=balls[n];if(!ball)return;
         const cls=getBallClass(n);
         const cfg=colorCfg[cls]||colorCfg['ball-neutral'];
         ball.style.background=cfg.bg;
@@ -2852,33 +2791,35 @@ function slotMachineReveal(games, callback){
         ball.style.setProperty('--ball-glow2',cfg.glow2);
         ball.style.setProperty('--ball-ring',cfg.ring);
         ball.classList.add('selected','just-selected');
-        setTimeout(()=>ball.classList.remove('just-selected'),900);
+        setTimeout(()=>ball.classList.remove('just-selected'),800);
         sfx.tick(i,totalSel);
         revealed++;
         counter.textContent=revealed;
 
         if(revealed===totalSel){
-          for(let m=1;m<=25;m++){if(!selectedSet.has(m))balls[m].classList.add('dimmed')}
+          // Dim non-selected with stagger
+          const unsel=[];for(let k=1;k<=25;k++)if(!selectedSet.has(k))unsel.push(k);
+          unsel.forEach((k,di)=>setTimeout(()=>balls[k].classList.add('dimmed'),di*40));
+
           setTimeout(()=>{
             if(skipAll)return;
             sfx.win(game.score);
-            scoreVal.textContent=game.score+' pts';
+            // Animated score counter (0 → score)
+            let sc=0;const target=game.score;
+            const si=setInterval(()=>{sc+=Math.ceil((target-sc)*0.2);if(sc>=target){sc=target;clearInterval(si)}scoreVal.textContent=sc+' pts'},30);
             scoreLabel.textContent=game.cls.label;
             const starCount=game.score>=80?5:game.score>=70?4:game.score>=60?3:game.score>=50?2:1;
             starsDiv.textContent='★'.repeat(starCount)+'☆'.repeat(5-starCount);
             starsDiv.style.color=starCount>=4?'var(--color-gold-primary)':'var(--text-muted)';
             scoreDiv.classList.add('show');
-            nextBtn.style.display='';
-            skipBtn.style.display='none';
-            spawnConfetti(overlay.querySelector('.casino-display'));
-          },500);
+            nextBtn.style.display='';skipBtn.style.display='none';
+            spawnCanvasFireworks(overlay.querySelector('.casino-display'));
+          },600);
         }
       },delay);
     });
 
-    skipBtn.onclick=()=>{
-      skipAll=true;overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback();
-    };
+    skipBtn.onclick=()=>{skipAll=true;overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback()};
     nextBtn.onclick=()=>{skipAll=false;showGame(idx+1)};
   }
 
