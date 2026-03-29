@@ -1380,10 +1380,12 @@
     .casino-watermark{position:absolute;bottom:8px;right:12px;font-family:var(--font-mono);font-size:0.6rem;color:rgba(212,168,83,0.35);letter-spacing:0.1em;z-index:15;pointer-events:none;text-transform:uppercase}
     .casino-cta{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(0,0,0,0.96),rgba(0,0,0,0.99));z-index:250;opacity:0;transition:opacity 0.3s;pointer-events:none;perspective:800px}
     .casino-cta.show{opacity:1;pointer-events:auto}
-    .cta-finger{width:120px;height:120px;animation:ctaFinger3D 0.45s cubic-bezier(0.15,0.85,0.25,1.3) forwards;transform:translateZ(-600px) scale(4);opacity:0;filter:drop-shadow(0 0 50px rgba(212,168,83,0.9)) drop-shadow(0 0 100px rgba(212,168,83,0.4));transform-style:preserve-3d}
+    .cta-finger{width:120px;height:120px;transform:translateZ(-600px) scale(4);opacity:0;transform-style:preserve-3d}
+    .casino-cta.show .cta-finger{animation:ctaFinger3D 0.45s cubic-bezier(0.15,0.85,0.25,1.3) forwards;filter:drop-shadow(0 0 50px rgba(212,168,83,0.9)) drop-shadow(0 0 100px rgba(212,168,83,0.4))}
     .cta-finger svg{width:100%;height:100%}
     @keyframes ctaFinger3D{0%{transform:translateZ(-600px) scale(4) rotateX(20deg);opacity:0;filter:brightness(4) blur(12px) drop-shadow(0 0 80px rgba(212,168,83,1))}35%{transform:translateZ(60px) scale(1.2) rotateX(-8deg);opacity:1;filter:brightness(1.8) blur(0) drop-shadow(0 0 50px rgba(212,168,83,0.9))}60%{transform:translateZ(-15px) scale(0.92) rotateX(3deg);filter:brightness(1.2)}100%{transform:translateZ(0) scale(1) rotateX(0);filter:brightness(1) drop-shadow(0 0 35px rgba(212,168,83,0.6))}}
-    .cta-finger-glow{position:absolute;width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-60%);background:radial-gradient(circle,rgba(212,168,83,0.3) 0%,transparent 70%);border-radius:50%;animation:fingerGlow 1.5s ease-in-out infinite;pointer-events:none}
+    .cta-finger-glow{position:absolute;width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-60%);background:radial-gradient(circle,rgba(212,168,83,0.3) 0%,transparent 70%);border-radius:50%;pointer-events:none;opacity:0}
+    .casino-cta.show .cta-finger-glow{opacity:1;animation:fingerGlow 1.5s ease-in-out infinite}
     @keyframes fingerGlow{0%,100%{opacity:0.5;transform:translate(-50%,-60%) scale(1)}50%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}}
     .cta-text{font-family:var(--font-mono);font-size:1.2rem;font-weight:800;text-transform:uppercase;letter-spacing:0.18em;margin-top:16px;background:linear-gradient(90deg,#FFD700,#FFF,#FFD700,#FFA500,#FFD700);background-size:400% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:ctaShine 1.5s linear infinite;opacity:0;transform:scale(0.8)}
     .cta-text.show{animation:ctaShine 1.5s linear infinite,ctaTextReveal 0.6s ease-out forwards}
