@@ -3241,10 +3241,10 @@ function slotMachineReveal(games, callback){
       setTimeout(()=>{if(ctaText)ctaText.classList.add('show');if(ctaBrand)ctaBrand.classList.add('show')},500);
       setTimeout(()=>{try{if('speechSynthesis' in window){
         speechSynthesis.cancel();
-        const u=new SpeechSynthesisUtterance('A sorte... está com você.');
-        u.lang='pt-BR';u.rate=0.88;u.pitch=1.4;u.volume=1;
+        const u=new SpeechSynthesisUtterance('A sorte, está com você!');
+        u.lang='pt-BR';u.rate=1.0;u.pitch=1.15;u.volume=1;
         const voices=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('pt'));
-        const fem=voices.find(v=>/femin|female|mulher|woman|luciana|vitoria|francisca/i.test(v.name))||voices.find(v=>!/male|masc|homem/i.test(v.name))||voices[0];
+        const fem=voices.find(v=>/google.*femin|google.*br/i.test(v.name))||voices.find(v=>/femin|female|luciana|vitoria|francisca/i.test(v.name))||voices.find(v=>!/male|daniel|masc/i.test(v.name))||voices[0];
         if(fem)u.voice=fem;speechSynthesis.speak(u);
       }}catch(e){}},600);
 
