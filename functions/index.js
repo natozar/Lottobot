@@ -97,10 +97,10 @@ exports.processDrawResults = onDocumentCreated({
         let title, body;
         if (bestHits >= 14) {
           title = `🏆 ${bestHits} ACERTOS! Voce pode ter ganhado!`;
-          body = `Premio estimado: ${prizeLabels[bestHits]}. Confira agora! Se o Lottobot te ajudou, considere fazer uma doacao via PIX: chatsagrado@gmail.com`;
+          body = `Premio estimado: ${prizeLabels[bestHits]}. Confira agora! Se o Lottobot te ajudou, considere fazer uma doacao via PIX: lottobot.io@gmail.com`;
         } else {
           title = `🎯 ${bestHits} acertos no concurso ${drawId}!`;
-          body = `Seu jogo acertou ${bestHits} numeros (${prizeLabels[bestHits]}). Confira! Gostou do Lottobot? Apoie via PIX: chatsagrado@gmail.com`;
+          body = `Seu jogo acertou ${bestHits} numeros (${prizeLabels[bestHits]}). Confira! Gostou do Lottobot? Apoie via PIX: lottobot.io@gmail.com`;
         }
 
         try {
