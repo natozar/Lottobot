@@ -973,11 +973,13 @@
       justify-content: center;
       padding: 20px;
       backdrop-filter: blur(2px);
+      pointer-events: none;
     }
 
     .modal-overlay.active {
       display: flex;
       animation: fadeIn 0.2s ease-out;
+      pointer-events: auto;
     }
 
     .modal {
