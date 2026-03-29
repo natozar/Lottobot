@@ -60,7 +60,7 @@
       --border-hover: rgba(255,255,255,0.12);
       --text-primary: #fafafa;
       --text-secondary: #a1a1aa;
-      --text-muted: #71717a;
+      --text-muted: #8a8a94;
       --color-moss-primary: #4a7c59;
       --color-gold-primary: #d4a853;
       --color-gold-dim: rgba(212,168,83,0.15);
@@ -77,6 +77,27 @@
       --z-header: 100;
       --z-modal: 200;
       --z-toast: 9999;
+    }
+
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+    [data-theme="light"] {
+      --bg-primary: #f5f5f5;
+      --bg-surface-1: #ffffff;
+      --bg-surface-2: #f0f0f2;
+      --bg-surface-3: #e8e8ec;
+      --border-default: rgba(0,0,0,0.08);
+      --border-hover: rgba(0,0,0,0.15);
+      --text-primary: #1a1a1a;
+      --text-secondary: #555560;
+      --text-muted: #7a7a85;
+      --color-moss-primary: #3a6a48;
+      --color-gold-primary: #b8912e;
+      --color-gold-dim: rgba(184,145,46,0.12);
+      --color-ball-hot: #d96a2a;
+      --color-ball-cold: #3a7cc0;
+      --color-ball-rising: #b8912e;
+      --color-ball-neutral: #9090a0;
     }
 
     html, body {
@@ -1508,6 +1529,7 @@
       <!-- CONFIG -->
       <div class="config-section">
         <div class="section-title">Quantidade</div>
+        <label for="qtdJogos" class="sr-only">Quantidade de jogos</label>
         <select id="qtdJogos">
           <option value="1">1 Jogo</option>
           <option value="3">3 Jogos</option>
@@ -1563,6 +1585,7 @@
             <span class="section-title" style="margin: 0;">Janela Histórica</span>
             <span id="sliderValue" style="font-size: 0.8rem;">50</span>
           </div>
+          <label for="sliderJanela" class="sr-only">Janela historica</label>
           <input id="sliderJanela" type="range" min="10" max="100" value="50">
         </div>
       </div>
@@ -1577,6 +1600,7 @@
             <span style="font-size: 0.75rem; color: var(--text-muted);">Seleção</span>
             <span id="sliderMelhorNValue" style="font-size: 0.8rem;">100</span>
           </div>
+          <label for="sliderMelhorN" class="sr-only">Top N selecao</label>
           <input id="sliderMelhorN" type="range" min="50" max="200" value="100" disabled>
         </div>
       </div>
@@ -2090,7 +2114,7 @@ async function loadAPI(){
 
 // ══════ ANALYSIS ══════
 function calcDynamic(){
-  FREQ={};ATRASO={};TENDENCIA={};
+  FREQ={};ATRASO={};TENDENCIA={};invalidateClassifyCache();
   for(let i=1;i<=25;i++){FREQ[i]=0;ATRASO[i]=historico.length}
   historico.forEach(d=>d.numeros.forEach(n=>FREQ[n]=(FREQ[n]||0)+1));
   const sorted=[...historico].sort((a,b)=>b.numero-a.numero);
@@ -2104,15 +2128,20 @@ function calcDynamic(){
   }
 }
 
+let _classifyCache={};
+function invalidateClassifyCache(){_classifyCache={}}
 function classifyNum(n){
+  if(_classifyCache[n])return _classifyCache[n];
   const freq=FREQ[n]||0,atraso=ATRASO[n]||0,tend=TENDENCIA[n]||0;
   const vals=Object.values(FREQ);if(!vals.length)return{type:'Neutro',cls:'ball-neutral'};
   const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
   const std=Math.sqrt(vals.reduce((s,f)=>s+(f-avg)**2,0)/vals.length)||1;
-  if(freq>avg+std*0.5&&(atraso<=1||tend>0))return{type:'Ascensão',cls:'ball-rising'};
-  if(freq>avg+std*0.3)return{type:'Quente',cls:'ball-hot'};
-  if(freq<avg-std*0.3)return{type:'Frio',cls:'ball-cold'};
-  return{type:'Neutro',cls:'ball-neutral'};
+  let r;
+  if(freq>avg+std*0.5&&(atraso<=1||tend>0))r={type:'Ascensão',cls:'ball-rising'};
+  else if(freq>avg+std*0.3)r={type:'Quente',cls:'ball-hot'};
+  else if(freq<avg-std*0.3)r={type:'Frio',cls:'ball-cold'};
+  else r={type:'Neutro',cls:'ball-neutral'};
+  _classifyCache[n]=r;return r;
 }
 function getBallClass(n){return classifyNum(n).cls}
 
