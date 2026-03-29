@@ -1904,13 +1904,18 @@ function getPrimos(){return new Set(getLottery().primos)}
 function getDezenas(){return getLottery().dezenas}
 const FILTER_IDS=['filterParImpar','filterSoma','filterConsec','filterRepet','filterDezena','filterPrimos'];
 const SK='lottobot_v3';
-const CACHE_KEY='lottobot_cache';
+function CACHE_KEY(){return 'lottobot_cache_'+selectedLottery}
 const CACHE_TTL=24*60*60*1000;
 const pad=n=>String(n).padStart(2,'0');
 const _escEl=document.createElement('div');
 function esc(s){_escEl.textContent=String(s);return _escEl.innerHTML}
-const FALLBACK={numero:3287,data:'14/07/2025',numeros:[1,3,5,7,9,11,13,15,17,19,21,22,23,24,25]};
-const FALLBACK_FREQ={1:58,2:52,3:71,4:45,5:63,6:49,7:68,8:44,9:61,10:55,11:66,12:53,13:67,14:46,15:59,16:57,17:64,18:47,19:62,20:65,21:56,22:69,23:60,24:54,25:70};
+const FALLBACKS={
+  lotofacil:{numero:3287,data:'14/07/2025',numeros:[1,3,5,7,9,11,13,15,17,19,21,22,23,24,25]},
+  megasena:{numero:2750,data:'14/07/2025',numeros:[7,15,23,38,42,56]},
+  quina:{numero:6500,data:'14/07/2025',numeros:[12,28,45,61,73]}
+};
+function getFallback(){return FALLBACKS[selectedLottery]||FALLBACKS.lotofacil}
+function getFallbackFreq(){const f={};const lot=getLottery();for(let i=1;i<=lot.total;i++)f[i]=Math.floor(Math.random()*30)+30;return f}
 
 let ULT=null,historico=[],FREQ={},ATRASO={},TENDENCIA={};
 let selectedModelo='B',jogos=[],previousJogos=[];
@@ -2150,7 +2155,8 @@ async function switchLottery(key){
   // Reset state
   ULT=null;historico=[];FREQ={};ATRASO={};TENDENCIA={};invalidateClassifyCache();
   jogos=[];previousJogos=[];
-  localStorage.removeItem(CACHE_KEY);
+  fixedNums.clear();excludedNums.clear();
+  localStorage.removeItem(CACHE_KEY());
   showToast('Carregando '+getLottery().name+'...');
   await loadAPI();
   updateUI();renderJogos();
@@ -2257,7 +2263,7 @@ function parseDraw(d){
 async function loadAPI(){
   const sp=document.getElementById('headerSpinner');if(sp)sp.classList.add('active');
   try{
-    const cached=localStorage.getItem(CACHE_KEY);
+    const cached=localStorage.getItem(CACHE_KEY());
     if(cached){const c=JSON.parse(cached);if(Date.now()-c.timestamp<CACHE_TTL&&c.latest?.numeros){ULT=c.latest;historico=c.historical||[];calcDynamic();const hb=document.getElementById('histBadge');if(hb)hb.textContent=historico.length+' concursos (cache)';if(sp)sp.classList.remove('active');return}}
     const raw=await apiFetch(getLottery().api+'/latest');
     const latest=parseDraw(raw);if(!latest)throw new Error('bad data');
@@ -2270,12 +2276,12 @@ async function loadAPI(){
     results.forEach(r=>{if(r)historico.push(r)});
     historico.sort((a,b)=>a.numero-b.numero);
     calcDynamic();
-    localStorage.setItem(CACHE_KEY,JSON.stringify({timestamp:Date.now(),latest:ULT,historical:historico}));
+    localStorage.setItem(CACHE_KEY(),JSON.stringify({timestamp:Date.now(),latest:ULT,historical:historico}));
     const hb=document.getElementById('histBadge');if(hb)hb.textContent=historico.length+' concursos';
     showToast('✅ '+historico.length+' concursos carregados');
   }catch(e){
     console.warn('API offline:',e);
-    ULT={...FALLBACK};FREQ={...FALLBACK_FREQ};historico=[FALLBACK];
+    ULT={...getFallback()};FREQ={...getFallbackFreq()};historico=[getFallback()];
     for(let i=1;i<=getLottery().total;i++)ATRASO[i]=ULT.numeros.includes(i)?0:1;
     for(let i=1;i<=getLottery().total;i++)TENDENCIA[i]=0;
     document.getElementById('offlineBadge')?.classList.add('show');
@@ -2322,7 +2328,9 @@ function getBallClass(n){return classifyNum(n).cls}
 function gerarJogos(){
   if(!ULT){showToast('⏳ Aguardando dados...');const btn=document.getElementById('btnGerar');if(btn){btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'}return}
   const qtd=parseInt(document.getElementById('qtdJogos').value);
-  const mod=getModelos()[selectedModelo];
+  let mod=getModelos()[selectedModelo];
+  if(!mod){selectedModelo='B';mod=getModelos()[selectedModelo]}
+  if(!mod){selectedModelo=Object.keys(getModelos())[0];mod=getModelos()[selectedModelo]}
   const filters=getActiveFilters();
   const useMelhorN=document.getElementById('toggleMelhorN')?.classList.contains('on');
   const melhorNSize=parseInt(document.getElementById('sliderMelhorN')?.value||100);
@@ -2385,13 +2393,14 @@ function isFilterOn(id){return document.getElementById(id)?.classList.contains('
 function getActiveFilters(){return{pi:isFilterOn('filterParImpar'),so:isFilterOn('filterSoma'),co:isFilterOn('filterConsec'),re:isFilterOn('filterRepet'),dz:isFilterOn('filterDezena'),pr:isFilterOn('filterPrimos')}}
 
 function passFilters(j,f){
+  const lot=getLottery();const flt=lot.filters;
   const p=j.filter(n=>n%2===0).length,s=j.reduce((a,b)=>a+b,0),r=ULT?j.filter(n=>ULT.numeros.includes(n)).length:0;
-  if(f.pi&&(p<7||p>8))return false;
-  if(f.so&&(s<175||s>205))return false;
-  if(f.co){let mx=1,c=1;for(let i=1;i<j.length;i++){j[i]===j[i-1]+1?(c++,mx=Math.max(mx,c)):c=1}if(mx>4)return false}
-  if(f.re&&(r<8||r>11))return false;
-  if(f.dz){for(const[lo,hi]of getDezenas()){const cnt=j.filter(n=>n>=lo&&n<=hi).length;if(cnt<1||cnt>4)return false}}
-  if(f.pr){const pc=j.filter(n=>getPrimos().has(n)).length;if(pc<4||pc>6)return false}
+  if(f.pi&&(p<flt.parImpar[0]||p>flt.parImpar[1]))return false;
+  if(f.so&&(s<flt.soma[0]||s>flt.soma[1]))return false;
+  if(f.co){let mx=1,c=1;for(let i=1;i<j.length;i++){j[i]===j[i-1]+1?(c++,mx=Math.max(mx,c)):c=1}if(mx>flt.consec)return false}
+  if(f.re&&(r<flt.repet[0]||r>flt.repet[1]))return false;
+  if(f.dz){const maxPerDz=Math.ceil(lot.pick/getDezenas().length)+1;for(const[lo,hi]of getDezenas()){const cnt=j.filter(n=>n>=lo&&n<=hi).length;if(cnt>maxPerDz)return false}}
+  if(f.pr){const prSet=getPrimos();const pc=j.filter(n=>prSet.has(n)).length;const maxPr=Math.ceil(lot.pick*0.45);const minPr=Math.max(0,Math.floor(lot.pick*0.15));if(pc<minPr||pc>maxPr)return false}
   return true;
 }
 
