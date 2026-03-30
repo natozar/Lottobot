@@ -3,17 +3,37 @@
     "public": ".",
     "ignore": [
       "firebase.json",
-      "firebase-MSI.json",
-      "firestore.rules",
-      "firestore-MSI.rules",
-      ".firebaserc",
-      "-MSI.firebaserc",
-      "functions",
-      "node_modules",
+      "**/node_modules/**",
+      "**/functions/**",
+      "**/*-MSI*",
       "setup.sh",
-      "package.json",
-      "package-lock.json",
-      "**/.*"
+      ".gitignore"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "service-worker.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
     ]
   },
   "firestore": {

@@ -66,6 +66,24 @@
     .pix-section{display:flex;gap:12px;align-items:flex-end}
     .pix-section input{flex:1}
     .hidden{display:none}
+    .gate-divider{color:var(--text3);font-size:0.72rem;margin:12px 0;position:relative;text-align:center}
+    .gate-divider::before,.gate-divider::after{content:'';position:absolute;top:50%;width:35%;height:1px;background:var(--border)}
+    .gate-divider::before{left:10%}
+    .gate-divider::after{right:10%}
+    .gate-phone-form{display:none;flex-direction:column;gap:10px;max-width:320px;margin:0 auto;text-align:left}
+    .gate-phone-form.show{display:flex}
+    .gate-phone-row{display:flex;gap:8px}
+    .gate-country-select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 6px;color:var(--text);font-size:0.82rem;outline:none;min-width:110px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:22px;cursor:pointer}
+    .gate-country-select:focus{border-color:var(--gold)}
+    .gate-phone-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:0.9rem;font-family:var(--mono);outline:none;min-width:0}
+    .gate-phone-input:focus{border-color:var(--gold)}
+    .gate-phone-input::placeholder{color:var(--text3)}
+    .gate-send-btn{padding:12px;border-radius:10px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;font-weight:600;font-size:0.85rem;border:none;cursor:pointer;transition:opacity 0.2s}
+    .gate-send-btn:hover{opacity:0.9}
+    .gate-send-btn:disabled{opacity:0.4;cursor:not-allowed}
+    .gate-send-btn.gold{background:linear-gradient(135deg,var(--gold),#b8912e);color:#09090b}
+    .gate-phone-toggle{background:none;border:1px solid var(--border);color:var(--text2);padding:10px 20px;border-radius:10px;cursor:pointer;font-size:0.82rem;transition:all 0.2s}
+    .gate-phone-toggle:hover{border-color:var(--gold);color:var(--gold)}
   </style>
 </head>
 <body>
@@ -74,7 +92,37 @@
   <div>
     <h2>Lottobot Admin</h2>
     <p>Acesso restrito ao administrador.</p>
-    <button onclick="loginAdmin()">Entrar com Google</button>
+    <button onclick="loginAdmin()" style="margin-bottom:8px">Entrar com Google</button>
+    <div class="gate-divider">ou</div>
+    <button class="gate-phone-toggle" id="gatePhoneToggle" onclick="document.getElementById('gatePhoneForm').classList.add('show');this.style.display='none'">Entrar com Telefone</button>
+    <div class="gate-phone-form" id="gatePhoneForm">
+      <div class="gate-phone-row">
+        <select class="gate-country-select" id="gateCountryCode">
+          <option value="+55">🇧🇷 +55</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+351">🇵🇹 +351</option>
+          <option value="+34">🇪🇸 +34</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+49">🇩🇪 +49</option>
+          <option value="+39">🇮🇹 +39</option>
+          <option value="+81">🇯🇵 +81</option>
+          <option value="+54">🇦🇷 +54</option>
+          <option value="+56">🇨🇱 +56</option>
+          <option value="+57">🇨🇴 +57</option>
+          <option value="+52">🇲🇽 +52</option>
+          <option value="+595">🇵🇾 +595</option>
+          <option value="+598">🇺🇾 +598</option>
+          <option value="+244">🇦🇴 +244</option>
+          <option value="+258">🇲🇿 +258</option>
+        </select>
+        <input type="tel" class="gate-phone-input" id="gatePhoneInput" placeholder="16 99999-9999" maxlength="15">
+      </div>
+      <div id="gateRecaptcha"></div>
+      <button class="gate-send-btn" id="gateSendCode" onclick="gateSendPhone()">Enviar codigo SMS</button>
+      <input type="text" class="gate-phone-input" id="gateCodeInput" placeholder="Codigo de 6 digitos" maxlength="6" style="display:none">
+      <button class="gate-send-btn gold" id="gateVerifyCode" onclick="gateVerifyPhone()" style="display:none">Verificar codigo</button>
+    </div>
     <p id="gateError" style="color:var(--red);margin-top:16px;font-size:0.8rem"></p>
   </div>
 </div>
@@ -154,11 +202,60 @@ function showToast(msg){
   document.body.appendChild(t);setTimeout(()=>t.remove(),3000);
 }
 
+const ADMIN_PHONE='+5516999916690';
+let _gateConfirm=null;
+let _gateRecaptcha=null;
+
 function loginAdmin(){
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{
-    document.getElementById('gateError').textContent=e.message;
-  });
+  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
 }
+
+function setupGateRecaptcha(){
+  if(_gateRecaptcha){_gateRecaptcha.clear();_gateRecaptcha=null;document.getElementById('gateRecaptcha').innerHTML=''}
+  _gateRecaptcha=new firebase.auth.RecaptchaVerifier('gateRecaptcha',{size:'invisible'});
+  _gateRecaptcha.render();
+}
+
+async function gateSendPhone(){
+  const phone=document.getElementById('gatePhoneInput').value.trim();
+  if(!phone||phone.length<8){showToast('Digite um numero valido');return}
+  const code=document.getElementById('gateCountryCode').value;
+  const formatted=code+phone.replace(/\D/g,'');
+  try{
+    if(!_gateRecaptcha)setupGateRecaptcha();
+    document.getElementById('gateSendCode').disabled=true;
+    document.getElementById('gateSendCode').textContent='Enviando...';
+    _gateConfirm=await auth.signInWithPhoneNumber(formatted,_gateRecaptcha);
+    document.getElementById('gateCodeInput').style.display='';
+    document.getElementById('gateVerifyCode').style.display='';
+    document.getElementById('gateSendCode').textContent='Codigo enviado!';
+    showToast('Codigo SMS enviado!');
+  }catch(e){
+    showToast('Erro: '+e.message);
+    document.getElementById('gateSendCode').disabled=false;
+    document.getElementById('gateSendCode').textContent='Enviar codigo SMS';
+    _gateRecaptcha=null;
+    document.getElementById('gateRecaptcha').innerHTML='';
+  }
+}
+
+async function gateVerifyPhone(){
+  const code=document.getElementById('gateCodeInput').value.trim();
+  if(code.length!==6){showToast('Digite o codigo de 6 digitos');return}
+  try{
+    document.getElementById('gateVerifyCode').disabled=true;
+    await _gateConfirm.confirm(code);
+  }catch(e){
+    showToast('Codigo invalido');
+    document.getElementById('gateVerifyCode').disabled=false;
+  }
+}
+
+// Handle redirect result
+auth.getRedirectResult().catch(e=>{
+  if(e.code!=='auth/null-user')
+    document.getElementById('gateError').textContent=e.message;
+});
 
 auth.onAuthStateChanged(async user=>{
   if(!user){
@@ -166,17 +263,23 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('adminScreen').classList.add('hidden');
     return;
   }
-  // Check admin flag
+  // Check admin: phone match OR Firestore flag
+  const phoneAdmin=user.phoneNumber===ADMIN_PHONE;
   const doc=await db.collection('users').doc(user.uid).get();
-  if(!doc.exists||!doc.data().isAdmin){
-    document.getElementById('gateError').textContent='Voce nao tem permissao de administrador. UID: '+user.uid;
+  const firestoreAdmin=doc.exists&&doc.data().isAdmin;
+  if(!phoneAdmin&&!firestoreAdmin){
+    document.getElementById('gateError').textContent='Voce nao tem permissao de administrador.';
     auth.signOut();
     return;
+  }
+  // Ensure admin flag is set in Firestore
+  if(phoneAdmin&&doc.exists&&!doc.data().isAdmin){
+    await db.collection('users').doc(user.uid).update({isAdmin:true});
   }
   adminUser=user;
   document.getElementById('gateScreen').classList.add('hidden');
   document.getElementById('adminScreen').classList.remove('hidden');
-  document.getElementById('adminName').textContent=user.displayName||user.email;
+  document.getElementById('adminName').textContent=user.displayName||user.phoneNumber||user.email;
   loadDashboard();
 });
 

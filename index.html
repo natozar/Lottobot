@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#09090b">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="Lottobot — Gerador analítico inteligente para Lotofácil, Mega-Sena e Quina. Filtros estatísticos, heatmap, Monte Carlo e conferência automática.">
   <meta name="keywords" content="lotofácil, mega-sena, quina, loteria, gerador, números, sorteio, probabilidade, estatística">
@@ -1284,12 +1284,10 @@
       .toast { font-size: 0.78rem; padding: 8px 14px; }
 
       /* Install banner */
-      .install-banner { flex-direction: column; text-align: center; padding: 16px; gap: 12px; bottom: 68px; max-width: 340px; }
-      .install-banner-icon { width: 40px; height: 40px; font-size: 1.2rem; }
-      .install-banner-title { font-size: 0.85rem; }
-      .install-banner-desc { font-size: 0.72rem; }
-      .install-banner-actions { justify-content: center; width: 100%; }
-      .install-banner-btn { flex: 1; padding: 8px 12px; font-size: 0.75rem; }
+      .install-card{max-width:100%;border-radius:16px}
+      .install-card-header{padding:20px 16px 14px}
+      .install-card-body{padding:16px}
+      .install-card-logo{font-size:2.8rem}
 
       /* Casino (keep grid-based, don't override with fixed sizes) */
       .casino-machine { width: 96%; max-width: none; border-radius: 16px; }
@@ -1447,20 +1445,29 @@
     .casino-btn.ghost{background:rgba(255,255,255,0.04);border:1px solid var(--border-hover);color:var(--text-muted)}
     .casino-btn.ghost:hover{border-color:var(--text-secondary);color:var(--text-secondary);background:rgba(255,255,255,0.06)}
     /* firework CSS removed — now using canvas particles */
-    /* === PWA INSTALL BANNER === */
-    .install-banner{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);z-index:180;background:linear-gradient(135deg,#1a2a1e 0%,#111113 50%,#1a1a10 100%);border:1px solid rgba(212,168,83,0.3);border-radius:16px;padding:20px 24px;display:none;align-items:center;gap:16px;max-width:440px;width:calc(100% - 32px);box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(212,168,83,0.1);backdrop-filter:blur(20px);animation:bannerIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
-    .install-banner.show{display:flex}
-    @keyframes bannerIn{from{opacity:0;transform:translateX(-50%) translateY(40px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-    .install-banner-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--color-gold-primary),#a8872e);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
-    .install-banner-text{flex:1}
-    .install-banner-title{font-weight:700;font-size:0.95rem;color:var(--color-gold-primary);margin-bottom:4px}
-    .install-banner-desc{font-size:0.78rem;color:var(--text-secondary);line-height:1.4}
-    .install-banner-actions{display:flex;gap:8px;flex-shrink:0}
-    .install-banner-btn{padding:10px 18px;border-radius:10px;font-size:0.8rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
-    .install-banner-btn.primary{background:var(--color-gold-primary);color:#09090b}
-    .install-banner-btn.primary:hover{background:#e5b863}
-    .install-banner-btn.dismiss{background:transparent;color:var(--text-muted);border:1px solid var(--border-hover)}
-    .install-banner-btn.dismiss:hover{color:var(--text-primary);border-color:var(--text-muted)}
+    /* === PWA INSTALL MODAL === */
+    .install-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:295;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(6px)}
+    .install-overlay.show{opacity:1;pointer-events:auto}
+    .install-card{background:linear-gradient(135deg,#1a2a1e 0%,#111113 50%,#1a1a10 100%);border:1px solid rgba(212,168,83,0.3);border-radius:20px;max-width:400px;width:100%;overflow:hidden;animation:modalIn 0.3s ease-out;box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+    .install-card-header{background:linear-gradient(135deg,rgba(212,168,83,0.15),rgba(74,124,89,0.08));padding:28px 24px 20px;text-align:center}
+    .install-card-logo{font-size:3.5rem;margin-bottom:8px;display:block;filter:drop-shadow(0 4px 12px rgba(212,168,83,0.3))}
+    .install-card-header h2{font-size:1.2rem;font-weight:700;color:var(--text-primary);margin-bottom:4px}
+    .install-card-header p{font-size:0.78rem;color:var(--text-secondary)}
+    .install-card-body{padding:20px 24px}
+    .install-features{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+    .install-feature{display:flex;align-items:center;gap:12px;font-size:0.82rem;color:var(--text-secondary)}
+    .install-feature-icon{font-size:1.1rem;flex-shrink:0;width:28px;text-align:center}
+    .install-ios-steps{background:rgba(212,168,83,0.08);border:1px solid rgba(212,168,83,0.15);border-radius:12px;padding:14px 16px;margin-bottom:20px}
+    .install-ios-steps h4{font-size:0.82rem;font-weight:600;color:var(--color-gold-primary);margin-bottom:10px;text-align:center}
+    .install-ios-step{display:flex;align-items:center;gap:10px;font-size:0.78rem;color:var(--text-secondary);margin-bottom:8px}
+    .install-ios-step:last-child{margin-bottom:0}
+    .install-ios-step .step-num{width:22px;height:22px;border-radius:50%;background:var(--color-gold-primary);color:#09090b;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .install-card-actions{display:flex;gap:10px}
+    .install-card-btn{flex:1;padding:13px;border-radius:12px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+    .install-card-btn.primary{background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b}
+    .install-card-btn.primary:hover{opacity:0.9}
+    .install-card-btn.dismiss{background:var(--bg-surface-2);color:var(--text-muted);border:1px solid var(--border-hover)}
+    .install-card-btn.dismiss:hover{color:var(--text-primary);border-color:var(--text-muted)}
 
     /* === AUTH === */
     .auth-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border-hover);background:rgba(255,255,255,0.04);color:var(--text-secondary);transition:all 0.2s;white-space:nowrap}
@@ -1475,7 +1482,10 @@
     .auth-provider-btn .auth-icon{font-size:1.2rem;text-align:center;line-height:22px}
     .auth-phone-form{display:none;flex-direction:column;gap:10px}
     .auth-phone-form.show{display:flex}
-    .auth-phone-input{background:var(--bg-surface-1);border:1px solid var(--border-hover);border-radius:8px;padding:12px 14px;color:var(--text-primary);font-size:0.9rem;font-family:var(--font-mono);outline:none;transition:border-color 0.2s}
+    .auth-phone-row{display:flex;gap:8px;align-items:stretch}
+    .auth-country-select{background:var(--bg-surface-1);border:1px solid var(--border-hover);border-radius:8px;padding:8px 6px;color:var(--text-primary);font-size:0.82rem;outline:none;transition:border-color 0.2s;cursor:pointer;min-width:110px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:22px}
+    .auth-country-select:focus{border-color:var(--color-gold-primary)}
+    .auth-phone-input{background:var(--bg-surface-1);border:1px solid var(--border-hover);border-radius:8px;padding:12px 14px;color:var(--text-primary);font-size:0.9rem;font-family:var(--font-mono);outline:none;transition:border-color 0.2s;flex:1;min-width:0}
     .auth-phone-input:focus{border-color:var(--color-gold-primary)}
     .auth-phone-input::placeholder{color:var(--text-muted)}
     .auth-send-btn{padding:12px;border-radius:10px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;font-weight:600;font-size:0.85rem;border:none;cursor:pointer;transition:opacity 0.2s}
@@ -1487,7 +1497,8 @@
     .auth-divider::after{right:0}
     .auth-logout{font-size:0.7rem;color:var(--text-muted);cursor:pointer;border:none;background:none;text-decoration:underline;padding:4px}
     .auth-logout:hover{color:var(--color-gold-primary)}
-    #recaptchaContainer{margin-top:4px}
+    #recaptchaContainer{margin-top:4px;display:flex;justify-content:center;transform:scale(0.92);transform-origin:center}
+    #recaptchaContainer>div{border-radius:10px;overflow:hidden}
     .auth-admin-link{font-size:0.65rem;color:var(--color-gold-primary);text-decoration:none;opacity:0.7;display:none}
     .auth-admin-link.show{display:inline}
 
@@ -1611,9 +1622,30 @@
         </button>
 
         <div class="auth-phone-form" id="phoneForm">
-          <input type="tel" class="auth-phone-input" id="phoneInput" placeholder="+55 11 99999-9999" maxlength="20">
+          <div class="auth-phone-row">
+            <select class="auth-country-select" id="countryCode">
+              <option value="+55">🇧🇷 +55</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+351">🇵🇹 +351</option>
+              <option value="+34">🇪🇸 +34</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+33">🇫🇷 +33</option>
+              <option value="+49">🇩🇪 +49</option>
+              <option value="+39">🇮🇹 +39</option>
+              <option value="+81">🇯🇵 +81</option>
+              <option value="+54">🇦🇷 +54</option>
+              <option value="+56">🇨🇱 +56</option>
+              <option value="+57">🇨🇴 +57</option>
+              <option value="+52">🇲🇽 +52</option>
+              <option value="+595">🇵🇾 +595</option>
+              <option value="+598">🇺🇾 +598</option>
+              <option value="+244">🇦🇴 +244</option>
+              <option value="+258">🇲🇿 +258</option>
+            </select>
+            <input type="tel" class="auth-phone-input" id="phoneInput" placeholder="16 99999-9999" maxlength="15">
+          </div>
           <div id="recaptchaContainer"></div>
-          <button class="auth-send-btn" id="btnSendCode" onclick="sendPhoneCode()" disabled>Enviar codigo SMS</button>
+          <button class="auth-send-btn" id="btnSendCode" onclick="sendPhoneCode()">Enviar codigo SMS</button>
           <input type="text" class="auth-phone-input" id="codeInput" placeholder="Codigo de 6 digitos" maxlength="6" style="display:none">
           <button class="auth-send-btn" id="btnVerifyCode" onclick="verifyPhoneCode()" style="display:none;background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b">Verificar codigo</button>
         </div>
@@ -2073,6 +2105,17 @@ document.addEventListener('DOMContentLoaded',async()=>{
       await loadSavedFromCloud();
       await requestPushPermission();
       checkNotifyParams();
+      // Fluxo pos-login: onboarding -> install -> LGPD
+      setTimeout(()=>{
+        if(window._onboardPending){
+          document.getElementById('onboardOverlay')?.classList.add('active');
+          // Install popup aparece apos fechar onboarding
+          const origClose=window.closeOnboard;
+          window.closeOnboard=function(){origClose();setTimeout(showInstallPopup,500)};
+        }else{
+          showInstallPopup();
+        }
+      },800);
     }else{
       // Bloquear app — exigir login
       document.getElementById('appLayout').style.display='none';
@@ -2106,9 +2149,11 @@ function updateAuthUI(){
   if(isAdmin)adminLink?.classList.add('show');
 }
 
+const ADMIN_PHONE='+5516999916690';
 async function syncUserDoc(user){
   const ref=_db.collection('users').doc(user.uid);
   const doc=await ref.get();
+  const phoneAdmin=user.phoneNumber===ADMIN_PHONE;
   const data={
     displayName:user.displayName||user.phoneNumber||'',
     email:user.email||null,
@@ -2118,15 +2163,17 @@ async function syncUserDoc(user){
   };
   if(!doc.exists){
     data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
-    data.isAdmin=false;
+    data.isAdmin=phoneAdmin;
     data.fcmTokens=[];
     data.notificationsEnabled=true;
     await ref.set(data);
+    isAdmin=phoneAdmin;
   }else{
+    if(phoneAdmin&&!doc.data().isAdmin){data.isAdmin=true}
     await ref.update(data);
-    isAdmin=doc.data().isAdmin||false;
-    document.getElementById('adminLink')?.classList.toggle('show',isAdmin);
+    isAdmin=phoneAdmin||doc.data().isAdmin||false;
   }
+  document.getElementById('adminLink')?.classList.toggle('show',isAdmin);
 }
 
 function loginGoogle(){
@@ -2141,25 +2188,33 @@ let _confirmationResult=null;
 let _recaptchaVerifier=null;
 
 function setupRecaptcha(){
-  if(_recaptchaVerifier)return;
+  if(_recaptchaVerifier){
+    _recaptchaVerifier.clear();
+    _recaptchaVerifier=null;
+    document.getElementById('recaptchaContainer').innerHTML='';
+  }
   _recaptchaVerifier=new firebase.auth.RecaptchaVerifier('recaptchaContainer',{
-    size:'normal',
-    callback:()=>{document.getElementById('btnSendCode').disabled=false},
-    'expired-callback':()=>{document.getElementById('btnSendCode').disabled=true}
+    size:'invisible'
   });
   _recaptchaVerifier.render();
 }
 
 // Show recaptcha when phone form is opened
 new MutationObserver(()=>{
-  if(document.querySelector('.auth-phone-form.show'))setupRecaptcha();
+  if(document.querySelector('.auth-phone-form.show')){
+    setupRecaptcha();
+    document.getElementById('btnSendCode').disabled=false;
+  }
 }).observe(document.getElementById('phoneForm'),{attributes:true,attributeFilter:['class']});
 
 async function sendPhoneCode(){
   const phone=document.getElementById('phoneInput').value.trim();
-  if(!phone||phone.length<10){showToast('Digite um numero valido');return}
-  const formatted=phone.startsWith('+')?phone:'+55'+phone.replace(/\D/g,'');
+  if(!phone||phone.length<8){showToast('Digite um numero valido');return}
+  const code=document.getElementById('countryCode').value;
+  const digits=phone.replace(/\D/g,'');
+  const formatted=code+digits;
   try{
+    if(!_recaptchaVerifier)setupRecaptcha();
     document.getElementById('btnSendCode').disabled=true;
     document.getElementById('btnSendCode').textContent='Enviando...';
     _confirmationResult=await _auth.signInWithPhoneNumber(formatted,_recaptchaVerifier);
@@ -2171,6 +2226,8 @@ async function sendPhoneCode(){
     showToast('Erro: '+e.message);
     document.getElementById('btnSendCode').disabled=false;
     document.getElementById('btnSendCode').textContent='Enviar codigo SMS';
+    _recaptchaVerifier=null;
+    document.getElementById('recaptchaContainer').innerHTML='';
   }
 }
 
@@ -3112,25 +3169,45 @@ function updatePrizeEstimate(){
 
 // ══════ PWA INSTALL ══════
 let deferredPrompt=null;
+const _isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+const _isStandalone=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone;
+
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();deferredPrompt=e;
-  const dismissed=localStorage.getItem('lottobot_install_dismissed');
-  if(dismissed&&Date.now()-parseInt(dismissed)<7*24*60*60*1000)return;
-  setTimeout(()=>{document.getElementById('installBanner')?.classList.add('show')},3000);
 });
+
+function showInstallPopup(){
+  if(_isStandalone)return showLgpd();
+  const dismissed=localStorage.getItem('lottobot_install_dismissed');
+  if(dismissed&&Date.now()-parseInt(dismissed)<7*24*60*60*1000)return showLgpd();
+  const overlay=document.getElementById('installOverlay');
+  if(_isIos){
+    document.getElementById('installIosSteps').style.display='';
+    document.getElementById('installMainBtn').textContent='Entendi';
+    document.getElementById('installMainBtn').onclick=dismissInstall;
+  }
+  overlay?.classList.add('show');
+}
+
 function doInstall(){
-  if(!deferredPrompt)return;
+  if(!deferredPrompt){dismissInstall();return}
   deferredPrompt.prompt();
   deferredPrompt.userChoice.then(r=>{
-    if(r.outcome==='accepted')showToast('✅ Lottobot instalado!');
-    deferredPrompt=null;document.getElementById('installBanner')?.classList.remove('show');
+    if(r.outcome==='accepted')showToast('Lottobot instalado!');
+    deferredPrompt=null;dismissInstall();
   });
 }
 function dismissInstall(){
   localStorage.setItem('lottobot_install_dismissed',String(Date.now()));
-  document.getElementById('installBanner')?.classList.remove('show');
+  document.getElementById('installOverlay')?.classList.remove('show');
+  setTimeout(showLgpd,400);
 }
-window.addEventListener('appinstalled',()=>{showToast('🎰 Lottobot instalado com sucesso!');document.getElementById('installBanner')?.classList.remove('show')});
+function showLgpd(){
+  if(!localStorage.getItem('lottobot_lgpd')){
+    document.getElementById('lgpdBanner')?.classList.add('show');
+  }
+}
+window.addEventListener('appinstalled',()=>{showToast('Lottobot instalado com sucesso!');document.getElementById('installOverlay')?.classList.remove('show')});
 
 // ══════ LAS VEGAS CASINO ANIMATION ══════
 // ══════ MODO I.A. — INTELLIGENT ANALYSIS ══════
@@ -3862,15 +3939,31 @@ function slotMachineReveal(games, callback){
   showGame(0);
 }
   </script>
-  <div class="install-banner" id="installBanner">
-    <div class="install-banner-icon">🎰</div>
-    <div class="install-banner-text">
-      <div class="install-banner-title">Instalar Lottobot</div>
-      <div class="install-banner-desc">Acesse mais rápido, direto da tela inicial. Funciona offline.</div>
-    </div>
-    <div class="install-banner-actions">
-      <button class="install-banner-btn dismiss" onclick="dismissInstall()">Depois</button>
-      <button class="install-banner-btn primary" onclick="doInstall()">Instalar</button>
+  <div class="install-overlay" id="installOverlay">
+    <div class="install-card">
+      <div class="install-card-header">
+        <span class="install-card-logo">🎲</span>
+        <h2>Instalar Lottobot</h2>
+        <p>Tenha o app na sua tela inicial</p>
+      </div>
+      <div class="install-card-body">
+        <div class="install-features">
+          <div class="install-feature"><span class="install-feature-icon">⚡</span> Acesso instantaneo, sem abrir navegador</div>
+          <div class="install-feature"><span class="install-feature-icon">📴</span> Funciona offline — seus jogos salvos</div>
+          <div class="install-feature"><span class="install-feature-icon">🔔</span> Notificacoes de resultados em tempo real</div>
+          <div class="install-feature"><span class="install-feature-icon">💾</span> Ocupa menos de 2MB no seu dispositivo</div>
+        </div>
+        <div class="install-ios-steps" id="installIosSteps" style="display:none">
+          <h4>Como instalar no iPhone/iPad</h4>
+          <div class="install-ios-step"><span class="step-num">1</span> Toque no botao <strong style="color:var(--text-primary)">Compartilhar</strong> (icone ⬆️) na barra do Safari</div>
+          <div class="install-ios-step"><span class="step-num">2</span> Role e toque em <strong style="color:var(--text-primary)">Adicionar a Tela de Inicio</strong></div>
+          <div class="install-ios-step"><span class="step-num">3</span> Toque em <strong style="color:var(--text-primary)">Adicionar</strong> no canto superior direito</div>
+        </div>
+        <div class="install-card-actions">
+          <button class="install-card-btn dismiss" onclick="dismissInstall()">Depois</button>
+          <button class="install-card-btn primary" id="installMainBtn" onclick="doInstall()">Instalar agora</button>
+        </div>
+      </div>
     </div>
   </div>
   <!-- LGPD COOKIE BANNER -->
@@ -3946,7 +4039,6 @@ function slotMachineReveal(games, callback){
   <script>
   function acceptLgpd(){localStorage.setItem('lottobot_lgpd','accepted');document.getElementById('lgpdBanner').classList.remove('show')}
   function rejectLgpd(){localStorage.setItem('lottobot_lgpd','rejected');document.getElementById('lgpdBanner').classList.remove('show')}
-  if(!localStorage.getItem('lottobot_lgpd')){setTimeout(()=>document.getElementById('lgpdBanner').classList.add('show'),2000)}
   </script>
 
   <!-- ONBOARDING TUTORIAL -->
@@ -4022,7 +4114,8 @@ function slotMachineReveal(games, callback){
       overlay.classList.remove('active');
       setTimeout(()=>overlay.remove(),300);
     };
-    setTimeout(()=>overlay.classList.add('active'),600);
+    // Onboarding so aparece apos login — controlado pelo auth flow
+    window._onboardPending=true;
   })();
   </script>
 </body>
