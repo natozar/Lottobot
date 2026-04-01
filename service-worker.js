@@ -46,7 +46,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ══════ CACHE (existing functionality) ══════
-const CACHE_NAME = 'lottobot-v3';
+const CACHE_NAME = 'lottobot-v41';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -54,8 +54,8 @@ const STATIC_ASSETS = [
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap'
 ];
 
-const API_CACHE = 'lotofacil-api-v1';
-const API_URL = 'https://loteriascaixa-api.herokuapp.com/api/lotofacil';
+const API_CACHE = 'lotteries-api-v1';
+const API_BASE = 'https://loteriascaixa-api.herokuapp.com/api/';
 
 // Install — cache static assets
 self.addEventListener('install', (event) => {
@@ -67,13 +67,16 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate — clean old caches
+// Activate — clean old caches and remove admin from cache
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME && key !== API_CACHE)
-            .map((key) => caches.delete(key))
+        keys.map((key) => {
+          if(key !== CACHE_NAME && key !== API_CACHE) return caches.delete(key);
+          // Also remove admin.html from current cache
+          return caches.open(key).then(c => c.delete('/admin.html'));
+        })
       );
     })
   );
@@ -90,8 +93,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network First for API calls
-  if (url.href.includes(API_URL)) {
+  // Skip admin pages — always fetch from network
+  if (url.pathname.includes('admin') || url.pathname.includes('painel')) {
+    return;
+  }
+
+  // Network First for API calls (lotofacil, megasena, quina)
+  if (url.href.includes(API_BASE)) {
     event.respondWith(
       fetch(request, { signal: AbortSignal.timeout(8000) })
         .then((response) => {
@@ -111,7 +119,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache First for static assets
+  // HTML pages — Network First (always try fresh, fallback to cache)
+  if (request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(request, { signal: AbortSignal.timeout(5000) })
+        .then((response) => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(request).then(c => c || caches.match('/index.html'));
+        })
+    );
+    return;
+  }
+
+  // Other static assets — Cache First
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
@@ -122,10 +148,6 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       });
-    }).catch(() => {
-      if (request.destination === 'document') {
-        return caches.match('/index.html');
-      }
-    })
+    }).catch(() => null)
   );
 });
