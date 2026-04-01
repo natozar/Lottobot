@@ -2745,7 +2745,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   downloadJackpotHistory(selectedLottery); // background — anti-jackpot history
   updateUI();renderJogos();renderSaved();renderTop5();updateStats();
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('service-worker.js').then(reg=>{
+    navigator.serviceWorker.register('service-worker.js',{updateViaCache:'none'}).then(reg=>{
       window._swReg=reg;
       // Check for updates every 30 seconds
       setInterval(()=>reg.update(),30*1000);
