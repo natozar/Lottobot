@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v40';
+    var V='lottobot-v41';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -829,14 +829,135 @@
     [data-theme="light"] .invite-card{background:linear-gradient(135deg,rgba(184,145,46,0.06) 0%,rgba(58,106,72,0.04) 50%,rgba(58,112,192,0.03) 100%);border-color:rgba(184,145,46,0.2)}
     [data-theme="light"] .invite-btn{box-shadow:0 4px 16px rgba(37,211,102,0.2)}
 
-    #filtrosAtivosResumo {
+    /* ══════ ANALISE TAB ══════ */
+    .analise-section {
       background: var(--bg-surface-2);
       border: 1px solid var(--border-default);
       border-radius: var(--border-radius-lg);
-      padding: 12px;
-      margin-bottom: 16px;
-      font-size: 0.8rem;
-      line-height: 1.6;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .analise-section-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .analise-quentes-row, .analise-atrasados-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .analise-quente-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      min-width: 48px;
+    }
+    .analise-quente-item .ball { width: 32px; height: 32px; font-size: 0.72rem; }
+    .analise-quente-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .analise-quente-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-ball-hot), var(--color-gold-primary));
+      border-radius: 2px;
+    }
+    .analise-quente-freq {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+    .analise-atrasado-ball {
+      animation: heatPulse 2s ease-in-out infinite;
+    }
+    .analise-ndd-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .analise-ndd-row .ball { width: 40px; height: 40px; font-size: 0.9rem; flex-shrink: 0; }
+    .analise-ndd-label { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; }
+    .analise-empty {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 8px 0;
+      opacity: 0.7;
+    }
+
+    /* Filter Chips */
+    .filter-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .filter-chip {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.68rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .filter-chip.active {
+      background: rgba(212,168,83,0.15);
+      border-color: rgba(212,168,83,0.4);
+      color: var(--color-gold-primary);
+    }
+    .filter-chip:active { transform: scale(0.95); }
+    .filter-chips-count {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Collapsible details */
+    .analise-details {
+      border: 1px solid var(--border-default);
+      border-radius: var(--border-radius-lg);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .analise-details summary {
+      padding: 12px 14px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      background: var(--bg-surface-2);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .analise-details summary::-webkit-details-marker { display: none; }
+    .analise-details summary::after { content: '▸'; transition: transform 0.2s; }
+    .analise-details[open] summary::after { transform: rotate(90deg); }
+    .analise-details .details-content { padding: 10px 14px 14px; }
+    .analise-details .details-badge {
+      font-size: 0.62rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(212,168,83,0.12);
+      color: var(--color-gold-primary);
+      font-family: var(--font-mono);
     }
 
     #excludeDentro, #excludeFora {
@@ -2043,8 +2164,7 @@
     <div class="col-center">
       <div class="tabs-header" role="tablist" aria-label="Navegacao principal">
         <button class="tab-button active" data-tab="jogos" role="tab" aria-selected="true" aria-controls="tabJogos">Jogos</button>
-        <button class="tab-button" data-tab="filtros" role="tab" aria-selected="false" aria-controls="tabFiltros">Filtros</button>
-        <button class="tab-button" data-tab="mapa" role="tab" aria-selected="false" aria-controls="tabMapa">Mapa</button>
+        <button class="tab-button" data-tab="analise" role="tab" aria-selected="false" aria-controls="tabAnalise">Analise</button>
         <button class="tab-button" data-tab="historico" role="tab" aria-selected="false" aria-controls="tabHistorico">Salvos</button>
       </div>
 
@@ -2105,37 +2225,60 @@
         </div>
       </div>
 
-      <div id="tabFiltros" class="tab-content" role="tabpanel" aria-label="Filtros de numeros">
-        <div id="filtrosAtivosResumo"></div>
-        <div style="margin-bottom: 16px;">
-          <div class="section-title">Dentro do Último Concurso</div>
-          <div id="excludeDentro"></div>
-        </div>
-        <div>
-          <div class="section-title">Fora do Último Concurso</div>
-          <div id="excludeFora"></div>
-        </div>
-        <button class="reset-exclusions" onclick="resetExclusions()">↩ Resetar Filtros</button>
-      </div>
+      <div id="tabAnalise" class="tab-content" role="tabpanel" aria-label="Analise inteligente">
 
-      <div id="tabMapa" class="tab-content" role="tabpanel" aria-label="Mapa de frequencia">
-        <div style="margin-bottom:14px">
-          <div class="section-title">Mapa de Frequencia e Atraso</div>
-          <div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">
-            Cada numero mostra sua frequencia nos ultimos sorteios. Toque em qualquer numero para ver detalhes.
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:0.65rem;margin-bottom:6px">
-            <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:#e74c3c"></div><span style="color:var(--text-muted)">Muito frequente</span></div>
-            <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:#2ecc71"></div><span style="color:var(--text-muted)">Frequente</span></div>
-            <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:#3498db"></div><span style="color:var(--text-muted)">Pouco frequente</span></div>
-            <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#d4a853,#b8912e);animation:heatPulse 2s ease-in-out infinite"></div><span style="color:var(--color-gold-primary);font-weight:600">Atrasado — fora do ciclo</span></div>
-          </div>
-          <div style="font-size:0.6rem;color:var(--text-muted);line-height:1.5;padding:8px 10px;background:rgba(212,168,83,0.05);border:1px solid rgba(212,168,83,0.1);border-radius:8px">
-            <strong style="color:var(--color-gold-primary)">O que significa "atrasado"?</strong> Cada numero tem um ciclo natural — um intervalo medio entre aparicoes. Quando o atraso atual ultrapassa 1.5x esse ciclo, o numero e destacado em dourado. Isso nao garante que ele saia no proximo sorteio, mas indica que ele esta fora do seu padrao historico.
-          </div>
+        <!-- Seção A: Números Quentes -->
+        <div class="analise-section">
+          <div class="analise-section-title">🔥 Numeros Quentes</div>
+          <div id="analiseQuentes" class="analise-quentes-row"></div>
         </div>
-        <div id="heatmapGrid"></div>
-        <p id="heatSource" class="text-muted" style="font-size: 0.75rem; text-align: center; margin-top: 8px;"></p>
+
+        <!-- Seção B: Números Atrasados -->
+        <div class="analise-section">
+          <div class="analise-section-title">⚡ Numeros Atrasados <span style="font-weight:400;font-size:0.62rem;color:var(--text-muted)">fora do ciclo natural</span></div>
+          <div id="analiseAtrasados" class="analise-atrasados-row"></div>
+        </div>
+
+        <!-- Seção C: Número do Dia -->
+        <div class="analise-section" id="analiseNDDSection" style="display:none">
+          <div class="analise-section-title">🎯 Numero do Dia</div>
+          <div id="analiseNDD" class="analise-ndd-row"></div>
+        </div>
+
+        <!-- Seção D: Heatmap -->
+        <div class="analise-section">
+          <div class="analise-section-title">🗺️ Mapa de Frequencia</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:0.6rem;margin-bottom:8px">
+            <div style="display:flex;align-items:center;gap:3px"><div style="width:10px;height:10px;border-radius:2px;background:#e74c3c"></div><span style="color:var(--text-muted)">Muito freq.</span></div>
+            <div style="display:flex;align-items:center;gap:3px"><div style="width:10px;height:10px;border-radius:2px;background:#2ecc71"></div><span style="color:var(--text-muted)">Frequente</span></div>
+            <div style="display:flex;align-items:center;gap:3px"><div style="width:10px;height:10px;border-radius:2px;background:#3498db"></div><span style="color:var(--text-muted)">Pouco freq.</span></div>
+            <div style="display:flex;align-items:center;gap:3px"><div style="width:10px;height:10px;border-radius:2px;background:linear-gradient(135deg,#d4a853,#b8912e);animation:heatPulse 2s ease-in-out infinite"></div><span style="color:var(--color-gold-primary);font-weight:600">Atrasado</span></div>
+          </div>
+          <div id="heatmapGrid"></div>
+          <p id="heatSource" class="text-muted" style="font-size:0.68rem;text-align:center;margin-top:6px"></p>
+        </div>
+
+        <!-- Seção E: Filtros Ativos (chips) -->
+        <div class="analise-section">
+          <div class="analise-section-title">🎛️ Filtros Ativos</div>
+          <div id="filterChips" class="filter-chips-wrap"></div>
+          <div id="filterChipsCount" class="filter-chips-count"></div>
+        </div>
+
+        <!-- Seção F: Fixar/Excluir (colapsável) -->
+        <details class="analise-details">
+          <summary>📌 Fixar / Excluir — Dentro do Ultimo <span id="badgeDentro" class="details-badge"></span></summary>
+          <div class="details-content">
+            <div id="excludeDentro"></div>
+          </div>
+        </details>
+        <details class="analise-details">
+          <summary>📌 Fixar / Excluir — Fora do Ultimo <span id="badgeFora" class="details-badge"></span></summary>
+          <div class="details-content">
+            <div id="excludeFora"></div>
+          </div>
+        </details>
+        <button class="reset-exclusions" onclick="resetExclusions()">↩ Resetar Selecoes</button>
       </div>
 
       <div id="tabHistorico" class="tab-content" role="tabpanel" aria-label="Jogos salvos">
@@ -2249,9 +2392,9 @@
         <div class="nav-icon">⚙️</div>
         <div>Config</div>
       </button>
-      <button class="nav-button" data-nav="filtros">
-        <div class="nav-icon">🔎</div>
-        <div>Filtros</div>
+      <button class="nav-button" data-nav="analise">
+        <div class="nav-icon">🧠</div>
+        <div>Analise</div>
       </button>
       <button class="nav-button" data-nav="stats">
         <div class="nav-icon">📊</div>
@@ -2600,7 +2743,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   document.querySelector('.col-center')?.classList.add('mobile-show');
   await loadAPI();
   downloadJackpotHistory(selectedLottery); // background — anti-jackpot history
-  updateUI();renderJogos();renderSaved();renderFilterTab();renderTop5();updateStats();
+  updateUI();renderJogos();renderSaved();renderTop5();updateStats();
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('service-worker.js').then(reg=>{
       window._swReg=reg;
@@ -3272,9 +3415,8 @@ function setupEventListeners(){
     } else {
       document.querySelector('.col-center').classList.add('mobile-show');
       if(nav==='jogos') switchTab('jogos');
-      else if(nav==='filtros') switchTab('filtros');
+      else if(nav==='analise') switchTab('analise');
       else if(nav==='salvos') switchTab('historico');
-      else if(nav==='mapa') switchTab('mapa');
     }
   }));
   document.querySelectorAll('.btn-close').forEach(b=>b.addEventListener('click',function(){this.closest('.modal-overlay').classList.remove('active')}));
@@ -3901,25 +4043,114 @@ function renderSaved(){
 }
 
 // ══════ FILTER TAB ══════
-function renderFilterTab(){
+function renderFilterTab(){renderAnaliseTab()}
+
+function renderAnaliseTab(){
   if(!ULT)return;
-  const r=document.getElementById('filtrosAtivosResumo');
-  if(r){
-    const flt=getLottery().filters;const ip=idealPairs();
-    const cVals=getActiveCentroValues().sort((a,b)=>a-b).join(', ');
-    const filters=[{id:'filterParImpar',l:'Par/Ímpar ('+ip[0]+'-'+ip[1]+'P)'},{id:'filterSoma',l:'Soma ('+flt.soma[0]+'-'+flt.soma[1]+')'},{id:'filterConsec',l:'Consecutivas (máx '+flt.consec+')'},{id:'filterRepet',l:'Repetição ('+flt.repet[0]+'-'+flt.repet[1]+')'},{id:'filterDezena',l:'Distribuição por Dezena'},{id:'filterPrimos',l:'Primos'}];
-    if(selectedLottery==='lotofacil'){
-      filters.push({id:'filterCentro',l:'Centro ('+cVals+')'});
-      filters.push({id:'filterFib',l:'Fibonacci ('+getActiveFilterVals('fib').sort((a,b)=>a-b).join(', ')+')'});
-      filters.push({id:'filterMult3',l:'Mult. 3 ('+getActiveFilterVals('mult3').sort((a,b)=>a-b).join(', ')+')'});
-      filters.push({id:'filterEspelho',l:'Espelho ('+getActiveFilterVals('espelho').sort((a,b)=>a-b).join(', ')+')'});
-      filters.push({id:'filterFinais',l:'Finais ('+getActiveFilterVals('finais').sort((a,b)=>a-b).join(', ')+')'});
-    }
-    r.innerHTML=filters.map(f=>{const on=document.getElementById(f.id)?.classList.contains('on');return '<div style="padding:4px 0;color:'+(on?'var(--color-gold-primary)':'rgba(255,255,255,0.4)')+'">'+(on?'✅':'⬜')+' '+f.l+'</div>'}).join('');
-  }
+  renderAnaliseQuentes();
+  renderAnaliseAtrasados();
+  renderAnaliseNDD();
+  renderHeatmap();
+  renderFilterChips();
+  // Fixar/Excluir grids
   const dg=document.getElementById('excludeDentro'),fg=document.getElementById('excludeFora');
   if(dg){dg.innerHTML='';ULT.numeros.forEach(n=>dg.appendChild(mkExcl(n)))}
   if(fg){fg.innerHTML='';for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkExcl(i))}
+  // Badges de contagem
+  const fixDentro=ULT.numeros.filter(n=>fixedNums.has(n)).length;
+  const exclDentro=ULT.numeros.filter(n=>excludedNums.has(n)).length;
+  const bd=document.getElementById('badgeDentro');if(bd)bd.textContent=fixDentro||exclDentro?(fixDentro?fixDentro+' fix':'')+(fixDentro&&exclDentro?' · ':'')+(exclDentro?exclDentro+' excl':''):'';
+  const allFora=[];for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i))allFora.push(i);
+  const fixFora=allFora.filter(n=>fixedNums.has(n)).length;
+  const exclFora=allFora.filter(n=>excludedNums.has(n)).length;
+  const bf=document.getElementById('badgeFora');if(bf)bf.textContent=fixFora||exclFora?(fixFora?fixFora+' fix':'')+(fixFora&&exclFora?' · ':'')+(exclFora?exclFora+' excl':''):'';
+}
+
+function renderAnaliseQuentes(){
+  const c=document.getElementById('analiseQuentes');if(!c)return;
+  if(!Object.keys(FREQ).length){c.innerHTML='<div class="analise-empty">Carregando dados...</div>';return}
+  const sorted=Object.entries(FREQ).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mx=sorted[0]?.[1]||1;
+  c.innerHTML=sorted.map(([n,f])=>`<div class="analise-quente-item">
+    <div class="ball ball-hot">${pad(n)}</div>
+    <div class="analise-quente-bar"><div class="analise-quente-bar-fill" style="width:${(f/mx*100)}%"></div></div>
+    <div class="analise-quente-freq">${f}x</div>
+  </div>`).join('');
+}
+
+function renderAnaliseAtrasados(){
+  const c=document.getElementById('analiseAtrasados');if(!c)return;
+  if(!Object.keys(CICLO).length){c.innerHTML='<div class="analise-empty">Carregando dados...</div>';return}
+  const atrasados=[];
+  for(let i=1;i<=getLottery().total;i++){
+    const ciclo=CICLO[i]||0;const atraso=ATRASO[i]||0;
+    if(ciclo>0&&atraso>ciclo*1.5)atrasados.push({n:i,atraso,ciclo});
+  }
+  atrasados.sort((a,b)=>(b.atraso/b.ciclo)-(a.atraso/a.ciclo));
+  if(!atrasados.length){c.innerHTML='<div class="analise-empty">Nenhum numero fora do ciclo no momento</div>';return}
+  c.innerHTML=atrasados.map(a=>`<div class="ball ball-rising analise-atrasado-ball" title="Atraso: ${a.atraso} (ciclo: ${Math.round(a.ciclo)})" style="width:32px;height:32px;font-size:0.72rem;cursor:help">${pad(a.n)}</div>`).join('');
+}
+
+function renderAnaliseNDD(){
+  const section=document.getElementById('analiseNDDSection');
+  const c=document.getElementById('analiseNDD');
+  if(!c||!section)return;
+  if(!Object.keys(TENDENCIA).length){section.style.display='none';return}
+  const today=new Date().toISOString().slice(0,10);
+  const seed=[...today].reduce((a,ch)=>a+ch.charCodeAt(0),0);
+  const scored=[];
+  for(let i=1;i<=getLottery().total;i++){
+    const t=TENDENCIA[i]||0,f=(FREQ[i]||0)/(historico.length||1),a=(ATRASO[i]||0);
+    scored.push({n:i,s:t*3+f*2+(a>2?1:0)+(seed%5===i%5?0.5:0)});
+  }
+  scored.sort((a,b)=>b.s-a.s);
+  const pick=scored[0];
+  const cls=classifyNum(pick.n);
+  section.style.display='';
+  c.innerHTML=`<div class="ball ${cls.cls}" style="width:40px;height:40px;font-size:0.9rem;flex-shrink:0">${pad(pick.n)}</div>
+    <div class="analise-ndd-label"><strong>${cls.type}</strong> — Freq: ${FREQ[pick.n]||0} · Atraso: ${ATRASO[pick.n]||0}<br><span style="font-size:0.65rem;color:var(--text-muted)">Baseado em tendencia + frequencia + atraso</span></div>`;
+}
+
+function renderFilterChips(){
+  const c=document.getElementById('filterChips');
+  const countEl=document.getElementById('filterChipsCount');
+  if(!c)return;
+  const flt=getLottery().filters;const ip=idealPairs();
+  const filters=[
+    {id:'filterParImpar',l:'Par/Impar '+ip[0]+'-'+ip[1]},
+    {id:'filterSoma',l:'Soma '+flt.soma[0]+'-'+flt.soma[1]},
+    {id:'filterConsec',l:'Consec. max '+flt.consec},
+    {id:'filterRepet',l:'Repet. '+flt.repet[0]+'-'+flt.repet[1]},
+    {id:'filterDezena',l:'Dezenas'},
+    {id:'filterPrimos',l:'Primos'},
+    {id:'filterBaixoAlto',l:'Baixo/Alto'},
+    {id:'filterMult3',l:'Mult. 3'},
+    {id:'filterFinais',l:'Finais'}
+  ];
+  if(selectedLottery==='lotofacil'){
+    filters.push({id:'filterCentro',l:'Centro'});
+    filters.push({id:'filterFib',l:'Fibonacci'});
+    filters.push({id:'filterEspelho',l:'Espelho'});
+  }
+  let activeCount=0;
+  c.innerHTML=filters.map(f=>{
+    const on=isFilterOn(f.id);if(on)activeCount++;
+    return '<div class="filter-chip'+(on?' active':'')+'" data-filter-id="'+f.id+'">'+f.l+'</div>';
+  }).join('');
+  if(countEl)countEl.textContent=activeCount+' de '+filters.length+' filtros ativos';
+  // Click handlers
+  c.querySelectorAll('.filter-chip').forEach(chip=>{
+    chip.addEventListener('click',function(){
+      const id=this.dataset.filterId;
+      const toggle=document.getElementById(id);
+      if(toggle)toggle.click(); // triggers the real toggle
+      this.classList.toggle('active');
+      // Update count
+      const total=c.querySelectorAll('.filter-chip').length;
+      const active=c.querySelectorAll('.filter-chip.active').length;
+      if(countEl)countEl.textContent=active+' de '+total+' filtros ativos';
+    });
+  });
 }
 function mkExcl(n){return mkToggleCell(n,'exclude-cell')}
 function resetExclusions(){
@@ -3941,7 +4172,7 @@ function updateUI(){
   }
   const res=document.getElementById('ultimoResumo');
   if(res){const p=ULT.numeros.filter(n=>n%2===0).length,s=ULT.numeros.reduce((a,b)=>a+b,0);res.innerHTML='Pares: '+p+' · Ímpares: '+(ULT.numeros.length-p)+' · Soma: '+s}
-  updateGridLayout();renderFilterTab();renderHeatmap();renderHomeHeatmap();renderTop5();renderNumeroDoDia();renderHistoricoTimeline();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();updateDynamicDescriptions();updateInviteStats();
+  updateGridLayout();renderAnaliseTab();renderHomeHeatmap();renderTop5();renderNumeroDoDia();renderHistoricoTimeline();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();updateDynamicDescriptions();updateInviteStats();
 }
 
 function switchTab(tab){
@@ -3950,7 +4181,7 @@ function switchTab(tab){
   const id='tab'+tab.charAt(0).toUpperCase()+tab.slice(1);
   document.getElementById(id)?.classList.add('active');
   document.querySelectorAll('[data-tab="'+tab+'"]').forEach(el=>{el.classList.add('active');el.setAttribute('aria-selected','true')});
-  if(tab==='mapa')renderHeatmap();if(tab==='historico')renderSaved();if(tab==='filtros')renderFilterTab();
+  if(tab==='analise')renderAnaliseTab();if(tab==='historico')renderSaved();
 }
 
 function selectModelo(m){
