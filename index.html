@@ -43,6 +43,27 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
+  <!-- Force SW update for stuck PWA installs -->
+  <script>
+  (function(){
+    var V='lottobot-v39';
+    if(localStorage.getItem('sw_ver')!==V){
+      // Clear API data caches from localStorage
+      try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
+      localStorage.setItem('sw_ver',V);
+      // Clear service worker and browser caches
+      if(navigator.serviceWorker){
+        navigator.serviceWorker.getRegistrations().then(function(regs){
+          Promise.all(regs.map(function(r){return r.unregister()})).then(function(){
+            caches.keys().then(function(k){k.forEach(function(c){caches.delete(c)})});
+            if(regs.length>0)location.reload();
+          });
+        });
+      }
+    }
+  })();
+  </script>
+
   <!-- Firebase SDK (compat for no-build PWA) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -172,8 +193,34 @@
     .header-right {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 12px;
     }
+    .header-actions{display:flex;align-items:center;gap:4px}
+    .header-icon-btn{background:none;border:1px solid transparent;color:var(--text-muted);font-size:0.95rem;cursor:pointer;padding:4px 6px;border-radius:6px;transition:all 0.15s;line-height:1;display:flex;align-items:center;justify-content:center}
+    .header-icon-btn:hover{color:var(--text-primary);background:rgba(255,255,255,0.04);border-color:var(--border-default)}
+    .header-user{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;border-radius:8px;border:1px solid var(--border-default);background:rgba(255,255,255,0.02);cursor:default}
+    .header-divider{width:1px;height:20px;background:var(--border-default);margin:0 2px}
+    .header-avatar-btn{background:none;border:2.5px solid var(--color-gold-primary);border-radius:50%;width:34px;height:34px;padding:0;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;transition:all 0.2s;box-shadow:0 0 0 0 rgba(212,168,83,0);flex-shrink:0}
+    .header-avatar-btn:hover{box-shadow:0 0 12px rgba(212,168,83,0.35);transform:scale(1.08)}
+    .header-avatar-btn:active{transform:scale(0.95)}
+    .header-avatar-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .header-avatar-btn span{font-size:0.75rem;font-weight:700;color:var(--color-gold-primary);background:var(--color-gold-dim);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%}
+
+    #jackpotBadge {
+      display: none;
+      padding: 3px 8px;
+      background: rgba(74,124,89,0.15);
+      border: 1px solid rgba(74,124,89,0.3);
+      border-radius: 6px;
+      font-size: 0.65rem;
+      color: var(--color-moss-primary);
+      white-space: nowrap;
+      cursor: help;
+      transition: opacity 0.3s;
+    }
+    #jackpotBadge.show { display: block; }
+    #jackpotBadge.loading { animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
     #offlineBadge {
       display: none;
@@ -750,13 +797,37 @@
       display: none;
       width: 100%;
       text-align: center;
-      padding: 80px 40px;
+      padding: 40px 20px;
       color: var(--text-muted);
     }
 
     #emptyState.show {
       display: block;
     }
+
+    /* === INVITE CARD === */
+    .invite-card{background:linear-gradient(135deg,rgba(212,168,83,0.08) 0%,rgba(74,124,89,0.06) 50%,rgba(74,144,217,0.04) 100%);border:1px solid rgba(212,168,83,0.2);border-radius:16px;padding:28px 24px;margin-top:24px;text-align:center;position:relative;overflow:hidden}
+    .invite-card::before{content:'';position:absolute;top:-40%;right:-20%;width:200px;height:200px;background:radial-gradient(circle,rgba(212,168,83,0.08) 0%,transparent 70%);pointer-events:none}
+    .invite-card::after{content:'';position:absolute;bottom:-30%;left:-15%;width:160px;height:160px;background:radial-gradient(circle,rgba(74,124,89,0.06) 0%,transparent 70%);pointer-events:none}
+    .invite-emoji{font-size:2.8rem;margin-bottom:12px;display:block;filter:drop-shadow(0 4px 12px rgba(212,168,83,0.3));animation:inviteFloat 3s ease-in-out infinite}
+    @keyframes inviteFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    .invite-title{font-size:1.05rem;font-weight:700;color:var(--text-primary);margin-bottom:6px;letter-spacing:-0.01em}
+    .invite-subtitle{font-size:0.78rem;color:var(--text-secondary);line-height:1.5;margin-bottom:20px;max-width:320px;margin-left:auto;margin-right:auto}
+    .invite-stats{display:flex;justify-content:center;gap:24px;margin-bottom:20px}
+    .invite-stat{display:flex;flex-direction:column;align-items:center;gap:2px}
+    .invite-stat-value{font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--color-gold-primary)}
+    .invite-stat-label{font-size:0.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em}
+    .invite-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;border:none;border-radius:12px;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(37,211,102,0.25);letter-spacing:0.01em}
+    .invite-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(37,211,102,0.35)}
+    .invite-btn:active{transform:translateY(0)}
+    .invite-btn svg{flex-shrink:0}
+    .invite-or{display:flex;align-items:center;gap:12px;margin:16px 0 12px;color:var(--text-muted);font-size:0.7rem}
+    .invite-or::before,.invite-or::after{content:'';flex:1;height:1px;background:var(--border-default)}
+    .invite-copy-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:transparent;border:1px solid var(--border-hover);color:var(--text-secondary);border-radius:8px;font-size:0.75rem;cursor:pointer;transition:all 0.2s}
+    .invite-copy-btn:hover{border-color:var(--color-gold-primary);color:var(--color-gold-primary);background:var(--color-gold-dim)}
+    .invite-badge{display:inline-block;padding:3px 8px;background:rgba(212,168,83,0.12);border-radius:6px;font-size:0.6rem;font-weight:600;color:var(--color-gold-primary);letter-spacing:0.04em;margin-bottom:14px}
+    [data-theme="light"] .invite-card{background:linear-gradient(135deg,rgba(184,145,46,0.06) 0%,rgba(58,106,72,0.04) 50%,rgba(58,112,192,0.03) 100%);border-color:rgba(184,145,46,0.2)}
+    [data-theme="light"] .invite-btn{box-shadow:0 4px 16px rgba(37,211,102,0.2)}
 
     #filtrosAtivosResumo {
       background: var(--bg-surface-2);
@@ -857,6 +928,13 @@
       transform: scale(1.08);
       z-index: 5;
     }
+    .heatmap-cell.atrasado{background:linear-gradient(135deg,#d4a853,#b8912e) !important;color:#fff !important;box-shadow:0 0 8px rgba(212,168,83,0.4);animation:heatPulse 2s ease-in-out infinite}
+    #homeHeatGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+    #homeHeatGrid.grid-8{grid-template-columns:repeat(8,1fr);gap:3px}
+    #homeHeatGrid.grid-10{grid-template-columns:repeat(10,1fr);gap:2px}
+    #homeHeatGrid .heatmap-cell{font-size:0.7rem}
+    #homeHeatGrid.grid-8 .heatmap-cell,#homeHeatGrid.grid-10 .heatmap-cell{font-size:0.58rem}
+    @keyframes heatPulse{0%,100%{box-shadow:0 0 6px rgba(212,168,83,0.3)}50%{box-shadow:0 0 14px rgba(212,168,83,0.6)}}
 
     .analytics-card {
       background: var(--bg-surface-1);
@@ -1230,7 +1308,9 @@
       header { padding: 0 12px; }
       .header-left { gap: 8px; }
       .header-logo { font-size: 1rem; }
-      .header-right { gap: 8px; font-size: 0.7rem; }
+      .header-right { gap: 6px; font-size: 0.7rem; }
+      .header-icon-btn{font-size:0.85rem;padding:3px 4px}
+      .header-avatar-btn{width:30px;height:30px;border-width:2px}
       .mobile-nav { display: flex; }
       .mobile-fab { display: flex; }
 
@@ -1419,9 +1499,9 @@
     .casino-watermark{position:absolute;bottom:8px;right:12px;font-family:var(--font-mono);font-size:0.6rem;color:rgba(212,168,83,0.35);letter-spacing:0.1em;z-index:15;pointer-events:none;text-transform:uppercase}
     .casino-cta{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(0,0,0,0.96),rgba(0,0,0,0.99));z-index:250;opacity:0;transition:opacity 0.3s;pointer-events:none;perspective:800px}
     .casino-cta.show{opacity:1;pointer-events:auto}
-    .cta-finger{width:180px;height:180px;transform:translateZ(-800px) scale(0.1);opacity:0;transform-style:preserve-3d}
-    .casino-cta.show .cta-finger{animation:ctaFinger3D 1.6s cubic-bezier(0.05,0.7,0.2,1.0) forwards;filter:drop-shadow(0 0 50px rgba(212,168,83,0.9)) drop-shadow(0 0 100px rgba(212,168,83,0.4))}
-    @keyframes ctaFinger3D{0%{transform:translateZ(-800px) scale(0.1) rotateX(30deg) rotateY(-10deg);opacity:0;filter:brightness(6) blur(20px) drop-shadow(0 0 100px rgba(212,168,83,1))}12%{transform:translateZ(-400px) scale(0.3) rotateX(20deg) rotateY(-5deg);opacity:0.4;filter:brightness(3) blur(10px) drop-shadow(0 0 80px rgba(212,168,83,1))}35%{transform:translateZ(-50px) scale(1.0) rotateX(5deg) rotateY(2deg);opacity:0.9;filter:brightness(1.8) blur(2px) drop-shadow(0 0 60px rgba(212,168,83,0.9))}55%{transform:translateZ(80px) scale(1.6) rotateX(-5deg) rotateY(-2deg);opacity:1;filter:brightness(1.4) blur(0) drop-shadow(0 0 50px rgba(212,168,83,0.8))}75%{transform:translateZ(40px) scale(2.0) rotateX(-2deg);opacity:1;filter:brightness(1.2)}100%{transform:translateZ(0) scale(2.5) rotateX(0) rotateY(0);opacity:1;filter:brightness(1) drop-shadow(0 0 35px rgba(212,168,83,0.6))}}
+    .cta-finger{width:180px;height:180px;transform:scale(0.1);opacity:0}
+    .casino-cta.show .cta-finger{animation:ctaFinger3D 1.4s cubic-bezier(0.05,0.7,0.2,1.0) forwards}
+    @keyframes ctaFinger3D{0%{transform:scale(0.1);opacity:0}20%{transform:scale(0.5);opacity:0.6}50%{transform:scale(1.2);opacity:1}70%{transform:scale(2.0);opacity:1}100%{transform:scale(2.5);opacity:1}}
     .cta-finger-glow{position:absolute;width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-60%) scale(0.1);background:radial-gradient(circle,rgba(212,168,83,0.4) 0%,rgba(255,215,0,0.15) 40%,transparent 70%);border-radius:50%;pointer-events:none;opacity:0}
     .casino-cta.show .cta-finger-glow{animation:fingerGlowEntry 1.6s cubic-bezier(0.05,0.7,0.2,1.0) forwards}
     @keyframes fingerGlowEntry{0%{opacity:0;transform:translate(-50%,-60%) scale(0.1)}35%{opacity:0.6;transform:translate(-50%,-60%) scale(1.0)}55%{opacity:1;transform:translate(-50%,-60%) scale(1.6)}100%{opacity:0.8;transform:translate(-50%,-60%) scale(2.5)}}
@@ -1469,6 +1549,46 @@
     .install-card-btn.dismiss{background:var(--bg-surface-2);color:var(--text-muted);border:1px solid var(--border-hover)}
     .install-card-btn.dismiss:hover{color:var(--text-primary);border-color:var(--text-muted)}
 
+    /* === PUSH NOTIFICATION MODAL === */
+    .push-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:296;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(6px)}
+    .push-overlay.show{opacity:1;pointer-events:auto}
+    .push-card{background:linear-gradient(135deg,#1a1a2a 0%,#111113 50%,#1a2a1e 100%);border:1px solid rgba(212,168,83,0.3);border-radius:20px;max-width:400px;width:100%;overflow:hidden;animation:modalIn 0.3s ease-out;box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+    .push-card-header{background:linear-gradient(135deg,rgba(212,168,83,0.12),rgba(74,124,89,0.1));padding:28px 24px 20px;text-align:center}
+    .push-card-icon{font-size:3rem;margin-bottom:8px;display:block;filter:drop-shadow(0 4px 16px rgba(212,168,83,0.4))}
+    .push-card-header h2{font-size:1.15rem;font-weight:700;color:var(--text-primary);margin-bottom:6px}
+    .push-card-header p{font-size:0.8rem;color:var(--text-secondary);line-height:1.5}
+    .push-card-body{padding:20px 24px}
+    .push-benefits{display:flex;flex-direction:column;gap:16px;margin-bottom:24px}
+    .push-benefit{display:flex;align-items:flex-start;gap:12px}
+    .push-benefit-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+    .push-benefit-icon.gold{background:rgba(212,168,83,0.15)}
+    .push-benefit-icon.green{background:rgba(74,124,89,0.15)}
+    .push-benefit-icon.blue{background:rgba(74,144,217,0.15)}
+    .push-benefit-text h4{font-size:0.82rem;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+    .push-benefit-text p{font-size:0.72rem;color:var(--text-muted);line-height:1.4}
+    .push-card-actions{display:flex;gap:10px}
+    .push-card-btn{flex:1;padding:14px;border-radius:12px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+    .push-card-btn.primary{background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b}
+    .push-card-btn.primary:hover{box-shadow:0 4px 20px rgba(212,168,83,0.3)}
+    .push-card-btn.dismiss{background:var(--bg-surface-2);color:var(--text-muted);border:1px solid var(--border-hover)}
+    .push-card-btn.dismiss:hover{color:var(--text-primary);border-color:var(--text-muted)}
+    .push-card-footer{text-align:center;padding:0 24px 18px;font-size:0.65rem;color:var(--text-muted);opacity:0.6}
+
+    /* === UPDATE BANNER === */
+    .update-banner{position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b;padding:10px 16px;display:none;align-items:center;justify-content:center;gap:10px;font-size:0.82rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.3);animation:slideDown 0.3s ease-out}
+    .update-banner.show{display:flex}
+    @keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+    .update-banner button{padding:6px 16px;border-radius:8px;border:2px solid #09090b;background:transparent;color:#09090b;font-weight:700;font-size:0.78rem;cursor:pointer;transition:all 0.2s}
+    .update-banner button:hover{background:#09090b;color:var(--color-gold-primary)}
+    .btn-check-update{background:none;border:1px solid var(--border-default);color:var(--text-muted);border-radius:var(--border-radius-sm);padding:4px 8px;font-size:0.65rem;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+    .btn-check-update:hover{border-color:var(--color-gold-primary);color:var(--color-gold-primary)}
+    .btn-check-update.checking{opacity:0.5;pointer-events:none}
+
+    /* Centro value buttons */
+    .centro-val{width:36px;height:32px;border-radius:8px;border:1.5px solid var(--border-default);background:var(--bg-surface-2);color:var(--text-muted);font-family:var(--font-mono);font-weight:600;font-size:0.8rem;cursor:pointer;transition:all 0.15s}
+    .centro-val:hover{border-color:var(--border-hover);color:var(--text-secondary)}
+    .centro-val.active{border-color:var(--color-gold-primary);background:var(--color-gold-dim);color:var(--color-gold-primary)}
+
     /* === AUTH === */
     .auth-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border-hover);background:rgba(255,255,255,0.04);color:var(--text-secondary);transition:all 0.2s;white-space:nowrap}
     .auth-btn:hover{border-color:var(--color-gold-primary);color:var(--color-gold-primary);background:rgba(212,168,83,0.08)}
@@ -1497,8 +1617,45 @@
     .auth-divider::after{right:0}
     .auth-logout{font-size:0.7rem;color:var(--text-muted);cursor:pointer;border:none;background:none;text-decoration:underline;padding:4px}
     .auth-logout:hover{color:var(--color-gold-primary)}
-    #recaptchaContainer{margin-top:4px;display:flex;justify-content:center;transform:scale(0.92);transform-origin:center}
-    #recaptchaContainer>div{border-radius:10px;overflow:hidden}
+
+    /* === USER PROFILE === */
+    #profileModal .modal{max-width:500px;max-height:90vh;overflow-y:auto}
+    .profile-header{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--border-default);margin-bottom:16px}
+    .profile-avatar{width:48px;height:48px;border-radius:50%;border:2px solid var(--color-gold-primary);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:var(--color-gold-primary);background:var(--color-gold-dim);flex-shrink:0}
+    .profile-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+    .profile-name{font-size:1rem;font-weight:700;color:var(--text-primary)}
+    .profile-since{font-size:0.68rem;color:var(--text-muted)}
+    .profile-section{padding:14px 0;border-bottom:1px solid var(--border-default)}
+    .profile-section:last-child{border-bottom:none}
+    .profile-section-title{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600;margin-bottom:10px}
+    .profile-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:0.8rem}
+    .profile-label{color:var(--text-secondary)}
+    .profile-value{color:var(--text-primary);font-family:var(--font-mono);font-weight:500;font-size:0.78rem;text-align:right;max-width:60%;overflow:hidden;text-overflow:ellipsis}
+    .profile-chart-wrap{background:var(--bg-surface-2);border:1px solid var(--border-default);border-radius:var(--border-radius-md);padding:12px;margin-top:8px}
+    .profile-chart-empty{text-align:center;padding:20px;color:var(--text-muted);font-size:0.78rem}
+    .profile-links{display:flex;flex-direction:column;gap:8px}
+    .profile-link{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg-surface-2);border:1px solid var(--border-default);border-radius:var(--border-radius-md);color:var(--text-secondary);font-size:0.8rem;cursor:pointer;transition:all 0.2s;border:none;width:100%;text-align:left}
+    .profile-link:hover{background:var(--bg-surface-3);color:var(--text-primary)}
+    .profile-danger{margin-top:8px;padding:14px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:var(--border-radius-md)}
+    .profile-danger p{font-size:0.72rem;color:var(--text-muted);margin-bottom:10px;line-height:1.5}
+    .profile-delete-btn{width:100%;padding:10px;border-radius:var(--border-radius-md);border:1px solid rgba(239,68,68,0.3);background:transparent;color:#ef4444;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+    .profile-delete-btn:hover{background:rgba(239,68,68,0.1);border-color:#ef4444}
+    .profile-delete-confirm{display:none;margin-top:10px}
+    .profile-delete-confirm.show{display:block}
+    .profile-delete-input{width:100%;padding:10px;background:var(--bg-surface-2);border:1px solid rgba(239,68,68,0.3);border-radius:var(--border-radius-sm);color:var(--text-primary);font-size:0.82rem;margin-bottom:8px;outline:none}
+    .profile-delete-input:focus{border-color:#ef4444}
+    .profile-delete-final{width:100%;padding:10px;border-radius:var(--border-radius-md);border:none;background:#ef4444;color:#fff;font-size:0.8rem;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+    .profile-delete-final:disabled{opacity:0.3;cursor:not-allowed}
+    #recaptchaContainer{position:absolute;opacity:0;pointer-events:none;z-index:-1}
+    .captcha-btn{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;border:1px solid var(--border-hover);background:var(--bg-surface-2);cursor:pointer;transition:all 0.3s;width:100%;font-size:0.82rem;color:var(--text-secondary)}
+    .captcha-btn:hover{border-color:var(--color-gold-primary);background:rgba(212,168,83,0.06)}
+    .captcha-btn.verified{border-color:rgba(74,124,89,0.5);background:rgba(74,124,89,0.08);color:#4a7c59;pointer-events:none}
+    .captcha-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--border-hover);display:flex;align-items:center;justify-content:center;transition:all 0.3s;flex-shrink:0}
+    .captcha-btn.verified .captcha-check{border-color:#4a7c59;background:#4a7c59}
+    .captcha-btn.verifying .captcha-check{border-color:var(--color-gold-primary);animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .captcha-label{flex:1}
+    .captcha-shield{font-size:1rem;opacity:0.5;flex-shrink:0}
     .auth-admin-link{font-size:0.65rem;color:var(--color-gold-primary);text-decoration:none;opacity:0.7;display:none}
     .auth-admin-link.show{display:inline}
 
@@ -1584,18 +1741,21 @@
   <header>
     <div class="header-left">
       <span class="header-logo">🎲 Lottobot</span>
+      <div id="concursoBadge" style="font-family:var(--font-mono);font-size:0.78rem;font-weight:700;color:var(--color-gold-primary);letter-spacing:0.02em">#0000</div>
     </div>
     <div class="header-right">
-      <div id="histBadge" class="text-secondary" style="font-size: 0.8rem;">— concursos</div>
-      <div id="concursoBadge" class="text-muted" style="font-size: 0.8rem;">#0000</div>
+      <div id="histBadge" class="text-secondary" style="font-size:0.7rem;display:none">—</div>
+      <div id="jackpotBadge" title="Histórico de jackpots"></div>
       <div id="offlineBadge">📡 Offline</div>
       <div id="headerSpinner"></div>
-      <button id="themeToggle" onclick="toggleTheme()" style="background:none;border:none;font-size:1rem;cursor:pointer;padding:4px" aria-label="Alternar tema" title="Tema claro/escuro">🌙</button>
-      <!-- Auth button -->
+      <div class="header-actions">
+        <button class="header-icon-btn" id="btnCheckUpdate" onclick="checkForUpdate()" title="Verificar atualizacao">🔄</button>
+        <button class="header-icon-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Alternar tema" title="Tema claro/escuro">🌙</button>
+      </div>
       <div id="authArea">
         <button class="auth-btn" id="authBtn" onclick="document.getElementById('authModal').classList.add('active')">Entrar</button>
       </div>
-      <a href="admin.html" class="auth-admin-link" id="adminLink" target="_blank">Admin</a>
+      <a href="/painel/" class="auth-admin-link" id="adminLink" target="_blank" rel="noopener">Admin</a>
     </div>
   </header>
 
@@ -1616,41 +1776,25 @@
 
         <div class="auth-divider">ou</div>
 
-        <button class="auth-provider-btn" id="btnPhoneToggle" onclick="document.querySelector('.auth-phone-form').classList.add('show');this.style.display='none'">
-          <span class="auth-icon">📱</span>
-          Entrar com Telefone
+        <button class="auth-provider-btn" id="btnFormToggle" onclick="document.getElementById('quickForm').classList.add('show');this.style.display='none'">
+          <span class="auth-icon">✏️</span>
+          Entrar com Nome e Email
         </button>
 
-        <div class="auth-phone-form" id="phoneForm">
-          <div class="auth-phone-row">
-            <select class="auth-country-select" id="countryCode">
-              <option value="+55">🇧🇷 +55</option>
-              <option value="+1">🇺🇸 +1</option>
-              <option value="+351">🇵🇹 +351</option>
-              <option value="+34">🇪🇸 +34</option>
-              <option value="+44">🇬🇧 +44</option>
-              <option value="+33">🇫🇷 +33</option>
-              <option value="+49">🇩🇪 +49</option>
-              <option value="+39">🇮🇹 +39</option>
-              <option value="+81">🇯🇵 +81</option>
-              <option value="+54">🇦🇷 +54</option>
-              <option value="+56">🇨🇱 +56</option>
-              <option value="+57">🇨🇴 +57</option>
-              <option value="+52">🇲🇽 +52</option>
-              <option value="+595">🇵🇾 +595</option>
-              <option value="+598">🇺🇾 +598</option>
-              <option value="+244">🇦🇴 +244</option>
-              <option value="+258">🇲🇿 +258</option>
-            </select>
-            <input type="tel" class="auth-phone-input" id="phoneInput" placeholder="16 99999-9999" maxlength="15">
-          </div>
-          <div id="recaptchaContainer"></div>
-          <button class="auth-send-btn" id="btnSendCode" onclick="sendPhoneCode()">Enviar codigo SMS</button>
-          <input type="text" class="auth-phone-input" id="codeInput" placeholder="Codigo de 6 digitos" maxlength="6" style="display:none">
-          <button class="auth-send-btn" id="btnVerifyCode" onclick="verifyPhoneCode()" style="display:none;background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b">Verificar codigo</button>
+        <div class="auth-phone-form" id="quickForm">
+          <input type="text" class="auth-phone-input" id="qfName" placeholder="Seu nome" maxlength="60" style="font-family:var(--font-sans)">
+          <input type="email" class="auth-phone-input" id="qfEmail" placeholder="Seu email" maxlength="80" style="font-family:var(--font-sans)">
+          <input type="tel" class="auth-phone-input" id="qfPhone" placeholder="Telefone (opcional)" maxlength="15" style="font-family:var(--font-mono)">
+          <button class="auth-send-btn" style="background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b" onclick="loginQuickForm()">Entrar</button>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- UPDATE BANNER -->
+  <div class="update-banner" id="updateBanner">
+    <span>🚀 Nova versao disponivel!</span>
+    <button onclick="location.reload()">Atualizar agora</button>
   </div>
 
   <div class="desktop-layout" id="appLayout" style="display:none">
@@ -1677,10 +1821,11 @@
       <!-- LOTTERY SELECTOR -->
       <div class="config-section">
         <div class="section-title">Loteria</div>
-        <div class="modelos-grid">
+        <div class="modelos-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
           <div class="modelo-card loteria-card active" data-loteria="lotofacil" onclick="switchLottery('lotofacil')" style="font-size:0.72rem">Lotofacil</div>
           <div class="modelo-card loteria-card" data-loteria="megasena" onclick="switchLottery('megasena')" style="font-size:0.72rem">Mega-Sena</div>
           <div class="modelo-card loteria-card" data-loteria="quina" onclick="switchLottery('quina')" style="font-size:0.72rem">Quina</div>
+          <div class="modelo-card loteria-card" data-loteria="duplasena" onclick="switchLottery('duplasena')" style="font-size:0.72rem">Dupla Sena</div>
         </div>
       </div>
 
@@ -1700,19 +1845,8 @@
       <div class="config-section" id="pickSizeSection">
         <div class="section-title">Números por Jogo</div>
         <label for="pickSize" class="sr-only">Numeros por jogo</label>
-        <select id="pickSize" onchange="updatePickSize()">
-          <option value="15" selected>15 números — R$ 3,00</option>
-          <option value="16">16 números — R$ 48,00</option>
-          <option value="17">17 números — R$ 408,00</option>
-          <option value="18">18 números — R$ 2.448,00</option>
-          <option value="19">19 números — R$ 11.628,00</option>
-        </select>
+        <select id="pickSize" onchange="updatePickSize()"></select>
         <div id="pickSizeInfo" style="font-size:0.65rem;color:var(--text-muted);margin-top:6px;line-height:1.5;display:none">
-          <div style="color:var(--color-gold-primary);font-weight:600;margin-bottom:4px">Estatísticas de vencedores:</div>
-          <div>~92% dos ganhadores jogaram com 15 números</div>
-          <div>~5% jogaram com 16 números</div>
-          <div>~2% jogaram com 17 números</div>
-          <div>~1% jogaram com 18-19 números</div>
           <div style="margin-top:4px;color:var(--color-ball-hot)">Mais números = mais chances, mas custo muito maior.</div>
         </div>
       </div>
@@ -1759,6 +1893,90 @@
           <div><span class="toggle-label">Primos</span><div class="filter-info" id="filterDescPrimos"></div></div>
           <div id="filterPrimos" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Primos" tabindex="0"><div class="toggle-knob"></div></div>
         </div>
+        <div class="toggle-row" id="filterBaixoAltoRow">
+          <div><span class="toggle-label">Baixo / Alto</span><div class="filter-info" id="filterDescBA"></div></div>
+          <div id="filterBaixoAlto" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Baixo Alto" tabindex="0"><div class="toggle-knob"></div></div>
+        </div>
+        <div id="baixoAltoRangeRow" style="display:none;padding:4px 0 8px">
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px">Quantos numeros baixos:</div>
+          <div id="baixoAltoValues" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+          <div id="baixoAltoDesc" style="font-size:0.58rem;color:var(--text-muted);margin-top:4px;line-height:1.4"></div>
+        </div>
+        <div class="toggle-row" id="filterCentroRow" style="display:none">
+          <div><span class="toggle-label">Centro da Cartela</span><div class="filter-info" id="filterDescCentro"></div></div>
+          <div id="filterCentro" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Centro" tabindex="0"><div class="toggle-knob"></div></div>
+        </div>
+        <div id="centroRangeRow" style="display:none;padding:4px 0 8px">
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px">Quantos centrais por jogo:</div>
+          <div id="centroValues" style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="centro-val" data-val="3" onclick="toggleCentroVal(this)">3</button>
+            <button class="centro-val active" data-val="4" onclick="toggleCentroVal(this)">4</button>
+            <button class="centro-val active" data-val="5" onclick="toggleCentroVal(this)">5</button>
+            <button class="centro-val active" data-val="6" onclick="toggleCentroVal(this)">6</button>
+            <button class="centro-val" data-val="7" onclick="toggleCentroVal(this)">7</button>
+            <button class="centro-val" data-val="8" onclick="toggleCentroVal(this)">8</button>
+          </div>
+          <div style="font-size:0.58rem;color:var(--text-muted);margin-top:6px;line-height:1.4">Centrais: 07, 08, 09, 12, 13, 14, 17, 18, 19. Media: 5.2 por sorteio.</div>
+        </div>
+        <div class="toggle-row" id="filterFibRow" style="display:none">
+          <div><span class="toggle-label">Fibonacci</span><div class="filter-info" id="filterDescFib"></div></div>
+          <div id="filterFib" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Fibonacci" tabindex="0"><div class="toggle-knob"></div></div>
+        </div>
+        <div id="fibRangeRow" style="display:none;padding:4px 0 8px">
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px">Quantos Fibonacci por jogo:</div>
+          <div id="fibValues" style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="centro-val" data-val="2" data-group="fib" onclick="toggleFilterVal(this)">2</button>
+            <button class="centro-val active" data-val="3" data-group="fib" onclick="toggleFilterVal(this)">3</button>
+            <button class="centro-val active" data-val="4" data-group="fib" onclick="toggleFilterVal(this)">4</button>
+            <button class="centro-val active" data-val="5" data-group="fib" onclick="toggleFilterVal(this)">5</button>
+            <button class="centro-val" data-val="6" data-group="fib" onclick="toggleFilterVal(this)">6</button>
+          </div>
+          <div style="font-size:0.58rem;color:var(--text-muted);margin-top:4px;line-height:1.4">Nums: 01, 02, 03, 05, 08, 13, 21. Media: 4.1 por sorteio.</div>
+        </div>
+        <div class="toggle-row" id="filterMult3Row">
+          <div><span class="toggle-label">Multiplos de 3</span><div class="filter-info" id="filterDescMult3"></div></div>
+          <div id="filterMult3" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Multiplos 3" tabindex="0"><div class="toggle-knob"></div></div>
+        </div>
+        <div id="mult3RangeRow" style="display:none;padding:4px 0 8px">
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px">Quantos multiplos de 3 por jogo:</div>
+          <div id="mult3Values" style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="centro-val" data-val="3" data-group="mult3" onclick="toggleFilterVal(this)">3</button>
+            <button class="centro-val active" data-val="4" data-group="mult3" onclick="toggleFilterVal(this)">4</button>
+            <button class="centro-val active" data-val="5" data-group="mult3" onclick="toggleFilterVal(this)">5</button>
+            <button class="centro-val" data-val="6" data-group="mult3" onclick="toggleFilterVal(this)">6</button>
+            <button class="centro-val" data-val="7" data-group="mult3" onclick="toggleFilterVal(this)">7</button>
+          </div>
+          <div style="font-size:0.58rem;color:var(--text-muted);margin-top:4px;line-height:1.4">Nums: 03, 06, 09, 12, 15, 18, 21, 24. Media: 4.6 por sorteio.</div>
+        </div>
+        <div class="toggle-row" id="filterEspelhoRow" style="display:none">
+          <div><span class="toggle-label">Pares Espelho</span><div class="filter-info" id="filterDescEspelho"></div></div>
+          <div id="filterEspelho" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Espelho" tabindex="0"><div class="toggle-knob"></div></div>
+        </div>
+        <div id="espelhoRangeRow" style="display:none;padding:4px 0 8px">
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px">Quantos pares espelho completos:</div>
+          <div id="espelhoValues" style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="centro-val" data-val="2" data-group="espelho" onclick="toggleFilterVal(this)">2</button>
+            <button class="centro-val active" data-val="3" data-group="espelho" onclick="toggleFilterVal(this)">3</button>
+            <button class="centro-val active" data-val="4" data-group="espelho" onclick="toggleFilterVal(this)">4</button>
+            <button class="centro-val active" data-val="5" data-group="espelho" onclick="toggleFilterVal(this)">5</button>
+            <button class="centro-val" data-val="6" data-group="espelho" onclick="toggleFilterVal(this)">6</button>
+          </div>
+          <div style="font-size:0.58rem;color:var(--text-muted);margin-top:4px;line-height:1.4">Pares que somam 26 (01+25, 02+24... 12+14). Media: 4.1 por sorteio.</div>
+        </div>
+        <div class="toggle-row" id="filterFinaisRow">
+          <div><span class="toggle-label">Finais Distintos</span><div class="filter-info" id="filterDescFinais"></div></div>
+          <div id="filterFinais" class="toggle-switch" role="switch" aria-checked="false" aria-label="Filtro Finais" tabindex="0"><div class="toggle-knob"></div></div>
+        </div>
+        <div id="finaisRangeRow" style="display:none;padding:4px 0 8px">
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px">Quantos finais distintos (0-9):</div>
+          <div id="finaisValues" style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="centro-val" data-val="7" data-group="finais" onclick="toggleFilterVal(this)">7</button>
+            <button class="centro-val" data-val="8" data-group="finais" onclick="toggleFilterVal(this)">8</button>
+            <button class="centro-val active" data-val="9" data-group="finais" onclick="toggleFilterVal(this)">9</button>
+            <button class="centro-val active" data-val="10" data-group="finais" onclick="toggleFilterVal(this)">10</button>
+          </div>
+          <div style="font-size:0.58rem;color:var(--text-muted);margin-top:4px;line-height:1.4">Quantos finais diferentes (0-9) aparecem. Media: 9.0 por sorteio.</div>
+        </div>
       </div>
 
       <div class="config-section">
@@ -1799,6 +2017,7 @@
       </div>
 
       <button id="btnGerar">🎲 Gerar Números</button>
+      <div style="margin-top:10px;padding:8px 10px;background:rgba(212,168,83,0.06);border:1px solid rgba(212,168,83,0.12);border-radius:8px;font-size:0.62rem;color:var(--text-muted);line-height:1.5;text-align:center">⚠️ Os jogos gerados aqui so concorrem aos premios se apostados em uma <strong style="color:var(--text-secondary)">Loterica</strong> ou pelo app/site da <strong style="color:var(--text-secondary)">Caixa Economica Federal</strong>.</div>
     </div>
 
     <div class="col-center">
@@ -1823,13 +2042,46 @@
           <button class="btn-export" onclick="undoJogos()">↩ Desfazer</button>
           <button class="btn-export" onclick="limparJogos()">🗑️ Limpar</button>
         </div>
+        <div style="font-size:0.6rem;color:var(--text-muted);opacity:0.7;margin-top:6px">⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.</div>
       </div>
 
       <div id="tabJogos" class="tab-content active" role="tabpanel" aria-label="Jogos gerados">
         <div id="jogosContainer"></div>
         <div id="emptyState" class="show">
-          <div style="font-size: 2.5rem; opacity: 0.15; margin-bottom: 12px;">🎲</div>
+          <div style="font-size: 2.5rem; opacity: 0.15; margin-bottom: 8px;">🎲</div>
           <p style="color: var(--text-muted); font-size: 0.9rem;">Configure e gere seus jogos</p>
+        </div>
+
+        <div class="invite-card" id="inviteCard">
+          <span class="invite-emoji">🏆</span>
+          <div class="invite-title">Desafie seus amigos!</div>
+          <div class="invite-subtitle">Quem acerta mais numeros? Convide para o Lottobot e descubram juntos. Cada um gera seus jogos e compara os resultados.</div>
+          <div class="invite-stats">
+            <div class="invite-stat"><span class="invite-stat-value" id="inviteStatUsers">--</span><span class="invite-stat-label">Jogadores</span></div>
+            <div class="invite-stat"><span class="invite-stat-value" id="inviteStatGames">--</span><span class="invite-stat-label">Jogos gerados</span></div>
+            <div class="invite-stat"><span class="invite-stat-value">3</span><span class="invite-stat-label">Loterias</span></div>
+          </div>
+          <button class="invite-btn" onclick="shareInvite()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Convidar pelo WhatsApp
+          </button>
+          <div class="invite-or">ou</div>
+          <button class="invite-copy-btn" onclick="copyInviteLink()">📋 Copiar link de convite</button>
+        </div>
+
+        <!-- MINI HEATMAP na tela principal -->
+        <div id="homeHeatmap" style="margin-top:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div class="section-title" style="margin:0">Mapa de Frequencia</div>
+            <div style="display:flex;gap:6px;font-size:0.55rem">
+              <span style="color:#e74c3c">● Quente</span>
+              <span style="color:#2ecc71">● Freq</span>
+              <span style="color:#3498db">● Frio</span>
+              <span style="color:#d4a853">● Atrasado</span>
+            </div>
+          </div>
+          <div id="homeHeatGrid"></div>
+          <p id="homeHeatSource" style="font-size:0.65rem;color:var(--text-muted);text-align:center;margin-top:6px"></p>
         </div>
       </div>
 
@@ -1847,19 +2099,44 @@
       </div>
 
       <div id="tabMapa" class="tab-content" role="tabpanel" aria-label="Mapa de frequencia">
-        <div style="margin-bottom: 12px;">
-          <div class="section-title">Frequência Histórica (Último Concurso)</div>
+        <div style="margin-bottom:14px">
+          <div class="section-title">Mapa de Frequencia e Atraso</div>
+          <div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">
+            Cada numero mostra sua frequencia nos ultimos sorteios. Toque em qualquer numero para ver detalhes.
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:0.65rem;margin-bottom:6px">
+            <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:#e74c3c"></div><span style="color:var(--text-muted)">Muito frequente</span></div>
+            <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:#2ecc71"></div><span style="color:var(--text-muted)">Frequente</span></div>
+            <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:#3498db"></div><span style="color:var(--text-muted)">Pouco frequente</span></div>
+            <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#d4a853,#b8912e);animation:heatPulse 2s ease-in-out infinite"></div><span style="color:var(--color-gold-primary);font-weight:600">Atrasado — fora do ciclo</span></div>
+          </div>
+          <div style="font-size:0.6rem;color:var(--text-muted);line-height:1.5;padding:8px 10px;background:rgba(212,168,83,0.05);border:1px solid rgba(212,168,83,0.1);border-radius:8px">
+            <strong style="color:var(--color-gold-primary)">O que significa "atrasado"?</strong> Cada numero tem um ciclo natural — um intervalo medio entre aparicoes. Quando o atraso atual ultrapassa 1.5x esse ciclo, o numero e destacado em dourado. Isso nao garante que ele saia no proximo sorteio, mas indica que ele esta fora do seu padrao historico.
+          </div>
         </div>
         <div id="heatmapGrid"></div>
         <p id="heatSource" class="text-muted" style="font-size: 0.75rem; text-align: center; margin-top: 8px;"></p>
       </div>
 
       <div id="tabHistorico" class="tab-content" role="tabpanel" aria-label="Jogos salvos">
+        <div id="savedExportBar" style="display:none;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn-export" onclick="exportSavedCopy()">📋 Copiar todos</button>
+          <button class="btn-export" onclick="exportSavedWhatsApp()">💬 WhatsApp</button>
+          <button class="btn-export" onclick="exportSavedPDF()">📄 PDF</button>
+        </div>
         <div id="savedContainer"></div>
       </div>
     </div>
 
     <div class="col-right">
+      <!-- LOTTERY SELECTOR (Stats) -->
+      <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="modelo-card loteria-stat-btn active" data-stat-lot="lotofacil" onclick="switchStatsLottery('lotofacil',this)" style="font-size:0.68rem;padding:8px 10px;flex:1;min-width:0">Lotofacil</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="megasena" onclick="switchStatsLottery('megasena',this)" style="font-size:0.68rem;padding:8px 10px;flex:1;min-width:0">Mega</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="quina" onclick="switchStatsLottery('quina',this)" style="font-size:0.68rem;padding:8px 10px;flex:1;min-width:0">Quina</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="duplasena" onclick="switchStatsLottery('duplasena',this)" style="font-size:0.68rem;padding:8px 10px;flex:1;min-width:0">Dupla</button>
+      </div>
+
       <!-- PREVISÃO DE PRÊMIO -->
       <div class="prize-panel">
         <div class="numeros-panel-title"><span>💰 Previsão Próximo Concurso</span></div>
@@ -1987,10 +2264,23 @@
         <button class="btn-close" onclick="document.getElementById('manualCheckModal').classList.remove('active')">✕</button>
       </div>
       <div class="modal-body">
-        <p style="color: var(--text-secondary); margin-bottom: 16px;">Selecione os 15 números sorteados:</p>
+        <p style="color: var(--text-secondary); margin-bottom: 16px;" id="manualCheckDesc">Selecione os números sorteados:</p>
         <div id="manualInputGrid"></div>
       </div>
       <button id="btnConfirmManual">✓ Confirmar</button>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div id="profileModal" class="modal-overlay" role="dialog" aria-label="Meu Perfil">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 style="font-size:1rem;font-weight:700">Meu Perfil</h2>
+        <button class="btn-close" onclick="document.getElementById('profileModal').classList.remove('active')">✕</button>
+      </div>
+      <div class="modal-body" id="profileBody" style="padding:16px 20px">
+        <!-- Populated by JS -->
+      </div>
     </div>
   </div>
 
@@ -2003,7 +2293,7 @@ const LOTTERIES={
     name:'Lotofacil',api:'https://loteriascaixa-api.herokuapp.com/api/lotofacil',
     total:25,pick:15,
     modelos:{A:{fora:6,dentro:9,noise:0.2},B:{fora:5,dentro:10,noise:0.35},C:{fora:7,dentro:8,noise:0.5},IA:{fora:5,dentro:10,noise:0.4}},
-    premios:{11:'R$ 6',12:'R$ 12',13:'R$ 30',14:'R$ 1.700',15:'JACKPOT'},
+    premios:{11:'R$ 7',12:'R$ 14',13:'R$ 35',14:'Variavel',15:'JACKPOT'},
     primos:[2,3,5,7,11,13,17,19,23],
     dezenas:[[1,5],[6,10],[11,15],[16,20],[21,25]],
     filters:{parImpar:[6,9],soma:[183,212],consec:4,repet:[8,11]}
@@ -2012,7 +2302,7 @@ const LOTTERIES={
     name:'Mega-Sena',api:'https://loteriascaixa-api.herokuapp.com/api/megasena',
     total:60,pick:6,
     modelos:{A:{fora:3,dentro:3,noise:0.2},B:{fora:2,dentro:4,noise:0.35},C:{fora:4,dentro:2,noise:0.5},IA:{fora:3,dentro:3,noise:0.4}},
-    premios:{4:'R$ 1.000',5:'R$ 40.000',6:'JACKPOT'},
+    premios:{4:'Variavel',5:'Variavel',6:'JACKPOT'},
     primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59],
     dezenas:[[1,10],[11,20],[21,30],[31,40],[41,50],[51,60]],
     filters:{parImpar:[2,4],soma:[131,235],consec:2,repet:[0,2]}
@@ -2021,10 +2311,19 @@ const LOTTERIES={
     name:'Quina',api:'https://loteriascaixa-api.herokuapp.com/api/quina',
     total:80,pick:5,
     modelos:{A:{fora:2,dentro:3,noise:0.2},B:{fora:2,dentro:3,noise:0.35},C:{fora:3,dentro:2,noise:0.5},IA:{fora:2,dentro:3,noise:0.4}},
-    premios:{2:'R$ 1',3:'R$ 20',4:'R$ 6.000',5:'JACKPOT'},
+    premios:{2:'Variavel',3:'Variavel',4:'Variavel',5:'JACKPOT'},
     primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79],
     dezenas:[[1,16],[17,32],[33,48],[49,64],[65,80]],
     filters:{parImpar:[2,3],soma:[143,262],consec:2,repet:[0,1]}
+  },
+  duplasena:{
+    name:'Dupla Sena',api:'https://loteriascaixa-api.herokuapp.com/api/duplasena',
+    total:50,pick:6,
+    modelos:{A:{fora:3,dentro:3,noise:0.2},B:{fora:2,dentro:4,noise:0.35},C:{fora:4,dentro:2,noise:0.5},IA:{fora:3,dentro:3,noise:0.4}},
+    premios:{3:'Variavel',4:'Variavel',5:'Variavel',6:'JACKPOT'},
+    primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47],
+    dezenas:[[1,10],[11,20],[21,30],[31,40],[41,50]],
+    filters:{parImpar:[2,4],soma:[100,200],consec:2,repet:[0,2]}
   }
 };
 let selectedLottery='lotofacil';
@@ -2033,17 +2332,28 @@ function getModelos(){return getLottery().modelos}
 function getPremios(){return getLottery().premios}
 function getPrimos(){return new Set(getLottery().primos)}
 function getDezenas(){return getLottery().dezenas}
-const FILTER_IDS=['filterParImpar','filterSoma','filterConsec','filterRepet','filterDezena','filterPrimos'];
+const FILTER_IDS=['filterParImpar','filterSoma','filterConsec','filterRepet','filterDezena','filterPrimos','filterBaixoAlto','filterMult3','filterFinais','filterCentro','filterFib','filterEspelho'];
+const CENTRO_NUMS=[7,8,9,12,13,14,17,18,19];
+const FIB_NUMS=[1,2,3,5,8,13,21];
+const MULT3_NUMS=[3,6,9,12,15,18,21,24];
+const ESPELHO_PAIRS=[[1,25],[2,24],[3,23],[4,22],[5,21],[6,20],[7,19],[8,18],[9,17],[10,16],[11,15],[12,14]];
+const PICK_OPTIONS={
+  lotofacil:[{v:15,p:'R$ 3,50'},{v:16,p:'R$ 56,00'},{v:17,p:'R$ 476,00'},{v:18,p:'R$ 2.856,00'},{v:19,p:'R$ 13.566,00'}],
+  megasena:[{v:6,p:'R$ 6,00'},{v:7,p:'R$ 42,00'},{v:8,p:'R$ 168,00'},{v:9,p:'R$ 504,00'},{v:10,p:'R$ 1.260,00'},{v:11,p:'R$ 2.772,00'},{v:12,p:'R$ 5.544,00'},{v:13,p:'R$ 10.296,00'},{v:14,p:'R$ 18.018,00'},{v:15,p:'R$ 30.030,00'}],
+  quina:[{v:5,p:'R$ 3,00'},{v:6,p:'R$ 18,00'},{v:7,p:'R$ 63,00'},{v:8,p:'R$ 168,00'},{v:9,p:'R$ 378,00'},{v:10,p:'R$ 756,00'}],
+  duplasena:[{v:6,p:'R$ 3,00'},{v:7,p:'R$ 21,00'},{v:8,p:'R$ 84,00'},{v:9,p:'R$ 252,00'},{v:10,p:'R$ 630,00'},{v:11,p:'R$ 1.386,00'},{v:12,p:'R$ 2.772,00'}]
+};
 const SK='lottobot_v3';
 function CACHE_KEY(){return 'lottobot_cache_'+selectedLottery}
-const CACHE_TTL=24*60*60*1000;
+const CACHE_TTL=2*60*60*1000; // 2 hours — refresh more often
 const pad=n=>String(n).padStart(2,'0');
 const _escEl=document.createElement('div');
 function esc(s){_escEl.textContent=String(s);return _escEl.innerHTML}
 const FALLBACKS={
-  lotofacil:{numero:3287,data:'14/07/2025',numeros:[1,3,5,7,9,11,13,15,17,19,21,22,23,24,25]},
-  megasena:{numero:2750,data:'14/07/2025',numeros:[7,15,23,38,42,56]},
-  quina:{numero:6500,data:'14/07/2025',numeros:[12,28,45,61,73]}
+  lotofacil:{numero:3649,data:'30/03/2026',numeros:[1,2,3,4,6,7,10,11,14,16,17,20,21,23,24]},
+  megasena:{numero:2850,data:'30/03/2026',numeros:[7,15,23,38,42,56]},
+  quina:{numero:6600,data:'30/03/2026',numeros:[12,28,45,61,73]},
+  duplasena:{numero:2939,data:'20/03/2026',numeros:[4,5,9,10,13,22]}
 };
 function getFallback(){return FALLBACKS[selectedLottery]||FALLBACKS.lotofacil}
 function getFallbackFreq(){const f={};const lot=getLottery();for(let i=1;i<=lot.total;i++)f[i]=Math.floor(Math.random()*30)+30;return f}
@@ -2060,6 +2370,169 @@ let excludedNums=new Set(),fixedNums=new Set();
 let stats={total:0,scores:[],modelos:{}},saved=[];
 let checkIdx=null,concRef=null;
 let currentUser=null,isAdmin=false;
+
+// ══════ JACKPOT HISTORY — never generate a past winning combination ══════
+const JACKPOT_SETS={}; // { lotofacil: Set(['1,2,3,...']), megasena: Set([...]), ... }
+let _jackpotLoading={};
+let _jackpotDB=null;
+
+function openJackpotDB(){
+  return new Promise((resolve,reject)=>{
+    if(_jackpotDB){resolve(_jackpotDB);return}
+    const req=indexedDB.open('lottobot_jackpots',2);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      for(const key of Object.keys(LOTTERIES)){
+        if(!db.objectStoreNames.contains(key))db.createObjectStore(key,{keyPath:'n'});
+      }
+    };
+    req.onsuccess=e=>{_jackpotDB=e.target.result;resolve(_jackpotDB)};
+    req.onerror=()=>reject(req.error);
+  });
+}
+
+async function loadJackpotSetFromDB(lottery){
+  const db=await openJackpotDB();
+  return new Promise(resolve=>{
+    const tx=db.transaction(lottery,'readonly');
+    const store=tx.objectStore(lottery);
+    const set=new Set();
+    const req=store.openCursor();
+    req.onsuccess=e=>{
+      const cursor=e.target.result;
+      if(cursor){set.add(cursor.value.k);cursor.continue()}
+      else resolve(set);
+    };
+    req.onerror=()=>resolve(set);
+  });
+}
+
+async function saveJackpotsToDB(lottery,draws){
+  const db=await openJackpotDB();
+  return new Promise(resolve=>{
+    const tx=db.transaction(lottery,'readwrite');
+    const store=tx.objectStore(lottery);
+    for(const d of draws)store.put(d);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>resolve();
+  });
+}
+
+async function getMaxStoredConcurso(lottery){
+  const db=await openJackpotDB();
+  return new Promise(resolve=>{
+    const tx=db.transaction(lottery,'readonly');
+    const store=tx.objectStore(lottery);
+    let max=0;
+    // Walk all records to find max n (integer keys only)
+    const req=store.openCursor();
+    req.onsuccess=e=>{
+      const cursor=e.target.result;
+      if(cursor){
+        const v=Math.floor(cursor.value.n);
+        if(v>max)max=v;
+        cursor.continue();
+      }else resolve(max);
+    };
+    req.onerror=()=>resolve(0);
+  });
+}
+
+async function downloadJackpotHistory(lottery){
+  if(_jackpotLoading[lottery])return _jackpotLoading[lottery];
+  _jackpotLoading[lottery]=(async()=>{
+    const badge=document.getElementById('jackpotBadge');
+    try{
+      // Load existing from IndexedDB
+      JACKPOT_SETS[lottery]=await loadJackpotSetFromDB(lottery);
+      const maxStored=await getMaxStoredConcurso(lottery);
+      // Get latest concurso number
+      const lot=LOTTERIES[lottery];
+      let latestNum;
+      try{
+        const data=await apiFetch(lot.api+'/latest');
+        latestNum=parseInt(data.concurso||data.numero);
+      }catch(e){
+        console.warn('Jackpot history: cannot get latest for',lottery);
+        updateJackpotBadge();return;
+      }
+      if(!latestNum||isNaN(latestNum)){updateJackpotBadge();return}
+      if(maxStored>=latestNum){
+        console.log('Jackpot history '+lottery+': complete ('+JACKPOT_SETS[lottery].size+' results)');
+        updateJackpotBadge();return;
+      }
+      // Download missing draws in parallel batches
+      const start=Math.max(1,maxStored+1);
+      const total=latestNum-start+1;
+      if(total<=0){updateJackpotBadge();return}
+      const BATCH=40;
+      let downloaded=0;
+      if(badge){badge.textContent='🛡️ 0%';badge.classList.add('show','loading');badge.title='Baixando historico '+lot.name+'...'}
+      for(let i=start;i<=latestNum;i+=BATCH){
+        const end=Math.min(i+BATCH-1,latestNum);
+        const promises=[];
+        for(let n=i;n<=end;n++){
+          promises.push(
+            apiFetch(lot.api+'/'+n).then(data=>{
+              const dz=data.listaDezenas||data.dezenas||data.numeros;
+              if(!dz||!Array.isArray(dz))return null;
+              let nums=dz.map(Number).filter(x=>Number.isInteger(x)&&x>=1&&x<=lot.total);
+              const results=[];
+              if(lottery==='duplasena'&&nums.length>=12){
+                const n1=nums.slice(0,6).sort((a,b)=>a-b);
+                const n2=nums.slice(6,12).sort((a,b)=>a-b);
+                results.push({n,k:n1.join(',')});
+                results.push({n:n+0.5,k:n2.join(',')});
+              }else{
+                nums=[...new Set(nums)].sort((a,b)=>a-b);
+                if(nums.length>=lot.pick)results.push({n,k:nums.slice(0,lot.pick).join(',')});
+              }
+              return results;
+            }).catch(()=>null)
+          );
+        }
+        const batchResults=await Promise.all(promises);
+        const toSave=[];
+        for(const res of batchResults){
+          if(!res)continue;
+          for(const r of res){JACKPOT_SETS[lottery].add(r.k);toSave.push(r)}
+        }
+        if(toSave.length)await saveJackpotsToDB(lottery,toSave);
+        downloaded+=(end-i+1);
+        const pct=Math.round(downloaded/total*100);
+        if(badge){badge.textContent='🛡️ '+pct+'%';badge.title='Baixando historico '+lot.name+': '+downloaded+'/'+total}
+      }
+      console.log('Jackpot history '+lottery+': loaded '+JACKPOT_SETS[lottery].size+' results');
+    }catch(e){
+      console.warn('Jackpot history error:',e);
+    }finally{
+      delete _jackpotLoading[lottery];
+      if(badge)badge.classList.remove('loading');
+      updateJackpotBadge();
+    }
+  })();
+  return _jackpotLoading[lottery];
+}
+
+function isJackpotDuplicate(nums){
+  const set=JACKPOT_SETS[selectedLottery];
+  if(!set||set.size===0)return false;
+  return set.has(nums.join(','));
+}
+
+function updateJackpotBadge(){
+  const badge=document.getElementById('jackpotBadge');
+  if(!badge)return;
+  const set=JACKPOT_SETS[selectedLottery];
+  const count=set?set.size:0;
+  if(count>0){
+    badge.textContent='🛡️ '+count;
+    badge.title=count+' resultados historicos carregados — jogos gerados nunca repetirao um jackpot passado';
+    badge.classList.add('show');badge.classList.remove('loading');
+  }else{
+    badge.classList.remove('show');
+  }
+}
 
 // CTA phrases + voice cache
 const CTA_PHRASES=[
@@ -2083,11 +2556,27 @@ if('speechSynthesis' in window){cacheVoices();speechSynthesis.addEventListener('
 
 // ══════ INIT ══════
 document.addEventListener('DOMContentLoaded',async()=>{
-  loadSaved();setupEventListeners();
+  loadSaved();populatePickSize();setupEventListeners();
   document.querySelector('.col-center')?.classList.add('mobile-show');
   await loadAPI();
+  downloadJackpotHistory(selectedLottery); // background — anti-jackpot history
   updateUI();renderJogos();renderSaved();renderFilterTab();renderTop5();updateStats();
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('service-worker.js').then(reg=>{
+      window._swReg=reg;
+      // Check for updates every 30 seconds
+      setInterval(()=>reg.update(),30*1000);
+      reg.addEventListener('updatefound',()=>{
+        const newSW=reg.installing;
+        if(!newSW)return;
+        newSW.addEventListener('statechange',()=>{
+          if(newSW.state==='activated'&&navigator.serviceWorker.controller){
+            document.getElementById('updateBanner')?.classList.add('show');
+          }
+        });
+      });
+    }).catch(()=>{});
+  }
   // Garantir persistencia de login entre sessoes e atualizacoes
   try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(e){}
   // Firebase Auth listener
@@ -2105,16 +2594,21 @@ document.addEventListener('DOMContentLoaded',async()=>{
       await loadSavedFromCloud();
       await requestPushPermission();
       checkNotifyParams();
-      // Fluxo pos-login: onboarding -> install -> LGPD
+      // Fluxo pos-login: onboarding -> install -> push -> LGPD
       setTimeout(()=>{
         if(window._onboardPending){
           document.getElementById('onboardOverlay')?.classList.add('active');
-          // Install popup aparece apos fechar onboarding
           const origClose=window.closeOnboard;
           window.closeOnboard=function(){origClose();setTimeout(showInstallPopup,500)};
         }else{
           showInstallPopup();
         }
+        // Reforço: se notificações não estão ativas, pedir de novo após 3s
+        setTimeout(()=>{
+          if(_messaging&&currentUser&&Notification.permission==='default'){
+            document.getElementById('pushOverlay')?.classList.add('show');
+          }
+        },3000);
       },800);
     }else{
       // Bloquear app — exigir login
@@ -2141,8 +2635,9 @@ function updateAuthUI(){
   const photo=currentUser.photoURL;
   const safePhoto=photo?photo.replace(/[^a-zA-Z0-9:\/\.\-_?=&%]/g,''):'';
   area.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
-    ${safePhoto?'<img src="'+esc(safePhoto)+'" class="auth-avatar" referrerpolicy="no-referrer">':'<div class="auth-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--color-gold-dim);color:var(--color-gold-primary);font-weight:700;font-size:0.7rem">'+esc(name[0].toUpperCase())+'</div>'}
-    <span class="auth-user-name">${esc(name.split(' ')[0])}</span>
+    <button onclick="openProfileModal()" class="header-avatar-btn" title="Meu Perfil">
+      ${safePhoto?'<img src="'+esc(safePhoto)+'" referrerpolicy="no-referrer">':'<span>'+esc(name[0].toUpperCase())+'</span>'}
+    </button>
     <button class="auth-logout" onclick="doLogout()">Sair</button>
   </div>`;
   document.getElementById('authModal')?.classList.remove('active');
@@ -2150,17 +2645,37 @@ function updateAuthUI(){
 }
 
 const ADMIN_PHONE='+5516999916690';
+const ADMIN_EMAILS=['chatsagrado@gmail.com','nato.growp@gmail.com'];
 async function syncUserDoc(user){
   const ref=_db.collection('users').doc(user.uid);
   const doc=await ref.get();
-  const phoneAdmin=user.phoneNumber===ADMIN_PHONE;
+  const phoneAdmin=user.phoneNumber===ADMIN_PHONE||ADMIN_EMAILS.includes(user.email);
+  const isGoogle=user.providerData.some(p=>p.providerId==='google.com');
+  const isEmailPwd=user.providerData.some(p=>p.providerId==='password');
+  const provider=isGoogle?'google':(isEmailPwd?'form':'other');
   const data={
-    displayName:user.displayName||user.phoneNumber||'',
-    email:user.email||null,
-    phone:user.phoneNumber||null,
-    authProvider:user.providerData[0]?.providerId==='google.com'?'google':'phone',
     lastLogin:firebase.firestore.FieldValue.serverTimestamp()
   };
+  // For Google, update name/email from provider
+  if(isGoogle){
+    data.displayName=user.displayName||'';
+    data.email=user.email||null;
+    data.authProvider='google';
+  }else{
+    // For form users, preserve Firestore data (set during loginQuickForm)
+    const existingDoc=await ref.get();
+    if(existingDoc.exists){
+      const ed=existingDoc.data();
+      data.displayName=ed.displayName||user.displayName||'';
+      data.email=ed.email||user.email||null;
+      data.phone=ed.phone||null;
+      data.authProvider=ed.authProvider||provider;
+    }else{
+      data.displayName=user.displayName||'';
+      data.email=user.email||null;
+      data.authProvider=provider;
+    }
+  }
   if(!doc.exists){
     data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
     data.isAdmin=phoneAdmin;
@@ -2184,60 +2699,54 @@ function loginGoogle(){
   });
 }
 
-let _confirmationResult=null;
-let _recaptchaVerifier=null;
-
-function setupRecaptcha(){
-  if(_recaptchaVerifier){
-    _recaptchaVerifier.clear();
-    _recaptchaVerifier=null;
-    document.getElementById('recaptchaContainer').innerHTML='';
-  }
-  _recaptchaVerifier=new firebase.auth.RecaptchaVerifier('recaptchaContainer',{
-    size:'invisible'
-  });
-  _recaptchaVerifier.render();
-}
-
-// Show recaptcha when phone form is opened
-new MutationObserver(()=>{
-  if(document.querySelector('.auth-phone-form.show')){
-    setupRecaptcha();
-    document.getElementById('btnSendCode').disabled=false;
-  }
-}).observe(document.getElementById('phoneForm'),{attributes:true,attributeFilter:['class']});
-
-async function sendPhoneCode(){
-  const phone=document.getElementById('phoneInput').value.trim();
-  if(!phone||phone.length<8){showToast('Digite um numero valido');return}
-  const code=document.getElementById('countryCode').value;
-  const digits=phone.replace(/\D/g,'');
-  const formatted=code+digits;
+async function loginQuickForm(){
+  const name=document.getElementById('qfName').value.trim();
+  const email=document.getElementById('qfEmail').value.trim();
+  const phone=document.getElementById('qfPhone').value.trim();
+  if(!name||name.length<2){showToast('Digite seu nome');return}
+  if(!email||!email.includes('@')||!email.includes('.')){showToast('Digite um email valido');return}
+  const btn=document.querySelector('#quickForm .auth-send-btn');
+  if(btn){btn.disabled=true;btn.textContent='Entrando...'}
   try{
-    if(!_recaptchaVerifier)setupRecaptcha();
-    document.getElementById('btnSendCode').disabled=true;
-    document.getElementById('btnSendCode').textContent='Enviando...';
-    _confirmationResult=await _auth.signInWithPhoneNumber(formatted,_recaptchaVerifier);
-    document.getElementById('codeInput').style.display='';
-    document.getElementById('btnVerifyCode').style.display='';
-    document.getElementById('btnSendCode').textContent='Codigo enviado!';
-    showToast('Codigo SMS enviado!');
+    let user;
+    // Tentar login com email/senha (senha = email invertido + salt fixo)
+    const pwd=email.split('').reverse().join('')+'#Lb2026';
+    try{
+      const cred=await _auth.signInWithEmailAndPassword(email,pwd);
+      user=cred.user;
+    }catch(e){
+      if(e.code==='auth/user-not-found'||e.code==='auth/invalid-credential'){
+        // Criar conta nova
+        const cred=await _auth.createUserWithEmailAndPassword(email,pwd);
+        user=cred.user;
+      }else if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'){
+        // Email ja existe com outra senha (Google?) — tentar anonimo
+        try{const cred=await _auth.signInAnonymously();user=cred.user}
+        catch(e2){showToast('Este email ja esta vinculado a uma conta Google. Use "Entrar com Google".');if(btn){btn.disabled=false;btn.textContent='Entrar'}return}
+      }else throw e;
+    }
+    // Atualizar perfil
+    await user.updateProfile({displayName:name});
+    // Salvar dados no Firestore
+    await _db.collection('users').doc(user.uid).set({
+      displayName:name,
+      email:email,
+      phone:phone||null,
+      authProvider:'form',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      lastLogin:firebase.firestore.FieldValue.serverTimestamp(),
+      fcmTokens:[],
+      notificationsEnabled:true
+    },{merge:true});
+    showToast('Bem-vindo, '+name+'!');
   }catch(e){
-    showToast('Erro: '+e.message);
-    document.getElementById('btnSendCode').disabled=false;
-    document.getElementById('btnSendCode').textContent='Enviar codigo SMS';
-    _recaptchaVerifier=null;
-    document.getElementById('recaptchaContainer').innerHTML='';
+    const msg=e.code==='auth/email-already-in-use'?'Este email ja esta em uso. Tente "Entrar com Google".':
+             e.code==='auth/invalid-email'?'Email invalido. Verifique e tente novamente.':
+             e.code==='auth/weak-password'?'Erro interno. Tente novamente.':
+             'Erro: '+e.message;
+    showToast(msg);
   }
-}
-
-async function verifyPhoneCode(){
-  const code=document.getElementById('codeInput').value.trim();
-  if(code.length!==6){showToast('Digite o codigo de 6 digitos');return}
-  try{
-    await _confirmationResult.confirm(code);
-    showToast('Login realizado!');
-  }catch(e){showToast('Codigo invalido')}
+  if(btn){btn.disabled=false;btn.textContent='Entrar'}
 }
 
 function doLogout(){
@@ -2245,6 +2754,208 @@ function doLogout(){
   currentUser=null;isAdmin=false;
   updateAuthUI();
   showToast('Desconectado');
+}
+
+// ══════ USER PROFILE ══════
+async function openProfileModal(){
+  if(!currentUser)return;
+  const body=document.getElementById('profileBody');
+  const name=currentUser.displayName||currentUser.phoneNumber||'Usuario';
+  const photo=currentUser.photoURL;
+  const safePhoto=photo?photo.replace(/[^a-zA-Z0-9:\/\.\-_?=&%]/g,''):'';
+  const email=currentUser.email||'—';
+  const phone=currentUser.phoneNumber||'—';
+  const provider=currentUser.providerData[0]?.providerId==='google.com'?'Google':'Telefone';
+
+  // Fetch user doc for createdAt
+  let memberSince='—';
+  try{const doc=await _db.collection('users').doc(currentUser.uid).get();if(doc.exists&&doc.data().createdAt)memberSince=doc.data().createdAt.toDate().toLocaleDateString('pt-BR')}catch(e){}
+
+  body.innerHTML=`
+    <div class="profile-header">
+      ${safePhoto?'<div class="profile-avatar"><img src="'+esc(safePhoto)+'" referrerpolicy="no-referrer"></div>':'<div class="profile-avatar">'+esc(name[0].toUpperCase())+'</div>'}
+      <div>
+        <div class="profile-name">${esc(name)}</div>
+        <div class="profile-since">Membro desde ${esc(memberSince)}</div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">Dados Pessoais</div>
+      <div class="profile-row"><span class="profile-label">Email</span><span class="profile-value">${esc(email)}</span></div>
+      <div class="profile-row"><span class="profile-label">Telefone</span><span class="profile-value">${esc(phone)}</span></div>
+      <div class="profile-row"><span class="profile-label">Login via</span><span class="profile-value">${esc(provider)}</span></div>
+      <div class="profile-row"><span class="profile-label">UID</span><span class="profile-value" style="font-size:0.6rem;opacity:0.5">${esc(currentUser.uid)}</span></div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">Atividade</div>
+      <div class="profile-row"><span class="profile-label">Jogos salvos</span><span class="profile-value">${saved.length}</span></div>
+      <div class="profile-row"><span class="profile-label">Total gerados (sessao)</span><span class="profile-value">${stats.total}</span></div>
+      <div class="profile-row"><span class="profile-label">Score medio</span><span class="profile-value">${stats.scores.length?Math.round(stats.scores.reduce((a,b)=>a+b,0)/stats.scores.length):'—'}</span></div>
+      <div class="profile-chart-wrap"><canvas id="profileChart" width="440" height="160" style="width:100%;height:auto"></canvas></div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">Legal</div>
+      <div class="profile-links">
+        <button class="profile-link" onclick="document.getElementById('termsModal').classList.add('show')">📄 Termos de Uso</button>
+        <button class="profile-link" onclick="document.getElementById('privacyModal').classList.add('show')">🔒 Politica de Privacidade</button>
+      </div>
+    </div>
+
+    <div class="profile-section" style="border-bottom:none">
+      <div class="profile-section-title">Zona de Perigo</div>
+      <div class="profile-danger">
+        <p>Ao excluir sua conta, todos os seus dados serao permanentemente removidos: jogos salvos, historico de geracoes, configuracoes e dados de autenticacao. Esta acao e irreversivel.</p>
+        <button class="profile-delete-btn" onclick="showDeleteConfirm()">Excluir minha conta</button>
+        <div class="profile-delete-confirm" id="deleteConfirm">
+          <p style="font-size:0.72rem;color:#ef4444;margin:10px 0 8px">Digite <strong>EXCLUIR</strong> para confirmar:</p>
+          <input type="text" class="profile-delete-input" id="deleteInput" placeholder="EXCLUIR" oninput="document.getElementById('deleteBtn').disabled=this.value!=='EXCLUIR'">
+          <button class="profile-delete-final" id="deleteBtn" disabled onclick="executeDeleteAccount()">Excluir permanentemente</button>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('profileModal').classList.add('active');
+  loadProfileChart();
+}
+
+function showDeleteConfirm(){
+  document.getElementById('deleteConfirm')?.classList.add('show');
+  document.getElementById('deleteInput')?.focus();
+}
+
+async function loadProfileChart(){
+  const cvs=document.getElementById('profileChart');if(!cvs)return;
+  const ctx=cvs.getContext('2d');
+  const w=cvs.width,h=cvs.height;
+  ctx.clearRect(0,0,w,h);
+
+  // Fetch user's generated batches
+  let batches=[];
+  try{
+    const snap=await _db.collection('generatedBatches').where('userId','==',currentUser.uid).orderBy('createdAt','desc').limit(100).get();
+    batches=snap.docs.map(d=>d.data());
+  }catch(e){
+    // If index missing, try without orderBy
+    try{const snap=await _db.collection('generatedBatches').where('userId','==',currentUser.uid).limit(100).get();batches=snap.docs.map(d=>d.data())}catch(e2){}
+  }
+
+  if(!batches.length){
+    ctx.fillStyle='#71717a';ctx.font='12px Inter,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Gere jogos para ver seu grafico aqui',w/2,h/2);
+    return;
+  }
+
+  // Aggregate by day (last 14 days)
+  const days={};const scores={};
+  const now=Date.now();
+  for(let i=13;i>=0;i--){
+    const d=new Date(now-i*86400000).toISOString().slice(5,10);
+    days[d]=0;scores[d]=[];
+  }
+  batches.forEach(b=>{
+    const ts=b.createdAt?.toDate?.();if(!ts)return;
+    const d=ts.toISOString().slice(5,10);
+    if(days[d]!==undefined){days[d]+=(b.count||0);if(b.avgScore)scores[d].push(b.avgScore)}
+  });
+
+  const labels=Object.keys(days);
+  const values=Object.values(days);
+  const maxVal=Math.max(...values,1);
+  const barW=(w-60)/labels.length;
+
+  // Background grid
+  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;
+  for(let i=0;i<4;i++){const y=20+i*(h-50)/3;ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(w-10,y);ctx.stroke()}
+
+  // Bars
+  labels.forEach((label,i)=>{
+    const val=values[i];
+    const barH=val>0?Math.max(4,(val/maxVal)*(h-55)):0;
+    const x=45+i*barW;
+    const y=h-30-barH;
+    // Bar
+    const grad=ctx.createLinearGradient(x,y,x,h-30);
+    grad.addColorStop(0,'#d4a853');grad.addColorStop(1,'#b8912e');
+    ctx.fillStyle=val>0?grad:'transparent';
+    ctx.beginPath();ctx.roundRect(x+2,y,barW-4,barH,3);ctx.fill();
+    // Value on top
+    if(val>0){ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText(val,x+barW/2,y-3)}
+    // Label
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='7px monospace';ctx.textAlign='center';
+    ctx.fillText(label,x+barW/2,h-8);
+  });
+
+  // Y axis label
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='8px Inter,sans-serif';ctx.textAlign='right';
+  ctx.fillText(maxVal,36,24);ctx.fillText('0',36,h-28);
+
+  // Score line (overlay)
+  const avgScores=labels.map(l=>scores[l]?.length?Math.round(scores[l].reduce((a,b)=>a+b,0)/scores[l].length):null);
+  ctx.strokeStyle='rgba(106,172,126,0.7)';ctx.lineWidth=2;ctx.beginPath();
+  let started=false;
+  avgScores.forEach((s,i)=>{
+    if(s===null)return;
+    const x=45+i*barW+barW/2;
+    const y=20+(1-s/100)*(h-55);
+    if(!started){ctx.moveTo(x,y);started=true}else ctx.lineTo(x,y);
+  });
+  if(started)ctx.stroke();
+
+  // Legend
+  ctx.fillStyle='#d4a853';ctx.fillRect(w-120,4,8,8);
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='8px Inter,sans-serif';ctx.textAlign='left';ctx.fillText('Jogos',w-108,12);
+  ctx.fillStyle='#6aac7e';ctx.fillRect(w-60,4,8,8);
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.fillText('Score',w-48,12);
+}
+
+async function executeDeleteAccount(){
+  if(!currentUser)return;
+  const btn=document.getElementById('deleteBtn');
+  btn.disabled=true;btn.textContent='Excluindo...';
+
+  try{
+    const uid=currentUser.uid;
+    // 1. Delete savedGames subcollection
+    const gamesSnap=await _db.collection('users').doc(uid).collection('savedGames').get();
+    const chunks=[];for(let i=0;i<gamesSnap.docs.length;i+=500)chunks.push(gamesSnap.docs.slice(i,i+500));
+    for(const chunk of chunks){const b=_db.batch();chunk.forEach(d=>b.delete(d.ref));await b.commit()}
+
+    // 2. Delete generatedBatches
+    try{
+      const batchSnap=await _db.collection('generatedBatches').where('userId','==',uid).get();
+      const bChunks=[];for(let i=0;i<batchSnap.docs.length;i+=500)bChunks.push(batchSnap.docs.slice(i,i+500));
+      for(const chunk of bChunks){const b=_db.batch();chunk.forEach(d=>b.delete(d.ref));await b.commit()}
+    }catch(e){console.warn('Batch delete error:',e)}
+
+    // 3. Delete user doc
+    await _db.collection('users').doc(uid).delete();
+
+    // 4. Delete Firebase Auth account
+    try{
+      await currentUser.delete();
+    }catch(e){
+      if(e.code==='auth/requires-recent-login'){
+        showToast('Sessao expirada. Faca login novamente e repita a exclusao.');
+        btn.textContent='Excluir permanentemente';btn.disabled=false;
+        return;
+      }
+      throw e;
+    }
+
+    // 5. Clear local data
+    localStorage.clear();
+    currentUser=null;isAdmin=false;
+    saved=[];stats={total:0,scores:[],modelos:{}};
+    document.getElementById('profileModal').classList.remove('active');
+    updateAuthUI();
+    showToast('Conta excluida com sucesso. Todos os dados foram removidos.');
+  }catch(e){
+    showToast('Erro ao excluir: '+e.message);
+    btn.textContent='Excluir permanentemente';btn.disabled=false;
+  }
 }
 
 // ══════ CLOUD SYNC ══════
@@ -2284,14 +2995,50 @@ async function saveToCloud(game){
 // ══════ PUSH NOTIFICATIONS (FCM) ══════
 async function requestPushPermission(){
   if(!_messaging||!currentUser)return;
+  if(Notification.permission==='granted'){
+    await registerPushToken();
+    return;
+  }
+  // denied or default — modal handles it
+}
+
+function showPushModal(){
+  if(!_messaging||!currentUser)return showLgpd();
+  if(Notification.permission!=='default')return showLgpd();
+  document.getElementById('pushOverlay')?.classList.add('show');
+}
+
+async function acceptPushModal(){
+  document.getElementById('pushOverlay')?.classList.remove('show');
   try{
     const permission=await Notification.requestPermission();
-    if(permission!=='granted')return;
-    const token=await _messaging.getToken({vapidKey:'BB7lJFlNo8nGUE1g4G4-VpPPlgE9QOsfwBql6KS6vMiRP5YBsK5qnLUQ1qjm1_tP5xLJZT-GTPCx0LlEGMV9e6E'});
-    if(!token)return;
+    if(permission==='granted'){
+      await registerPushToken();
+      showToast('Notificacoes ativadas!');
+    }
+  }catch(e){console.warn('Push permission error:',e)}
+  setTimeout(showLgpd,400);
+}
+
+function dismissPushModal(){
+  document.getElementById('pushOverlay')?.classList.remove('show');
+  setTimeout(showLgpd,400);
+}
+
+async function registerPushToken(){
+  if(!_messaging||!currentUser)return;
+  try{
+    // Need active service worker for FCM
+    const swReg=await navigator.serviceWorker?.ready;
+    const token=await _messaging.getToken({
+      vapidKey:'BB7lJFlNo8nGUE1g4G4-VpPPlgE9QOsfwBql6KS6vMiRP5YBsK5qnLUQ1qjm1_tP5xLJZT-GTPCx0LlEGMV9e6E',
+      serviceWorkerRegistration:swReg
+    });
+    if(!token){console.warn('FCM: no token returned');return}
     const ref=_db.collection('users').doc(currentUser.uid);
     await ref.update({fcmTokens:firebase.firestore.FieldValue.arrayUnion(token),notificationsEnabled:true});
-  }catch(e){console.warn('FCM error:',e)}
+    console.log('FCM token registered successfully');
+  }catch(e){console.warn('FCM token error:',e)}
 }
 
 // Handle foreground messages
@@ -2336,36 +3083,83 @@ async function switchLottery(key){
   if(key===selectedLottery)return;
   selectedLottery=key;
   document.querySelectorAll('.loteria-card').forEach(el=>el.classList.toggle('active',el.dataset.loteria===key));
+  document.querySelectorAll('.loteria-stat-btn').forEach(el=>el.classList.toggle('active',el.dataset.statLot===key));
   // Reset state
   ULT=null;historico=[];FREQ={};ATRASO={};TENDENCIA={};invalidateClassifyCache();
   jogos=[];previousJogos=[];
   fixedNums.clear();excludedNums.clear();
   // Update UI elements that don't depend on ULT immediately
-  updatePrizeEstimate();updateDynamicDescriptions();updateGridLayout();renderJogos();
-  // Try cache first for instant switch
+  populatePickSize();updatePrizeEstimate();updateDynamicDescriptions();updateGridLayout();renderJogos();
+  // Try cache for instant preview, then always refresh from API
   const cached=localStorage.getItem(CACHE_KEY());
-  if(cached){try{const c=JSON.parse(cached);if(Date.now()-c.timestamp<CACHE_TTL&&c.latest?.numeros){
+  if(cached){try{const c=JSON.parse(cached);if(c.latest?.numeros){
     ULT=c.latest;historico=c.historical||[];calcDynamic();
     updateUI();renderJogos();initManualGrid();
-    showToast('✅ '+getLottery().name+' (cache)');return;
   }}catch(e){}}
   showToast('Carregando '+getLottery().name+'...');
   await loadAPI();
+  downloadJackpotHistory(selectedLottery); // background — anti-jackpot history
   updateUI();renderJogos();initManualGrid();
 }
 
-// ══════ PICK SIZE (15-19 números) ══════
+// ══════ PICK SIZE ══════
 let customPickSize=0;
 function getPickSize(){return customPickSize||getLottery().pick}
+function populatePickSize(){
+  const sel=document.getElementById('pickSize');if(!sel)return;
+  const opts=PICK_OPTIONS[selectedLottery]||[];
+  const basePick=getLottery().pick;
+  sel.innerHTML=opts.map(o=>'<option value="'+o.v+'"'+(o.v===basePick?' selected':'')+'>'+o.v+' numeros — '+o.p+'</option>').join('');
+  customPickSize=0;
+}
 function updatePickSize(){
   const v=parseInt(document.getElementById('pickSize')?.value||0);
+  const basePick=getLottery().pick;
   const info=document.getElementById('pickSizeInfo');
-  if(v>15){customPickSize=v;if(info)info.style.display='block'}
+  if(v>basePick){customPickSize=v;if(info)info.style.display='block'}
   else{customPickSize=0;if(info)info.style.display='none'}
   updatePreGenSummary();
 }
 
 // ══════ THEME TOGGLE ══════
+// ══════ FILTER VALUE TOGGLES ══════
+function toggleCentroVal(btn){btn.classList.toggle('active');updatePreGenSummary()}
+function toggleFilterVal(btn){btn.classList.toggle('active');updatePreGenSummary()}
+function getActiveCentroValues(){return Array.from(document.querySelectorAll('#centroValues .centro-val.active')).map(b=>parseInt(b.dataset.val))}
+function getActiveFilterVals(group){return Array.from(document.querySelectorAll('[data-group="'+group+'"].centro-val.active')).map(b=>parseInt(b.dataset.val))}
+
+// ══════ UPDATE CHECK ══════
+async function checkForUpdate(){
+  const btn=document.getElementById('btnCheckUpdate');
+  if(!btn)return;
+  btn.classList.add('checking');
+  btn.textContent='🔄 Verificando...';
+  try{
+    if(window._swReg){
+      await window._swReg.update();
+      // Wait a moment for updatefound to fire
+      await new Promise(r=>setTimeout(r,2000));
+      if(!document.getElementById('updateBanner')?.classList.contains('show')){
+        showToast('Voce ja esta na versao mais recente!');
+      }
+    }else{
+      // No SW, just reload
+      location.reload();
+    }
+  }catch(e){showToast('Erro ao verificar: '+e.message)}
+  btn.classList.remove('checking');
+  btn.textContent='🔄 Atualizar';
+}
+
+// ══════ STATS LOTTERY SWITCH ══════
+async function switchStatsLottery(key,btn){
+  // Highlight button
+  document.querySelectorAll('.loteria-stat-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  // Also switch the main lottery
+  await switchLottery(key);
+}
+
 function toggleTheme(){
   const html=document.documentElement;
   const isLight=html.getAttribute('data-theme')==='light';
@@ -2402,7 +3196,10 @@ function setupEventListeners(){
   document.querySelectorAll('.modelo-card').forEach(el=>el.addEventListener('click',function(){selectModelo(this.dataset.modelo)}));
   FILTER_IDS.forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
-    const toggle=()=>{el.classList.toggle('on');el.setAttribute('aria-checked',el.classList.contains('on'));updatePreGenSummary()};
+    const rangeMap={filterBaixoAlto:'baixoAltoRangeRow',filterMult3:'mult3RangeRow',filterFinais:'finaisRangeRow',filterCentro:'centroRangeRow',filterFib:'fibRangeRow',filterEspelho:'espelhoRangeRow'};
+    const toggle=()=>{el.classList.toggle('on');el.setAttribute('aria-checked',el.classList.contains('on'));updatePreGenSummary();
+      if(rangeMap[id]){const cr=document.getElementById(rangeMap[id]);if(cr)cr.style.display=el.classList.contains('on')?'':'none'}
+    };
     el.addEventListener('click',toggle);
     el.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle()}});
   });
@@ -2456,32 +3253,73 @@ function parseDraw(d){
   const numero=parseInt(d.concurso||d.numero);
   if(isNaN(numero))return null;
   const lot=getLottery();
-  const nums=dz.map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=lot.total).sort((a,b)=>a-b);
+  let allNums=dz.map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=lot.total);
+  // Dupla Sena: API returns 12 numbers (2 draws of 6). Use first 6 for analysis, store second 6 separately
+  let numeros2=null;
+  if(selectedLottery==='duplasena'&&allNums.length>=12){
+    numeros2=allNums.slice(6,12).sort((a,b)=>a-b);
+    allNums=allNums.slice(0,6);
+  }
+  const nums=[...new Set(allNums)].sort((a,b)=>a-b);
   if(nums.length<lot.pick)return null;
   const data=String(d.data||d.dataApuracao||'').replace(/[^0-9\/\-\.]/g,'');
   const valEst=d.valorEstimadoProximoConcurso?'R$ '+Number(d.valorEstimadoProximoConcurso).toLocaleString('pt-BR'):null;
-  return{numero,data,numeros:nums,acumulou:!!d.acumulou,valorEstimado:valEst};
+  const result={numero,data,numeros:nums,acumulou:!!d.acumulou,valorEstimado:valEst};
+  if(numeros2)result.numeros2=numeros2;
+  return result;
 }
 
 async function loadAPI(){
   const sp=document.getElementById('headerSpinner');if(sp)sp.classList.add('active');
   try{
+    // Always try to fetch latest first to check for new draw
+    let useCache=false;
     const cached=localStorage.getItem(CACHE_KEY());
-    if(cached){const c=JSON.parse(cached);if(Date.now()-c.timestamp<CACHE_TTL&&c.latest?.numeros){ULT=c.latest;historico=c.historical||[];calcDynamic();const hb=document.getElementById('histBadge');if(hb)hb.textContent=historico.length+' concursos (cache)';if(sp)sp.classList.remove('active');return}}
-    const raw=await apiFetch(getLottery().api+'/latest');
-    const latest=parseDraw(raw);if(!latest)throw new Error('bad data');
-    ULT=latest;
-    historico=[{numero:ULT.numero,numeros:ULT.numeros}];
-    const N=parseInt(document.getElementById('sliderJanela')?.value||50);
-    const promises=[];
-    for(let i=1;i<N;i++) promises.push(apiFetch(getLottery().api+'/'+(ULT.numero-i)).then(r=>{const p=parseDraw(r);return p}).catch(()=>null));
-    const results=await Promise.all(promises);
-    results.forEach(r=>{if(r)historico.push(r)});
-    historico.sort((a,b)=>a.numero-b.numero);
-    calcDynamic();
-    localStorage.setItem(CACHE_KEY(),JSON.stringify({timestamp:Date.now(),latest:ULT,historical:historico}));
-    const hb=document.getElementById('histBadge');if(hb)hb.textContent=historico.length+' concursos';
-    showToast('✅ '+historico.length+' concursos carregados');
+    let cachedData=null;
+    if(cached){try{cachedData=JSON.parse(cached)}catch(e){}}
+
+    let raw;
+    try{raw=await apiFetch(getLottery().api+'/latest')}catch(e){raw=null}
+
+    if(raw){
+      const latest=parseDraw(raw);
+      if(latest){
+        // Check if this is a new draw compared to cache
+        const isNew=!cachedData||!cachedData.latest||cachedData.latest.numero!==latest.numero;
+        const cacheExpired=!cachedData||Date.now()-cachedData.timestamp>CACHE_TTL;
+
+        if(!isNew&&!cacheExpired&&cachedData.historical?.length>5){
+          // Same draw, cache still valid — use cached historical data
+          ULT=latest; // Always use fresh latest (has updated valorEstimado)
+          historico=cachedData.historical;
+          // Update latest in cache
+          cachedData.latest=ULT;cachedData.timestamp=Date.now();
+          localStorage.setItem(CACHE_KEY(),JSON.stringify(cachedData));
+          calcDynamic();
+          if(sp)sp.classList.remove('active');
+          updateUI();
+          return;
+        }
+
+        // New draw or cache expired — full reload
+        ULT=latest;
+        historico=[{numero:ULT.numero,numeros:ULT.numeros}];
+        const N=parseInt(document.getElementById('sliderJanela')?.value||50);
+        const promises=[];
+        for(let i=1;i<N;i++) promises.push(apiFetch(getLottery().api+'/'+(ULT.numero-i)).then(r=>{const p=parseDraw(r);return p}).catch(()=>null));
+        const results=await Promise.all(promises);
+        results.forEach(r=>{if(r)historico.push(r)});
+        historico.sort((a,b)=>a.numero-b.numero);
+        calcDynamic();
+        localStorage.setItem(CACHE_KEY(),JSON.stringify({timestamp:Date.now(),latest:ULT,historical:historico}));
+        showToast('✅ '+historico.length+' concursos · #'+ULT.numero);
+      }else throw new Error('bad data');
+    }else{
+      // API offline — use cache if available
+      if(cachedData&&cachedData.latest?.numeros){
+        ULT=cachedData.latest;historico=cachedData.historical||[];calcDynamic();
+      }else throw new Error('no data');
+    }
   }catch(e){
     console.warn('API offline:',e);
     ULT={...getFallback()};FREQ={...getFallbackFreq()};historico=[getFallback()];
@@ -2494,9 +3332,23 @@ async function loadAPI(){
   updateUI();
 }
 
+// Auto-refresh: check for new draw every 10 minutes
+setInterval(async()=>{
+  if(!ULT)return;
+  try{
+    const raw=await apiFetch(getLottery().api+'/latest');
+    const latest=parseDraw(raw);
+    if(latest&&latest.numero>ULT.numero){
+      showToast('🆕 Novo sorteio #'+latest.numero+'! Atualizando...');
+      await loadAPI();updateUI();
+    }
+  }catch(e){}
+},10*60*1000);
+
 // ══════ ANALYSIS ══════
+let CICLO={};// gap medio por numero
 function calcDynamic(){
-  FREQ={};ATRASO={};TENDENCIA={};invalidateClassifyCache();
+  FREQ={};ATRASO={};TENDENCIA={};CICLO={};invalidateClassifyCache();
   for(let i=1;i<=getLottery().total;i++){FREQ[i]=0;ATRASO[i]=historico.length}
   historico.forEach(d=>d.numeros.forEach(n=>FREQ[n]=(FREQ[n]||0)+1));
   const sorted=[...historico].sort((a,b)=>b.numero-a.numero);
@@ -2507,6 +3359,18 @@ function calcDynamic(){
     const f10=last10.filter(d=>d.numeros.includes(i)).length;
     const f20=mid20.filter(d=>d.numeros.includes(i)).length;
     TENDENCIA[i]=f10-f20;
+  }
+  // Calcular ciclo medio (gap entre aparicoes) de cada numero
+  const chronological=[...historico].sort((a,b)=>a.numero-b.numero);
+  for(let num=1;num<=getLottery().total;num++){
+    const gaps=[];let lastIdx=-1;
+    for(let j=0;j<chronological.length;j++){
+      if(chronological[j].numeros.includes(num)){
+        if(lastIdx>=0)gaps.push(j-lastIdx);
+        lastIdx=j;
+      }
+    }
+    CICLO[num]=gaps.length?+(gaps.reduce((a,b)=>a+b,0)/gaps.length).toFixed(1):historico.length;
   }
 }
 
@@ -2545,12 +3409,15 @@ function gerarJogos(){
   const melhorNSize=parseInt(document.getElementById('sliderMelhorN')?.value||100);
   const targetCount=useMelhorN?melhorNSize:qtd;
   previousJogos=[...jogos];
-  let pool=[];const seen=new Set();let att=0;const maxAtt=targetCount*300;
+  // Pool restrito: se fixou mais que pick, reduz hamming distance minimo
+  const isPoolRestrito=fixedNums.size>getPickSize();
+  const minHamming=isPoolRestrito?1:3;
+  let pool=[];const seen=new Set();let att=0;const maxAtt=targetCount*(isPoolRestrito?500:300);
   while(pool.length<targetCount&&att<maxAtt){att++;
     const j=genOne(mod);if(!j)continue;
     const k=j.join(',');if(seen.has(k))continue;
-    if(pool.some(ex=>hammingDistance(j,ex)<3))continue;
-    if(passFilters(j,filters)){seen.add(k);j.score=calcScore(j);j.cls=classifyScore(j.score);pool.push(j)}
+    if(pool.some(ex=>hammingDistance(j,ex)<minHamming))continue;
+    if(passFilters(j,filters)&&!isJackpotDuplicate(j)){seen.add(k);j.score=calcScore(j);j.cls=classifyScore(j.score);pool.push(j)}
   }
   if(useMelhorN&&pool.length>qtd){pool.sort((a,b)=>b.score-a.score);pool=pool.slice(0,qtd)}
 
@@ -2565,8 +3432,8 @@ function gerarJogos(){
     let msg='';
     if(available<needed){
       msg='Voce excluiu numeros demais. Precisa de pelo menos '+needed+' numeros disponiveis, mas so tem '+available+'. Remova algumas exclusoes.';
-    }else if(fixedNums.size>needed){
-      msg='Voce fixou '+fixedNums.size+' numeros, mas o jogo so usa '+needed+'. Remova alguns fixados.';
+    }else if(fixedNums.size>needed&&fixedNums.size>needed+6){
+      msg='Voce fixou '+fixedNums.size+' numeros. O maximo para gerar combinacoes e '+(needed+6)+'. Remova alguns fixados.';
     }else{
       const activeCount=FILTER_IDS.filter(isFilterOn).length;
       if(activeCount>=4){
@@ -2580,6 +3447,7 @@ function gerarJogos(){
   }
 
   jogos=pool;concRef=ULT.numero;
+  logGeneratedGames(jogos,selectedModelo,concRef);
   stats.total+=jogos.length;stats.modelos[selectedModelo]=(stats.modelos[selectedModelo]||0)+jogos.length;bumpStreak();
   jogos.forEach(j=>stats.scores.push(j.score));
   if(stats.scores.length>500)stats.scores=stats.scores.slice(-500);
@@ -2605,11 +3473,19 @@ function gerarJogos(){
 }
 
 function hammingDistance(a,b){const s=new Set(b);return a.filter(n=>!s.has(n)).length}
+function factorial(n){let r=1;for(let i=2;i<=n;i++)r*=i;return r}
 
 function genOne(mod){
   const pick=getPickSize();
   const fixed=[...fixedNums];const need=pick-fixed.length;
-  if(need<0)return null;if(need===0)return fixed.sort((a,b)=>a-b);
+  // Modo pool restrito: usuario fixou mais numeros que o pick — escolher pick dentre os fixados
+  if(need<0){
+    if(fixed.length<pick)return null;
+    const w=n=>{const f=(FREQ[n]||0)/(historico.length||1);const a=(ATRASO[n]||0)/(historico.length||1);const t=(TENDENCIA[n]||0)/10;return 0.4*f+0.3*a+0.2*t+Math.random()*mod.noise};
+    const ranked=fixed.map(n=>({n,w:w(n)})).sort((a,b)=>b.w-a.w).map(x=>x.n);
+    return ranked.slice(0,pick).sort((a,b)=>a-b);
+  }
+  if(need===0)return fixed.sort((a,b)=>a-b);
   const dentro=ULT.numeros.filter(n=>!excludedNums.has(n)&&!fixedNums.has(n));
   const fora=[];for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i)&&!excludedNums.has(i)&&!fixedNums.has(i))fora.push(i);
   const w=n=>{const f=(FREQ[n]||0)/(historico.length||1);const a=(ATRASO[n]||0)/(historico.length||1);const t=(TENDENCIA[n]||0)/10;return 0.4*f+0.3*a+0.2*t+Math.random()*mod.noise};
@@ -2624,7 +3500,7 @@ function genOne(mod){
 
 // ══════ FILTERS ══════
 function isFilterOn(id){return document.getElementById(id)?.classList.contains('on')}
-function getActiveFilters(){return{pi:isFilterOn('filterParImpar'),so:isFilterOn('filterSoma'),co:isFilterOn('filterConsec'),re:isFilterOn('filterRepet'),dz:isFilterOn('filterDezena'),pr:isFilterOn('filterPrimos')}}
+function getActiveFilters(){return{pi:isFilterOn('filterParImpar'),so:isFilterOn('filterSoma'),co:isFilterOn('filterConsec'),re:isFilterOn('filterRepet'),dz:isFilterOn('filterDezena'),pr:isFilterOn('filterPrimos'),ba:isFilterOn('filterBaixoAlto'),m3:isFilterOn('filterMult3'),fn:isFilterOn('filterFinais'),ce:isFilterOn('filterCentro'),fi:isFilterOn('filterFib'),es:isFilterOn('filterEspelho')}}
 
 function passFilters(j,f){
   const lot=getLottery();const flt=lot.filters;
@@ -2637,6 +3513,12 @@ function passFilters(j,f){
   if(f.re&&(r<flt.repet[0]||r>flt.repet[1]))return false;
   if(f.dz){const maxPerDz=Math.ceil(lot.pick/getDezenas().length)+1;for(const[lo,hi]of getDezenas()){const cnt=j.filter(n=>n>=lo&&n<=hi).length;if(cnt>maxPerDz)return false}}
   if(f.pr){const prSet=getPrimos();const pc=j.filter(n=>prSet.has(n)).length;const maxPr=Math.ceil(lot.pick*0.45);const minPr=Math.max(0,Math.floor(lot.pick*0.15));if(pc<minPr||pc>maxPr)return false}
+  if(f.ce&&selectedLottery==='lotofacil'){const cc=j.filter(n=>CENTRO_NUMS.includes(n)).length;const allowed=getActiveCentroValues();if(allowed.length&&!allowed.includes(cc))return false}
+  if(f.ba){const mid=Math.ceil(getLottery().total/2);const bc=j.filter(n=>n<=mid).length;const allowed=getActiveFilterVals('baixoalto');if(allowed.length&&!allowed.includes(bc))return false}
+  if(f.m3){const t=getLottery().total;const m3List=[];for(let k=3;k<=t;k+=3)m3List.push(k);const mc=j.filter(n=>m3List.includes(n)).length;const allowed=getActiveFilterVals('mult3');if(allowed.length&&!allowed.includes(mc))return false}
+  if(f.fn){const dc=new Set(j.map(n=>n%10)).size;const allowed=getActiveFilterVals('finais');if(allowed.length&&!allowed.includes(dc))return false}
+  if(f.fi&&selectedLottery==='lotofacil'){const fc=j.filter(n=>FIB_NUMS.includes(n)).length;const allowed=getActiveFilterVals('fib');if(allowed.length&&!allowed.includes(fc))return false}
+  if(f.es&&selectedLottery==='lotofacil'){const ec=ESPELHO_PAIRS.filter(([a,b])=>j.includes(a)&&j.includes(b)).length;const allowed=getActiveFilterVals('espelho');if(allowed.length&&!allowed.includes(ec))return false}
   return true;
 }
 
@@ -2661,6 +3543,18 @@ function calcScore(j){
   // Primos — proportional
   const prSet=getPrimos();const pr=j.filter(n=>prSet.has(n)).length;
   const prIdeal=Math.round(pk*0.3);s+=(Math.abs(pr-prIdeal)<=1)?10:(Math.abs(pr-prIdeal)<=2)?5:1;
+  // Generic patterns (all lotteries)
+  const mid2=Math.ceil(getLottery().total/2);const bc=j.filter(n=>n<=mid2).length;
+  const idealB=Math.round(pk/2);s+=(Math.abs(bc-idealB)<=1)?5:(Math.abs(bc-idealB)<=2)?2:0;
+  const t2=getLottery().total;const m3L=[];for(let k=3;k<=t2;k+=3)m3L.push(k);const m3c=j.filter(n=>m3L.includes(n)).length;
+  const m3Ideal=Math.round(pk*m3L.length/t2);s+=(Math.abs(m3c-m3Ideal)<=1)?5:0;
+  const fnc=new Set(j.map(n=>n%10)).size;s+=(fnc>=pk-1)?5:(fnc>=pk-2)?2:0;
+  // Lotofácil-only patterns
+  if(selectedLottery==='lotofacil'){
+    const cc=j.filter(n=>CENTRO_NUMS.includes(n)).length;s+=(cc>=4&&cc<=6)?4:(cc>=3&&cc<=7)?2:0;
+    const fc=j.filter(n=>FIB_NUMS.includes(n)).length;s+=(fc>=3&&fc<=5)?4:(fc>=2&&fc<=6)?2:0;
+    const ec=ESPELHO_PAIRS.filter(([a,b])=>j.includes(a)&&j.includes(b)).length;s+=(ec>=3&&ec<=5)?4:(ec>=2&&ec<=6)?2:0;
+  }
   return Math.min(100,Math.max(0,s));
 }
 function classifyScore(s){if(s>=85)return{label:'Excelente',cls:'score-excelente'};if(s>=70)return{label:'Muito Forte',cls:'score-muitoforte'};if(s>=50)return{label:'Forte',cls:'score-forte'};return{label:'Regular',cls:'score-regular'}}
@@ -2692,6 +3586,7 @@ function renderJogos(){
   c.innerHTML=jogos.map((j,i)=>{
     const p=j.filter(n=>n%2===0).length,s=j.reduce((a,b)=>a+b,0),r=ULT?j.filter(n=>ULT.numeros.includes(n)).length:0;
     const pr=j.filter(n=>getPrimos().has(n)).length;
+    const cc=selectedLottery==='lotofacil'?j.filter(n=>CENTRO_NUMS.includes(n)).length:null;
     return `<div class="game-card" id="gc${i}" style="animation-delay:${i*0.05}s">
       <div class="game-header"><div class="game-number">#${i+1}</div><div class="score-badge ${j.cls.cls}">${j.score} · ${j.cls.label}</div></div>
       <div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(pad(n))}</div>`).join('')}</div>
@@ -2699,7 +3594,7 @@ function renderJogos(){
         <div class="meta-item"><span class="meta-label">Par/Ímpar</span><span class="meta-value">${p}P/${j.length-p}I</span></div>
         <div class="meta-item"><span class="meta-label">Soma</span><span class="meta-value">Σ${s}</span></div>
         <div class="meta-item"><span class="meta-label">Repet</span><span class="meta-value">${r}</span></div>
-        <div class="meta-item"><span class="meta-label">Primos</span><span class="meta-value">${pr}</span></div>
+        ${cc!==null?'<div class="meta-item"><span class="meta-label">Centro</span><span class="meta-value">'+cc+'/9</span></div>':'<div class="meta-item"><span class="meta-label">Primos</span><span class="meta-value">'+pr+'</span></div>'}
       </div>
       <div class="game-actions-row">
         <button class="btn-action" onclick="conferir(${i})">🔍 Conferir</button>
@@ -2713,25 +3608,33 @@ function renderJogos(){
 async function conferir(i){
   try{
     const raw=await apiFetch(getLottery().api+'/latest');const d=parseDraw(raw);if(!d)throw 0;
-    if(d.numero===concRef){checkIdx=i;document.getElementById('manualCheckModal').classList.add('active');showToast('⏳ Próximo sorteio ainda não saiu. Use conferência manual.');return}
-    showCheckResult(i,d.numeros,d.numero);
-  }catch(e){checkIdx=i;document.getElementById('manualCheckModal').classList.add('active')}
+    if(d.numero===concRef){checkIdx=i;const desc=document.getElementById('manualCheckDesc');if(desc)desc.textContent='Selecione os '+getLottery().pick+' números sorteados:';document.getElementById('manualCheckModal').classList.add('active');showToast('⏳ Próximo sorteio ainda não saiu. Use conferência manual.');return}
+    showCheckResult(i,d.numeros,d.numero,d.numeros2||null);
+  }catch(e){checkIdx=i;const desc=document.getElementById('manualCheckDesc');if(desc)desc.textContent='Selecione os '+getLottery().pick+' números sorteados:';document.getElementById('manualCheckModal').classList.add('active')}
 }
 
-function showCheckResult(i,res,cn){
+function showCheckResult(i,res,cn,res2){
   const j=jogos[i],ac=j.filter(n=>res.includes(n));
+  const ac2=res2?j.filter(n=>res2.includes(n)):null;
+  const bestHits=ac2?Math.max(ac.length,ac2.length):ac.length;
   const card=document.getElementById('gc'+i);if(!card)return;
-  card.querySelectorAll('.ball').forEach(b=>{const n=parseInt(b.textContent);b.classList.add(ac.map(Number).includes(n)?'ball-hit':'ball-miss')});
-  const prize=getPremios()[ac.length]||'Sem premiação';
+  card.querySelectorAll('.ball').forEach(b=>{const n=parseInt(b.textContent);const hit1=ac.map(Number).includes(n);const hit2=ac2?ac2.map(Number).includes(n):false;b.classList.add((hit1||hit2)?'ball-hit':'ball-miss')});
+  const prize=getPremios()[bestHits]||'Sem premiação';
   const overlay=document.createElement('div');
   overlay.style.cssText='position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,10,10,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:5;border-radius:var(--border-radius-lg)';
-  overlay.innerHTML=`<div style="font-size:2.5rem;font-weight:700;color:var(--color-gold-primary)">${ac.length}</div>
-    <div style="color:rgba(255,255,255,0.6);margin-bottom:12px">acertos${cn?' · #'+cn:''}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px">${ac.map(n=>'<div class="ball ball-hit">'+pad(n)+'</div>').join('')}</div>
-    <div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--color-gold-primary);margin-top:8px">${prize}</div>
-    <button class="btn-action" style="margin-top:16px" onclick="this.parentElement.remove()">Fechar</button>`;
+  let html=`<div style="font-size:2.5rem;font-weight:700;color:var(--color-gold-primary)">${ac.length}</div>
+    <div style="color:rgba(255,255,255,0.6);margin-bottom:8px">acertos${ac2?' (1o sorteio)':''}${cn?' · #'+cn:''}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px">${ac.map(n=>'<div class="ball ball-hit">'+pad(n)+'</div>').join('')}</div>`;
+  if(ac2){
+    html+=`<div style="font-size:1.8rem;font-weight:700;color:var(--color-gold-primary);margin-top:8px">${ac2.length}</div>
+      <div style="color:rgba(255,255,255,0.6);margin-bottom:8px">acertos (2o sorteio)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px">${ac2.map(n=>'<div class="ball ball-hit">'+pad(n)+'</div>').join('')}</div>`;
+  }
+  html+=`<div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--color-gold-primary);margin-top:8px">${prize}</div>
+    <button class="btn-action" style="margin-top:12px" onclick="this.parentElement.remove()">Fechar</button>`;
+  overlay.innerHTML=html;
   card.style.position='relative';card.appendChild(overlay);
-  if(ac.length>=minPrizeHits())setTimeout(showDonation,1500);
+  if(bestHits>=minPrizeHits())setTimeout(showDonation,1500);
 }
 
 function initManualGrid(){
@@ -2747,7 +3650,8 @@ function initManualGrid(){
 function confirmManualCheck(){
   if(checkIdx===null)return;
   const nums=Array.from(document.querySelectorAll('#manualInputGrid .exclude-cell')).filter(c=>c.dataset.selected==='true').map(c=>parseInt(c.dataset.num)).sort((a,b)=>a-b);
-  if(nums.length!==getPickSize()){showToast('⚠️ Selecione exatamente '+getPickSize()+' numeros');return}
+  const expectedPick=getLottery().pick;
+  if(nums.length!==expectedPick){showToast('⚠️ Selecione exatamente '+expectedPick+' numeros');return}
   document.getElementById('manualCheckModal').classList.remove('active');
   document.querySelectorAll('#manualInputGrid .exclude-cell').forEach(c=>{c.dataset.selected='false';c.style.background='';c.style.borderColor='';c.style.color=''});
   showCheckResult(checkIdx,nums,null);
@@ -2763,17 +3667,19 @@ function salvar(i){
 }
 
 function shareGame(i){
-  const j=jogos[i];const t='🎯 Lottobot · Jogo '+(i+1)+'\n'+j.map(n=>pad(n)).join(' - ')+'\nScore: '+j.score+' · Modelo '+selectedModelo;
+  const j=jogos[i];const t='🎯 Lottobot · '+getLottery().name+' · Jogo '+(i+1)+'\n'+j.map(n=>pad(n)).join(' - ')+'\nScore: '+j.score+' · Modelo '+selectedModelo;
   if(navigator.share)navigator.share({title:'Lottobot',text:t}).catch(()=>{});
   else navigator.clipboard.writeText(t).then(()=>showToast('📋 Copiado!'));
 }
 
 function exportCopy(){
-  const t='🎯 LOTTOBOT — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'Jogo '+(i+1)+': '+j.map(n=>pad(n)).join(' - ')+' ('+j.score+'pts)').join('\n');
+  const lot=getLottery().name;
+  const t='🎯 LOTTOBOT · '+lot+' — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'Jogo '+(i+1)+': '+j.map(n=>pad(n)).join(' - ')+' ('+j.score+'pts)').join('\n')+'\n\n⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.';
   navigator.clipboard.writeText(t).then(()=>showToast('📋 Copiado!')).catch(()=>showToast('Erro ao copiar'));
 }
 function exportWhatsApp(){
-  const t='🎯 *LOTTOBOT* — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'*Jogo '+(i+1)+':* '+j.map(n=>pad(n)).join('-')+' _('+j.score+'pts)_').join('\n')+'\n\n_Gerado por Lottobot_';
+  const lot=getLottery().name;
+  const t='🎯 *LOTTOBOT · '+lot+'* — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'*Jogo '+(i+1)+':* '+j.map(n=>pad(n)).join('-')+' _('+j.score+'pts)_').join('\n')+'\n\n⚠️ _Aposte em uma Loterica ou no app/site da Caixa para concorrer._\n_Gerado por Lottobot — lottobot.com.br_';
   window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
 }
 function exportPDF(){
@@ -2790,11 +3696,11 @@ function exportPDF(){
     .footer{text-align:center;font-size:9px;color:#aaa;margin-top:16px;padding-top:8px;border-top:1px solid #eee}
     @media print{body{padding:10px}.game{border-width:1px}}
   </style></head><body>
-    <h1>🎲 Lottobot — ${jogos.length} Jogos</h1>
+    <h1>🎲 Lottobot · ${getLottery().name} — ${jogos.length} Jogos</h1>
     <h2>Ref: #${concRef} · Modelo ${selectedModelo} · ${new Date().toLocaleDateString('pt-BR')}</h2>
     ${jogos.map((j,i)=>{const p=j.filter(n=>n%2===0).length,s=j.reduce((a,b)=>a+b,0);
       return '<div class="game"><div class="game-head"><span>Jogo '+(i+1)+'</span><span>'+j.score+' pts · '+j.cls.label+'</span></div><div class="nums">'+j.map(n=>'<div class="num">'+pad(n)+'</div>').join('')+'</div><div class="meta"><span>'+p+'P/'+(j.length-p)+'I</span><span>Σ'+s+'</span></div></div>'}).join('')}
-    <div class="footer">Gerado por Lottobot — lottobot.app · Boa sorte!</div>
+    <div class="footer">⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.<br>Gerado por Lottobot — lottobot.com.br</div>
     <script>setTimeout(()=>window.print(),300)<\/script>
   </body></html>`);
   w.document.close();
@@ -2802,31 +3708,36 @@ function exportPDF(){
 
 function exportShareCard(){
   if(!jogos.length){showToast('Gere jogos primeiro');return}
-  const cvs=document.createElement('canvas');cvs.width=600;cvs.height=400;
+  const lot=getLottery();const numCount=jogos[0]?.length||lot.pick;
+  const ballSize=numCount>10?10:12;const ballGap=numCount>10?26:36;
+  const show=jogos.slice(0,5);
+  const cardH=75+show.length*62+30;
+  const cvs=document.createElement('canvas');cvs.width=600;cvs.height=cardH;
   const ctx=cvs.getContext('2d');
   // Background
-  ctx.fillStyle='#09090b';ctx.fillRect(0,0,600,400);
+  ctx.fillStyle='#09090b';ctx.fillRect(0,0,600,cardH);
   ctx.fillStyle='#111113';ctx.fillRect(0,0,600,60);
   // Header
-  ctx.fillStyle='#d4a853';ctx.font='bold 18px Inter,sans-serif';ctx.fillText('🎲 LOTTOBOT',20,38);
-  ctx.fillStyle='#8a8a94';ctx.font='12px Inter,sans-serif';ctx.fillText(jogos.length+' jogos · Modelo '+selectedModelo+' · #'+concRef,200,38);
-  // Games (max 5)
-  const show=jogos.slice(0,5);
+  ctx.fillStyle='#d4a853';ctx.font='bold 18px Inter,sans-serif';ctx.fillText('🎲 LOTTOBOT · '+lot.name,20,38);
+  ctx.fillStyle='#8a8a94';ctx.font='12px Inter,sans-serif';ctx.fillText(jogos.length+' jogos · Modelo '+selectedModelo+' · #'+concRef,320,38);
+  // Games
   show.forEach((j,gi)=>{
     const y=75+gi*62;
     ctx.fillStyle='#18181b';ctx.beginPath();ctx.roundRect(15,y,570,52,8);ctx.fill();
     ctx.fillStyle='#8a8a94';ctx.font='bold 11px monospace';ctx.fillText('Jogo '+(gi+1),22,y+16);
-    ctx.fillStyle='#d4a853';ctx.fillText(j.score+'pts · '+j.cls.label,510,y+16);
+    // Score — positioned after balls
+    const scoreX=Math.max(22+numCount*ballGap+20,400);
+    ctx.fillStyle='#d4a853';ctx.fillText(j.score+'pts · '+(j.cls?.label||''),scoreX,y+16);
     j.forEach((n,ni)=>{
-      const x=22+ni*36,cy=y+37;
+      const x=22+ni*ballGap,cy=y+37;
       const cls=classifyNum(n);
       ctx.fillStyle=cls.cls==='ball-hot'?'#ef7d3a':cls.cls==='ball-cold'?'#4a90d9':cls.cls==='ball-rising'?'#d4a853':'#52525b';
-      ctx.beginPath();ctx.arc(x+12,cy,12,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#fff';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText(pad(n),x+12,cy+4);ctx.textAlign='left';
+      ctx.beginPath();ctx.arc(x+ballSize,cy,ballSize,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#fff';ctx.font='bold '+(ballSize-1)+'px monospace';ctx.textAlign='center';ctx.fillText(pad(n),x+ballSize,cy+4);ctx.textAlign='left';
     });
   });
   // Footer
-  ctx.fillStyle='#8a8a94';ctx.font='10px Inter,sans-serif';ctx.fillText('Gerado por Lottobot · '+new Date().toLocaleDateString('pt-BR'),20,385);
+  ctx.fillStyle='#8a8a94';ctx.font='10px Inter,sans-serif';ctx.fillText('Aposte em uma Loterica ou no app/site da Caixa · Lottobot — lottobot.com.br',20,cardH-12);
   // Download
   cvs.toBlob(blob=>{
     if(navigator.share&&navigator.canShare?.({files:[new File([blob],'lottobot.png',{type:'image/png'})]})){
@@ -2843,8 +3754,75 @@ function shareBolao(){
   const data=jogos.map(j=>j.join(',')).join(';');
   const encoded=btoa(data);
   const url=window.location.origin+window.location.pathname+'?bolao='+encoded;
-  if(navigator.share)navigator.share({title:'Lottobot Bolao',text:'Confira esses jogos!',url}).catch(()=>{});
+  if(navigator.share)navigator.share({title:'Lottobot Bolao · '+getLottery().name,text:'Confira esses jogos da '+getLottery().name+'!',url}).catch(()=>{});
   else navigator.clipboard.writeText(url).then(()=>showToast('🎯 Link do bolao copiado!'));
+}
+
+// ══════ INVITE / SHARE ══════
+function getInviteText(){
+  const msgs=[
+    '🎲 *DESAFIO LOTTOBOT* 🎲\n\nEu to usando inteligencia artificial pra montar meus jogos da Lotofacil, Mega-Sena e Quina.\n\n🏆 *Te desafio:* vamos ver quem acerta mais numeros no proximo sorteio?\n\nCada um gera seus jogos com analise estatistica real — frequencia, tendencia, atraso. O app mostra o score de cada combinacao.\n\n📊 Nao e achismo. E matematica.\n\n👉 Entra aqui e gera seus numeros (gratis):\nhttps://lottobot.com.br\n\n_Quem sabe a sorte nao ta do seu lado?_ 🍀',
+    '🏆 *Bora apostar com inteligencia?*\n\nDescobri um gerador que analisa todos os sorteios passados e cria combinacoes otimizadas.\n\n🎯 Score de 0 a 100 pra cada jogo\n📊 Filtros: par/impar, soma, primos, consecutivas\n🧠 Modo I.A. que decide tudo por voce\n\n*Te desafio a gerar seus jogos e comparar comigo!*\n\n👉 https://lottobot.com.br\n\n_100% gratis. Sem cadastro obrigatorio. Instala como app no celular._ 🎲',
+    '⚡ *Voce ainda escolhe numeros no achismo?*\n\nEu uso o Lottobot — ele analisa o historico real de todos os sorteios e gera as melhores combinacoes.\n\n✅ Lotofacil, Mega-Sena e Quina\n✅ Analise de frequencia e tendencia\n✅ Conferencia automatica de resultados\n✅ Notificacao se voce ganhar\n\n🎯 *Desafio:* gera 5 jogos e me manda seu score!\n\n👉 https://lottobot.com.br\n\n_Gratis pra sempre. Boa sorte!_ 🍀'
+  ];
+  return msgs[Math.floor(Math.random()*msgs.length)];
+}
+
+function shareInvite(){
+  const text=getInviteText();
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
+
+function copyInviteLink(){
+  const text='🎲 Lottobot — Gerador inteligente de jogos para Lotofacil, Mega-Sena e Quina. Analise estatistica real, gratis!\n👉 https://lottobot.com.br';
+  navigator.clipboard.writeText(text).then(()=>showToast('📋 Link copiado!')).catch(()=>showToast('Erro ao copiar'));
+}
+
+function updateInviteStats(){
+  const su=document.getElementById('inviteStatUsers'),sg=document.getElementById('inviteStatGames');
+  if(!su||!sg)return;
+  // Show real stats if available, otherwise estimates
+  const totalGen=stats.total||0;
+  if(totalGen>0){sg.textContent=totalGen>1000?(Math.round(totalGen/100)/10)+'k':totalGen}
+  else{sg.textContent='10k+'}
+  su.textContent='500+';
+}
+
+// ══════ EXPORT SAVED GAMES ══════
+function exportSavedCopy(){
+  if(!saved.length){showToast('Nenhum jogo salvo');return}
+  const lot=getLottery().name;
+  const t='🎯 LOTTOBOT · '+lot+' — '+saved.length+' jogos salvos\n\n'+saved.map((g,i)=>'Jogo '+(i+1)+': '+g.n.map(n=>pad(n)).join(' - ')+' ('+g.score+'pts · M'+g.mod+')').join('\n')+'\n\n⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.';
+  navigator.clipboard.writeText(t).then(()=>showToast('📋 '+saved.length+' jogos copiados!')).catch(()=>showToast('Erro ao copiar'));
+}
+function exportSavedWhatsApp(){
+  if(!saved.length){showToast('Nenhum jogo salvo');return}
+  const lot=getLottery().name;
+  const t='🎯 *LOTTOBOT · '+lot+'* — '+saved.length+' jogos salvos\n\n'+saved.map((g,i)=>'*Jogo '+(i+1)+':* '+g.n.map(n=>pad(n)).join('-')+' _('+g.score+'pts · M'+g.mod+')_').join('\n')+'\n\n⚠️ _Aposte em uma Loterica ou no app/site da Caixa para concorrer._\n_Gerado por Lottobot — lottobot.com.br_';
+  window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+}
+function exportSavedPDF(){
+  if(!saved.length){showToast('Nenhum jogo salvo');return}
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>Lottobot - Jogos Salvos</title><style>
+    *{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:20px;color:#1a1a1a}
+    h1{font-size:18px;margin-bottom:4px}h2{font-size:12px;color:#666;margin-bottom:16px}
+    .game{border:1.5px solid #ddd;border-radius:8px;padding:12px;margin-bottom:10px;page-break-inside:avoid}
+    .game-head{display:flex;justify-content:space-between;margin-bottom:8px;font-size:11px;color:#888}
+    .nums{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+    .num{width:28px;height:28px;border-radius:50%;background:#b8912e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+    .meta{display:flex;gap:12px;font-size:10px;color:#666;border-top:1px solid #eee;padding-top:6px}
+    .footer{text-align:center;font-size:9px;color:#aaa;margin-top:16px;padding-top:8px;border-top:1px solid #eee}
+    @media print{body{padding:10px}.game{border-width:1px}}
+  </style></head><body>
+    <h1>🎲 Lottobot · ${getLottery().name} — ${saved.length} Jogos Salvos</h1>
+    <h2>${new Date().toLocaleDateString('pt-BR')}</h2>
+    ${saved.map((g,i)=>{const p=g.n.filter(n=>n%2===0).length,s=g.n.reduce((a,b)=>a+b,0);
+      return '<div class="game"><div class="game-head"><span>Jogo '+(i+1)+' · M'+g.mod+'</span><span>'+g.score+' pts · #'+g.ref+'</span></div><div class="nums">'+g.n.map(n=>'<div class="num">'+pad(n)+'</div>').join('')+'</div><div class="meta"><span>'+p+'P/'+(g.n.length-p)+'I</span><span>Σ'+s+'</span><span>'+g.dt+'</span></div></div>'}).join('')}
+    <div class="footer">⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.<br>Gerado por Lottobot — lottobot.com.br</div>
+    <script>setTimeout(()=>window.print(),300)<\/script>
+  </body></html>`);
+  w.document.close();
 }
 
 function limparJogos(){previousJogos=[...jogos];jogos=[];concRef=null;renderJogos();persist();showToast('🗑️ Limpo')}
@@ -2853,7 +3831,9 @@ function undoJogos(){if(!previousJogos.length){showToast('Nada para desfazer');r
 // ══════ SAVED GAMES ══════
 function renderSaved(){
   const c=document.getElementById('savedContainer');if(!c)return;
-  if(!saved.length){c.innerHTML='<p class="text-small" style="text-align:center;padding:32px 0;opacity:.5">Nenhum jogo salvo. Use 💾 nos jogos gerados.</p>';return}
+  const bar=document.getElementById('savedExportBar');
+  if(!saved.length){c.innerHTML='<p class="text-small" style="text-align:center;padding:32px 0;opacity:.5">Nenhum jogo salvo. Use 💾 nos jogos gerados.</p>';if(bar)bar.style.display='none';return}
+  if(bar)bar.style.display='flex';
   c.innerHTML=saved.map(g=>{
     let checkHtml='';
     if(ULT&&g.ref&&ULT.numero>g.ref){
@@ -2874,7 +3854,15 @@ function renderFilterTab(){
   const r=document.getElementById('filtrosAtivosResumo');
   if(r){
     const flt=getLottery().filters;const ip=idealPairs();
+    const cVals=getActiveCentroValues().sort((a,b)=>a-b).join(', ');
     const filters=[{id:'filterParImpar',l:'Par/Ímpar ('+ip[0]+'-'+ip[1]+'P)'},{id:'filterSoma',l:'Soma ('+flt.soma[0]+'-'+flt.soma[1]+')'},{id:'filterConsec',l:'Consecutivas (máx '+flt.consec+')'},{id:'filterRepet',l:'Repetição ('+flt.repet[0]+'-'+flt.repet[1]+')'},{id:'filterDezena',l:'Distribuição por Dezena'},{id:'filterPrimos',l:'Primos'}];
+    if(selectedLottery==='lotofacil'){
+      filters.push({id:'filterCentro',l:'Centro ('+cVals+')'});
+      filters.push({id:'filterFib',l:'Fibonacci ('+getActiveFilterVals('fib').sort((a,b)=>a-b).join(', ')+')'});
+      filters.push({id:'filterMult3',l:'Mult. 3 ('+getActiveFilterVals('mult3').sort((a,b)=>a-b).join(', ')+')'});
+      filters.push({id:'filterEspelho',l:'Espelho ('+getActiveFilterVals('espelho').sort((a,b)=>a-b).join(', ')+')'});
+      filters.push({id:'filterFinais',l:'Finais ('+getActiveFilterVals('finais').sort((a,b)=>a-b).join(', ')+')'});
+    }
     r.innerHTML=filters.map(f=>{const on=document.getElementById(f.id)?.classList.contains('on');return '<div style="padding:4px 0;color:'+(on?'var(--color-gold-primary)':'rgba(255,255,255,0.4)')+'">'+(on?'✅':'⬜')+' '+f.l+'</div>'}).join('');
   }
   const dg=document.getElementById('excludeDentro'),fg=document.getElementById('excludeFora');
@@ -2894,10 +3882,14 @@ function updateUI(){
   document.getElementById('ultimoNumero').textContent='Concurso #'+ULT.numero;
   document.getElementById('ultimoData').textContent=ULT.data;
   const balls=document.getElementById('ultimoBalls');
-  if(balls)balls.innerHTML=ULT.numeros.map(n=>'<div class="ball '+getBallClass(n)+'">'+pad(n)+'</div>').join('');
+  if(balls){
+    let html=ULT.numeros.map(n=>'<div class="ball '+getBallClass(n)+'">'+pad(n)+'</div>').join('');
+    if(ULT.numeros2){html+='<div style="width:100%;font-size:0.6rem;color:var(--text-muted);margin:4px 0">2o Sorteio:</div>'+ULT.numeros2.map(n=>'<div class="ball ball-neutral">'+pad(n)+'</div>').join('')}
+    balls.innerHTML=html;
+  }
   const res=document.getElementById('ultimoResumo');
   if(res){const p=ULT.numeros.filter(n=>n%2===0).length,s=ULT.numeros.reduce((a,b)=>a+b,0);res.innerHTML='Pares: '+p+' · Ímpares: '+(ULT.numeros.length-p)+' · Soma: '+s}
-  updateGridLayout();renderFilterTab();renderHeatmap();renderTop5();renderNumeroDoDia();renderHistoricoTimeline();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();updateDynamicDescriptions();
+  updateGridLayout();renderFilterTab();renderHeatmap();renderHomeHeatmap();renderTop5();renderNumeroDoDia();renderHistoricoTimeline();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();updateDynamicDescriptions();updateInviteStats();
 }
 
 function switchTab(tab){
@@ -2960,17 +3952,64 @@ function renderHeatmap(){
   const g=document.getElementById('heatmapGrid');if(!g)return;
   const vals=Object.values(FREQ),mn=Math.min(...vals),mx=Math.max(...vals);
   g.innerHTML='';
+  let atrasadoCount=0;
   for(let i=1;i<=getLottery().total;i++){
     const f=FREQ[i]||0,r=mx>mn?(f-mn)/(mx-mn):0.5;
-    let bg;if(r>0.66)bg='rgba(192,57,43,'+(0.4+r*0.5)+')';else if(r>0.33)bg='rgba(243,156,18,'+(0.3+r*0.4)+')';else bg='rgba(52,152,219,'+(0.3+(1-r)*0.4)+')';
-    const cell=document.createElement('div');cell.className='heatmap-cell';cell.style.background=bg;cell.style.color=r>0.4?'#fff':'#ccc';
-    cell.innerHTML=pad(i)+'<div style="position:absolute;bottom:calc(100%+6px);background:rgba(10,10,10,0.95);border:1px solid rgba(201,168,76,0.3);padding:4px 8px;border-radius:6px;font-size:.7rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10" class="ht">Nº'+pad(i)+' · Freq:'+f+' · Atraso:'+(ATRASO[i]||0)+'</div>';
+    const atraso=ATRASO[i]||0;
+    const ciclo=CICLO[i]||1;
+    const isAtrasado=atraso>=ciclo*1.5&&atraso>=2;
+    if(isAtrasado)atrasadoCount++;
+    let bg;if(r>0.66)bg='rgba(231,76,60,'+(0.5+r*0.4)+')';else if(r>0.33)bg='rgba(46,204,113,'+(0.35+r*0.4)+')';else bg='rgba(52,152,219,'+(0.35+(1-r)*0.4)+')';
+    const cell=document.createElement('div');
+    cell.className='heatmap-cell'+(isAtrasado?' atrasado':'');
+    if(!isAtrasado){cell.style.background=bg;cell.style.color='#fff'}
+    const statusText=isAtrasado?'⚡ ATRASADO':(atraso===0?'Saiu agora':'Normal');
+    const statusColor=isAtrasado?'#d4a853':(atraso===0?'#6aac7e':'#888');
+    cell.innerHTML=pad(i)+'<div style="position:absolute;bottom:calc(100%+6px);left:50%;transform:translateX(-50%);background:rgba(10,10,10,0.97);border:1px solid '+(isAtrasado?'rgba(212,168,83,0.5)':'rgba(201,168,76,0.2)')+';padding:6px 10px;border-radius:8px;font-size:.68rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;line-height:1.5" class="ht">'
+      +'<div style="font-weight:700;margin-bottom:2px">N'+pad(i)+'</div>'
+      +'<div>Freq: <strong>'+f+'</strong> em '+historico.length+' sorteios</div>'
+      +'<div>Atraso: <strong>'+atraso+'</strong> concursos</div>'
+      +'<div>Ciclo medio: <strong>'+ciclo+'</strong></div>'
+      +'<div style="color:'+statusColor+';font-weight:600;margin-top:2px">'+statusText+'</div>'
+      +'</div>';
     cell.style.position='relative';
     cell.onmouseenter=()=>cell.querySelector('.ht').style.opacity='1';
     cell.onmouseleave=()=>cell.querySelector('.ht').style.opacity='0';
+    // Touch support for mobile
+    cell.ontouchstart=(e)=>{e.preventDefault();cell.querySelector('.ht').style.opacity='1';setTimeout(()=>cell.querySelector('.ht').style.opacity='0',2500)};
     g.appendChild(cell);
   }
-  const src=document.getElementById('heatSource');if(src)src.textContent='Base: '+historico.length+' concursos '+(historico.length>1?'reais':'(fallback)');
+  const src=document.getElementById('heatSource');
+  if(src)src.innerHTML='Base: '+historico.length+' concursos '+(historico.length>1?'reais':'(fallback)')+(atrasadoCount?'<br><span style="color:var(--color-gold-primary)">⚡ '+atrasadoCount+' numero'+(atrasadoCount>1?'s':'')+' atrasado'+(atrasadoCount>1?'s':'')+'</span>':'');
+}
+
+function renderHomeHeatmap(){
+  const g=document.getElementById('homeHeatGrid');if(!g)return;
+  if(!Object.keys(FREQ).length){g.innerHTML='';return}
+  const t=getLottery().total;const cls=t>50?'grid-10':t>30?'grid-8':'';
+  g.classList.remove('grid-8','grid-10');if(cls)g.classList.add(cls);
+  const vals=Object.values(FREQ),mn=Math.min(...vals),mx=Math.max(...vals);
+  g.innerHTML='';
+  let atrasadoCount=0;
+  for(let i=1;i<=t;i++){
+    const f=FREQ[i]||0,r=mx>mn?(f-mn)/(mx-mn):0.5;
+    const atraso=ATRASO[i]||0,ciclo=CICLO[i]||1;
+    const isAtrasado=atraso>=ciclo*1.5&&atraso>=2;
+    if(isAtrasado)atrasadoCount++;
+    let bg;if(r>0.66)bg='rgba(231,76,60,'+(0.5+r*0.4)+')';else if(r>0.33)bg='rgba(46,204,113,'+(0.35+r*0.4)+')';else bg='rgba(52,152,219,'+(0.35+(1-r)*0.4)+')';
+    const cell=document.createElement('div');
+    cell.className='heatmap-cell'+(isAtrasado?' atrasado':'');
+    if(!isAtrasado){cell.style.background=bg;cell.style.color='#fff'}
+    const statusText=isAtrasado?'⚡ ATRASADO':(atraso===0?'Saiu agora':'Normal');
+    cell.innerHTML=pad(i)+'<div style="position:absolute;bottom:calc(100%+6px);left:50%;transform:translateX(-50%);background:rgba(10,10,10,0.97);border:1px solid '+(isAtrasado?'rgba(212,168,83,0.5)':'rgba(100,100,100,0.3)')+';padding:5px 8px;border-radius:6px;font-size:.62rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;line-height:1.4" class="ht">N'+pad(i)+' · F:'+f+' · A:'+(atraso)+' · C:'+(CICLO[i]||'-')+'<br><span style="color:'+(isAtrasado?'#d4a853':'#888')+'">'+statusText+'</span></div>';
+    cell.style.position='relative';
+    cell.onmouseenter=()=>cell.querySelector('.ht').style.opacity='1';
+    cell.onmouseleave=()=>cell.querySelector('.ht').style.opacity='0';
+    cell.ontouchstart=(e)=>{e.preventDefault();cell.querySelector('.ht').style.opacity='1';setTimeout(()=>cell.querySelector('.ht').style.opacity='0',2000)};
+    g.appendChild(cell);
+  }
+  const src=document.getElementById('homeHeatSource');
+  if(src)src.innerHTML=historico.length+' concursos'+(atrasadoCount?' · <span style="color:var(--color-gold-primary)">⚡ '+atrasadoCount+' atrasado'+(atrasadoCount>1?'s':'')+'</span>':'');
 }
 
 function renderTop5(){
@@ -3031,6 +4070,12 @@ function persist(){try{localStorage.setItem(SK,JSON.stringify({
     repet:isFilterOn('filterRepet'),
     dezena:isFilterOn('filterDezena'),
     primos:isFilterOn('filterPrimos'),
+    baixoAlto:isFilterOn('filterBaixoAlto'),baixoAltoVals:getActiveFilterVals('baixoalto'),
+    mult3:isFilterOn('filterMult3'),mult3Vals:getActiveFilterVals('mult3'),
+    finais:isFilterOn('filterFinais'),finaisVals:getActiveFilterVals('finais'),
+    centro:isFilterOn('filterCentro'),centroVals:getActiveCentroValues(),
+    fib:isFilterOn('filterFib'),fibVals:getActiveFilterVals('fib'),
+    espelho:isFilterOn('filterEspelho'),espelhoVals:getActiveFilterVals('espelho'),
     janela:document.getElementById('sliderJanela')?.value,
     melhorN:document.getElementById('toggleMelhorN')?.classList.contains('on'),
     melhorNSize:document.getElementById('sliderMelhorN')?.value,
@@ -3053,12 +4098,45 @@ function loadSaved(){try{const d=JSON.parse(localStorage.getItem(SK)||'{}');
     toggleFilter('filterRepet',f.repet);
     toggleFilter('filterDezena',f.dezena);
     toggleFilter('filterPrimos',f.primos);
+    toggleFilter('filterCentro',f.centro);
+    if(f.centroVals){document.querySelectorAll('#centroValues .centro-val').forEach(b=>{b.classList.toggle('active',f.centroVals.includes(parseInt(b.dataset.val)))})}
+    if(f.centro){const cr=document.getElementById('centroRangeRow');if(cr)cr.style.display=''}
+    const newFilters=[{key:'baixoAlto',id:'filterBaixoAlto',range:'baixoAltoRangeRow',group:'baixoalto'},{key:'mult3',id:'filterMult3',range:'mult3RangeRow',group:'mult3'},{key:'finais',id:'filterFinais',range:'finaisRangeRow',group:'finais'},{key:'fib',id:'filterFib',range:'fibRangeRow',group:'fib'},{key:'espelho',id:'filterEspelho',range:'espelhoRangeRow',group:'espelho'}];
+    newFilters.forEach(nf=>{
+      toggleFilter(nf.id,f[nf.key]);
+      const grp=nf.group||nf.key;
+      if(f[nf.key+'Vals']){document.querySelectorAll('[data-group="'+grp+'"].centro-val').forEach(b=>{b.classList.toggle('active',f[nf.key+'Vals'].includes(parseInt(b.dataset.val)))})}
+      if(f[nf.key]){const cr=document.getElementById(nf.range);if(cr)cr.style.display=''}
+    });
     if(f.janela){const sl=document.getElementById('sliderJanela');if(sl){sl.value=f.janela;document.getElementById('sliderValue').textContent=f.janela}}
     if(f.melhorN){document.getElementById('toggleMelhorN')?.classList.add('on');const sn=document.getElementById('sliderMelhorN');if(sn)sn.disabled=false}
     if(f.melhorNSize){const sn=document.getElementById('sliderMelhorN');if(sn){sn.value=f.melhorNSize;document.getElementById('sliderMelhorNValue').textContent=f.melhorNSize}}
     if(f.qtdJogos){const q=document.getElementById('qtdJogos');if(q)q.value=f.qtdJogos}
   }
 }catch(e){}}
+// ══════ ANALYTICS — LOG ALL GENERATED GAMES ══════
+function logGeneratedGames(games,modelo,ref){
+  if(!currentUser||!games.length)return;
+  try{
+    const activeFilters=FILTER_IDS.filter(isFilterOn);
+    const batch={
+      userId:currentUser.uid,
+      lottery:selectedLottery,
+      modelo:modelo,
+      concursoRef:ref||0,
+      count:games.length,
+      pickSize:getPickSize(),
+      filters:activeFilters,
+      fixedCount:fixedNums.size,
+      excludedCount:excludedNums.size,
+      games:games.map(j=>({n:Array.from(j),score:j.score||0})),
+      avgScore:games.length?Math.round(games.reduce((a,j)=>a+(j.score||0),0)/games.length):0,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    };
+    _db.collection('generatedBatches').add(batch).catch(e=>console.warn('Log error:',e));
+  }catch(e){console.warn('Analytics log error:',e)}
+}
+
 function copyPix(){navigator.clipboard.writeText(document.getElementById('pixKey')?.textContent?.trim()||'').then(()=>showToast('📋 Chave PIX copiada!'))}
 let _donationShown=false;
 function showDonation(){if(_donationShown)return;_donationShown=true;document.getElementById('donationModal')?.classList.add('active')}
@@ -3133,6 +4211,65 @@ function updateDynamicDescriptions(){
   const dzStr=getDezenas().map(([a,b])=>a+'-'+b).join(', ');
   const d5=el('filterDescDz');if(d5)d5.textContent='Distribui números entre as faixas ('+dzStr+'). Evita concentração.';
   const d6=el('filterDescPrimos');if(d6)d6.textContent='Controla quantidade de números primos no jogo.';
+  // Lotofácil-only filters
+  const isLF=selectedLottery==='lotofacil';
+  ['filterCentroRow','filterFibRow','filterEspelhoRow'].forEach(id=>{const r=el(id);if(r)r.style.display=isLF?'':'none'});
+  ['centroRangeRow','fibRangeRow','espelhoRangeRow'].forEach(id=>{const r=el(id);if(r)r.style.display=(isLF&&isFilterOn(id.replace('RangeRow','').replace('centro','filterCentro').replace('fib','filterFib').replace('espelho','filterEspelho')))?'':'none'});
+
+  // Generic filters — update ranges per lottery
+  const t=lot.total,pk=lot.pick,mid=Math.ceil(t/2);
+
+  // Baixo/Alto — populate buttons
+  const baDiv=el('baixoAltoValues');
+  if(baDiv){
+    const baDefaults={lotofacil:[6,7,8,9],megasena:[2,3,4],quina:[2,3],duplasena:[2,3,4]};
+    const defs=baDefaults[selectedLottery]||[Math.floor(pk/2)];
+    baDiv.innerHTML='';
+    for(let v=0;v<=pk;v++){
+      const btn=document.createElement('button');btn.className='centro-val'+(defs.includes(v)?' active':'');
+      btn.dataset.val=v;btn.dataset.group='baixoalto';btn.textContent=v;
+      btn.onclick=function(){toggleFilterVal(this)};baDiv.appendChild(btn);
+    }
+  }
+  const baDesc=el('baixoAltoDesc');if(baDesc)baDesc.textContent='Baixos: 1-'+mid+' / Altos: '+(mid+1)+'-'+t;
+  const dBA=el('filterDescBA');if(dBA)dBA.textContent='Equilibrio entre numeros baixos (1-'+mid+') e altos ('+(mid+1)+'-'+t+').';
+  const baRange=el('baixoAltoRangeRow');if(baRange)baRange.style.display=isFilterOn('filterBaixoAlto')?'':'none';
+
+  // Mult3 — populate buttons dynamically
+  const m3Div=el('mult3Values');
+  if(m3Div){
+    const m3Count=Math.floor(t/3);
+    const m3Defs={lotofacil:[4,5],megasena:[1,2,3],quina:[1,2],duplasena:[1,2]};
+    const defs=m3Defs[selectedLottery]||[Math.round(pk*m3Count/t)];
+    m3Div.innerHTML='';
+    for(let v=0;v<=Math.min(pk,m3Count);v++){
+      const btn=document.createElement('button');btn.className='centro-val'+(defs.includes(v)?' active':'');
+      btn.dataset.val=v;btn.dataset.group='mult3';btn.textContent=v;
+      btn.onclick=function(){toggleFilterVal(this)};m3Div.appendChild(btn);
+    }
+  }
+  const m3Range=el('mult3RangeRow');if(m3Range)m3Range.style.display=isFilterOn('filterMult3')?'':'none';
+  const d9=el('filterDescMult3');if(d9)d9.textContent='Multiplos de 3 ate '+t+'. '+Math.floor(t/3)+' numeros no universo.';
+
+  // Finais Distintos — populate buttons dynamically
+  const fnDiv=el('finaisValues');
+  if(fnDiv){
+    const fnDefs={lotofacil:[9,10],megasena:[4,5],quina:[4,5],duplasena:[5,6]};
+    const defs=fnDefs[selectedLottery]||[pk-1,pk];
+    const maxFinais=Math.min(pk,10);
+    fnDiv.innerHTML='';
+    for(let v=Math.max(2,pk-3);v<=maxFinais;v++){
+      const btn=document.createElement('button');btn.className='centro-val'+(defs.includes(v)?' active':'');
+      btn.dataset.val=v;btn.dataset.group='finais';btn.textContent=v;
+      btn.onclick=function(){toggleFilterVal(this)};fnDiv.appendChild(btn);
+    }
+  }
+  const fnRange=el('finaisRangeRow');if(fnRange)fnRange.style.display=isFilterOn('filterFinais')?'':'none';
+  const d11=el('filterDescFinais');if(d11)d11.textContent='Quantos finais diferentes (0-9) nos '+pk+' numeros.';
+
+  const d7=el('filterDescCentro');if(d7)d7.textContent='Centro da cartela 5x5. Media: 5.2 por sorteio.';
+  const d8=el('filterDescFib');if(d8)d8.textContent='Fibonacci (01,02,03,05,08,13,21). Media: 4.1.';
+  const d10=el('filterDescEspelho');if(d10)d10.textContent='Pares que somam 26 (01+25, 02+24...). Media: 4.1.';
 }
 
 // ══════ PRIZE ESTIMATION ══════
@@ -3155,10 +4292,7 @@ function updatePrizeEstimate(){
   // Acumulado
   const acPanel=document.getElementById('acumuladoPanel');
   if(acPanel){
-    if(ULT&&ULT.acumulou&&ULT.valorEstimado){
-      acPanel.style.display='block';
-      document.getElementById('acumuladoValue').textContent=ULT.valorEstimado;
-    }else if(ULT&&ULT.valorEstimado){
+    if(ULT&&ULT.valorEstimado){
       acPanel.style.display='block';
       document.getElementById('acumuladoValue').textContent=ULT.valorEstimado;
     }else{
@@ -3177,9 +4311,9 @@ window.addEventListener('beforeinstallprompt',e=>{
 });
 
 function showInstallPopup(){
-  if(_isStandalone)return showLgpd();
+  if(_isStandalone)return showPushModal();
   const dismissed=localStorage.getItem('lottobot_install_dismissed');
-  if(dismissed&&Date.now()-parseInt(dismissed)<7*24*60*60*1000)return showLgpd();
+  if(dismissed&&Date.now()-parseInt(dismissed)<7*24*60*60*1000)return showPushModal();
   const overlay=document.getElementById('installOverlay');
   if(_isIos){
     document.getElementById('installIosSteps').style.display='';
@@ -3200,7 +4334,7 @@ function doInstall(){
 function dismissInstall(){
   localStorage.setItem('lottobot_install_dismissed',String(Date.now()));
   document.getElementById('installOverlay')?.classList.remove('show');
-  setTimeout(showLgpd,400);
+  setTimeout(showPushModal,400);
 }
 function showLgpd(){
   if(!localStorage.getItem('lottobot_lgpd')){
@@ -3213,32 +4347,35 @@ window.addEventListener('appinstalled',()=>{showToast('Lottobot instalado com su
 // ══════ MODO I.A. — INTELLIGENT ANALYSIS ══════
 function gerarModoIA(callback){
   const lot=getLottery();const pick=getPickSize();const mod=getModelos().IA||getModelos().B;
+  const isPoolRestrito=fixedNums.size>pick;
 
-  // I.A. ignora filtros do usuario — decide sozinha
+  // I.A. ignora filtros do usuario — decide sozinha (mas respeita numeros fixados)
+  const maxCandidates=isPoolRestrito?Math.min(200,Math.round(factorial(fixedNums.size)/factorial(fixedNums.size-pick)/factorial(pick))):100;
   const candidates=[];const seen=new Set();let att=0;
-  while(candidates.length<100&&att<5000){att++;
+  while(candidates.length<maxCandidates&&att<(isPoolRestrito?10000:5000)){att++;
     const j=genOne(mod);if(!j)continue;
     const k=j.join(',');if(seen.has(k))continue;
-    // I.A. aplica seus proprios criterios (score > 0)
+    // I.A. aplica seus proprios criterios (score > 0) + anti-jackpot
+    if(isJackpotDuplicate(j))continue;
     j.score=calcScore(j);j.cls=classifyScore(j.score);
     seen.add(k);candidates.push(j);
   }
   if(candidates.length<3){showToast('⚠️ Dados insuficientes para analise I.A.');callback();return}
 
-  // Phase 2: Sort by score, take top 20
+  // Phase 2: Sort by score, take top N
   candidates.sort((a,b)=>b.score-a.score);
-  const top20=candidates.slice(0,20);
+  const topN=candidates.slice(0,Math.min(candidates.length,isPoolRestrito?candidates.length:20));
 
-  // Phase 3: Select 3 most diverse from top 20 (maximize hamming distance)
-  const selected=[top20[0]];
+  // Phase 3: Select 3 most diverse from top (maximize hamming distance)
+  const selected=[topN[0]];
   for(let round=0;round<2;round++){
     let bestIdx=-1,bestMinDist=-1;
-    for(let i=1;i<top20.length;i++){
-      if(selected.includes(top20[i]))continue;
-      const minDist=Math.min(...selected.map(s=>hammingDistance(top20[i],s)));
+    for(let i=1;i<topN.length;i++){
+      if(selected.includes(topN[i]))continue;
+      const minDist=Math.min(...selected.map(s=>hammingDistance(topN[i],s)));
       if(minDist>bestMinDist){bestMinDist=minDist;bestIdx=i}
     }
-    if(bestIdx>=0)selected.push(top20[bestIdx]);
+    if(bestIdx>=0)selected.push(topN[bestIdx]);
   }
 
   // Phase 4: Generate explanations
@@ -3475,6 +4612,7 @@ function showIAAnimation(games,explanations,callback){
         setTimeout(()=>{
           overlay.remove();
           jogos=games;concRef=ULT?.numero||0;
+          logGeneratedGames(jogos,'IA',concRef);
           stats.total+=jogos.length;stats.modelos.IA=(stats.modelos.IA||0)+jogos.length;bumpStreak();
           jogos.forEach(j=>stats.scores.push(j.score));
           slotMachineReveal([...jogos],()=>{renderJogos();updateStats();runHistoricalAnalysis();persist();callback()});
@@ -3744,7 +4882,7 @@ function slotMachineReveal(games, callback){
       </div>
       <div class="casino-cta" id="casinoCta">
         <div class="cta-finger-glow"></div>
-        <div class="cta-finger" id="ctaFinger"><canvas id="fingerCanvas" width="768" height="768" style="width:100%;height:100%"></canvas></div>
+        <div class="cta-finger" id="ctaFinger"><canvas id="fingerCanvas" width="512" height="512" style="width:100%;height:100%"></canvas></div>
         <div class="cta-text" id="ctaText">A SORTE ESTA COM VOCE</div>
         <div class="cta-brand" id="ctaBrand">ENTRE AGORA — LOTTOBOT.APP</div>
       </div>`;
@@ -3845,25 +4983,20 @@ function slotMachineReveal(games, callback){
       const goNext=()=>{if(idx<games.length-1){skipAll=false;showGame(idx+1)}else{overlay.classList.remove('active');setTimeout(()=>overlay.remove(),400);callback()}};
       if(!cta){goNext();return}
 
-      // Render 🫵 em canvas 768px — 4K nítido
+      // Render 🫵 — simple and crisp on all devices
       const fc=document.getElementById('fingerCanvas');
       if(fc){try{
-        const c=fc.getContext('2d'),s=768;
+        const dpr=Math.min(window.devicePixelRatio||1,3);
+        const s=Math.round(384*dpr);
+        fc.width=s;fc.height=s;
+        fc.style.width='100%';fc.style.height='100%';
+        const c=fc.getContext('2d');
         c.clearRect(0,0,s,s);
-        // Glow
-        const g=c.createRadialGradient(s/2,s/2,60,s/2,s/2,350);
-        g.addColorStop(0,'rgba(255,215,0,0.35)');g.addColorStop(1,'transparent');
-        c.fillStyle=g;c.fillRect(0,0,s,s);
-        // Emoji HD
-        c.font='420px serif';c.textAlign='center';c.textBaseline='middle';
-        c.shadowColor='rgba(0,0,0,0.7)';c.shadowBlur=60;c.shadowOffsetY=16;
+        const fontSize=Math.round(s*0.6);
+        c.font=fontSize+'px serif';
+        c.textAlign='center';
+        c.textBaseline='middle';
         c.fillText('🫵',s/2,s/2);
-        c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetY=0;
-        // Brilho
-        c.globalCompositeOperation='lighter';
-        c.fillStyle='rgba(255,255,255,0.08)';
-        c.beginPath();c.ellipse(s/2,s/2-100,140,60,0,0,Math.PI*2);c.fill();
-        c.globalCompositeOperation='source-over';
       }catch(e){}}
 
       // Show + boom
@@ -3939,6 +5072,47 @@ function slotMachineReveal(games, callback){
   showGame(0);
 }
   </script>
+  <!-- PUSH NOTIFICATION PERMISSION -->
+  <div class="push-overlay" id="pushOverlay">
+    <div class="push-card">
+      <div class="push-card-header">
+        <span class="push-card-icon">🔔</span>
+        <h2>Permitir Notificacoes</h2>
+        <p>Fique por dentro dos resultados sem precisar abrir o app.</p>
+      </div>
+      <div class="push-card-body">
+        <div class="push-benefits">
+          <div class="push-benefit">
+            <div class="push-benefit-icon gold">🏆</div>
+            <div class="push-benefit-text">
+              <h4>Alerta de premiacao</h4>
+              <p>Receba um aviso instantaneo quando seu jogo salvo acertar numeros.</p>
+            </div>
+          </div>
+          <div class="push-benefit">
+            <div class="push-benefit-icon green">📊</div>
+            <div class="push-benefit-text">
+              <h4>Resultado do sorteio</h4>
+              <p>Saiba na hora quando sair o resultado da Lotofacil, Mega-Sena e Quina.</p>
+            </div>
+          </div>
+          <div class="push-benefit">
+            <div class="push-benefit-icon blue">🎯</div>
+            <div class="push-benefit-text">
+              <h4>Dicas e novidades</h4>
+              <p>Receba estrategias e atualizacoes do Lottobot direto no seu dispositivo.</p>
+            </div>
+          </div>
+        </div>
+        <div class="push-card-actions">
+          <button class="push-card-btn dismiss" onclick="dismissPushModal()">Agora nao</button>
+          <button class="push-card-btn primary" onclick="acceptPushModal()">Permitir</button>
+        </div>
+      </div>
+      <div class="push-card-footer">Voce pode desativar a qualquer momento nas configuracoes do navegador.</div>
+    </div>
+  </div>
+
   <div class="install-overlay" id="installOverlay">
     <div class="install-card">
       <div class="install-card-header">
@@ -4014,25 +5188,54 @@ function slotMachineReveal(games, callback){
     <div class="legal-content">
       <button class="legal-close" onclick="this.closest('.legal-modal').classList.remove('show')">✕</button>
       <h2>Termos de Uso</h2>
-      <p><strong>Ultima atualizacao:</strong> Março de 2026</p>
-      <h3>1. Sobre o Servico</h3>
-      <p>O Lottobot e um gerador analitico de combinacoes numericas para loterias brasileiras (Lotofacil, Mega-Sena, Quina). O servico utiliza analise estatistica de sorteios passados para gerar combinacoes otimizadas.</p>
-      <h3>2. Isenção de Responsabilidade</h3>
-      <p><strong>O Lottobot NAO garante premiacoes.</strong> Loterias sao jogos de azar e os resultados sao aleatorios. As analises estatisticas e scores sao ferramentas de apoio, nao previsoes. Jogue com responsabilidade.</p>
-      <h3>3. Uso Adequado</h3>
+      <p><strong>Ultima atualizacao:</strong> 30 de Março de 2026</p>
+
+      <h3>1. Natureza do Servico</h3>
+      <p style="background:rgba(220,60,60,0.08);border:1px solid rgba(220,60,60,0.2);border-radius:8px;padding:12px;margin:8px 0"><strong style="color:#ef4444;font-size:0.95rem">O LOTTOBOT NAO REALIZA APOSTAS, NAO REGISTRA JOGOS E NAO PARTICIPA DE NENHUM SORTEIO EM NOME DO USUARIO.</strong></p>
+      <p>O Lottobot e exclusivamente um <strong>gerador analitico de combinacoes numericas</strong> para loterias brasileiras (Lotofacil, Mega-Sena, Quina). O servico utiliza analise estatistica de sorteios passados para sugerir combinacoes. <strong>Gerar numeros no Lottobot nao constitui aposta.</strong></p>
+      <p>Para que qualquer combinacao gerada concorra a premios, o usuario deve <strong>obrigatoriamente registrar a aposta</strong> em uma casa loterica credenciada ou pelos canais oficiais da Caixa Economica Federal (site ou aplicativo Loterias Caixa). O Lottobot nao possui qualquer vinculo, parceria ou representacao junto a Caixa Economica Federal.</p>
+
+      <h3>2. Notificacoes e Conferencia de Resultados</h3>
+      <p>O Lottobot oferece funcionalidades de <strong>conferencia automatica</strong> que comparam as combinacoes geradas com os resultados oficiais dos sorteios. Quando uma combinacao coincide com numeros sorteados, o sistema pode enviar notificacoes push informando a quantidade de acertos.</p>
+      <p style="background:rgba(220,60,60,0.08);border:1px solid rgba(220,60,60,0.2);border-radius:8px;padding:12px;margin:8px 0"><strong style="color:#ef4444">IMPORTANTE: Uma notificacao de acertos NAO significa que o usuario ganhou qualquer premio.</strong> A notificacao indica apenas que a combinacao gerada <strong>teria acertado</strong> aquela quantidade de numeros <strong>caso tivesse sido efetivamente apostada</strong> em uma loterica ou canal oficial da Caixa. O Lottobot nao tem como verificar se o usuario realizou ou nao a aposta.</p>
+      <p>O usuario reconhece e concorda que <strong>nenhuma notificacao, mensagem, score ou resultado exibido pelo Lottobot constitui comprovante de aposta, bilhete premiado ou direito a premiacao</strong>. A responsabilidade de registrar a aposta e exclusivamente do usuario.</p>
+
+      <h3>3. Isencao Total de Responsabilidade</h3>
+      <p><strong>O Lottobot, seus criadores, desenvolvedores e colaboradores estao isentos de qualquer responsabilidade por:</strong></p>
+      <ul>
+        <li>Combinacoes que teriam sido premiadas mas nao foram apostadas pelo usuario</li>
+        <li>Expectativas de ganho geradas por notificacoes de conferencia</li>
+        <li>Qualquer prejuizo financeiro, dano moral ou material alegado pelo usuario em decorrencia do uso do servico</li>
+        <li>Decisoes de aposta tomadas com base nas combinacoes ou analises geradas</li>
+        <li>Indisponibilidade do servico, erros nos dados ou falhas nas notificacoes</li>
+      </ul>
+      <p><strong>O Lottobot NAO garante premiacoes.</strong> Loterias sao jogos de azar e os resultados sao aleatorios. As analises estatisticas e scores sao ferramentas de apoio, nao previsoes. Ao utilizar o servico, o usuario renuncia expressamente a qualquer pedido de indenizacao contra o Lottobot.</p>
+
+      <h3>4. Uso Adequado</h3>
       <ul>
         <li>O servico e destinado a maiores de 18 anos</li>
         <li>Nao utilize o servico para fins ilegais</li>
         <li>Nao tente manipular ou explorar vulnerabilidades do sistema</li>
+        <li>O usuario e integralmente responsavel por suas decisoes de aposta</li>
+        <li>Jogue com responsabilidade. Se precisar de ajuda: <strong>Disque 180</strong></li>
       </ul>
-      <h3>4. Propriedade Intelectual</h3>
+
+      <h3>5. Propriedade Intelectual</h3>
       <p>O Lottobot, incluindo seu codigo, design, animacoes e marca, sao propriedade de seus criadores. E proibida a reproducao sem autorizacao.</p>
-      <h3>5. Disponibilidade</h3>
-      <p>O servico e oferecido "como esta". Nao garantimos disponibilidade ininterrupta. Podemos modificar ou descontinuar funcionalidades a qualquer momento.</p>
-      <h3>6. Doacoes</h3>
+
+      <h3>6. Disponibilidade</h3>
+      <p>O servico e oferecido "como esta" (as is), sem garantias de qualquer natureza. Nao garantimos disponibilidade ininterrupta, precisao dos dados ou funcionamento de notificacoes. Podemos modificar ou descontinuar funcionalidades a qualquer momento, sem aviso previo.</p>
+
+      <h3>7. Doacoes</h3>
       <p>O Lottobot e gratuito. Doacoes via PIX sao voluntarias e nao conferem direitos adicionais sobre o servico.</p>
-      <h3>7. Contato</h3>
+
+      <h3>8. Foro e Legislacao</h3>
+      <p>Estes termos sao regidos pela legislacao brasileira. Fica eleito o foro da comarca do domicilio do responsavel pelo servico para dirimir quaisquer controversias.</p>
+
+      <h3>9. Contato</h3>
       <p>Duvidas ou sugestoes: <strong>lottobot.io@gmail.com</strong></p>
+
+      <p style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);font-size:0.72rem;color:var(--text-muted)">Ao utilizar o Lottobot, voce declara ter lido, compreendido e concordado integralmente com estes Termos de Uso.</p>
     </div>
   </div>
 
