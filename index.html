@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v41';
+    var V='lottobot-v42';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -888,6 +888,17 @@
     }
     .analise-ndd-row .ball { width: 40px; height: 40px; font-size: 0.9rem; flex-shrink: 0; }
     .analise-ndd-label { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; }
+    .analise-info-text {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 6px;
+    }
+    .analise-frio-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-ball-cold), #6bb3e8);
+      border-radius: 2px;
+    }
     .analise-empty {
       font-size: 0.72rem;
       color: var(--text-muted);
@@ -2227,22 +2238,50 @@
 
       <div id="tabAnalise" class="tab-content" role="tabpanel" aria-label="Analise inteligente">
 
-        <!-- Seção A: Números Quentes -->
+        <!-- Seção 0: Último Sorteio -->
         <div class="analise-section">
-          <div class="analise-section-title">🔥 Numeros Quentes</div>
-          <div id="analiseQuentes" class="analise-quentes-row"></div>
+          <div class="analise-section-title">🏆 Ultimo Sorteio</div>
+          <div id="analiseUltimoSorteio"></div>
         </div>
 
-        <!-- Seção B: Números Atrasados -->
+        <!-- Seção A: Quentes & Frios -->
         <div class="analise-section">
-          <div class="analise-section-title">⚡ Numeros Atrasados <span style="font-weight:400;font-size:0.62rem;color:var(--text-muted)">fora do ciclo natural</span></div>
+          <div class="analise-section-title">🔥 Quentes &amp; ❄️ Frios</div>
+          <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:8px">Os 5 que mais sairam</div>
+          <div id="analiseQuentes" class="analise-quentes-row"></div>
+          <div id="analiseQuentesInfo" class="analise-info-text"></div>
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-default)">
+            <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:8px">Os 5 que menos sairam</div>
+            <div id="analiseFrios" class="analise-quentes-row"></div>
+            <div id="analiseFriosInfo" class="analise-info-text"></div>
+          </div>
+        </div>
+
+        <!-- Seção B: Atrasados -->
+        <div class="analise-section">
+          <div class="analise-section-title">⚡ Numeros Atrasados</div>
+          <div class="analise-info-text" style="margin-bottom:8px;margin-top:0">Cada numero tem um <strong style="color:var(--text-secondary)">ciclo</strong> — intervalo medio entre aparicoes. Quando o atraso atual ultrapassa 1.5x esse ciclo, o numero esta fora do padrao.</div>
           <div id="analiseAtrasados" class="analise-atrasados-row"></div>
+        </div>
+
+        <!-- Seção T: Tendências -->
+        <div class="analise-section" id="analiseTendenciasSection" style="display:none">
+          <div class="analise-section-title">📈 Tendencias</div>
+          <div id="analiseTendencias"></div>
+          <div class="analise-info-text">Comparacao dos ultimos 10 sorteios com os 10 anteriores</div>
         </div>
 
         <!-- Seção C: Número do Dia -->
         <div class="analise-section" id="analiseNDDSection" style="display:none">
           <div class="analise-section-title">🎯 Numero do Dia</div>
           <div id="analiseNDD" class="analise-ndd-row"></div>
+          <div id="analiseNDDExplain" class="analise-info-text" style="margin-top:8px"></div>
+        </div>
+
+        <!-- Seção H: Últimos Sorteios -->
+        <div class="analise-section" id="analiseUltimosSorteiosSection" style="display:none">
+          <div class="analise-section-title">📋 Ultimos Sorteios</div>
+          <div id="analiseUltimosSorteios"></div>
         </div>
 
         <!-- Seção D: Heatmap -->
@@ -4047,9 +4086,12 @@ function renderFilterTab(){renderAnaliseTab()}
 
 function renderAnaliseTab(){
   if(!ULT)return;
+  renderAnaliseUltimoSorteio();
   renderAnaliseQuentes();
   renderAnaliseAtrasados();
+  renderAnaliseTendencias();
   renderAnaliseNDD();
+  renderAnaliseUltimosSorteios();
   renderHeatmap();
   renderFilterChips();
   // Fixar/Excluir grids
@@ -4066,16 +4108,43 @@ function renderAnaliseTab(){
   const bf=document.getElementById('badgeFora');if(bf)bf.textContent=fixFora||exclFora?(fixFora?fixFora+' fix':'')+(fixFora&&exclFora?' · ':'')+(exclFora?exclFora+' excl':''):'';
 }
 
+function renderAnaliseUltimoSorteio(){
+  const c=document.getElementById('analiseUltimoSorteio');if(!c||!ULT)return;
+  const nums=ULT.numeros;
+  const pares=nums.filter(n=>n%2===0).length;
+  const soma=nums.reduce((a,b)=>a+b,0);
+  const primos=nums.filter(n=>getPrimos().has(n)).length;
+  let html='<div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-secondary);margin-bottom:8px">#'+ULT.numero+' — '+ULT.data+'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">'
+    +nums.map(n=>'<div class="ball '+getBallClass(n)+'" style="width:28px;height:28px;font-size:0.65rem">'+pad(n)+'</div>').join('')
+    +'</div>';
+  if(ULT.numeros2){
+    html+='<div style="font-size:0.6rem;color:var(--text-muted);margin:4px 0">2o Sorteio:</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">'
+      +ULT.numeros2.map(n=>'<div class="ball ball-neutral" style="width:28px;height:28px;font-size:0.65rem">'+pad(n)+'</div>').join('')
+      +'</div>';
+  }
+  html+='<div class="analise-info-text" style="margin-top:0">'+pares+' pares · '+(nums.length-pares)+' impares · Soma '+soma+' · '+primos+' primos</div>';
+  c.innerHTML=html;
+}
+
 function renderAnaliseQuentes(){
-  const c=document.getElementById('analiseQuentes');if(!c)return;
-  if(!Object.keys(FREQ).length){c.innerHTML='<div class="analise-empty">Carregando dados...</div>';return}
-  const sorted=Object.entries(FREQ).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const mx=sorted[0]?.[1]||1;
-  c.innerHTML=sorted.map(([n,f])=>`<div class="analise-quente-item">
-    <div class="ball ball-hot">${pad(n)}</div>
-    <div class="analise-quente-bar"><div class="analise-quente-bar-fill" style="width:${(f/mx*100)}%"></div></div>
-    <div class="analise-quente-freq">${f}x</div>
-  </div>`).join('');
+  const cHot=document.getElementById('analiseQuentes');
+  const cCold=document.getElementById('analiseFrios');
+  const infoHot=document.getElementById('analiseQuentesInfo');
+  const infoCold=document.getElementById('analiseFriosInfo');
+  if(!cHot)return;
+  if(!Object.keys(FREQ).length){cHot.innerHTML='<div class="analise-empty">Carregando dados...</div>';if(cCold)cCold.innerHTML='';return}
+  const entries=Object.entries(FREQ);
+  const sortedHot=[...entries].sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const sortedCold=[...entries].sort((a,b)=>a[1]-b[1]).slice(0,5);
+  const mxHot=sortedHot[0]?.[1]||1;
+  const mxCold=sortedHot[0]?.[1]||1;
+  cHot.innerHTML=sortedHot.map(([n,f])=>'<div class="analise-quente-item"><div class="ball ball-hot">'+pad(n)+'</div><div class="analise-quente-bar"><div class="analise-quente-bar-fill" style="width:'+(f/mxHot*100)+'%"></div></div><div class="analise-quente-freq">'+f+'x</div></div>').join('');
+  if(cCold)cCold.innerHTML=sortedCold.map(([n,f])=>'<div class="analise-quente-item"><div class="ball ball-cold">'+pad(n)+'</div><div class="analise-quente-bar"><div class="analise-frio-bar-fill" style="width:'+(f/mxCold*100)+'%"></div></div><div class="analise-quente-freq">'+f+'x</div></div>').join('');
+  const cnt=historico.length;
+  if(infoHot)infoHot.textContent='Apareceram mais vezes nos ultimos '+cnt+' concursos';
+  if(infoCold)infoCold.textContent='Apareceram menos vezes nos ultimos '+cnt+' concursos';
 }
 
 function renderAnaliseAtrasados(){
@@ -4088,27 +4157,70 @@ function renderAnaliseAtrasados(){
   }
   atrasados.sort((a,b)=>(b.atraso/b.ciclo)-(a.atraso/a.ciclo));
   if(!atrasados.length){c.innerHTML='<div class="analise-empty">Nenhum numero fora do ciclo no momento</div>';return}
-  c.innerHTML=atrasados.map(a=>`<div class="ball ball-rising analise-atrasado-ball" title="Atraso: ${a.atraso} (ciclo: ${Math.round(a.ciclo)})" style="width:32px;height:32px;font-size:0.72rem;cursor:help">${pad(a.n)}</div>`).join('');
+  c.innerHTML=atrasados.slice(0,8).map(a=>'<div style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;min-width:44px;margin-bottom:6px"><div class="ball ball-rising analise-atrasado-ball" style="width:32px;height:32px;font-size:0.72rem">'+pad(a.n)+'</div><div style="font-size:0.55rem;color:var(--text-muted);text-align:center;line-height:1.3">Atr '+a.atraso+'<br>Ciclo '+Math.round(a.ciclo)+'</div></div>').join('');
+}
+
+function renderAnaliseTendencias(){
+  const section=document.getElementById('analiseTendenciasSection');
+  const c=document.getElementById('analiseTendencias');
+  if(!c||!section)return;
+  if(!Object.keys(TENDENCIA).length){section.style.display='none';return}
+  const rising=[],falling=[];
+  for(let i=1;i<=getLottery().total;i++){
+    const t=TENDENCIA[i]||0;
+    if(t>0)rising.push({n:i,t});
+    if(t<0)falling.push({n:i,t});
+  }
+  rising.sort((a,b)=>b.t-a.t);falling.sort((a,b)=>a.t-b.t);
+  if(!rising.length&&!falling.length){section.style.display='none';return}
+  section.style.display='';
+  let html='';
+  if(rising.length){
+    html+='<div style="margin-bottom:6px;font-size:0.65rem;color:var(--text-muted)">Em alta</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">';
+    html+=rising.slice(0,5).map(x=>'<div style="display:flex;align-items:center;gap:3px"><div class="ball ball-hot" style="width:28px;height:28px;font-size:0.65rem">'+pad(x.n)+'</div><span style="font-size:0.62rem;color:#4ade80;font-weight:600">+'+x.t+'</span></div>').join('');
+    html+='</div>';
+  }
+  if(falling.length){
+    html+='<div style="margin-bottom:6px;font-size:0.65rem;color:var(--text-muted)">Em queda</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+    html+=falling.slice(0,5).map(x=>'<div style="display:flex;align-items:center;gap:3px"><div class="ball ball-cold" style="width:28px;height:28px;font-size:0.65rem">'+pad(x.n)+'</div><span style="font-size:0.62rem;color:#f87171;font-weight:600">'+x.t+'</span></div>').join('');
+    html+='</div>';
+  }
+  c.innerHTML=html;
 }
 
 function renderAnaliseNDD(){
   const section=document.getElementById('analiseNDDSection');
   const c=document.getElementById('analiseNDD');
+  const explain=document.getElementById('analiseNDDExplain');
   if(!c||!section)return;
   if(!Object.keys(TENDENCIA).length){section.style.display='none';return}
   const today=new Date().toISOString().slice(0,10);
   const seed=[...today].reduce((a,ch)=>a+ch.charCodeAt(0),0);
+  const vals=Object.values(FREQ);const avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;
   const scored=[];
   for(let i=1;i<=getLottery().total;i++){
     const t=TENDENCIA[i]||0,f=(FREQ[i]||0)/(historico.length||1),a=(ATRASO[i]||0);
     scored.push({n:i,s:t*3+f*2+(a>2?1:0)+(seed%5===i%5?0.5:0)});
   }
   scored.sort((a,b)=>b.s-a.s);
-  const pick=scored[0];
-  const cls=classifyNum(pick.n);
+  const pick=scored[0];const cls=classifyNum(pick.n);
+  const tend=TENDENCIA[pick.n]||0;const freqVal=FREQ[pick.n]||0;const atrasoVal=ATRASO[pick.n]||0;
+  const freqLabel=freqVal>avg?'alta':freqVal<avg?'baixa':'media';
   section.style.display='';
-  c.innerHTML=`<div class="ball ${cls.cls}" style="width:40px;height:40px;font-size:0.9rem;flex-shrink:0">${pad(pick.n)}</div>
-    <div class="analise-ndd-label"><strong>${cls.type}</strong> — Freq: ${FREQ[pick.n]||0} · Atraso: ${ATRASO[pick.n]||0}<br><span style="font-size:0.65rem;color:var(--text-muted)">Baseado em tendencia + frequencia + atraso</span></div>`;
+  c.innerHTML='<div class="ball '+cls.cls+'" style="width:40px;height:40px;font-size:0.9rem;flex-shrink:0">'+pad(pick.n)+'</div>'
+    +'<div class="analise-ndd-label"><strong>'+cls.type+'</strong><br>'
+    +'<span style="font-size:0.65rem;color:var(--text-muted)">Tendencia: '+(tend>=0?'+':'')+tend+' · Freq: '+freqLabel+' ('+freqVal+'x) · Atraso: '+atrasoVal+'</span></div>';
+  if(explain)explain.textContent='Combina tendencia recente '+(tend>0?'positiva':'neutra')+', frequencia '+freqLabel+' e atraso de '+atrasoVal+' concursos.';
+}
+
+function renderAnaliseUltimosSorteios(){
+  const section=document.getElementById('analiseUltimosSorteiosSection');
+  const c=document.getElementById('analiseUltimosSorteios');
+  if(!c||!section)return;
+  if(historico.length<2){section.style.display='none';return}
+  section.style.display='';
+  const last5=[...historico].sort((a,b)=>b.numero-a.numero).slice(0,5);
+  c.innerHTML=last5.map(d=>'<div style="display:flex;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border-default)"><div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);min-width:38px">#'+d.numero+'</div><div style="display:flex;flex-wrap:wrap;gap:2px">'+d.numeros.map(n=>'<div class="ball '+classifyNum(n).cls+'" style="width:20px;height:20px;font-size:0.55rem">'+pad(n)+'</div>').join('')+'</div></div>').join('');
 }
 
 function renderFilterChips(){
