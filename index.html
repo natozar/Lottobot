@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v45';
+    var V='lottobot-v46';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2647,7 +2647,7 @@ const FALLBACKS={
 };
 function getFallback(){return FALLBACKS[selectedLottery]||FALLBACKS.lotofacil}
 function getFallbackFreq(){const f={};const lot=getLottery();for(let i=getMinNum();i<=lot.total;i++)f[i]=Math.floor(Math.random()*30)+30;return f}
-function getMinNum(){return getLottery().minNum||1}
+function getMinNum(){const m=getLottery().minNum;return m!==undefined?m:1}
 function getDrawSize(){return getLottery().draw||getLottery().pick}
 function dNum(n){return getMinNum()===0?String(n):pad(n)}
 // ══════ DYNAMIC HELPERS (multi-lottery) ══════
@@ -3582,7 +3582,7 @@ function parseDraw(d){
   const numero=parseInt(d.concurso||d.numero);
   if(isNaN(numero))return null;
   const lot=getLottery();
-  const mn=lot.minNum||1;
+  const mn=lot.minNum!==undefined?lot.minNum:1;
   let allNums=dz.map(Number).filter(n=>Number.isInteger(n)&&n>=mn&&n<=lot.total);
   // Dupla Sena: API returns 12 numbers (2 draws of 6)
   let numeros2=null;
@@ -3843,7 +3843,7 @@ function genOne(mod){
 
 function genOneColumns(mod){
   // Super Sete: 7 dígitos independentes 0-9, seleção ponderada aleatória
-  const pick=getPickSize();const lot=getLottery();const mn=lot.minNum||0;
+  const pick=getPickSize();const lot=getLottery();const mn=getMinNum();
   const result=[];
   for(let col=0;col<pick;col++){
     const candidates=[];let totalW=0;
