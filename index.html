@@ -6,14 +6,14 @@
   <meta name="theme-color" content="#09090b">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Lottobot — Gerador analítico inteligente para Lotofácil, Mega-Sena, Quina, Dupla Sena e Dia de Sorte. Filtros estatísticos, heatmap, Monte Carlo e conferência automática.">
-  <meta name="keywords" content="lotofácil, mega-sena, quina, dupla sena, dia de sorte, loteria, gerador, números, sorteio, probabilidade, estatística">
+  <meta name="description" content="Lottobot — Gerador analítico inteligente para Lotofácil, Mega-Sena, Quina, Dupla Sena, Dia de Sorte, Super Sete, +Milionaria e Timemania. Filtros estatísticos, heatmap, Monte Carlo e conferência automática.">
+  <meta name="keywords" content="lotofácil, mega-sena, quina, dupla sena, dia de sorte, super sete, mais milionária, timemania, loteria, gerador, números, sorteio, probabilidade, estatística">
   <meta name="author" content="Lottobot">
   <meta name="robots" content="index, follow">
   <meta name="apple-mobile-web-app-title" content="Lottobot">
   <!-- Open Graph -->
   <meta property="og:title" content="Lottobot — Seus números da sorte com inteligência">
-  <meta property="og:description" content="Gere combinações otimizadas para Lotofácil, Mega-Sena, Quina, Dupla Sena e Dia de Sorte. Análise estatística real, filtros avançados e conferência automática. Grátis.">
+  <meta property="og:description" content="Gere combinações otimizadas para Lotofácil, Mega-Sena, Quina, Dupla Sena, Dia de Sorte, Super Sete, +Milionaria e Timemania. Análise estatística real, filtros avançados e conferência automática. Grátis.">
   <meta property="og:image" content="https://lottobot.com.br/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -27,9 +27,9 @@
   <meta name="twitter:description" content="Gere combinações otimizadas para Lotofácil com análise estatística real. Grátis.">
   <meta name="twitter:image" content="https://lottobot.com.br/og-image.png">
   <!-- Structured Data -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lottobot","description":"Gerador analítico inteligente de combinações para Lotofácil, Mega-Sena, Quina, Dupla Sena e Dia de Sorte","url":"https://lottobot.com.br/","applicationCategory":"GameApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"author":{"@type":"Organization","name":"Lottobot"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lottobot","description":"Gerador analítico inteligente de combinações para Lotofácil, Mega-Sena, Quina, Dupla Sena, Dia de Sorte, Super Sete, +Milionaria e Timemania","url":"https://lottobot.com.br/","applicationCategory":"GameApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"author":{"@type":"Organization","name":"Lottobot"}}</script>
 
-  <title>Lottobot — Gerador Inteligente para Lotofácil, Mega-Sena, Quina, Dupla Sena e Dia de Sorte</title>
+  <title>Lottobot — Gerador Inteligente para Lotofácil, Mega-Sena, Quina, Dupla Sena, Dia de Sorte, Super Sete, +Milionaria e Timemania</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v42';
+    var V='lottobot-v43';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -1953,12 +1953,15 @@
       <!-- LOTTERY SELECTOR -->
       <div class="config-section">
         <div class="section-title">Loteria</div>
-        <div class="modelos-grid" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr">
-          <div class="modelo-card loteria-card active" data-loteria="lotofacil" onclick="switchLottery('lotofacil')" style="font-size:0.68rem">Lotofacil</div>
-          <div class="modelo-card loteria-card" data-loteria="megasena" onclick="switchLottery('megasena')" style="font-size:0.68rem">Mega-Sena</div>
-          <div class="modelo-card loteria-card" data-loteria="quina" onclick="switchLottery('quina')" style="font-size:0.68rem">Quina</div>
-          <div class="modelo-card loteria-card" data-loteria="duplasena" onclick="switchLottery('duplasena')" style="font-size:0.68rem">Dupla Sena</div>
-          <div class="modelo-card loteria-card" data-loteria="diadesorte" onclick="switchLottery('diadesorte')" style="font-size:0.68rem">Dia de Sorte</div>
+        <div class="modelos-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:4px">
+          <div class="modelo-card loteria-card active" data-loteria="lotofacil" onclick="switchLottery('lotofacil')" style="font-size:0.62rem;padding:8px 4px">Lotofacil</div>
+          <div class="modelo-card loteria-card" data-loteria="megasena" onclick="switchLottery('megasena')" style="font-size:0.62rem;padding:8px 4px">Mega-Sena</div>
+          <div class="modelo-card loteria-card" data-loteria="quina" onclick="switchLottery('quina')" style="font-size:0.62rem;padding:8px 4px">Quina</div>
+          <div class="modelo-card loteria-card" data-loteria="duplasena" onclick="switchLottery('duplasena')" style="font-size:0.62rem;padding:8px 4px">Dupla Sena</div>
+          <div class="modelo-card loteria-card" data-loteria="diadesorte" onclick="switchLottery('diadesorte')" style="font-size:0.62rem;padding:8px 4px">Dia de Sorte</div>
+          <div class="modelo-card loteria-card" data-loteria="supersete" onclick="switchLottery('supersete')" style="font-size:0.62rem;padding:8px 4px">Super Sete</div>
+          <div class="modelo-card loteria-card" data-loteria="maismilionaria" onclick="switchLottery('maismilionaria')" style="font-size:0.62rem;padding:8px 4px">+Milionaria</div>
+          <div class="modelo-card loteria-card" data-loteria="timemania" onclick="switchLottery('timemania')" style="font-size:0.62rem;padding:8px 4px">Timemania</div>
         </div>
       </div>
 
@@ -2000,6 +2003,41 @@
           <option value="Outubro">Outubro</option>
           <option value="Novembro">Novembro</option>
           <option value="Dezembro">Dezembro</option>
+        </select>
+      </div>
+
+      <div class="config-section" id="trevoSection" style="display:none">
+        <div class="section-title">🍀 Trevos</div>
+        <select id="trevoSelect" style="width:100%">
+          <option value="random">🎲 Aleatorio (sortear 2)</option>
+          <option value="1,2">1 e 2</option><option value="1,3">1 e 3</option><option value="1,4">1 e 4</option>
+          <option value="1,5">1 e 5</option><option value="1,6">1 e 6</option><option value="2,3">2 e 3</option>
+          <option value="2,4">2 e 4</option><option value="2,5">2 e 5</option><option value="2,6">2 e 6</option>
+          <option value="3,4">3 e 4</option><option value="3,5">3 e 5</option><option value="3,6">3 e 6</option>
+          <option value="4,5">4 e 5</option><option value="4,6">4 e 6</option><option value="5,6">5 e 6</option>
+        </select>
+      </div>
+
+      <div class="config-section" id="timeCoracaoSection" style="display:none">
+        <div class="section-title">⚽ Time do Coracao</div>
+        <select id="timeCoracaoSelect" style="width:100%">
+          <option value="random">🎲 Aleatorio (sortear)</option>
+          <option>ABC/RN</option><option>America/MG</option><option>America/RN</option><option>ASA/AL</option>
+          <option>Atletico/GO</option><option>Atletico/MG</option><option>Atletico/PR</option><option>Avai/SC</option>
+          <option>Bahia/BA</option><option>Barueri/SP</option><option>Botafogo/PB</option><option>Botafogo/RJ</option>
+          <option>Bragantino/SP</option><option>Brasiliense/DF</option><option>CEARA/CE</option><option>Chapecoense/SC</option>
+          <option>Coritiba/PR</option><option>CRAC/GO</option><option>CRB/AL</option><option>Criciuma/SC</option>
+          <option>Cruzeiro/MG</option><option>CSA/AL</option><option>Cuiaba/MT</option><option>Figueirense/SC</option>
+          <option>Flamengo/RJ</option><option>Fluminense/RJ</option><option>Fortaleza/CE</option><option>Goias/GO</option>
+          <option>Gremio/RS</option><option>Guarani/SP</option><option>Icasa/CE</option><option>Internacional/RS</option>
+          <option>Ituano/SP</option><option>Joinville/SC</option><option>Juventude/RS</option><option>Londrina/PR</option>
+          <option>Marilia/SP</option><option>Mixto/MT</option><option>Nautico/PE</option><option>Operario/MS</option>
+          <option>Parana/PR</option><option>Paysandu/PA</option><option>Ponte Preta/SP</option><option>Portuguesa/SP</option>
+          <option>Remo/PA</option><option>River/PI</option><option>Rondonopolis/MT</option><option>Salgueiro/PE</option>
+          <option>Sampaio Correa/MA</option><option>Santa Cruz/PE</option><option>Santo Andre/SP</option><option>Santos/SP</option>
+          <option>Sao Caetano/SP</option><option>Sao Paulo/SP</option><option>Sao Raimundo/AM</option><option>Sport/PE</option>
+          <option>Taguatinga/DF</option><option>Treze/PB</option><option>Uberaba/MG</option><option>Vasco/RJ</option>
+          <option>Vila Nova/GO</option><option>Vitoria/BA</option><option>Vitoria/ES</option><option>XV Piracicaba/SP</option>
         </select>
       </div>
 
@@ -2333,11 +2371,14 @@
     <div class="col-right">
       <!-- LOTTERY SELECTOR (Stats) -->
       <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap">
-        <button class="modelo-card loteria-stat-btn active" data-stat-lot="lotofacil" onclick="switchStatsLottery('lotofacil',this)" style="font-size:0.62rem;padding:8px 6px;flex:1;min-width:0">Lotofacil</button>
-        <button class="modelo-card loteria-stat-btn" data-stat-lot="megasena" onclick="switchStatsLottery('megasena',this)" style="font-size:0.62rem;padding:8px 6px;flex:1;min-width:0">Mega</button>
-        <button class="modelo-card loteria-stat-btn" data-stat-lot="quina" onclick="switchStatsLottery('quina',this)" style="font-size:0.62rem;padding:8px 6px;flex:1;min-width:0">Quina</button>
-        <button class="modelo-card loteria-stat-btn" data-stat-lot="duplasena" onclick="switchStatsLottery('duplasena',this)" style="font-size:0.62rem;padding:8px 6px;flex:1;min-width:0">Dupla</button>
-        <button class="modelo-card loteria-stat-btn" data-stat-lot="diadesorte" onclick="switchStatsLottery('diadesorte',this)" style="font-size:0.62rem;padding:8px 6px;flex:1;min-width:0">Dia Sorte</button>
+        <button class="modelo-card loteria-stat-btn active" data-stat-lot="lotofacil" onclick="switchStatsLottery('lotofacil',this)" style="font-size:0.55rem;padding:6px 3px;flex:1;min-width:0">Lotofacil</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="megasena" onclick="switchStatsLottery('megasena',this)" style="font-size:0.55rem;padding:6px 3px;flex:1;min-width:0">Mega</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="quina" onclick="switchStatsLottery('quina',this)" style="font-size:0.55rem;padding:6px 3px;flex:1;min-width:0">Quina</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="duplasena" onclick="switchStatsLottery('duplasena',this)" style="font-size:0.55rem;padding:6px 3px;flex:1;min-width:0">Dupla</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="diadesorte" onclick="switchStatsLottery('diadesorte',this)" style="font-size:0.55rem;padding:6px 3px;flex:1;min-width:0">Dia</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="supersete" onclick="switchStatsLottery('supersete',this)" style="font-size:0.55rem;padding:6px 3px;flex:1;min-width:0">S7</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="maismilionaria" onclick="switchStatsLottery('maismilionaria',this)" style="font-size:0.55rem;padding:6px 3px;flex:1;min-width:0">+Mil</button>
+        <button class="modelo-card loteria-stat-btn" data-stat-lot="timemania" onclick="switchStatsLottery('timemania',this)" style="font-size:0.55rem;padding:6px 3px;flex:1;min-width:0">Time</button>
       </div>
 
       <!-- PREVISÃO DE PRÊMIO -->
@@ -2537,6 +2578,34 @@ const LOTTERIES={
     dezenas:[[1,9],[10,19],[20,29],[30,31]],
     filters:{parImpar:[2,5],soma:[85,141],consec:3,repet:[0,3]},
     meses:['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  },
+  supersete:{
+    name:'Super Sete',api:'https://loteriascaixa-api.herokuapp.com/api/supersete',
+    total:9,pick:7,minNum:0,columns:true,
+    modelos:{A:{fora:3,dentro:4,noise:0.2},B:{fora:3,dentro:4,noise:0.35},C:{fora:4,dentro:3,noise:0.5},IA:{fora:3,dentro:4,noise:0.4}},
+    premios:{3:'R$ 5',4:'Variavel',5:'Variavel',6:'Variavel',7:'JACKPOT'},
+    primos:[2,3,5,7],
+    dezenas:[[0,4],[5,9]],
+    filters:{parImpar:[2,5],soma:[17,46],consec:3,repet:[1,3]}
+  },
+  maismilionaria:{
+    name:'+Milionaria',api:'https://loteriascaixa-api.herokuapp.com/api/maismilionaria',
+    total:50,pick:6,
+    modelos:{A:{fora:3,dentro:3,noise:0.2},B:{fora:2,dentro:4,noise:0.35},C:{fora:4,dentro:2,noise:0.5},IA:{fora:3,dentro:3,noise:0.4}},
+    premios:{2:'R$ 6',3:'R$ 24',4:'Variavel',5:'Variavel',6:'JACKPOT'},
+    primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47],
+    dezenas:[[1,10],[11,20],[21,30],[31,40],[41,50]],
+    filters:{parImpar:[2,4],soma:[100,210],consec:2,repet:[0,2]},
+    trevos:{total:6,pick:2}
+  },
+  timemania:{
+    name:'Timemania',api:'https://loteriascaixa-api.herokuapp.com/api/timemania',
+    total:80,pick:10,draw:7,
+    modelos:{A:{fora:5,dentro:5,noise:0.2},B:{fora:4,dentro:6,noise:0.35},C:{fora:6,dentro:4,noise:0.5},IA:{fora:5,dentro:5,noise:0.4}},
+    premios:{3:'R$ 3,50',4:'R$ 10,50',5:'Variavel',6:'Variavel',7:'JACKPOT'},
+    primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79],
+    dezenas:[[1,16],[17,32],[33,48],[49,64],[65,80]],
+    filters:{parImpar:[3,7],soma:[310,500],consec:3,repet:[1,3]}
   }
 };
 let selectedLottery='lotofacil';
@@ -2555,7 +2624,10 @@ const PICK_OPTIONS={
   megasena:[{v:6,p:'R$ 6,00'},{v:7,p:'R$ 42,00'},{v:8,p:'R$ 168,00'},{v:9,p:'R$ 504,00'},{v:10,p:'R$ 1.260,00'},{v:11,p:'R$ 2.772,00'},{v:12,p:'R$ 5.544,00'},{v:13,p:'R$ 10.296,00'},{v:14,p:'R$ 18.018,00'},{v:15,p:'R$ 30.030,00'}],
   quina:[{v:5,p:'R$ 3,00'},{v:6,p:'R$ 18,00'},{v:7,p:'R$ 63,00'},{v:8,p:'R$ 168,00'},{v:9,p:'R$ 378,00'},{v:10,p:'R$ 756,00'}],
   duplasena:[{v:6,p:'R$ 3,00'},{v:7,p:'R$ 21,00'},{v:8,p:'R$ 84,00'},{v:9,p:'R$ 252,00'},{v:10,p:'R$ 630,00'},{v:11,p:'R$ 1.386,00'},{v:12,p:'R$ 2.772,00'}],
-  diadesorte:[{v:7,p:'R$ 2,50'},{v:8,p:'R$ 20,00'},{v:9,p:'R$ 90,00'},{v:10,p:'R$ 300,00'},{v:11,p:'R$ 825,00'},{v:12,p:'R$ 1.980,00'},{v:13,p:'R$ 4.290,00'},{v:14,p:'R$ 8.580,00'},{v:15,p:'R$ 16.087,50'}]
+  diadesorte:[{v:7,p:'R$ 2,50'},{v:8,p:'R$ 20,00'},{v:9,p:'R$ 90,00'},{v:10,p:'R$ 300,00'},{v:11,p:'R$ 825,00'},{v:12,p:'R$ 1.980,00'},{v:13,p:'R$ 4.290,00'},{v:14,p:'R$ 8.580,00'},{v:15,p:'R$ 16.087,50'}],
+  supersete:[{v:7,p:'R$ 2,50'},{v:8,p:'R$ 5,00'},{v:9,p:'R$ 10,00'},{v:10,p:'R$ 20,00'},{v:11,p:'R$ 40,00'},{v:12,p:'R$ 80,00'},{v:13,p:'R$ 160,00'},{v:14,p:'R$ 320,00'}],
+  maismilionaria:[{v:6,p:'R$ 6,00'},{v:7,p:'R$ 42,00'},{v:8,p:'R$ 168,00'},{v:9,p:'R$ 504,00'},{v:10,p:'R$ 1.260,00'},{v:11,p:'R$ 2.772,00'},{v:12,p:'R$ 5.544,00'}],
+  timemania:[{v:10,p:'R$ 3,50'}]
 };
 const SK='lottobot_v3';
 function CACHE_KEY(){return 'lottobot_cache_'+selectedLottery}
@@ -2568,18 +2640,44 @@ const FALLBACKS={
   megasena:{numero:2850,data:'30/03/2026',numeros:[7,15,23,38,42,56]},
   quina:{numero:6600,data:'30/03/2026',numeros:[12,28,45,61,73]},
   duplasena:{numero:2939,data:'20/03/2026',numeros:[4,5,9,10,13,22]},
-  diadesorte:{numero:1195,data:'31/03/2026',numeros:[5,11,14,15,19,26,27]}
+  diadesorte:{numero:1195,data:'31/03/2026',numeros:[5,11,14,15,19,26,27]},
+  supersete:{numero:830,data:'01/04/2026',numeros:[0,6,2,0,7,8,4]},
+  maismilionaria:{numero:342,data:'01/04/2026',numeros:[6,9,20,40,41,43]},
+  timemania:{numero:2374,data:'31/03/2026',numeros:[7,28,35,52,57,63,74]}
 };
 function getFallback(){return FALLBACKS[selectedLottery]||FALLBACKS.lotofacil}
-function getFallbackFreq(){const f={};const lot=getLottery();for(let i=1;i<=lot.total;i++)f[i]=Math.floor(Math.random()*30)+30;return f}
+function getFallbackFreq(){const f={};const lot=getLottery();for(let i=getMinNum();i<=lot.total;i++)f[i]=Math.floor(Math.random()*30)+30;return f}
+function getMinNum(){return getLottery().minNum||1}
+function getDrawSize(){return getLottery().draw||getLottery().pick}
+function dNum(n){return getMinNum()===0?String(n):pad(n)}
 // ══════ DYNAMIC HELPERS (multi-lottery) ══════
 function idealPairs(){const pk=getLottery().pick;const mid=Math.round(pk/2);return[mid-1,mid+1]}
-function updateMesSorteVisibility(){const s=document.getElementById('mesSorteSection');if(s)s.style.display=selectedLottery==='diadesorte'?'':'none'}
+function updateSpecialSelectors(){
+  const ms=document.getElementById('mesSorteSection');if(ms)ms.style.display=selectedLottery==='diadesorte'?'':'none';
+  const ts=document.getElementById('trevoSection');if(ts)ts.style.display=selectedLottery==='maismilionaria'?'':'none';
+  const tc=document.getElementById('timeCoracaoSection');if(tc)tc.style.display=selectedLottery==='timemania'?'':'none';
+}
+function updateMesSorteVisibility(){updateSpecialSelectors()}
 function getMesSorte(){
   const lot=getLottery();if(!lot.meses)return null;
   const sel=document.getElementById('mesSorteSelect');
   const val=sel?sel.value:'random';
   return val==='random'?lot.meses[Math.floor(Math.random()*12)]:val;
+}
+function getTrevos(){
+  const lot=getLottery();if(!lot.trevos)return null;
+  const sel=document.getElementById('trevoSelect');
+  if(sel&&sel.value!=='random')return sel.value.split(',').map(Number);
+  // Sortear 2 trevos de 1-6
+  const all=[];for(let i=1;i<=lot.trevos.total;i++)all.push(i);
+  const t=[];while(t.length<lot.trevos.pick){const r=all[Math.floor(Math.random()*all.length)];if(!t.includes(r))t.push(r)}
+  return t.sort((a,b)=>a-b);
+}
+function getTimeCoracao(){
+  const sel=document.getElementById('timeCoracaoSelect');
+  if(!sel||selectedLottery!=='timemania')return null;
+  if(sel.value==='random'){const opts=Array.from(sel.options).filter(o=>o.value!=='random');return opts[Math.floor(Math.random()*opts.length)]?.value||null}
+  return sel.value;
 }
 function idealSumCenter(){const f=getLottery().filters;return Math.round((f.soma[0]+f.soma[1])/2)}
 function idealRepeat(){const f=getLottery().filters;return f.repet}
@@ -2601,7 +2699,7 @@ let _jackpotDB=null;
 function openJackpotDB(){
   return new Promise((resolve,reject)=>{
     if(_jackpotDB){resolve(_jackpotDB);return}
-    const req=indexedDB.open('lottobot_jackpots',3);
+    const req=indexedDB.open('lottobot_jackpots',4);
     req.onupgradeneeded=e=>{
       const db=e.target.result;
       for(const key of Object.keys(LOTTERIES)){
@@ -3311,7 +3409,7 @@ async function switchLottery(key){
   jogos=[];previousJogos=[];
   fixedNums.clear();excludedNums.clear();
   // Update UI elements that don't depend on ULT immediately
-  populatePickSize();updateMesSorteVisibility();updatePrizeEstimate();updateDynamicDescriptions();updateGridLayout();renderJogos();
+  populatePickSize();updateSpecialSelectors();updatePrizeEstimate();updateDynamicDescriptions();updateGridLayout();renderJogos();
   // Try cache for instant preview, then always refresh from API
   const cached=localStorage.getItem(CACHE_KEY());
   if(cached){try{const c=JSON.parse(cached);if(c.latest?.numeros){
@@ -3474,15 +3572,18 @@ function parseDraw(d){
   const numero=parseInt(d.concurso||d.numero);
   if(isNaN(numero))return null;
   const lot=getLottery();
-  let allNums=dz.map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=lot.total);
-  // Dupla Sena: API returns 12 numbers (2 draws of 6). Use first 6 for analysis, store second 6 separately
+  const mn=lot.minNum||1;
+  let allNums=dz.map(Number).filter(n=>Number.isInteger(n)&&n>=mn&&n<=lot.total);
+  // Dupla Sena: API returns 12 numbers (2 draws of 6)
   let numeros2=null;
   if(selectedLottery==='duplasena'&&allNums.length>=12){
     numeros2=allNums.slice(6,12).sort((a,b)=>a-b);
     allNums=allNums.slice(0,6);
   }
-  const nums=[...new Set(allNums)].sort((a,b)=>a-b);
-  if(nums.length<lot.pick)return null;
+  // Super Sete: 7 column digits 0-9, allow duplicates — don't deduplicate
+  const nums=lot.columns?allNums.slice(0,lot.pick):[...new Set(allNums)].sort((a,b)=>a-b);
+  const minSize=lot.draw||lot.pick;
+  if(nums.length<minSize)return null;
   const data=String(d.data||d.dataApuracao||'').replace(/[^0-9\/\-\.]/g,'');
   const valEst=d.valorEstimadoProximoConcurso?'R$ '+Number(d.valorEstimadoProximoConcurso).toLocaleString('pt-BR'):null;
   const result={numero,data,numeros:nums,acumulou:!!d.acumulou,valorEstimado:valEst};
@@ -3544,8 +3645,8 @@ async function loadAPI(){
   }catch(e){
     console.warn('API offline:',e);
     ULT={...getFallback()};FREQ={...getFallbackFreq()};historico=[getFallback()];
-    for(let i=1;i<=getLottery().total;i++)ATRASO[i]=ULT.numeros.includes(i)?0:1;
-    for(let i=1;i<=getLottery().total;i++)TENDENCIA[i]=0;
+    for(let i=getMinNum();i<=getLottery().total;i++)ATRASO[i]=ULT.numeros.includes(i)?0:1;
+    for(let i=getMinNum();i<=getLottery().total;i++)TENDENCIA[i]=0;
     document.getElementById('offlineBadge')?.classList.add('show');
     showToast('📡 Dados offline');
   }
@@ -3570,20 +3671,21 @@ setInterval(async()=>{
 let CICLO={};// gap medio por numero
 function calcDynamic(){
   FREQ={};ATRASO={};TENDENCIA={};CICLO={};invalidateClassifyCache();
-  for(let i=1;i<=getLottery().total;i++){FREQ[i]=0;ATRASO[i]=historico.length}
+  const mn=getMinNum();
+  for(let i=mn;i<=getLottery().total;i++){FREQ[i]=0;ATRASO[i]=historico.length}
   historico.forEach(d=>d.numeros.forEach(n=>FREQ[n]=(FREQ[n]||0)+1));
   const sorted=[...historico].sort((a,b)=>b.numero-a.numero);
-  for(let i=1;i<=getLottery().total;i++){ATRASO[i]=sorted.length;for(let j=0;j<sorted.length;j++){if(sorted[j].numeros.includes(i)){ATRASO[i]=j;break}}}
+  for(let i=mn;i<=getLottery().total;i++){ATRASO[i]=sorted.length;for(let j=0;j<sorted.length;j++){if(sorted[j].numeros.includes(i)){ATRASO[i]=j;break}}}
   const last10=sorted.slice(0,Math.min(10,sorted.length));
   const mid20=sorted.slice(10,Math.min(20,sorted.length));
-  for(let i=1;i<=getLottery().total;i++){
+  for(let i=mn;i<=getLottery().total;i++){
     const f10=last10.filter(d=>d.numeros.includes(i)).length;
     const f20=mid20.filter(d=>d.numeros.includes(i)).length;
     TENDENCIA[i]=f10-f20;
   }
   // Calcular ciclo medio (gap entre aparicoes) de cada numero
   const chronological=[...historico].sort((a,b)=>a.numero-b.numero);
-  for(let num=1;num<=getLottery().total;num++){
+  for(let num=mn;num<=getLottery().total;num++){
     const gaps=[];let lastIdx=-1;
     for(let j=0;j<chronological.length;j++){
       if(chronological[j].numeros.includes(num)){
@@ -3669,7 +3771,12 @@ function gerarJogos(){
 
   jogos=pool;concRef=ULT.numero;
   // Dia de Sorte: atribuir mês a cada jogo
-  if(selectedLottery==='diadesorte')jogos.forEach(j=>{j.mes=getMesSorte()});
+  // Atribuir extras por loteria
+  jogos.forEach(j=>{
+    if(selectedLottery==='diadesorte')j.mes=getMesSorte();
+    if(selectedLottery==='maismilionaria')j.trevos=getTrevos();
+    if(selectedLottery==='timemania')j.time=getTimeCoracao();
+  });
   logGeneratedGames(jogos,selectedModelo,concRef);
   stats.total+=jogos.length;stats.modelos[selectedModelo]=(stats.modelos[selectedModelo]||0)+jogos.length;bumpStreak();
   jogos.forEach(j=>stats.scores.push(j.score));
@@ -3699,6 +3806,8 @@ function hammingDistance(a,b){const s=new Set(b);return a.filter(n=>!s.has(n)).l
 function factorial(n){let r=1;for(let i=2;i<=n;i++)r*=i;return r}
 
 function genOne(mod){
+  // Super Sete: 7 colunas independentes de 0-9, permite repetição
+  if(getLottery().columns)return genOneColumns(mod);
   const pick=getPickSize();
   const fixed=[...fixedNums];const need=pick-fixed.length;
   // Modo pool restrito: usuario fixou mais numeros que o pick — escolher pick dentre os fixados
@@ -3709,8 +3818,9 @@ function genOne(mod){
     return ranked.slice(0,pick).sort((a,b)=>a-b);
   }
   if(need===0)return fixed.sort((a,b)=>a-b);
+  const mn=getMinNum();
   const dentro=ULT.numeros.filter(n=>!excludedNums.has(n)&&!fixedNums.has(n));
-  const fora=[];for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i)&&!excludedNums.has(i)&&!fixedNums.has(i))fora.push(i);
+  const fora=[];for(let i=mn;i<=getLottery().total;i++)if(!ULT.numeros.includes(i)&&!excludedNums.has(i)&&!fixedNums.has(i))fora.push(i);
   const w=n=>{const f=(FREQ[n]||0)/(historico.length||1);const a=(ATRASO[n]||0)/(historico.length||1);const t=(TENDENCIA[n]||0)/10;return 0.4*f+0.3*a+0.2*t+Math.random()*mod.noise};
   const sf=fora.map(n=>({n,w:w(n)})).sort((a,b)=>b.w-a.w).map(x=>x.n);
   const sd=dentro.map(n=>({n,w:w(n)})).sort((a,b)=>b.w-a.w).map(x=>x.n);
@@ -3719,6 +3829,22 @@ function genOne(mod){
   const sel=[...fixed,...sf.slice(0,fc),...sd.slice(0,dc)];
   if(sel.length<pick){const rem=[...sf.slice(fc),...sd.slice(dc)];for(const n of rem){if(sel.length>=pick)break;if(!sel.includes(n))sel.push(n)}}
   return sel.length>=pick?sel.sort((a,b)=>a-b):null;
+}
+
+function genOneColumns(mod){
+  // Super Sete: 7 dígitos independentes 0-9, ponderados por frequência
+  const pick=getPickSize();const lot=getLottery();
+  const result=[];
+  for(let col=0;col<pick;col++){
+    const w=n=>{const f=(FREQ[n]||0)/(historico.length||1);const a=(ATRASO[n]||0)/(historico.length||1);const t=(TENDENCIA[n]||0)/10;return 0.4*f+0.3*a+0.2*t+Math.random()*mod.noise};
+    const candidates=[];
+    for(let d=lot.minNum||0;d<=lot.total;d++){
+      if(!excludedNums.has(d))candidates.push({n:d,w:w(d)});
+    }
+    candidates.sort((a,b)=>b.w-a.w);
+    result.push(candidates[0]?.n??Math.floor(Math.random()*10));
+  }
+  return result;
 }
 
 // ══════ FILTERS ══════
@@ -3812,8 +3938,10 @@ function renderJogos(){
     const cc=selectedLottery==='lotofacil'?j.filter(n=>CENTRO_NUMS.includes(n)).length:null;
     return `<div class="game-card" id="gc${i}" style="animation-delay:${i*0.05}s">
       <div class="game-header"><div class="game-number">#${i+1}</div><div class="score-badge ${j.cls.cls}">${j.score} · ${j.cls.label}</div></div>
-      <div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(pad(n))}</div>`).join('')}</div>
-      ${j.mes?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">🗓️ Mês da Sorte: <strong>'+esc(j.mes)+'</strong></div>':''}
+      <div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(dNum(n))}</div>`).join('')}</div>
+      ${j.mes?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">🗓️ Mes da Sorte: <strong>'+esc(j.mes)+'</strong></div>':''}
+      ${j.trevos?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">🍀 Trevos: <strong>'+j.trevos.join(' e ')+'</strong></div>':''}
+      ${j.time?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">⚽ Time: <strong>'+esc(j.time)+'</strong></div>':''}
       <div class="game-meta">
         <div class="meta-item"><span class="meta-label">Par/Ímpar</span><span class="meta-value">${p}P/${j.length-p}I</span></div>
         <div class="meta-item"><span class="meta-label">Soma</span><span class="meta-value">Σ${s}</span></div>
@@ -3870,7 +3998,7 @@ function showCheckResult(i,res,cn,res2,mesSorteado){
 function initManualGrid(){
   const grid=document.getElementById('manualInputGrid');if(!grid)return;
   grid.innerHTML='';
-  for(let i=1;i<=getLottery().total;i++){
+  for(let i=getMinNum();i<=getLottery().total;i++){
     const cell=document.createElement('div');cell.className='exclude-cell';cell.textContent=pad(i);cell.dataset.num=i;cell.dataset.selected='false';
     cell.onclick=function(){const sel=this.dataset.selected==='true';this.dataset.selected=sel?'false':'true';this.style.background=sel?'rgba(45,74,62,0.2)':'rgba(201,168,76,0.3)';this.style.borderColor=sel?'rgba(201,168,76,0.15)':'var(--color-gold-primary)';this.style.color=sel?'rgba(255,255,255,0.8)':'var(--color-gold-primary)'};
     grid.appendChild(cell);
@@ -3891,6 +4019,8 @@ function salvar(i){
   const j=jogos[i];if(saved.some(s=>s.n.join(',')=== j.join(','))){showToast('⚠️ Já salvo');return}
   const game={n:[...j],score:j.score,mod:selectedModelo,ref:concRef,dt:new Date().toLocaleDateString('pt-BR'),id:Date.now(),lot:selectedLottery};
   if(j.mes)game.mes=j.mes;
+  if(j.trevos)game.trevos=j.trevos;
+  if(j.time)game.time=j.time;
   saved.unshift(game);
   if(saved.length>100)saved.pop();persist();updateStats();renderSaved();
   saveToCloud(game);
@@ -3898,8 +4028,10 @@ function salvar(i){
 }
 
 function shareGame(i){
-  const j=jogos[i];let t='🎯 Lottobot · '+getLottery().name+' · Jogo '+(i+1)+'\n'+j.map(n=>pad(n)).join(' - ');
-  if(j.mes)t+='\n🗓️ Mês: '+j.mes;
+  const j=jogos[i];let t='🎯 Lottobot · '+getLottery().name+' · Jogo '+(i+1)+'\n'+j.map(n=>dNum(n)).join(' - ');
+  if(j.mes)t+='\n🗓️ Mes: '+j.mes;
+  if(j.trevos)t+='\n🍀 Trevos: '+j.trevos.join(' e ');
+  if(j.time)t+='\n⚽ Time: '+j.time;
   t+='\nScore: '+j.score+' · Modelo '+selectedModelo;
   if(navigator.share)navigator.share({title:'Lottobot',text:t}).catch(()=>{});
   else navigator.clipboard.writeText(t).then(()=>showToast('📋 Copiado!'));
@@ -3994,9 +4126,9 @@ function shareBolao(){
 // ══════ INVITE / SHARE ══════
 function getInviteText(){
   const msgs=[
-    '🎲 *DESAFIO LOTTOBOT* 🎲\n\nEu to usando inteligencia artificial pra montar meus jogos da Lotofacil, Mega-Sena, Quina, Dupla Sena e Dia de Sorte.\n\n🏆 *Te desafio:* vamos ver quem acerta mais numeros no proximo sorteio?\n\nCada um gera seus jogos com analise estatistica real — frequencia, tendencia, atraso. O app mostra o score de cada combinacao.\n\n📊 Nao e achismo. E matematica.\n\n👉 Entra aqui e gera seus numeros (gratis):\nhttps://lottobot.com.br\n\n_Quem sabe a sorte nao ta do seu lado?_ 🍀',
+    '🎲 *DESAFIO LOTTOBOT* 🎲\n\nEu to usando inteligencia artificial pra montar meus jogos da Lotofacil, Mega-Sena, Quina, Dupla Sena, Dia de Sorte, Super Sete, +Milionaria e Timemania.\n\n🏆 *Te desafio:* vamos ver quem acerta mais numeros no proximo sorteio?\n\nCada um gera seus jogos com analise estatistica real — frequencia, tendencia, atraso. O app mostra o score de cada combinacao.\n\n📊 Nao e achismo. E matematica.\n\n👉 Entra aqui e gera seus numeros (gratis):\nhttps://lottobot.com.br\n\n_Quem sabe a sorte nao ta do seu lado?_ 🍀',
     '🏆 *Bora apostar com inteligencia?*\n\nDescobri um gerador que analisa todos os sorteios passados e cria combinacoes otimizadas.\n\n🎯 Score de 0 a 100 pra cada jogo\n📊 Filtros: par/impar, soma, primos, consecutivas\n🧠 Modo I.A. que decide tudo por voce\n\n*Te desafio a gerar seus jogos e comparar comigo!*\n\n👉 https://lottobot.com.br\n\n_100% gratis. Sem cadastro obrigatorio. Instala como app no celular._ 🎲',
-    '⚡ *Voce ainda escolhe numeros no achismo?*\n\nEu uso o Lottobot — ele analisa o historico real de todos os sorteios e gera as melhores combinacoes.\n\n✅ Lotofacil, Mega-Sena, Quina, Dupla Sena e Dia de Sorte\n✅ Analise de frequencia e tendencia\n✅ Conferencia automatica de resultados\n✅ Notificacao se voce ganhar\n\n🎯 *Desafio:* gera 5 jogos e me manda seu score!\n\n👉 https://lottobot.com.br\n\n_Gratis pra sempre. Boa sorte!_ 🍀'
+    '⚡ *Voce ainda escolhe numeros no achismo?*\n\nEu uso o Lottobot — ele analisa o historico real de todos os sorteios e gera as melhores combinacoes.\n\n✅ Lotofacil, Mega-Sena, Quina, Dupla Sena, Dia de Sorte, Super Sete, +Milionaria e Timemania\n✅ Analise de frequencia e tendencia\n✅ Conferencia automatica de resultados\n✅ Notificacao se voce ganhar\n\n🎯 *Desafio:* gera 5 jogos e me manda seu score!\n\n👉 https://lottobot.com.br\n\n_Gratis pra sempre. Boa sorte!_ 🍀'
   ];
   return msgs[Math.floor(Math.random()*msgs.length)];
 }
@@ -4007,7 +4139,7 @@ function shareInvite(){
 }
 
 function copyInviteLink(){
-  const text='🎲 Lottobot — Gerador inteligente de jogos para Lotofacil, Mega-Sena, Quina, Dupla Sena e Dia de Sorte. Analise estatistica real, gratis!\n👉 https://lottobot.com.br';
+  const text='🎲 Lottobot — Gerador inteligente de jogos para Lotofacil, Mega-Sena, Quina, Dupla Sena, Dia de Sorte, Super Sete, +Milionaria e Timemania. Analise estatistica real, gratis!\n👉 https://lottobot.com.br';
   navigator.clipboard.writeText(text).then(()=>showToast('📋 Link copiado!')).catch(()=>showToast('Erro ao copiar'));
 }
 
@@ -4076,7 +4208,7 @@ function renderSaved(){
       checkHtml=`<div style="font-size:0.65rem;color:${color};margin-top:3px">${hits} acertos${prize?' · '+prize:''}</div>`;
     }
     return `<div class="saved-item">
-    <div><div class="saved-nums">${g.n.map(n=>pad(n)).join('-')}</div>${g.mes?'<div style="font-size:0.65rem;color:var(--color-gold-primary)">🗓️ '+g.mes+'</div>':''}<div class="saved-meta">${g.dt} · M${g.mod} · #${g.ref}</div>${checkHtml}</div>
+    <div><div class="saved-nums">${g.n.map(n=>pad(n)).join('-')}</div>${g.mes?'<div style="font-size:0.65rem;color:var(--color-gold-primary)">🗓️ '+g.mes+'</div>':''}${g.trevos?'<div style="font-size:0.65rem;color:var(--color-gold-primary)">🍀 '+g.trevos.join(', ')+'</div>':''}${g.time?'<div style="font-size:0.65rem;color:var(--color-gold-primary)">⚽ '+g.time+'</div>':''}<div class="saved-meta">${g.dt} · M${g.mod} · #${g.ref}</div>${checkHtml}</div>
     <div class="saved-score">${g.score}</div></div>`;
   }).join('');
 }
@@ -4097,12 +4229,12 @@ function renderAnaliseTab(){
   // Fixar/Excluir grids
   const dg=document.getElementById('excludeDentro'),fg=document.getElementById('excludeFora');
   if(dg){dg.innerHTML='';ULT.numeros.forEach(n=>dg.appendChild(mkExcl(n)))}
-  if(fg){fg.innerHTML='';for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkExcl(i))}
+  if(fg){fg.innerHTML='';for(let i=getMinNum();i<=getLottery().total;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkExcl(i))}
   // Badges de contagem
   const fixDentro=ULT.numeros.filter(n=>fixedNums.has(n)).length;
   const exclDentro=ULT.numeros.filter(n=>excludedNums.has(n)).length;
   const bd=document.getElementById('badgeDentro');if(bd)bd.textContent=fixDentro||exclDentro?(fixDentro?fixDentro+' fix':'')+(fixDentro&&exclDentro?' · ':'')+(exclDentro?exclDentro+' excl':''):'';
-  const allFora=[];for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i))allFora.push(i);
+  const allFora=[];for(let i=getMinNum();i<=getLottery().total;i++)if(!ULT.numeros.includes(i))allFora.push(i);
   const fixFora=allFora.filter(n=>fixedNums.has(n)).length;
   const exclFora=allFora.filter(n=>excludedNums.has(n)).length;
   const bf=document.getElementById('badgeFora');if(bf)bf.textContent=fixFora||exclFora?(fixFora?fixFora+' fix':'')+(fixFora&&exclFora?' · ':'')+(exclFora?exclFora+' excl':''):'';
@@ -4151,7 +4283,7 @@ function renderAnaliseAtrasados(){
   const c=document.getElementById('analiseAtrasados');if(!c)return;
   if(!Object.keys(CICLO).length){c.innerHTML='<div class="analise-empty">Carregando dados...</div>';return}
   const atrasados=[];
-  for(let i=1;i<=getLottery().total;i++){
+  for(let i=getMinNum();i<=getLottery().total;i++){
     const ciclo=CICLO[i]||0;const atraso=ATRASO[i]||0;
     if(ciclo>0&&atraso>ciclo*1.5)atrasados.push({n:i,atraso,ciclo});
   }
@@ -4166,7 +4298,7 @@ function renderAnaliseTendencias(){
   if(!c||!section)return;
   if(!Object.keys(TENDENCIA).length){section.style.display='none';return}
   const rising=[],falling=[];
-  for(let i=1;i<=getLottery().total;i++){
+  for(let i=getMinNum();i<=getLottery().total;i++){
     const t=TENDENCIA[i]||0;
     if(t>0)rising.push({n:i,t});
     if(t<0)falling.push({n:i,t});
@@ -4198,7 +4330,7 @@ function renderAnaliseNDD(){
   const seed=[...today].reduce((a,ch)=>a+ch.charCodeAt(0),0);
   const vals=Object.values(FREQ);const avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;
   const scored=[];
-  for(let i=1;i<=getLottery().total;i++){
+  for(let i=getMinNum();i<=getLottery().total;i++){
     const t=TENDENCIA[i]||0,f=(FREQ[i]||0)/(historico.length||1),a=(ATRASO[i]||0);
     scored.push({n:i,s:t*3+f*2+(a>2?1:0)+(seed%5===i%5?0.5:0)});
   }
@@ -4348,7 +4480,7 @@ function renderHeatmap(){
   const vals=Object.values(FREQ),mn=Math.min(...vals),mx=Math.max(...vals);
   g.innerHTML='';
   let atrasadoCount=0;
-  for(let i=1;i<=getLottery().total;i++){
+  for(let i=getMinNum();i<=getLottery().total;i++){
     const f=FREQ[i]||0,r=mx>mn?(f-mn)/(mx-mn):0.5;
     const atraso=ATRASO[i]||0;
     const ciclo=CICLO[i]||1;
@@ -4386,7 +4518,7 @@ function renderHomeHeatmap(){
   const vals=Object.values(FREQ),mn=Math.min(...vals),mx=Math.max(...vals);
   g.innerHTML='';
   let atrasadoCount=0;
-  for(let i=1;i<=t;i++){
+  for(let i=getMinNum();i<=t;i++){
     const f=FREQ[i]||0,r=mx>mn?(f-mn)/(mx-mn):0.5;
     const atraso=ATRASO[i]||0,ciclo=CICLO[i]||1;
     const isAtrasado=atraso>=ciclo*1.5&&atraso>=2;
@@ -4426,7 +4558,7 @@ function renderNumeroDoDia(){
   const today=new Date().toISOString().slice(0,10);
   const seed=[...today].reduce((a,c)=>a+c.charCodeAt(0),0);
   const scored=[];
-  for(let i=1;i<=getLottery().total;i++){
+  for(let i=getMinNum();i<=getLottery().total;i++){
     const t=TENDENCIA[i]||0,f=(FREQ[i]||0)/(historico.length||1),a=(ATRASO[i]||0);
     scored.push({n:i,s:t*3+f*2+(a>2?1:0)+(seed%5===i%5?0.5:0)});
   }
@@ -4543,7 +4675,7 @@ function renderNumPanel(){
   document.getElementById('numPanelConc').textContent='#'+ULT.numero;
   const dg=document.getElementById('numDentro'),fg=document.getElementById('numFora');
   if(dg){dg.innerHTML='';ULT.numeros.forEach(n=>dg.appendChild(mkNumCell(n)))}
-  if(fg){fg.innerHTML='';for(let i=1;i<=getLottery().total;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkNumCell(i))}
+  if(fg){fg.innerHTML='';for(let i=getMinNum();i<=getLottery().total;i++)if(!ULT.numeros.includes(i))fg.appendChild(mkNumCell(i))}
 }
 function mkToggleCell(n,cls){
   const c=document.createElement('div');c.className=cls;
@@ -4617,7 +4749,7 @@ function updateDynamicDescriptions(){
   // Baixo/Alto — populate buttons
   const baDiv=el('baixoAltoValues');
   if(baDiv){
-    const baDefaults={lotofacil:[6,7,8,9],megasena:[2,3,4],quina:[2,3],duplasena:[2,3,4],diadesorte:[3,4]};
+    const baDefaults={lotofacil:[6,7,8,9],megasena:[2,3,4],quina:[2,3],duplasena:[2,3,4],diadesorte:[3,4],supersete:[3,4],maismilionaria:[2,3,4],timemania:[4,5,6]};
     const defs=baDefaults[selectedLottery]||[Math.floor(pk/2)];
     baDiv.innerHTML='';
     for(let v=0;v<=pk;v++){
@@ -4634,7 +4766,7 @@ function updateDynamicDescriptions(){
   const m3Div=el('mult3Values');
   if(m3Div){
     const m3Count=Math.floor(t/3);
-    const m3Defs={lotofacil:[4,5],megasena:[1,2,3],quina:[1,2],duplasena:[1,2],diadesorte:[1,2,3]};
+    const m3Defs={lotofacil:[4,5],megasena:[1,2,3],quina:[1,2],duplasena:[1,2],diadesorte:[1,2,3],supersete:[2,3],maismilionaria:[1,2,3],timemania:[2,3,4]};
     const defs=m3Defs[selectedLottery]||[Math.round(pk*m3Count/t)];
     m3Div.innerHTML='';
     for(let v=0;v<=Math.min(pk,m3Count);v++){
@@ -4649,7 +4781,7 @@ function updateDynamicDescriptions(){
   // Finais Distintos — populate buttons dynamically
   const fnDiv=el('finaisValues');
   if(fnDiv){
-    const fnDefs={lotofacil:[9,10],megasena:[4,5],quina:[4,5],duplasena:[5,6],diadesorte:[5,6]};
+    const fnDefs={lotofacil:[9,10],megasena:[4,5],quina:[4,5],duplasena:[5,6],diadesorte:[5,6],supersete:[5,6],maismilionaria:[4,5],timemania:[7,8]};
     const defs=fnDefs[selectedLottery]||[pk-1,pk];
     const maxFinais=Math.min(pk,10);
     fnDiv.innerHTML='';
@@ -4791,7 +4923,11 @@ function gerarModoIA(callback){
   });
 
   // Dia de Sorte: atribuir mês
-  if(selectedLottery==='diadesorte')selected.forEach(j=>{j.mes=getMesSorte()});
+  selected.forEach(j=>{
+    if(selectedLottery==='diadesorte')j.mes=getMesSorte();
+    if(selectedLottery==='maismilionaria')j.trevos=getTrevos();
+    if(selectedLottery==='timemania')j.time=getTimeCoracao();
+  });
   // Phase 5: Show neural network animation
   showIAAnimation(selected,explanations,callback);
 }
@@ -5490,7 +5626,7 @@ function slotMachineReveal(games, callback){
             <div class="push-benefit-icon green">📊</div>
             <div class="push-benefit-text">
               <h4>Resultado do sorteio</h4>
-              <p>Saiba na hora quando sair o resultado da Lotofacil, Mega-Sena, Quina, Dupla Sena e Dia de Sorte.</p>
+              <p>Saiba na hora quando sair o resultado da Lotofacil, Mega-Sena, Quina, Dupla Sena, Dia de Sorte, Super Sete, +Milionaria e Timemania.</p>
             </div>
           </div>
           <div class="push-benefit">
@@ -5589,7 +5725,7 @@ function slotMachineReveal(games, callback){
 
       <h3>1. Natureza do Servico</h3>
       <p style="background:rgba(220,60,60,0.08);border:1px solid rgba(220,60,60,0.2);border-radius:8px;padding:12px;margin:8px 0"><strong style="color:#ef4444;font-size:0.95rem">O LOTTOBOT NAO REALIZA APOSTAS, NAO REGISTRA JOGOS E NAO PARTICIPA DE NENHUM SORTEIO EM NOME DO USUARIO.</strong></p>
-      <p>O Lottobot e exclusivamente um <strong>gerador analitico de combinacoes numericas</strong> para loterias brasileiras (Lotofacil, Mega-Sena, Quina, Dupla Sena e Dia de Sorte). O servico utiliza analise estatistica de sorteios passados para sugerir combinacoes. <strong>Gerar numeros no Lottobot nao constitui aposta.</strong></p>
+      <p>O Lottobot e exclusivamente um <strong>gerador analitico de combinacoes numericas</strong> para loterias brasileiras (Lotofacil, Mega-Sena, Quina, Dupla Sena, Dia de Sorte, Super Sete, +Milionaria e Timemania). O servico utiliza analise estatistica de sorteios passados para sugerir combinacoes. <strong>Gerar numeros no Lottobot nao constitui aposta.</strong></p>
       <p>Para que qualquer combinacao gerada concorra a premios, o usuario deve <strong>obrigatoriamente registrar a aposta</strong> em uma casa loterica credenciada ou pelos canais oficiais da Caixa Economica Federal (site ou aplicativo Loterias Caixa). O Lottobot nao possui qualquer vinculo, parceria ou representacao junto a Caixa Economica Federal.</p>
 
       <h3>2. Notificacoes e Conferencia de Resultados</h3>
