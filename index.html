@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v46';
+    var V='lottobot-v47';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2595,7 +2595,7 @@ const LOTTERIES={
     premios:{2:'R$ 6',3:'R$ 24',4:'Variavel',5:'Variavel',6:'JACKPOT'},
     primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47],
     dezenas:[[1,10],[11,20],[21,30],[31,40],[41,50]],
-    filters:{parImpar:[2,4],soma:[100,210],consec:2,repet:[0,2]},
+    filters:{parImpar:[2,4],soma:[100,210],consec:2,repet:[0,3]},
     trevos:{total:6,pick:2}
   },
   timemania:{
@@ -2605,7 +2605,7 @@ const LOTTERIES={
     premios:{3:'R$ 3,50',4:'R$ 10,50',5:'Variavel',6:'Variavel',7:'JACKPOT'},
     primos:[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79],
     dezenas:[[1,16],[17,32],[33,48],[49,64],[65,80]],
-    filters:{parImpar:[3,7],soma:[310,500],consec:3,repet:[1,3]}
+    filters:{parImpar:[3,7],soma:[310,500],consec:3,repet:[1,5]}
   }
 };
 let selectedLottery='lotofacil';
