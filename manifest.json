@@ -1,7 +1,7 @@
 {
   "name": "Lottobot — Lotofácil Intelligence",
   "short_name": "Lottobot",
-  "description": "Gerador analítico inteligente de combinações para Lotofácil",
+  "description": "Gerador analítico inteligente para Lotofácil, Mega-Sena, Quina e mais 5 loterias",
   "id": "/lottobot",
   "start_url": "./index.html",
   "scope": "./",
@@ -9,7 +9,7 @@
   "lang": "pt-BR",
   "background_color": "#09090b",
   "theme_color": "#09090b",
-  "orientation": "any",
+  "orientation": "portrait",
   "categories": ["games", "utilities"],
   "gcm_sender_id": "103953800507",
   "icons": [
