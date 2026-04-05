@@ -1,6 +1,9 @@
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
+
+const ODDS_API_KEY = defineSecret("ODDS_API_KEY");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -194,4 +197,216 @@ exports.sendAdminBroadcast = onDocumentCreated({
     processedAt: admin.firestore.FieldValue.serverTimestamp()
   });
   console.log(`Admin broadcast sent: ${successCount}/${tokens.length} successful`);
+});
+
+// ══════════════════════════════════════════════
+// 4. BETS SCANNER — fetch odds, detect value/sure bets
+// ══════════════════════════════════════════════
+
+const ODDS_API_BASE = "https://api.the-odds-api.com/v4";
+
+const BETS_SPORTS = [
+  {key:"soccer_brazil_serie_a",name:"Brasileirao Serie A",priority:1,flag:"BR"},
+  {key:"soccer_brazil_serie_b",name:"Brasileirao Serie B",priority:1,flag:"BR"},
+  {key:"soccer_copa_libertadores",name:"Libertadores",priority:2,flag:"CONMEBOL"},
+  {key:"soccer_conmebol_copa_sudamericana",name:"Sul-Americana",priority:2,flag:"CONMEBOL"},
+  {key:"soccer_uefa_champs_league",name:"Champions League",priority:2,flag:"UEFA"},
+  {key:"soccer_epl",name:"Premier League",priority:3,flag:"EN"},
+  {key:"soccer_spain_la_liga",name:"La Liga",priority:3,flag:"ES"},
+  {key:"soccer_italy_serie_a",name:"Serie A Italia",priority:3,flag:"IT"},
+  {key:"soccer_germany_bundesliga",name:"Bundesliga",priority:3,flag:"DE"},
+  {key:"soccer_france_ligue_one",name:"Ligue 1",priority:3,flag:"FR"}
+];
+
+// --- Value Bet Detection ---
+function impliedProb(odd) { return 1 / odd; }
+
+function betsDetectValueBets(event) {
+  const valueBets = [];
+  const allOutcomes = {};
+  event.bookmakers.forEach(bk => {
+    bk.markets.forEach(mkt => {
+      mkt.outcomes.forEach(out => {
+        const key = mkt.key + "|" + out.name + (out.point != null ? "|" + out.point : "");
+        if (!allOutcomes[key]) allOutcomes[key] = [];
+        allOutcomes[key].push({bookmaker:bk.title,bookmakerKey:bk.key,price:out.price,market:mkt.key,name:out.name,point:out.point});
+      });
+    });
+  });
+  Object.entries(allOutcomes).forEach(([key, odds]) => {
+    if (odds.length < 2) return;
+    const avgImplied = odds.reduce((s, o) => s + impliedProb(o.price), 0) / odds.length;
+    const fairOdd = 1 / avgImplied;
+    odds.forEach(o => {
+      const edge = ((o.price - fairOdd) / fairOdd) * 100;
+      if (edge > 3) {
+        valueBets.push({
+          bookmaker:o.bookmaker,bookmakerKey:o.bookmakerKey,market:o.market,
+          outcome:o.name,point:o.point||null,price:o.price,
+          fairOdd:Math.round(fairOdd*100)/100,
+          edge:Math.round(edge*10)/10,
+          confidence:odds.length>=4?"alta":odds.length>=3?"media":"baixa"
+        });
+      }
+    });
+  });
+  return valueBets.sort((a, b) => b.edge - a.edge);
+}
+
+// --- Sure Bet Detection ---
+function betsDetectSureBets(event) {
+  const sureBets = [];
+  ["h2h","totals"].forEach(mktKey => {
+    const bestByOutcome = {};
+    event.bookmakers.forEach(bk => {
+      const mkt = bk.markets.find(m => m.key === mktKey);
+      if (!mkt) return;
+      mkt.outcomes.forEach(out => {
+        const oKey = out.name + (out.point != null ? "|" + out.point : "");
+        if (!bestByOutcome[oKey] || out.price > bestByOutcome[oKey].price) {
+          bestByOutcome[oKey] = {name:out.name,point:out.point||null,price:out.price,bookmaker:bk.title,bookmakerKey:bk.key};
+        }
+      });
+    });
+    const bestOdds = Object.values(bestByOutcome);
+    if (bestOdds.length < 2) return;
+    const totalImplied = bestOdds.reduce((s, o) => s + 1 / o.price, 0);
+    if (totalImplied < 1) {
+      const profit = Math.round(((1 / totalImplied) - 1) * 1000) / 10;
+      sureBets.push({
+        market:mktKey,profit,totalImplied:Math.round(totalImplied*10000)/10000,
+        outcomes:bestOdds.map(o => ({...o,stake:Math.round((1/o.price)/totalImplied*1000)/10}))
+      });
+    }
+  });
+  return sureBets;
+}
+
+// --- Scheduled fetcher ---
+exports.fetchBetsOdds = onSchedule({
+  schedule: "every 20 minutes",
+  timeZone: "America/Sao_Paulo",
+  region: "southamerica-east1",
+  secrets: [ODDS_API_KEY]
+}, async () => {
+  const apiKey = ODDS_API_KEY.value();
+  if (!apiKey) { console.error("ODDS_API_KEY not set. Run: firebase functions:secrets:set ODDS_API_KEY"); return; }
+
+  const now = Date.now();
+  const metaRef = db.collection("bets_meta").doc("status");
+  const metaSnap = await metaRef.get();
+  const meta = metaSnap.exists ? metaSnap.data() : {};
+  let creditsUsed = meta.creditsUsed || 0;
+  let creditsRemaining = meta.creditsRemaining || 500;
+
+  // Safety: stop if credits too low
+  if (creditsRemaining < 20) {
+    console.log("Credits too low (" + creditsRemaining + "), skipping");
+    return;
+  }
+
+  // Decide which sports need refresh this cycle
+  const sportsToFetch = [];
+  for (const sport of BETS_SPORTS) {
+    const oddsRef = db.collection("bets_odds").doc(sport.key);
+    const oddsSnap = await oddsRef.get();
+    const lastFetch = oddsSnap.exists && oddsSnap.data().fetchedAt ? oddsSnap.data().fetchedAt.toMillis() : 0;
+    const age = now - lastFetch;
+
+    // Dynamic intervals based on priority
+    const intervals = {1: 18*60000, 2: 38*60000, 3: 58*60000};
+    if (age >= (intervals[sport.priority] || 58*60000)) {
+      sportsToFetch.push(sport);
+    }
+  }
+
+  if (!sportsToFetch.length) { console.log("No sports need refresh"); return; }
+
+  // Budget: priority 1 gets h2h+totals (2 credits), others get h2h only (1 credit)
+  let fetchList = sportsToFetch;
+
+  // If credits < 100, only priority 1
+  if (creditsRemaining < 100) {
+    fetchList = fetchList.filter(s => s.priority === 1);
+  }
+  // If credits < 50, reduce frequency (skip if fetched in last 40 min)
+  if (creditsRemaining < 50) {
+    const filtered = [];
+    for (const s of fetchList) {
+      const snap = await db.collection("bets_odds").doc(s.key).get();
+      const last = snap.exists && snap.data().fetchedAt ? snap.data().fetchedAt.toMillis() : 0;
+      if (now - last >= 38*60000) filtered.push(s);
+    }
+    fetchList = filtered;
+  }
+
+  if (!fetchList.length) { console.log("Budget constraints: no sports to fetch"); return; }
+
+  console.log("Fetching " + fetchList.length + " sports: " + fetchList.map(s => s.key).join(", "));
+  const errors = [];
+
+  for (const sport of fetchList) {
+    try {
+      const markets = sport.priority === 1 ? "h2h,totals" : "h2h";
+      const url = ODDS_API_BASE + "/sports/" + sport.key + "/odds/?apiKey=" + apiKey + "&regions=eu&markets=" + markets + "&oddsFormat=decimal";
+      const resp = await fetch(url, {signal: AbortSignal.timeout(15000)});
+
+      const rem = resp.headers.get("x-requests-remaining");
+      if (rem) creditsRemaining = parseInt(rem);
+      const used = resp.headers.get("x-requests-used");
+      if (used) creditsUsed = parseInt(used);
+
+      if (!resp.ok) {
+        errors.push({sport:sport.key,status:resp.status,time:new Date().toISOString()});
+        continue;
+      }
+
+      const events = await resp.json();
+
+      // Filter: only games in next 48h
+      const cutoff = now + 48*3600000;
+      const upcoming = events.filter(e => {
+        const t = new Date(e.commence_time).getTime();
+        return t > now && t < cutoff;
+      });
+
+      // Detect value/sure bets
+      const allValueBets = [];
+      const allSureBets = [];
+      upcoming.forEach(ev => {
+        const vb = betsDetectValueBets(ev);
+        const sb = betsDetectSureBets(ev);
+        if (vb.length) allValueBets.push(...vb.map(v => ({...v,eventId:ev.id,home:ev.home_team,away:ev.away_team,commence:ev.commence_time})));
+        if (sb.length) allSureBets.push(...sb.map(s => ({...s,eventId:ev.id,home:ev.home_team,away:ev.away_team,commence:ev.commence_time})));
+      });
+
+      // Save to Firestore
+      await db.collection("bets_odds").doc(sport.key).set({
+        sportKey:sport.key,sportName:sport.name,flag:sport.flag,priority:sport.priority,
+        events:upcoming.map(e => ({
+          id:e.id,home:e.home_team,away:e.away_team,commence:e.commence_time,
+          bookmakers:e.bookmakers.map(bk => ({key:bk.key,title:bk.title,markets:bk.markets}))
+        })),
+        valueBets:allValueBets,sureBets:allSureBets,
+        eventCount:upcoming.length,valueBetCount:allValueBets.length,sureBetCount:allSureBets.length,
+        fetchedAt:admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      console.log(sport.key + ": " + upcoming.length + " events, " + allValueBets.length + " VB, " + allSureBets.length + " SB");
+    } catch (e) {
+      errors.push({sport:sport.key,error:e.message,time:new Date().toISOString()});
+      console.error("Error " + sport.key + ": " + e.message);
+    }
+  }
+
+  // Update meta
+  await metaRef.set({
+    lastRun:admin.firestore.FieldValue.serverTimestamp(),
+    creditsRemaining,creditsUsed,
+    activeSports:fetchList.map(s => s.key),
+    sportsCount:fetchList.length,
+    errors:errors.slice(-10)
+  },{merge:true});
+
+  console.log("Bets fetch done. Credits: " + creditsRemaining);
 });
