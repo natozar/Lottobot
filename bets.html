@@ -196,8 +196,9 @@
             </select>
           </div>
           <div class="filter-row">
-            <span class="chip active" data-market="h2h" onclick="toggleMarket(this)">1X2</span>
-            <span class="chip" data-market="totals" onclick="toggleMarket(this)">Over/Under</span>
+            <span class="chip active" data-market="all" onclick="setMarket(this)">Todos</span>
+            <span class="chip" data-market="h2h" onclick="setMarket(this)">1X2</span>
+            <span class="chip" data-market="totals" onclick="setMarket(this)">Over/Under</span>
           </div>
           <div class="filter-row">
             <span class="chip active" data-sort="value" onclick="toggleSort(this)">Edge % \u2193</span>
@@ -240,7 +241,7 @@ const SPORTS=[
 
 let allLeagueData=[];
 let currentSort='value';
-let activeMarkets=new Set(['h2h']);
+let activeMarkets=new Set(['h2h','totals']);
 let selectedLeague='';
 let unsubscribers=[];
 
@@ -281,8 +282,12 @@ _auth.onAuthStateChanged(user=>{
 function populateLeagues(){
   const sel=document.getElementById('leagueSelect');
   sel.innerHTML='<option value="">Todas as ligas</option>';
-  SPORTS.forEach(s=>{sel.innerHTML+='<option value="'+s.key+'">'+s.flag+' '+s.name+'</option>'});
+  const activeSports=new Set(allLeagueData.map(d=>d.sportKey));
+  SPORTS.forEach(s=>{
+    if(activeSports.has(s.key)){sel.innerHTML+='<option value="'+s.key+'">'+s.flag+' '+s.name+'</option>'}
+  });
   selectedLeague=localStorage.getItem('bets_league')||'';
+  if(selectedLeague&&!activeSports.has(selectedLeague))selectedLeague='';
   sel.value=selectedLeague;
 }
 
@@ -293,11 +298,11 @@ function onLeagueChange(){
 }
 
 // ══════ MARKET / SORT ══════
-function toggleMarket(el){
+function setMarket(el){
+  document.querySelectorAll('[data-market]').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
   const m=el.dataset.market;
-  if(activeMarkets.has(m)&&activeMarkets.size===1)return;
-  el.classList.toggle('active');
-  if(activeMarkets.has(m))activeMarkets.delete(m);else activeMarkets.add(m);
+  if(m==='all'){activeMarkets=new Set(['h2h','totals'])}else{activeMarkets=new Set([m])}
   renderAll();
 }
 function toggleSort(el){
@@ -321,6 +326,7 @@ function startListening(){
       document.getElementById('emptyMsg').textContent='Aguardando dados do servidor...';
       return;
     }
+    populateLeagues();
     renderAll();
     updateRefreshInfo();
   },err=>{
@@ -439,22 +445,33 @@ function renderAll(){
     });
   });
 
+  // Filter events that have data for at least one active market
+  const filtered=eventData.filter(d=>{
+    const ev=d.event;
+    for(const mkt of activeMarkets){
+      const hasData=(ev.bookmakers||[]).some(bk=>(bk.markets||[]).some(m=>m.key===mkt));
+      if(hasData)return true;
+    }
+    return false;
+  });
+
   // Sort
   if(currentSort==='value'){
-    eventData.sort((a,b)=>{
-      const aMax=a.sureBets.length?100:a.valueBets.length?a.valueBets[0].edge:0;
-      const bMax=b.sureBets.length?100:b.valueBets.length?b.valueBets[0].edge:0;
-      return bMax-aMax;
+    filtered.sort((a,b)=>{
+      const aMax=a.sureBets.length?100:a.valueBets.length?a.valueBets[0].edge:-1;
+      const bMax=b.sureBets.length?100:b.valueBets.length?b.valueBets[0].edge:-1;
+      if(bMax!==aMax)return bMax-aMax;
+      return new Date(a.event.commence)-new Date(b.event.commence);
     });
   }else if(currentSort==='time'){
-    eventData.sort((a,b)=>new Date(a.event.commence)-new Date(b.event.commence));
+    filtered.sort((a,b)=>new Date(a.event.commence)-new Date(b.event.commence));
   }else{
-    eventData.sort((a,b)=>(a.sport.key||'').localeCompare(b.sport.key||''));
+    filtered.sort((a,b)=>(a.sport.key||'').localeCompare(b.sport.key||''));
   }
 
   // Render sure bet alerts at top
   const alertsEl=document.getElementById('alertsSection');
-  const allSure=eventData.filter(d=>d.sureBets.length>0);
+  const allSure=filtered.filter(d=>d.sureBets.length>0);
   if(allSure.length){
     alertsEl.style.display='';
     alertsEl.innerHTML=allSure.map(d=>d.sureBets.map(sb=>`
@@ -473,14 +490,14 @@ function renderAll(){
 
   // Render game cards
   const list=document.getElementById('gamesList');
-  if(!eventData.length){
+  if(!filtered.length){
     list.innerHTML='';
     document.getElementById('emptyState').style.display='';
     return;
   }
   document.getElementById('emptyState').style.display='none';
 
-  list.innerHTML=eventData.map(d=>{
+  list.innerHTML=filtered.map(d=>{
     const ev=d.event;const sport=d.sport;const vbs=d.valueBets;const sbs=d.sureBets;
     const hasVb=vbs.length>0;const hasSb=sbs.length>0;
     const cardClass=hasSb?'card-surebet':hasVb?'card-valuebet':'';
