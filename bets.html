@@ -191,9 +191,9 @@
 
         <div class="filters-bar">
           <div class="filter-row">
-            <select class="filter-select" id="leagueSelect" onchange="onLeagueChange()">
-              <option value="">Todas as ligas</option>
-            </select>
+            <span class="chip active" data-league="" onclick="setLeague(this)">Todas</span>
+            <span class="chip" data-league="soccer_brazil_serie_a" onclick="setLeague(this)">Serie A</span>
+            <span class="chip" data-league="soccer_brazil_serie_b" onclick="setLeague(this)">Serie B</span>
           </div>
           <div class="filter-row">
             <span class="chip active" data-market="all" onclick="setMarket(this)">Todos</span>
@@ -228,15 +228,7 @@
 
 const SPORTS=[
   {key:'soccer_brazil_serie_a',name:'Brasileirao Serie A',flag:'\u{1F1E7}\u{1F1F7}'},
-  {key:'soccer_brazil_serie_b',name:'Brasileirao Serie B',flag:'\u{1F1E7}\u{1F1F7}'},
-  {key:'soccer_copa_libertadores',name:'Libertadores',flag:'\u{1F30E}'},
-  {key:'soccer_conmebol_copa_sudamericana',name:'Sul-Americana',flag:'\u{1F30E}'},
-  {key:'soccer_uefa_champs_league',name:'Champions League',flag:'\u{1F1EA}\u{1F1FA}'},
-  {key:'soccer_epl',name:'Premier League',flag:'\u{1F3F4}'},
-  {key:'soccer_spain_la_liga',name:'La Liga',flag:'\u{1F1EA}\u{1F1F8}'},
-  {key:'soccer_italy_serie_a',name:'Serie A Italia',flag:'\u{1F1EE}\u{1F1F9}'},
-  {key:'soccer_germany_bundesliga',name:'Bundesliga',flag:'\u{1F1E9}\u{1F1EA}'},
-  {key:'soccer_france_ligue_one',name:'Ligue 1',flag:'\u{1F1EB}\u{1F1F7}'}
+  {key:'soccer_brazil_serie_b',name:'Brasileirao Serie B',flag:'\u{1F1E7}\u{1F1F7}'}
 ];
 
 let allLeagueData=[];
@@ -269,7 +261,13 @@ _auth.onAuthStateChanged(user=>{
   if(user){
     document.getElementById('authScreen').style.display='none';
     document.getElementById('scanner').style.display='';
-    populateLeagues();
+    // Restaurar liga salva
+    selectedLeague=localStorage.getItem('bets_league')||'';
+    const savedChip=document.querySelector('[data-league="'+selectedLeague+'"]');
+    if(savedChip){
+      document.querySelectorAll('[data-league]').forEach(c=>c.classList.remove('active'));
+      savedChip.classList.add('active');
+    }
     startListening();
   }else{
     document.getElementById('authScreen').style.display='';
@@ -279,20 +277,10 @@ _auth.onAuthStateChanged(user=>{
 });
 
 // ══════ LEAGUES ══════
-function populateLeagues(){
-  const sel=document.getElementById('leagueSelect');
-  sel.innerHTML='<option value="">Todas as ligas</option>';
-  const activeSports=new Set(allLeagueData.map(d=>d.sportKey));
-  SPORTS.forEach(s=>{
-    if(activeSports.has(s.key)){sel.innerHTML+='<option value="'+s.key+'">'+s.flag+' '+s.name+'</option>'}
-  });
-  selectedLeague=localStorage.getItem('bets_league')||'';
-  if(selectedLeague&&!activeSports.has(selectedLeague))selectedLeague='';
-  sel.value=selectedLeague;
-}
-
-function onLeagueChange(){
-  selectedLeague=document.getElementById('leagueSelect').value;
+function setLeague(el){
+  document.querySelectorAll('[data-league]').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  selectedLeague=el.dataset.league;
   localStorage.setItem('bets_league',selectedLeague);
   renderAll();
 }
@@ -326,7 +314,6 @@ function startListening(){
       document.getElementById('emptyMsg').textContent='Aguardando dados do servidor...';
       return;
     }
-    populateLeagues();
     renderAll();
     updateRefreshInfo();
   },err=>{

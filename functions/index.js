@@ -204,15 +204,7 @@ const ODDS_API_BASE = "https://api.the-odds-api.com/v4";
 
 const BETS_SPORTS = [
   {key:"soccer_brazil_serie_a",name:"Brasileirao Serie A",priority:1,flag:"BR"},
-  {key:"soccer_brazil_serie_b",name:"Brasileirao Serie B",priority:1,flag:"BR"},
-  {key:"soccer_copa_libertadores",name:"Libertadores",priority:2,flag:"CONMEBOL"},
-  {key:"soccer_conmebol_copa_sudamericana",name:"Sul-Americana",priority:2,flag:"CONMEBOL"},
-  {key:"soccer_uefa_champs_league",name:"Champions League",priority:2,flag:"UEFA"},
-  {key:"soccer_epl",name:"Premier League",priority:3,flag:"EN"},
-  {key:"soccer_spain_la_liga",name:"La Liga",priority:3,flag:"ES"},
-  {key:"soccer_italy_serie_a",name:"Serie A Italia",priority:3,flag:"IT"},
-  {key:"soccer_germany_bundesliga",name:"Bundesliga",priority:3,flag:"DE"},
-  {key:"soccer_france_ligue_one",name:"Ligue 1",priority:3,flag:"FR"}
+  {key:"soccer_brazil_serie_b",name:"Brasileirao Serie B",priority:1,flag:"BR"}
 ];
 
 // --- Value Bet Detection ---
