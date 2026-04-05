@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v49';
+    var V='lottobot-v50';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -1972,6 +1972,7 @@
       <div id="offlineBadge">📡 Offline</div>
       <div id="headerSpinner"></div>
       <div class="header-actions">
+        <a href="/bets.html" class="header-icon-btn" title="Bets Scanner" style="text-decoration:none">⚽</a>
         <button class="header-icon-btn" id="btnCheckUpdate" onclick="checkForUpdate()" title="Verificar atualizacao">🔄</button>
         <button class="header-icon-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Alternar tema" title="Tema claro/escuro">🌙</button>
       </div>
