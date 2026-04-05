@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v48';
+    var V='lottobot-v49';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -493,6 +493,69 @@
       font-family: var(--font-mono);
       font-weight: 600;
       font-size: 0.8rem;
+    }
+
+    /* ══════ DESDOBRAMENTO SECTION ══════ */
+    .desdobramento-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 10px 12px;
+      background: var(--bg-surface-2);
+      border: 1px solid var(--border-default);
+      border-radius: var(--border-radius-md);
+      transition: all 0.2s;
+    }
+    .desdobramento-header:hover { border-color: var(--border-hover); }
+    .desdobramento-header .dh-left {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-primary);
+    }
+    .desdobramento-header .dh-arrow {
+      font-size: 0.6rem; color: var(--text-muted); transition: transform 0.3s;
+    }
+    .desdobramento-header.open .dh-arrow { transform: rotate(90deg); }
+    .desdobramento-body {
+      max-height: 0; overflow: hidden; transition: max-height 0.35s ease;
+    }
+    .desdobramento-body.open { max-height: 600px; }
+    .desdobramento-inner {
+      padding: 12px 0 4px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .desdobramento-info {
+      font-size: 0.7rem; color: var(--text-secondary); line-height: 1.5;
+      padding: 8px 10px; background: rgba(212,168,83,0.06);
+      border: 1px solid rgba(212,168,83,0.1); border-radius: 8px;
+    }
+    .desdobramento-info strong { color: var(--color-gold-primary); }
+    .desdobramento-stats {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .desdobramento-stats .ds-chip {
+      font-size: 0.65rem; padding: 4px 8px;
+      background: var(--bg-surface-2); border: 1px solid var(--border-default);
+      border-radius: 6px; color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+    .desdobramento-stats .ds-chip b { color: var(--color-gold-primary); }
+    #garantiaSelect {
+      width: 100%; padding: 8px 10px;
+      background: var(--bg-surface-2); color: var(--text-primary);
+      border: 1px solid var(--border-default); border-radius: 8px;
+      font-size: 0.72rem; font-family: var(--font-sans);
+    }
+    .badge-desdobramento {
+      display: inline-block; font-size: 0.55rem; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px; margin-left: 6px;
+      background: rgba(56,189,248,0.15); color: #38bdf8;
+      letter-spacing: 0.04em; vertical-align: middle;
+    }
+    .desdobramento-warn {
+      font-size: 0.65rem; color: #f59e0b; padding: 6px 8px;
+      background: rgba(245,158,11,0.08); border-radius: 6px;
+      border: 1px solid rgba(245,158,11,0.15);
     }
 
     #btnGerar {
@@ -2223,6 +2286,45 @@
         </div>
       </div>
 
+      <!-- DESDOBRAMENTO -->
+      <div class="config-section" id="desdobramentoSection">
+        <div class="desdobramento-header" id="desdobramentoToggleHeader">
+          <div class="dh-left">🎯 Desdobramento</div>
+          <span class="dh-arrow">▶</span>
+        </div>
+        <div class="desdobramento-body" id="desdobramentoBody">
+          <div class="desdobramento-inner">
+            <div class="toggle-row">
+              <span class="toggle-label">Ativar desdobramento</span>
+              <div id="toggleDesdobramento" class="toggle-switch"><div class="toggle-knob"></div></div>
+            </div>
+            <div id="desdobramentoContent" style="display:none">
+              <div class="desdobramento-info" id="desdobramentoInfo">
+                Selecione seus numeros no painel acima (fixe clicando) e ative o desdobramento para gerar todas as combinacoes possiveis com cobertura otimizada.
+              </div>
+              <div class="desdobramento-stats" id="desdobramentoStats">
+                <div class="ds-chip">Pool: <b id="desdPool">0</b></div>
+                <div class="ds-chip">Pick: <b id="desdPick">0</b></div>
+                <div class="ds-chip">Combos: <b id="desdCombos">0</b></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <span class="section-title" style="margin:0;font-size:0.62rem">Garantia minima</span>
+                <select id="garantiaSelect">
+                  <option value="0">Sem otimizacao (por score)</option>
+                  <option value="1">Garantir pick-1 acertos</option>
+                  <option value="2" selected>Garantir pick-2 acertos</option>
+                  <option value="3">Garantir pick-3 acertos</option>
+                </select>
+              </div>
+              <div class="desdobramento-stats">
+                <div class="ds-chip">Jogos estimados: <b id="desdEstimativa">-</b></div>
+              </div>
+              <div id="desdobramentoWarn" class="desdobramento-warn" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- PRE-GENERATION SUMMARY -->
       <div id="preGenSummary" class="pre-gen-summary">
         <div style="font-weight:600;color:var(--color-gold-primary);margin-bottom:6px;font-size:0.78rem;">📋 O que será feito:</div>
@@ -3556,12 +3658,24 @@ function setupEventListeners(){
   document.getElementById('sliderMelhorN')?.addEventListener('input',updateMelhorNSlider);
   const tMN=document.getElementById('toggleMelhorN');
   if(tMN) tMN.addEventListener('click',function(){this.classList.toggle('on');const s=document.getElementById('sliderMelhorN');if(s)s.disabled=!this.classList.contains('on');updatePreGenSummary()});
+  // Desdobramento UI
+  document.getElementById('desdobramentoToggleHeader')?.addEventListener('click',function(){
+    this.classList.toggle('open');
+    document.getElementById('desdobramentoBody')?.classList.toggle('open');
+  });
+  document.getElementById('toggleDesdobramento')?.addEventListener('click',function(e){
+    e.stopPropagation();
+    if(getLottery().columns){showToast('Super Sete usa colunas independentes. Desdobramento nao disponivel.');return}
+    this.classList.toggle('on');
+    updateDesdobramentoUI();
+  });
+  document.getElementById('garantiaSelect')?.addEventListener('change',updateDesdobramentoUI);
   document.getElementById('btnGerar')?.addEventListener('click',function(){
     this.classList.add('loading');this.textContent='⏳ Gerando...';
     // Init AudioContext on user gesture (required for mobile)
     if(!window._lottoAudio)try{window._lottoAudio=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}
     if(window._lottoAudio&&window._lottoAudio.state==='suspended')window._lottoAudio.resume();
-    setTimeout(()=>{gerarJogos()},150);
+    setTimeout(()=>{isDesdobramentoOn()?gerarDesdobramento():gerarJogos()},150);
   });
   document.querySelectorAll('.tab-button').forEach(b=>b.addEventListener('click',function(){switchTab(this.dataset.tab)}));
   document.querySelectorAll('.nav-button').forEach(b=>b.addEventListener('click',function(){
@@ -3843,6 +3957,174 @@ function gerarJogos(){
 function hammingDistance(a,b){const s=new Set(b);return a.filter(n=>!s.has(n)).length}
 function factorial(n){let r=1;for(let i=2;i<=n;i++)r*=i;return r}
 
+// ══════ DESDOBRAMENTO ENGINE ══════
+function comb(n,k){if(k>n||k<0)return 0;if(k===0||k===n)return 1;let r=1;for(let i=0;i<Math.min(k,n-k);i++){r=r*(n-i)/(i+1)}return Math.round(r)}
+
+function generateCombinations(pool,pick){
+  const result=[];const combo=[];
+  function bt(start){
+    if(combo.length===pick){result.push([...combo]);return}
+    for(let i=start;i<pool.length;i++){combo.push(pool[i]);bt(i+1);combo.pop()}
+  }
+  bt(0);return result;
+}
+
+function countCoverage(combo,size,uncoveredSet){
+  const subs=generateCombinations(combo,size);
+  let count=0;
+  for(const s of subs){if(uncoveredSet.has(s.join(',')))count++}
+  return count;
+}
+
+function greedyCovering(validCombos,pool,pick,minMatch){
+  const targets=generateCombinations(pool,minMatch);
+  const uncovered=new Set(targets.map(t=>t.join(',')));
+  const selected=[];const remaining=[...validCombos];
+  while(uncovered.size>0&&remaining.length>0){
+    let bestIdx=-1,bestCount=0;
+    for(let i=0;i<remaining.length;i++){
+      const covered=countCoverage(remaining[i],minMatch,uncovered);
+      if(covered>bestCount){bestCount=covered;bestIdx=i}
+    }
+    if(bestIdx===-1)break;
+    const chosen=remaining.splice(bestIdx,1)[0];
+    selected.push(chosen);
+    const subs=generateCombinations(chosen,minMatch);
+    subs.forEach(s=>uncovered.delete(s.join(',')));
+  }
+  return selected;
+}
+
+function getDesdobramentoPoolMax(){
+  const lot=getLottery();const pick=getPickSize();
+  if(lot.columns)return 0; // Super Sete desabilitado
+  if(pick>=15)return 22; // Lotofacil
+  if(pick>=10)return 18; // Timemania
+  return 15; // demais
+}
+
+function isDesdobramentoOn(){
+  return document.getElementById('toggleDesdobramento')?.classList.contains('on')&&
+    !getLottery().columns;
+}
+
+function getGarantiaLevel(){return parseInt(document.getElementById('garantiaSelect')?.value||0)}
+
+function updateDesdobramentoUI(){
+  const content=document.getElementById('desdobramentoContent');
+  const on=document.getElementById('toggleDesdobramento')?.classList.contains('on');
+  if(content)content.style.display=on?'':'none';
+  if(!on)return;
+  const lot=getLottery();
+  if(lot.columns){
+    document.getElementById('desdobramentoInfo').textContent='Super Sete usa colunas independentes. Desdobramento nao disponivel para esta loteria.';
+    document.getElementById('desdobramentoStats').style.display='none';
+    document.getElementById('garantiaSelect')?.parentElement&&(document.getElementById('garantiaSelect').parentElement.style.display='none');
+    return;
+  }
+  document.getElementById('desdobramentoStats').style.display='';
+  document.getElementById('garantiaSelect')?.parentElement&&(document.getElementById('garantiaSelect').parentElement.style.display='');
+  const pick=getPickSize();
+  const poolSize=fixedNums.size;
+  const maxPool=getDesdobramentoPoolMax();
+  document.getElementById('desdPool').textContent=poolSize;
+  document.getElementById('desdPick').textContent=pick;
+  const combos=poolSize>=pick?comb(poolSize,pick):0;
+  document.getElementById('desdCombos').textContent=combos>99999?combos.toLocaleString('pt-BR'):combos;
+  // Estimar jogos necessarios
+  const garantia=getGarantiaLevel();
+  let est='-';
+  if(poolSize>pick){
+    if(garantia===0){
+      est=Math.min(combos,parseInt(document.getElementById('qtdJogos')?.value||5));
+    }else{
+      const minMatch=pick-garantia;
+      const targetsCount=comb(poolSize,minMatch);
+      const coversPerGame=comb(pick,minMatch);
+      est=Math.ceil(targetsCount/coversPerGame);
+      if(est>combos)est=combos;
+    }
+  }
+  document.getElementById('desdEstimativa').textContent=est;
+  // Info
+  if(poolSize<pick+1){
+    document.getElementById('desdobramentoInfo').innerHTML='Fixe pelo menos <strong>'+(pick+1)+'</strong> numeros no painel acima para desdobrar. Voce tem <strong>'+poolSize+'</strong>.';
+  }else if(poolSize>maxPool){
+    document.getElementById('desdobramentoInfo').innerHTML='Maximo de <strong>'+maxPool+'</strong> numeros para desdobramento nesta loteria. Voce tem <strong>'+poolSize+'</strong>. Remova alguns.';
+  }else{
+    document.getElementById('desdobramentoInfo').innerHTML='Pool de <strong>'+poolSize+'</strong> numeros selecionados. Serao geradas combinacoes otimizadas de <strong>'+pick+'</strong> numeros.';
+  }
+  // Warning para combos pesadas
+  const warn=document.getElementById('desdobramentoWarn');
+  if(warn){
+    if(combos>10000){warn.textContent='⚠️ '+combos.toLocaleString('pt-BR')+' combinacoes. Processamento pode demorar alguns segundos.';warn.style.display=''}
+    else{warn.style.display='none'}
+  }
+  updatePreGenSummary();
+}
+
+function gerarDesdobramento(){
+  const lot=getLottery();
+  if(lot.columns){showToast('Super Sete usa colunas independentes. Desdobramento nao disponivel.');return}
+  const pool=[...fixedNums].sort((a,b)=>a-b);
+  const pick=getPickSize();
+  const maxPool=getDesdobramentoPoolMax();
+  if(pool.length<pick+1){showToast('Selecione pelo menos '+(pick+1)+' numeros para desdobrar');return}
+  if(pool.length>maxPool){showToast('Maximo de '+maxPool+' numeros para desdobramento nesta loteria');return}
+  const totalCombos=comb(pool.length,pick);
+  // Gerar todas as combinacoes
+  const doGenerate=()=>{
+    const allCombos=generateCombinations(pool,pick);
+    const filters=getActiveFilters();
+    const valid=allCombos.filter(j=>passFilters(j,filters)&&!isJackpotDuplicate(j));
+    if(!valid.length){showToast('Nenhuma combinacao passou nos filtros. Tente ajustar.');const btn=document.getElementById('btnGerar');if(btn){btn.classList.remove('loading');btn.textContent='🎲 Gerar Numeros'}return}
+    const garantia=getGarantiaLevel();
+    let selected;
+    if(garantia===0){
+      const qtd=parseInt(document.getElementById('qtdJogos').value)||5;
+      selected=valid.map(j=>{const s=calcScore(j);return Object.assign(j,{score:s})});
+      selected.sort((a,b)=>b.score-a.score);
+      selected=selected.slice(0,qtd);
+    }else{
+      const minMatch=pick-garantia;
+      selected=greedyCovering(valid,pool,pick,minMatch);
+    }
+    // Pontuar e classificar
+    previousJogos=[...jogos];
+    selected.forEach(j=>{
+      if(!j.score)j.score=calcScore(j);
+      j.cls=classifyScore(j.score);
+      j.desdobramento=true;
+      if(selectedLottery==='diadesorte')j.mes=getMesSorte();
+      if(selectedLottery==='maismilionaria')j.trevos=getTrevos();
+      if(selectedLottery==='timemania')j.time=getTimeCoracao();
+    });
+    jogos=selected;concRef=ULT?ULT.numero:0;
+    logGeneratedGames(jogos,'DESD',concRef);
+    stats.total+=jogos.length;stats.modelos['DESD']=(stats.modelos['DESD']||0)+jogos.length;bumpStreak();
+    jogos.forEach(j=>stats.scores.push(j.score));
+    if(stats.scores.length>500)stats.scores=stats.scores.slice(-500);
+    renderJogos();updateStats();runHistoricalAnalysis();persist();
+    const btn=document.getElementById('btnGerar');
+    if(btn){btn.classList.remove('loading');btn.textContent='🎲 Gerar Numeros'}
+    showToast('🎯 Desdobramento: '+jogos.length+' jogos gerados');
+    // Mobile: ir para aba Jogos
+    if(window.innerWidth<=768){
+      document.querySelectorAll('.col-left,.col-center,.col-right').forEach(c=>c.classList.remove('mobile-show'));
+      document.querySelector('.col-center')?.classList.add('mobile-show');
+      switchTab('jogos');
+      document.querySelectorAll('.nav-button').forEach(x=>x.classList.remove('active'));
+      document.querySelector('.nav-button[data-nav="jogos"]')?.classList.add('active');
+    }
+  };
+  if(totalCombos>10000){
+    showToast('⏳ Processando '+totalCombos.toLocaleString('pt-BR')+' combinacoes...');
+    setTimeout(doGenerate,100);
+  }else{
+    doGenerate();
+  }
+}
+
 function genOne(mod){
   // Super Sete: 7 colunas independentes de 0-9, permite repetição
   if(getLottery().columns)return genOneColumns(mod);
@@ -3980,7 +4262,7 @@ function renderJogos(){
     const pr=j.filter(n=>getPrimos().has(n)).length;
     const cc=selectedLottery==='lotofacil'?j.filter(n=>CENTRO_NUMS.includes(n)).length:null;
     return `<div class="game-card" id="gc${i}" style="animation-delay:${i*0.05}s">
-      <div class="game-header"><div class="game-number">#${i+1}</div><div class="score-badge ${j.cls.cls}">${j.score} · ${j.cls.label}</div></div>
+      <div class="game-header"><div class="game-number">#${i+1}${j.desdobramento?'<span class="badge-desdobramento">DESDOBRAMENTO</span>':''}</div><div class="score-badge ${j.cls.cls}">${j.score} · ${j.cls.label}</div></div>
       <div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(dNum(n))}</div>`).join('')}</div>
       ${j.mes?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">🗓️ Mes da Sorte: <strong>'+esc(j.mes)+'</strong></div>':''}
       ${j.trevos?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">🍀 Trevos: <strong>'+j.trevos.join(' e ')+'</strong></div>':''}
@@ -4442,7 +4724,7 @@ function renderFilterChips(){
 function mkExcl(n){return mkToggleCell(n,'exclude-cell')}
 function resetExclusions(){
   if(fixedNums.size+excludedNums.size>0&&!confirm('Limpar todas as selecoes (fixados + excluidos)?'))return;
-  excludedNums.clear();fixedNums.clear();renderNumPanel();renderFilterTab();updatePreGenSummary();showToast('↩ Filtros resetados');
+  excludedNums.clear();fixedNums.clear();renderNumPanel();renderFilterTab();updatePreGenSummary();if(isDesdobramentoOn())updateDesdobramentoUI();showToast('↩ Filtros resetados');
 }
 
 // ══════ UI UPDATES ══════
@@ -4649,7 +4931,9 @@ function persist(){try{localStorage.setItem(SK,JSON.stringify({
     janela:document.getElementById('sliderJanela')?.value,
     melhorN:document.getElementById('toggleMelhorN')?.classList.contains('on'),
     melhorNSize:document.getElementById('sliderMelhorN')?.value,
-    qtdJogos:document.getElementById('qtdJogos')?.value
+    qtdJogos:document.getElementById('qtdJogos')?.value,
+    desdobramento:document.getElementById('toggleDesdobramento')?.classList.contains('on'),
+    garantia:document.getElementById('garantiaSelect')?.value
   },
   t:Date.now()
 }))}catch(e){}}
@@ -4682,6 +4966,8 @@ function loadSaved(){try{const d=JSON.parse(localStorage.getItem(SK)||'{}');
     if(f.melhorN){document.getElementById('toggleMelhorN')?.classList.add('on');const sn=document.getElementById('sliderMelhorN');if(sn)sn.disabled=false}
     if(f.melhorNSize){const sn=document.getElementById('sliderMelhorN');if(sn){sn.value=f.melhorNSize;document.getElementById('sliderMelhorNValue').textContent=f.melhorNSize}}
     if(f.qtdJogos){const q=document.getElementById('qtdJogos');if(q)q.value=f.qtdJogos}
+    if(f.desdobramento){document.getElementById('toggleDesdobramento')?.classList.add('on');updateDesdobramentoUI()}
+    if(f.garantia){const g=document.getElementById('garantiaSelect');if(g)g.value=f.garantia}
   }
 }catch(e){}}
 // ══════ ANALYTICS — LOG ALL GENERATED GAMES ══════
@@ -4728,7 +5014,7 @@ function mkToggleCell(n,cls){
     if(fixedNums.has(n)){fixedNums.delete(n);excludedNums.add(n)}
     else if(excludedNums.has(n)){excludedNums.delete(n)}
     else{fixedNums.add(n)}
-    renderNumPanel();renderFilterTab();updatePreGenSummary();
+    renderNumPanel();renderFilterTab();updatePreGenSummary();if(isDesdobramentoOn())updateDesdobramentoUI();
   };return c;
 }
 function mkNumCell(n){return mkToggleCell(n,'num-cell')}
@@ -4741,7 +5027,12 @@ function updatePreGenSummary(){
   const modelNames={A:'A (Conservador)',B:'B (Equilibrado)',C:'C (Arrojado)'};
   const activeFilters=FILTER_IDS.filter(isFilterOn).length;
   document.getElementById('sumQtd').textContent=qtd;
-  document.getElementById('sumModelo').textContent=modelNames[selectedModelo]||selectedModelo;
+  if(isDesdobramentoOn()){
+    document.getElementById('sumModelo').textContent='DESDOBRAMENTO';
+    document.getElementById('sumQtd').textContent=document.getElementById('desdEstimativa')?.textContent||'-';
+  }else{
+    document.getElementById('sumModelo').textContent=modelNames[selectedModelo]||selectedModelo;
+  }
   document.getElementById('sumFiltros').textContent=activeFilters+' de 6';
   document.getElementById('sumFixed').textContent=fixedNums.size;
   document.getElementById('sumExcluded').textContent=excludedNums.size;
