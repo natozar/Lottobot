@@ -281,8 +281,8 @@ function betsDetectSureBets(event) {
 
 // --- Scheduled fetcher ---
 // API key stored in Firestore: bets_meta/config { apiKey: "..." }
-// Set via: firebase firestore:set bets_meta/config --data '{"apiKey":"YOUR_KEY"}'
-// Or manually in Firebase Console > Firestore > bets_meta > config
+// Set manually in Firebase Console > Firestore > bets_meta > config
+// TODO: adicionar gerenciamento da API key no painel admin (painel/index.html)
 
 exports.fetchBetsOdds = onSchedule({
   schedule: "every 20 minutes",

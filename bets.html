@@ -208,7 +208,11 @@
 
         <div id="alertsSection" class="alerts-section" style="display:none"></div>
         <div id="loadingState" style="display:none"><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div></div>
-        <div id="emptyState" class="empty-state" style="display:none"><div class="icon">\u26BD</div><p>Nenhum jogo encontrado nas proximas 48h</p></div>
+        <div id="emptyState" class="empty-state" style="display:none">
+          <div class="icon">\u26BD</div>
+          <p id="emptyMsg">Nenhum jogo encontrado nas proximas 48h</p>
+          <p style="font-size:0.68rem;margin-top:8px;color:var(--text-muted)">O scanner atualiza automaticamente a cada 20 minutos.<br>Se e sua primeira vez, os dados podem levar ate 20 min para aparecer.</p>
+        </div>
         <div id="gamesList" class="games-list"></div>
       </div>
     </div>
@@ -311,6 +315,12 @@ function startListening(){
     allLeagueData=[];
     snap.forEach(doc=>allLeagueData.push(doc.data()));
     document.getElementById('loadingState').style.display='none';
+    if(allLeagueData.length===0){
+      document.getElementById('gamesList').innerHTML='';
+      document.getElementById('emptyState').style.display='';
+      document.getElementById('emptyMsg').textContent='Aguardando dados do servidor...';
+      return;
+    }
     renderAll();
     updateRefreshInfo();
   },err=>{
