@@ -1,9 +1,6 @@
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
-
-const ODDS_API_KEY = defineSecret("ODDS_API_KEY");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -283,14 +280,19 @@ function betsDetectSureBets(event) {
 }
 
 // --- Scheduled fetcher ---
+// API key stored in Firestore: bets_meta/config { apiKey: "..." }
+// Set via: firebase firestore:set bets_meta/config --data '{"apiKey":"YOUR_KEY"}'
+// Or manually in Firebase Console > Firestore > bets_meta > config
+
 exports.fetchBetsOdds = onSchedule({
   schedule: "every 20 minutes",
   timeZone: "America/Sao_Paulo",
-  region: "southamerica-east1",
-  secrets: [ODDS_API_KEY]
+  region: "southamerica-east1"
 }, async () => {
-  const apiKey = ODDS_API_KEY.value();
-  if (!apiKey) { console.error("ODDS_API_KEY not set. Run: firebase functions:secrets:set ODDS_API_KEY"); return; }
+  // Read API key from Firestore config
+  const configSnap = await db.collection("bets_meta").doc("config").get();
+  const apiKey = configSnap.exists ? configSnap.data().apiKey : null;
+  if (!apiKey) { console.error("ODDS_API_KEY not set. Add apiKey to bets_meta/config in Firestore."); return; }
 
   const now = Date.now();
   const metaRef = db.collection("bets_meta").doc("status");
