@@ -277,7 +277,7 @@ function betsDetectSureBets(event) {
 // TODO: adicionar gerenciamento da API key no painel admin (painel/index.html)
 
 exports.fetchBetsOdds = onSchedule({
-  schedule: "every 20 minutes",
+  schedule: "every 10 minutes",
   timeZone: "America/Sao_Paulo",
   region: "southamerica-east1"
 }, async () => {
@@ -299,49 +299,80 @@ exports.fetchBetsOdds = onSchedule({
     return;
   }
 
-  // Decide which sports need refresh this cycle
+  // Decidir intervalo dinamico baseado na proximidade do proximo jogo
+  // ORCAMENTO: 500 creditos/mes — meta ~16 cred/dia
+  const H = 3600000; // 1 hora em ms
   const sportsToFetch = [];
+  const sportNearestGame = {}; // guardar proximidade para decidir markets
+
   for (const sport of BETS_SPORTS) {
     const oddsRef = db.collection("bets_odds").doc(sport.key);
     const oddsSnap = await oddsRef.get();
-    const lastFetch = oddsSnap.exists && oddsSnap.data().fetchedAt ? oddsSnap.data().fetchedAt.toMillis() : 0;
+    const oddsData = oddsSnap.exists ? oddsSnap.data() : null;
+    const lastFetch = oddsData?.fetchedAt?.toMillis() || 0;
     const age = now - lastFetch;
 
-    // Dynamic intervals based on priority
-    const intervals = {1: 18*60000, 2: 38*60000, 3: 58*60000};
-    if (age >= (intervals[sport.priority] || 58*60000)) {
+    // Verificar proximidade do jogo mais proximo (dados ja salvos)
+    let nearestGame = Infinity;
+    if (oddsData && oddsData.events) {
+      oddsData.events.forEach(ev => {
+        const gameTime = new Date(ev.commence).getTime();
+        const diff = gameTime - now;
+        if (diff > 0 && diff < nearestGame) nearestGame = diff;
+      });
+    }
+
+    // Intervalo minimo baseado na proximidade do jogo
+    let minInterval;
+    if (!oddsData) {
+      minInterval = 0;                // primeira vez, buscar agora
+    } else if (nearestGame < 2 * H) {
+      minInterval = 25 * 60000;       // 25 min — jogo iminente
+    } else if (nearestGame < 24 * H) {
+      minInterval = 110 * 60000;      // 2h — jogo hoje
+    } else {
+      minInterval = 480 * 60000;      // 8h — sem jogo em breve
+    }
+
+    if (age >= minInterval) {
       sportsToFetch.push(sport);
+      sportNearestGame[sport.key] = nearestGame;
     }
   }
 
   if (!sportsToFetch.length) { console.log("No sports need refresh"); return; }
 
-  // Budget: priority 1 gets h2h+totals (2 credits), others get h2h only (1 credit)
   let fetchList = sportsToFetch;
 
-  // If credits < 100, only priority 1
-  if (creditsRemaining < 100) {
-    fetchList = fetchList.filter(s => s.priority === 1);
-  }
-  // If credits < 50, reduce frequency (skip if fetched in last 40 min)
+  // Override: economizar creditos quando estao baixos
   if (creditsRemaining < 50) {
     const filtered = [];
     for (const s of fetchList) {
       const snap = await db.collection("bets_odds").doc(s.key).get();
       const last = snap.exists && snap.data().fetchedAt ? snap.data().fetchedAt.toMillis() : 0;
-      if (now - last >= 38*60000) filtered.push(s);
+      if (now - last >= 110 * 60000) filtered.push(s);
+    }
+    fetchList = filtered;
+  } else if (creditsRemaining < 100) {
+    const filtered = [];
+    for (const s of fetchList) {
+      const snap = await db.collection("bets_odds").doc(s.key).get();
+      const last = snap.exists && snap.data().fetchedAt ? snap.data().fetchedAt.toMillis() : 0;
+      if (now - last >= 55 * 60000) filtered.push(s);
     }
     fetchList = filtered;
   }
 
   if (!fetchList.length) { console.log("Budget constraints: no sports to fetch"); return; }
 
-  console.log("Fetching " + fetchList.length + " sports: " + fetchList.map(s => s.key).join(", "));
+  console.log("Fetching " + fetchList.length + " sports: " + fetchList.map(s => s.key).join(", ") + " | Credits: " + creditsRemaining);
   const errors = [];
 
   for (const sport of fetchList) {
     try {
-      const markets = sport.priority === 1 ? "h2h,totals" : "h2h";
+      // h2h+totals (2 cred) so quando jogo iminente, senao h2h only (1 cred)
+      const nearest = sportNearestGame[sport.key] || Infinity;
+      const markets = (nearest < 2 * H) ? "h2h,totals" : "h2h";
       const url = ODDS_API_BASE + "/sports/" + sport.key + "/odds/?apiKey=" + apiKey + "&regions=eu&markets=" + markets + "&oddsFormat=decimal";
       const resp = await fetch(url, {signal: AbortSignal.timeout(15000)});
 
