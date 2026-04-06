@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v59';
+    var V='lottobot-v60';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -1956,6 +1956,13 @@
     .onboard-btn.primary:hover{background:#e5b863}
     .onboard-btn.skip{background:none;color:var(--text-muted);border:none;font-size:0.75rem;cursor:pointer}
     .onboard-btn.skip:hover{color:var(--text-secondary)}
+
+    /* FREEMIUM — Feature Lock */
+    .feature-locked{position:relative;opacity:0.45;pointer-events:none}
+    .feature-locked::after{content:'🔒 Pro';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-surface-3);padding:6px 14px;border-radius:8px;font-size:0.75rem;font-weight:700;color:var(--color-gold-primary);border:1px solid var(--color-gold-dim);pointer-events:auto;cursor:pointer;z-index:5}
+    .loteria-card.locked{opacity:0.35;position:relative}
+    .loteria-card.locked::after{content:'🔒';position:absolute;top:-2px;right:-2px;font-size:0.55rem}
+    .ciclo-btn.active{background:var(--color-moss-primary)!important;color:#fff!important;border-color:var(--color-moss-primary)!important}
   </style>
 </head>
 <body>
@@ -2677,6 +2684,49 @@
     </div>
   </div>
 
+  <!-- PAYWALL MODAL -->
+  <div id="paywallModal" class="modal-overlay" role="dialog" aria-label="Upgrade de plano">
+    <div class="modal" style="max-width:420px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h2 style="font-size:1.1rem;color:var(--text-primary)">🚀 Upgrade seu Lottobot</h2>
+        <button onclick="document.getElementById('paywallModal').classList.remove('active')" class="btn-close">✕</button>
+      </div>
+      <p id="paywallMsg" style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:20px"></p>
+      <div id="planCardPro" style="border:1px solid var(--color-gold-primary);border-radius:12px;padding:16px;margin-bottom:12px;background:var(--color-gold-dim);cursor:pointer" onclick="selectPlan('pro')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:0.95rem;font-weight:700;color:var(--color-gold-primary)">⭐ Pro</span>
+          <span style="font-size:0.75rem;color:var(--text-muted)" id="proPrecoLabel">R$9,90/mes</span>
+        </div>
+        <ul style="font-size:0.78rem;color:var(--text-secondary);list-style:none;display:flex;flex-direction:column;gap:4px;padding:0;margin:0">
+          <li>✓ Todas as 8 loterias</li>
+          <li>✓ Modo IA + 12 filtros</li>
+          <li>✓ Monte Carlo + Desdobramento</li>
+          <li>✓ Ate 20 jogos por sessao</li>
+          <li>✓ Salvos ilimitados</li>
+        </ul>
+      </div>
+      <div id="planCardUltra" style="border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px;margin-bottom:16px;background:var(--bg-surface-2);cursor:pointer" onclick="selectPlan('ultra')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:0.95rem;font-weight:700;color:var(--text-primary)">💎 Ultra</span>
+          <span style="font-size:0.75rem;color:var(--text-muted)" id="ultraPrecoLabel">R$19,90/mes</span>
+        </div>
+        <ul style="font-size:0.78rem;color:var(--text-secondary);list-style:none;display:flex;flex-direction:column;gap:4px;padding:0;margin:0">
+          <li>✓ Tudo do Pro +</li>
+          <li>✓ Bolao inteligente</li>
+          <li>✓ Bets Scanner completo</li>
+          <li>✓ Analise preditiva avancada</li>
+          <li>✓ Suporte WhatsApp</li>
+        </ul>
+      </div>
+      <div style="display:flex;justify-content:center;gap:8px;margin-bottom:16px">
+        <button id="cicloMensal" onclick="setCiclo('mensal')" style="padding:8px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;border:1px solid var(--color-moss-primary);background:var(--color-moss-primary);color:#fff;cursor:pointer">Mensal</button>
+        <button id="cicloAnual" onclick="setCiclo('anual')" style="padding:8px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;border:1px solid var(--border-hover);background:var(--bg-surface-2);color:var(--text-secondary);cursor:pointer">Anual <span style="color:var(--color-moss-primary);font-size:0.7rem">ate 37% OFF</span></button>
+      </div>
+      <button id="paywallCTA" onclick="iniciarPagamento()" style="width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--color-moss-primary),#3a6a48);color:#fff;font-weight:700;font-size:0.95rem;border:none;cursor:pointer">Assinar agora</button>
+      <p style="text-align:center;font-size:0.68rem;color:var(--text-muted);margin-top:8px">Pagamento seguro via Mercado Pago. Cancele quando quiser.</p>
+    </div>
+  </div>
+
   <script>
 // ══════════════════════════════════════════════
 // LOTTOBOT V3 — ENGINE
@@ -2839,6 +2889,10 @@ let excludedNums=new Set(),fixedNums=new Set();
 let stats={total:0,scores:[],modelos:{}},saved=[];
 let checkIdx=null,concRef=null;
 let currentUser=null,isAdmin=false;
+let userPlano='free',userPlanoExpira=null,userPlanoCiclo=null;
+function isPro(){return userPlano==='pro'||userPlano==='ultra'}
+function isUltra(){return userPlano==='ultra'}
+function isFree(){return userPlano==='free'}
 
 // ══════ JACKPOT HISTORY — never generate a past winning combination ══════
 const JACKPOT_SETS={}; // { lotofacil: Set(['1,2,3,...']), megasena: Set([...]), ... }
@@ -3025,6 +3079,7 @@ if('speechSynthesis' in window){cacheVoices();speechSynthesis.addEventListener('
 
 // ══════ INIT ══════
 document.addEventListener('DOMContentLoaded',async()=>{
+  checkPagamentoRetorno();
   loadSaved();populatePickSize();setupEventListeners();
   document.querySelector('.col-center')?.classList.add('mobile-show');
   await loadAPI();
@@ -3060,6 +3115,11 @@ document.addEventListener('DOMContentLoaded',async()=>{
       document.getElementById('authModal').classList.remove('active');
       document.getElementById('authCloseBtn').style.display='';
       await syncUserDoc(user);
+      // Carregar plano
+      try{const ud=await _db.collection('users').doc(user.uid).get();
+      if(ud.exists){const d=ud.data();userPlano=d.plano||'free';userPlanoExpira=d.planoExpira?d.planoExpira.toDate():null;userPlanoCiclo=d.planoCiclo||null;
+      if(userPlanoExpira&&userPlanoExpira<new Date()){userPlano='free';userPlanoExpira=null;userPlanoCiclo=null}}}catch(e){}
+      applyPlanRestrictions();updatePlanBadge();
       await loadSavedFromCloud();
       await requestPushPermission();
       checkNotifyParams();
@@ -3150,6 +3210,11 @@ async function syncUserDoc(user){
     data.isAdmin=phoneAdmin;
     data.fcmTokens=[];
     data.notificationsEnabled=true;
+    data.plano='free';
+    data.planoExpira=null;
+    data.planoCiclo=null;
+    data.mpSubscriptionId=null;
+    data.planoHistorico=[];
     await ref.set(data);
     isAdmin=phoneAdmin;
   }else{
@@ -3158,6 +3223,106 @@ async function syncUserDoc(user){
     isAdmin=phoneAdmin||doc.data().isAdmin||false;
   }
   document.getElementById('adminLink')?.classList.toggle('show',isAdmin);
+}
+
+// ══════ FREEMIUM — PLAN RESTRICTIONS ══════
+const FREE_LOTERIAS=new Set(['lotofacil','megasena','quina']);
+
+function applyPlanRestrictions(){
+  // Loterias
+  document.querySelectorAll('.loteria-card').forEach(el=>{
+    const key=el.dataset.loteria;
+    if(!FREE_LOTERIAS.has(key)&&isFree()){el.classList.add('locked');el.title='Disponivel no plano Pro'}
+    else{el.classList.remove('locked');el.title=''}
+  });
+  // Filtros avancados — Modo IA card
+  const iaCard=document.querySelector('.modelo-card[data-modelo="IA"]');
+  if(iaCard){if(isFree()){iaCard.classList.add('feature-locked');iaCard.setAttribute('data-locked','true')}else{iaCard.classList.remove('feature-locked');iaCard.removeAttribute('data-locked')}}
+  // Desdobramento
+  const desSec=document.getElementById('desdobramentoSection');
+  if(desSec){if(isFree()){desSec.classList.add('feature-locked');desSec.setAttribute('data-locked','true')}else{desSec.classList.remove('feature-locked');desSec.removeAttribute('data-locked')}}
+  // Monte Carlo
+  const mc=document.querySelector('.monte-carlo');
+  if(mc){if(isFree()){mc.classList.add('feature-locked');mc.setAttribute('data-locked','true')}else{mc.classList.remove('feature-locked');mc.removeAttribute('data-locked')}}
+  // Qtd jogos
+  const sel=document.getElementById('qtdJogos');
+  if(sel){
+    Array.from(sel.options).forEach(o=>{
+      const v=parseInt(o.value);
+      if(isFree()&&v>5)o.disabled=true;
+      else if(isPro()&&!isUltra()&&v>20)o.disabled=true;
+      else o.disabled=false;
+    });
+    if(isFree()&&parseInt(sel.value)>5)sel.value='5';
+    else if(isPro()&&!isUltra()&&parseInt(sel.value)>20)sel.value='20';
+  }
+}
+
+function updatePlanBadge(){
+  let b=document.getElementById('planBadge');
+  if(!b){b=document.createElement('span');b.id='planBadge';b.style.cssText='font-size:0.6rem;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:4px;vertical-align:middle';
+  const aa=document.getElementById('authArea');if(aa)aa.appendChild(b)}
+  if(userPlano==='pro'){b.textContent='⭐ Pro';b.style.background='var(--color-gold-dim)';b.style.color='var(--color-gold-primary)';b.style.display=''}
+  else if(userPlano==='ultra'){b.textContent='💎 Ultra';b.style.background='rgba(147,51,234,0.15)';b.style.color='#a78bfa';b.style.display=''}
+  else{b.style.display='none'}
+}
+
+let selectedPlan='pro',selectedCiclo='mensal';
+
+function showPaywall(planoMin,msg){
+  selectedPlan=planoMin||'pro';
+  document.getElementById('paywallMsg').textContent=msg||'';
+  document.getElementById('paywallModal').classList.add('active');
+  selectPlan(selectedPlan);setCiclo('mensal');
+}
+
+function selectPlan(p){
+  selectedPlan=p;
+  document.getElementById('planCardPro').style.borderColor=p==='pro'?'var(--color-gold-primary)':'rgba(255,255,255,0.1)';
+  document.getElementById('planCardUltra').style.borderColor=p==='ultra'?'var(--color-gold-primary)':'rgba(255,255,255,0.1)';
+  updatePrecoLabels();
+}
+
+function setCiclo(c){
+  selectedCiclo=c;
+  const m=document.getElementById('cicloMensal'),a=document.getElementById('cicloAnual');
+  if(c==='mensal'){m.style.background='var(--color-moss-primary)';m.style.color='#fff';m.style.borderColor='var(--color-moss-primary)';a.style.background='var(--bg-surface-2)';a.style.color='var(--text-secondary)';a.style.borderColor='var(--border-hover)'}
+  else{a.style.background='var(--color-moss-primary)';a.style.color='#fff';a.style.borderColor='var(--color-moss-primary)';m.style.background='var(--bg-surface-2)';m.style.color='var(--text-secondary)';m.style.borderColor='var(--border-hover)'}
+  updatePrecoLabels();
+}
+
+function updatePrecoLabels(){
+  const p={'pro-mensal':'R$9,90/mes','pro-anual':'R$79,90/ano','ultra-mensal':'R$19,90/mes','ultra-anual':'R$149,90/ano'};
+  document.getElementById('proPrecoLabel').textContent=p['pro-'+selectedCiclo];
+  document.getElementById('ultraPrecoLabel').textContent=p['ultra-'+selectedCiclo];
+}
+
+async function iniciarPagamento(){
+  const btn=document.getElementById('paywallCTA');
+  btn.disabled=true;btn.textContent='Processando...';
+  try{
+    const token=await currentUser.getIdToken();
+    const resp=await fetch('https://southamerica-east1-lottobot-8d75e.cloudfunctions.net/mpCreatePreference',{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({plano:selectedPlan,ciclo:selectedCiclo})
+    });
+    const data=await resp.json();
+    if(data.url){window.open(data.url,'_blank')}else{throw new Error(data.error||'Erro')}
+  }catch(err){console.error('Pagamento erro:',err);showToast('Erro ao iniciar pagamento. Tente novamente.','error')}
+  finally{btn.disabled=false;btn.textContent='Assinar agora'}
+}
+
+function checkPagamentoRetorno(){
+  const params=new URLSearchParams(location.search);
+  const st=params.get('pagamento');
+  if(!st)return;
+  if(st==='sucesso'){
+    showToast('Pagamento aprovado! Seu plano foi ativado.');
+    setTimeout(async()=>{if(currentUser){try{const d=await _db.collection('users').doc(currentUser.uid).get();
+    if(d.exists){userPlano=d.data().plano||'free';userPlanoExpira=d.data().planoExpira?.toDate()||null;userPlanoCiclo=d.data().planoCiclo||null;applyPlanRestrictions();updatePlanBadge()}}catch(e){}}},3000);
+  }else if(st==='falha'){showToast('Pagamento nao aprovado. Tente outro metodo.')}
+  else if(st==='pendente'){showToast('Pagamento pendente. Voce sera notificado quando aprovado.')}
+  history.replaceState(null,'',location.pathname);
 }
 
 function loginGoogle(){
@@ -3255,6 +3420,14 @@ async function openProfileModal(){
       <div class="profile-row"><span class="profile-label">Telefone</span><span class="profile-value">${esc(phone)}</span></div>
       <div class="profile-row"><span class="profile-label">Login via</span><span class="profile-value">${esc(provider)}</span></div>
       <div class="profile-row"><span class="profile-label">UID</span><span class="profile-value" style="font-size:0.6rem;opacity:0.5">${esc(currentUser.uid)}</span></div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">Meu Plano</div>
+      <div class="profile-row"><span class="profile-label">Plano atual</span><span class="profile-value">${userPlano==='ultra'?'💎 Ultra':userPlano==='pro'?'⭐ Pro':'Free'}</span></div>
+      ${userPlano!=='free'?`<div class="profile-row"><span class="profile-label">Expira em</span><span class="profile-value">${userPlanoExpira?userPlanoExpira.toLocaleDateString('pt-BR'):'—'}</span></div>
+      <div class="profile-row"><span class="profile-label">Ciclo</span><span class="profile-value">${userPlanoCiclo==='anual'?'Anual':'Mensal'}</span></div>`
+      :`<button onclick="showPaywall('pro','Desbloqueie todo o potencial do Lottobot!')" style="margin-top:8px;width:100%;padding:10px;border-radius:8px;background:linear-gradient(135deg,var(--color-moss-primary),#3a6a48);color:#fff;font-weight:600;font-size:0.85rem;border:none;cursor:pointer">🚀 Fazer Upgrade</button>`}
     </div>
 
     <div class="profile-section">
@@ -3550,6 +3723,7 @@ function checkNotifyParams(){
 // ══════ LOTTERY SWITCH ══════
 async function switchLottery(key){
   if(key===selectedLottery)return;
+  if(isFree()&&!FREE_LOTERIAS.has(key)){showPaywall('pro','Desbloqueie todas as 8 loterias com o plano Pro!');return}
   selectedLottery=key;
   document.querySelectorAll('.loteria-card').forEach(el=>el.classList.toggle('active',el.dataset.loteria===key));
   document.querySelectorAll('.loteria-stat-btn').forEach(el=>el.classList.toggle('active',el.dataset.statLot===key));
@@ -3684,6 +3858,7 @@ function setupEventListeners(){
   });
   document.getElementById('toggleDesdobramento')?.addEventListener('click',function(e){
     e.stopPropagation();
+    if(isFree()){showPaywall('pro','Desdobramento disponivel no plano Pro!');return}
     if(getLottery().columns){showToast('Super Sete usa colunas independentes. Desdobramento nao disponivel.');return}
     this.classList.toggle('on');
     updateDesdobramentoUI();
@@ -3894,7 +4069,9 @@ function gerarJogos(){
     gerarModoIA(()=>{btn.classList.remove('loading');btn.textContent='🎲 Gerar Números'});
     return;
   }
-  const qtd=parseInt(document.getElementById('qtdJogos').value);
+  let qtd=parseInt(document.getElementById('qtdJogos').value);
+  if(isFree()&&qtd>5)qtd=5;
+  else if(isPro()&&!isUltra()&&qtd>20)qtd=20;
   let mod=getModelos()[selectedModelo];
   if(!mod){selectedModelo='B';mod=getModelos()[selectedModelo]}
   if(!mod){selectedModelo=Object.keys(getModelos())[0];mod=getModelos()[selectedModelo]}
@@ -4360,6 +4537,7 @@ function confirmManualCheck(){
 }
 
 function salvar(i){
+  if(isFree()&&saved.length>=10){showPaywall('pro','Salve jogos ilimitados com o plano Pro! (Limite: 10 no Free)');return}
   const j=jogos[i];if(saved.some(s=>s.n.join(',')=== j.join(','))){showToast('⚠️ Já salvo');return}
   const game={n:[...j],score:j.score,mod:selectedModelo,ref:concRef,dt:new Date().toLocaleDateString('pt-BR'),id:Date.now(),lot:selectedLottery};
   if(j.mes)game.mes=j.mes;
@@ -4806,6 +4984,7 @@ function switchTab(tab){
 }
 
 function selectModelo(m){
+  if(m==='IA'&&isFree()){showPaywall('pro','Modo I.A. disponivel no plano Pro!');return}
   selectedModelo=m;
   document.querySelectorAll('.modelo-card[data-modelo]').forEach(el=>el.classList.toggle('active',el.dataset.modelo===m));
   const desc=document.getElementById('modeloDesc');

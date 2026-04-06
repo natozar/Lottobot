@@ -3,6 +3,9 @@ const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 
+// MP_ACCESS_TOKEN — stored in Firestore: bets_meta/mp_config { accessToken: "..." }
+// Set manually in Firebase Console > Firestore > bets_meta > mp_config
+
 admin.initializeApp();
 const db = admin.firestore();
 const messaging = admin.messaging();
@@ -1602,4 +1605,151 @@ exports.checkBetsRodada = onSchedule({
       console.error(`Error generating bets blog for ${sport.key}:`, e.message);
     }
   }
+});
+
+// ══════════════════════════════════════════════
+// 6. MERCADO PAGO — WEBHOOK
+// ══════════════════════════════════════════════
+async function getMpToken() {
+  const snap = await db.collection("bets_meta").doc("mp_config").get();
+  return snap.exists ? snap.data().accessToken : null;
+}
+
+exports.mpWebhook = onRequest({
+  region: "southamerica-east1"
+}, async (req, res) => {
+  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+
+  const mpToken = await getMpToken();
+  if (!mpToken) { console.error("MP_ACCESS_TOKEN not configured"); return res.status(500).send("Not configured"); }
+
+  const { type, data } = req.body || {};
+
+  try {
+    if (type === "payment" && data?.id) {
+      const payResp = await fetch(
+        `https://api.mercadopago.com/v1/payments/${data.id}`,
+        { headers: { Authorization: `Bearer ${mpToken}` } }
+      );
+      const payment = await payResp.json();
+
+      if (payment.status === "approved") {
+        const uid = payment.metadata?.firebase_uid || payment.external_reference;
+        if (!uid) { console.error("mpWebhook: no UID in payment", data.id); return res.status(400).send("No UID"); }
+
+        const plano = payment.metadata?.plano || "pro";
+        const ciclo = payment.metadata?.ciclo || "mensal";
+
+        const agora = new Date();
+        const expira = new Date(agora);
+        if (ciclo === "anual") expira.setFullYear(expira.getFullYear() + 1);
+        else expira.setMonth(expira.getMonth() + 1);
+
+        await db.collection("users").doc(uid).update({
+          plano,
+          planoExpira: admin.firestore.Timestamp.fromDate(expira),
+          planoCiclo: ciclo,
+          mpSubscriptionId: String(data.id),
+          planoHistorico: admin.firestore.FieldValue.arrayUnion({
+            plano, ciclo,
+            inicio: agora.toISOString(),
+            fim: expira.toISOString(),
+            paymentId: String(data.id)
+          })
+        });
+        console.log(`Plan activated: ${uid} → ${plano}/${ciclo} until ${expira.toISOString()}`);
+      }
+    }
+    res.status(200).send("OK");
+  } catch (err) {
+    console.error("mpWebhook error:", err.message);
+    res.status(500).send("Error");
+  }
+});
+
+// ══════════════════════════════════════════════
+// 7. MERCADO PAGO — CREATE PREFERENCE
+// ══════════════════════════════════════════════
+exports.mpCreatePreference = onRequest({
+  region: "southamerica-east1",
+  cors: true
+}, async (req, res) => {
+  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) return res.status(401).send("No auth");
+
+  let decoded;
+  try {
+    decoded = await admin.auth().verifyIdToken(authHeader.split("Bearer ")[1]);
+  } catch {
+    return res.status(401).send("Invalid token");
+  }
+
+  const { plano, ciclo } = req.body || {};
+  const precos = {
+    "pro-mensal":   { preco: 9.90,   titulo: "Lottobot Pro — Mensal" },
+    "pro-anual":    { preco: 79.90,  titulo: "Lottobot Pro — Anual (33% OFF)" },
+    "ultra-mensal": { preco: 19.90,  titulo: "Lottobot Ultra — Mensal" },
+    "ultra-anual":  { preco: 149.90, titulo: "Lottobot Ultra — Anual (37% OFF)" },
+  };
+
+  const item = precos[`${plano}-${ciclo}`];
+  if (!item) return res.status(400).json({ error: "Plano invalido" });
+
+  const preference = {
+    items: [{ title: item.titulo, quantity: 1, unit_price: item.preco, currency_id: "BRL" }],
+    metadata: { firebase_uid: decoded.uid, plano, ciclo },
+    back_urls: {
+      success: "https://lottobot.com.br/?pagamento=sucesso",
+      failure: "https://lottobot.com.br/?pagamento=falha",
+      pending: "https://lottobot.com.br/?pagamento=pendente"
+    },
+    auto_return: "approved",
+    notification_url: "https://southamerica-east1-lottobot-8d75e.cloudfunctions.net/mpWebhook",
+    statement_descriptor: "LOTTOBOT",
+    external_reference: decoded.uid
+  };
+
+  const mpToken = await getMpToken();
+  if (!mpToken) return res.status(500).json({ error: "Pagamento nao configurado" });
+
+  try {
+    const mpResp = await fetch("https://api.mercadopago.com/checkout/preferences", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${mpToken}` },
+      body: JSON.stringify(preference)
+    });
+    const mpData = await mpResp.json();
+    if (!mpData.init_point) throw new Error(mpData.message || "No init_point");
+    res.json({ url: mpData.init_point, id: mpData.id });
+  } catch (err) {
+    console.error("mpCreatePreference error:", err.message);
+    res.status(500).json({ error: "Erro ao criar pagamento" });
+  }
+});
+
+// ══════════════════════════════════════════════
+// 8. CHECK EXPIRED PLANS — runs every 6 hours
+// ══════════════════════════════════════════════
+exports.checkPlanosExpirados = onSchedule({
+  schedule: "every 6 hours",
+  timeZone: "America/Sao_Paulo",
+  region: "southamerica-east1",
+  timeoutSeconds: 120
+}, async () => {
+  const agora = admin.firestore.Timestamp.now();
+  const snap = await db.collection("users")
+    .where("plano", "in", ["pro", "ultra"])
+    .where("planoExpira", "<=", agora)
+    .get();
+
+  if (snap.empty) { console.log("No expired plans"); return; }
+
+  const batch = db.batch();
+  snap.docs.forEach(doc => {
+    batch.update(doc.ref, { plano: "free", planoCiclo: null, mpSubscriptionId: null });
+  });
+  await batch.commit();
+  console.log(`${snap.size} expired plans downgraded to free`);
 });

@@ -2,8 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Users: own data only, admin can read all
+    // Plan fields (plano, planoExpira, planoCiclo, mpSubscriptionId, planoHistorico)
+    // can only be written by Cloud Functions (admin SDK)
     match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['plano', 'planoExpira', 'planoCiclo', 'mpSubscriptionId', 'planoHistorico']);
       allow read: if request.auth != null &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
 
@@ -15,6 +20,12 @@ service cloud.firestore {
     // Draws: read-only for clients
     match /draws/{drawId} {
       allow read: if request.auth != null;
+    }
+
+    // Blog posts: readable by all (SSR function reads via admin SDK anyway)
+    match /blog_posts/{postId} {
+      allow read: if true;
+      allow write: if false;
     }
 
     // Config: readable by all auth users, writable by admin
