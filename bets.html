@@ -152,6 +152,17 @@
     /* STALE WARNING */
     .stale-warning{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:var(--border-radius-sm);padding:8px 12px;font-size:0.68rem;color:#f59e0b;margin-bottom:12px;text-align:center}
 
+    /* Recomendacao da I.A. */
+    .vb-card{background:var(--bg-surface-2);border:1px solid var(--border-default);border-radius:var(--border-radius-sm);padding:10px 12px;margin-top:6px}
+    .vb-card.vb-top{background:rgba(212,168,83,0.06);border-color:rgba(212,168,83,0.25)}
+    .vb-action{display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;margin-bottom:4px}
+    .vb-where{font-size:0.65rem;color:var(--text-secondary);margin-bottom:2px}
+    .vb-confidence{font-size:0.62rem;color:var(--text-muted);margin-bottom:6px}
+    .vb-link{display:inline-block;font-size:0.65rem;font-weight:700;color:var(--color-gold-primary);text-decoration:none;padding:6px 14px;border:1px solid var(--color-gold-primary);border-radius:6px;transition:all 0.15s;text-align:center;width:100%;box-sizing:border-box}
+    .vb-link:hover{background:var(--color-gold-dim)}
+    .sure-leg a{display:block;font-size:0.58rem;color:#10b981;text-decoration:none;margin-top:4px;font-weight:600}
+    .sure-leg a:hover{text-decoration:underline}
+
     /* RESPONSIVE */
     @media(max-width:768px){header{padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px))}.main{padding:12px}.header-logo{font-size:0.85rem}}
     @media(max-width:480px){.odds-grid{gap:4px}.odd-cell{padding:6px 2px}.odd-value{font-size:0.8rem}.game-teams{font-size:0.82rem}.filter-row{gap:4px}.chip{padding:4px 8px;font-size:0.62rem}}
@@ -188,6 +199,22 @@
       <!-- Scanner (shown when logged in) -->
       <div id="scanner" style="display:none">
         <div id="staleWarning" class="stale-warning" style="display:none"></div>
+
+        <div style="text-align:center;margin-bottom:16px;padding:12px;background:linear-gradient(135deg,rgba(212,168,83,0.08),rgba(212,168,83,0.02));border:1px solid rgba(212,168,83,0.15);border-radius:var(--border-radius-lg)">
+          <div style="font-size:0.85rem;font-weight:700;color:var(--color-gold-primary);margin-bottom:4px">&#x1F916; Lottobot I.A. — Analise de Odds</div>
+          <div style="font-size:0.65rem;color:var(--text-secondary);line-height:1.5">Nossa inteligencia artificial monitora as odds de multiplas casas de apostas e identifica <b style="color:var(--color-gold-primary)">oportunidades com margem positiva</b>. Quanto maior o Edge, maior a vantagem detectada pela I.A.</div>
+        </div>
+
+        <details style="margin-bottom:12px;font-size:0.65rem;color:var(--text-muted)">
+          <summary style="cursor:pointer;font-weight:600;color:var(--text-secondary);font-size:0.7rem;padding:6px 0">&#x2139;&#xFE0F; Como funciona?</summary>
+          <div style="padding:8px 12px;background:var(--bg-surface-1);border-radius:var(--border-radius-sm);margin-top:6px;line-height:1.7">
+            <p><b style="color:var(--color-gold-primary)">Value Bet</b> — A I.A. detectou que a odd oferecida por uma casa esta acima do valor justo calculado. Exemplo: se o valor justo e 1.85 e a casa paga 2.10, voce tem <b>+13.5% de vantagem</b>.</p>
+            <p style="margin-top:6px"><b style="color:#10b981">Arbitragem</b> — Combinacao de apostas em casas diferentes que garante lucro independente do resultado. Extremamente raro, mas nossa I.A. detecta automaticamente.</p>
+            <p style="margin-top:6px"><b>Edge %</b> — Sua vantagem sobre a casa. Acima de 5% e forte. Acima de 10% e excepcional.</p>
+            <p style="margin-top:6px"><b>Odd Justa</b> — O valor que a I.A. calcula como probabilidade real do evento, sem a margem da casa.</p>
+            <p style="margin-top:6px"><b style="color:#f59e0b">&#x26A0;&#xFE0F; Atencao</b> — Aposte com responsabilidade. Value bets indicam vantagem estatistica, nao garantia de acerto individual.</p>
+          </div>
+        </details>
 
         <div class="filters-bar">
           <div class="filter-row">
@@ -353,6 +380,36 @@ function freshnessColor(ts){
   return'#ef4444';
 }
 function edgeClass(edge){return edge>=10?'edge-high':edge>=5?'edge-medium':'edge-low'}
+
+const BOOKMAKER_LINKS={
+  'betano':'https://www.betano.com.br/',
+  'bet365':'https://www.bet365.com/',
+  'superbet':'https://superbet.com.br/',
+  'betfair':'https://www.betfair.com/sport/football',
+  'pinnacle':'https://www.pinnacle.com/pt/soccer',
+  'williamhill':'https://sports.williamhill.com/betting/pt-br/football',
+  '1xbet':'https://1xbet.com/pt/line/football',
+  'novibet':'https://www.novibet.com.br/',
+  'betsul':'https://www.betsul.com/',
+  'sportingbet':'https://sports.sportingbet.com/pt-br/sports',
+  'betsson':'https://www.betsson.com/br/apostas-esportivas',
+  'rivalo':'https://www.rivalo.com/pt-br/sports',
+  'pixbet':'https://pixbet.com/',
+  'galera_bet':'https://www.gfrfreer.bet/',
+  'parimatch':'https://parimatch.com/pt/',
+  'marathonbet':'https://www.marathonbet.com/pt/betting/Football/',
+  'unibet':'https://www.unibet.com/betting/sports/filter/football',
+  'coolbet':'https://www.coolbet.com/en/sport/soccer',
+  'nordicbet':'https://www.nordicbet.com/en/sport/soccer'
+};
+function getBookmakerUrl(bookmakerKey,bookmakerTitle){
+  const key=(bookmakerKey||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(BOOKMAKER_LINKS[bookmakerKey])return BOOKMAKER_LINKS[bookmakerKey];
+  for(const[k,url]of Object.entries(BOOKMAKER_LINKS)){
+    if(key.includes(k)||k.includes(key))return url;
+  }
+  return'https://www.google.com/search?q='+encodeURIComponent((bookmakerTitle||bookmakerKey)+' apostas esportivas');
+}
 function getSportInfo(key){return SPORTS.find(s=>s.key===key)||{name:key,flag:''}}
 
 function timeUntil(iso){
@@ -373,7 +430,7 @@ function getBestOdds(event,marketKey){
     mkt.outcomes.forEach(out=>{
       const k=out.name+(out.point!=null?'|'+out.point:'');
       if(!best[k]||out.price>best[k].price){
-        best[k]={name:out.name,price:out.price,bookmaker:bk.title,point:out.point};
+        best[k]={name:out.name,price:out.price,bookmaker:bk.title,bookmakerKey:bk.key,point:out.point};
       }
     });
   });
@@ -470,6 +527,7 @@ function renderAll(){
             <div class="leg-odd">@${o.price.toFixed(2)}</div>
             <div class="leg-bk">${esc(o.bookmaker)}</div>
             <div class="leg-stake">Stake: ${o.stake}%</div>
+            <a href="${getBookmakerUrl(o.bookmakerKey||'',o.bookmaker)}" target="_blank" rel="noopener">Apostar \u2192</a>
           </div>`).join('')}
         </div>
       </div>`).join('')).join('');
@@ -501,11 +559,11 @@ function renderAll(){
           ${entries.map(o=>{
             const isBest=vbs.some(v=>v.outcome===o.name&&v.market==='h2h');
             const label=o.name===ev.home?'1':o.name===ev.away?'2':(labels[o.name]||o.name);
-            return`<div class="odd-cell${isBest?' best':''}">
+            return`<a href="${getBookmakerUrl(o.bookmakerKey||'',o.bookmaker)}" target="_blank" rel="noopener" class="odd-cell${isBest?' best':''}" style="text-decoration:none;color:inherit">
               <div class="odd-label">${esc(label)}</div>
               <div class="odd-value">${o.price.toFixed(2)}</div>
               <div class="odd-bookmaker">${esc(o.bookmaker)}</div>
-            </div>`;}).join('')}</div>`;
+            </a>`;}).join('')}</div>`;
       }
     }
     if(activeMarkets.has('totals')){
@@ -516,34 +574,53 @@ function renderAll(){
           ${entries.map(o=>{
             const isBest=vbs.some(v=>v.outcome===o.name&&v.market==='totals');
             const label=(o.name==='Over'?'Over':'Under')+(o.point!=null?' '+o.point:'');
-            return`<div class="odd-cell${isBest?' best':''}">
+            return`<a href="${getBookmakerUrl(o.bookmakerKey||'',o.bookmaker)}" target="_blank" rel="noopener" class="odd-cell${isBest?' best':''}" style="text-decoration:none;color:inherit">
               <div class="odd-label">${label}</div>
               <div class="odd-value">${o.price.toFixed(2)}</div>
               <div class="odd-bookmaker">${esc(o.bookmaker)}</div>
-            </div>`;}).join('')}</div>`;
+            </a>`;}).join('')}</div>`;
       }
     }
 
-    // Value bets
+    // Value bets com acao
     let vbHTML='';
     if(hasVb){
-      // Filter by active markets
       const filtered=vbs.filter(v=>activeMarkets.has(v.market));
       if(filtered.length){
+        const bkCount=(ev.bookmakers||[]).length;
+        const confLabel=bkCount>=5?'Alta':bkCount>=3?'Media':'Baixa';
+        const confDetail=bkCount>=5?'(5+ casas analisadas)':bkCount>=3?'(3-4 casas)':'(2 casas)';
         vbHTML=`<div class="value-bets">
-          <div class="vb-title">\u{1F4CA} Value Bets: <span class="badge badge-value">VALUE BET</span></div>
-          ${filtered.slice(0,5).map(v=>{
+          <div class="vb-title">\u{1F916} Recomendacao da I.A.:</div>
+          ${filtered.slice(0,5).map((v,i)=>{
             const nameDisplay=v.outcome==='Draw'?'Empate':v.outcome;
-            return`<div class="vb-item">
-              <span class="vb-outcome">\u26A1 ${esc(nameDisplay)}${v.point!=null?' '+v.point:''}</span>
-              <span class="vb-detail">@${v.price.toFixed(2)} (${esc(v.bookmaker)})</span>
-              <span class="vb-detail">Justo: ${v.fairOdd.toFixed(2)}</span>
-              <span class="vb-edge ${edgeClass(v.edge)}">+${v.edge.toFixed(1)}%</span>
+            const marketLabel=v.market==='h2h'?'':(v.market==='totals'?(v.outcome==='Over'?'Over ':'Under ')+(v.point||''):'');
+            const displayName=v.market==='h2h'?nameDisplay:marketLabel;
+            const bkUrl=getBookmakerUrl(v.bookmakerKey||'',v.bookmaker);
+            const isTop=i===0;
+            return`<div class="vb-card${isTop?' vb-top':''}">
+              <div class="vb-action">
+                <span>\u26A1 <b>Apostar: ${esc(displayName)}</b></span>
+                <span class="vb-edge ${edgeClass(v.edge)}">+${v.edge.toFixed(1)}%</span>
+              </div>
+              <div class="vb-where">
+                \u{1F4CD} Onde: <b>${esc(v.bookmaker)}</b> @${v.price.toFixed(2)} \u00B7 Justo: ${v.fairOdd.toFixed(2)}
+              </div>
+              <div class="vb-confidence">
+                \u{1F3AF} Confianca: <b>${confLabel}</b> ${confDetail}
+              </div>
+              <a href="${bkUrl}" target="_blank" rel="noopener" class="vb-link">
+                Apostar na ${esc(v.bookmaker)} \u2192
+              </a>
             </div>`;}).join('')}</div>`;
       }
     }
     if(!vbHTML&&!hasSb){
-      vbHTML=`<div class="value-bets"><div class="vb-title" style="opacity:0.5"><span class="badge badge-no-op">SEM OPORTUNIDADES</span></div></div>`;
+      vbHTML=`<div class="value-bets">
+        <div style="font-size:0.65rem;color:var(--text-muted);padding:6px 0">
+          \u{1F916} I.A.: Odds equilibradas entre as casas. Sem vantagem detectada no momento.
+        </div>
+      </div>`;
     }
 
     // Sure bets inside card
@@ -558,6 +635,7 @@ function renderAll(){
               <div class="leg-odd">@${o.price.toFixed(2)}</div>
               <div class="leg-bk">${esc(o.bookmaker)}</div>
               <div class="leg-stake">Stake: ${o.stake}%</div>
+              <a href="${getBookmakerUrl(o.bookmakerKey||'',o.bookmaker)}" target="_blank" rel="noopener">Apostar \u2192</a>
             </div>`).join('')}
           </div>
         </div>`).join('');

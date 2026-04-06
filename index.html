@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v55';
+    var V='lottobot-v56';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2494,6 +2494,7 @@
           <button class="btn-export" onclick="exportSavedCopy()">📋 Copiar todos</button>
           <button class="btn-export" onclick="exportSavedWhatsApp()">💬 WhatsApp</button>
           <button class="btn-export" onclick="exportSavedPDF()">📄 PDF</button>
+          <button class="btn-export" onclick="clearAllSaved()" style="margin-left:auto;border-color:rgba(239,68,68,0.3);color:#ef4444">🗑️ Limpar</button>
         </div>
         <div id="savedContainer"></div>
       </div>
@@ -4535,8 +4536,41 @@ function renderSaved(){
     }
     return `<div class="saved-item">
     <div><div class="saved-nums">${g.n.map(n=>pad(n)).join('-')}</div>${g.mes?'<div style="font-size:0.65rem;color:var(--color-gold-primary)">🗓️ '+g.mes+'</div>':''}${g.trevos?'<div style="font-size:0.65rem;color:var(--color-gold-primary)">🍀 '+g.trevos.join(', ')+'</div>':''}${g.time?'<div style="font-size:0.65rem;color:var(--color-gold-primary)">⚽ '+g.time+'</div>':''}<div class="saved-meta">${g.dt} · M${g.mod} · #${g.ref}</div>${checkHtml}</div>
-    <div class="saved-score">${g.score}</div></div>`;
+    <div style="display:flex;align-items:center;gap:4px"><div class="saved-score">${g.score}</div><button onclick="deleteSavedGame(${g.id})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.7rem;padding:4px;opacity:0.5" title="Excluir">\u2715</button></div></div>`;
   }).join('');
+}
+
+async function clearAllSaved(){
+  if(!saved.length)return;
+  if(!confirm('Excluir todos os '+saved.length+' jogos salvos? Esta acao nao pode ser desfeita.'))return;
+  saved=[];
+  persist();
+  renderSaved();
+  updateStats();
+  if(currentUser){
+    try{
+      const snap=await _db.collection('users').doc(currentUser.uid).collection('savedGames').get();
+      const batch=_db.batch();
+      snap.forEach(doc=>batch.delete(doc.ref));
+      await batch.commit();
+    }catch(e){console.error('Erro ao limpar savedGames:',e)}
+  }
+  showToast('Jogos salvos excluidos');
+}
+
+async function deleteSavedGame(id){
+  const idx=saved.findIndex(g=>g.id===id);
+  if(idx===-1)return;
+  saved.splice(idx,1);
+  persist();
+  renderSaved();
+  updateStats();
+  if(currentUser){
+    try{
+      await _db.collection('users').doc(currentUser.uid).collection('savedGames').doc(String(id)).delete();
+    }catch(e){console.error('Erro ao deletar savedGame:',e)}
+  }
+  showToast('Jogo removido');
 }
 
 // ══════ FILTER TAB ══════
