@@ -1522,7 +1522,8 @@ exports.fetchBetsOdds = onSchedule({
       if (!resp.ok) { errors.push({ sport: sport.key, status: resp.status, time: new Date().toISOString() }); continue; }
 
       const events = await resp.json();
-      const cutoff = now + 48 * 3600000;
+      // 7 days window — Serie A/B games can be scheduled far ahead
+      const cutoff = now + 7 * 24 * 3600000;
       const upcoming = events.filter(e => {
         const t = new Date(e.commence_time).getTime();
         return t > now && t < cutoff;
