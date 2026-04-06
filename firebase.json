@@ -10,10 +10,26 @@
       ".gitignore"
     ],
     "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
+      { "source": "/lotofacil", "function": "ssrPages" },
+      { "source": "/lotofacil/**", "function": "ssrPages" },
+      { "source": "/mega-sena", "function": "ssrPages" },
+      { "source": "/mega-sena/**", "function": "ssrPages" },
+      { "source": "/quina", "function": "ssrPages" },
+      { "source": "/quina/**", "function": "ssrPages" },
+      { "source": "/dupla-sena", "function": "ssrPages" },
+      { "source": "/dupla-sena/**", "function": "ssrPages" },
+      { "source": "/dia-de-sorte", "function": "ssrPages" },
+      { "source": "/dia-de-sorte/**", "function": "ssrPages" },
+      { "source": "/super-sete", "function": "ssrPages" },
+      { "source": "/super-sete/**", "function": "ssrPages" },
+      { "source": "/mais-milionaria", "function": "ssrPages" },
+      { "source": "/mais-milionaria/**", "function": "ssrPages" },
+      { "source": "/timemania", "function": "ssrPages" },
+      { "source": "/timemania/**", "function": "ssrPages" },
+      { "source": "/blog", "function": "ssrPages" },
+      { "source": "/blog/**", "function": "ssrPages" },
+      { "source": "/sitemap.xml", "function": "ssrPages" },
+      { "source": "**", "destination": "/index.html" }
     ],
     "headers": [
       {
