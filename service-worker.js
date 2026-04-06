@@ -46,7 +46,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ══════ CACHE (existing functionality) ══════
-const CACHE_NAME = 'lottobot-v57';
+const CACHE_NAME = 'lottobot-v58';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -100,7 +100,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Skip SSR pages — served by Cloud Functions, not cached by SW
-  const ssrRoutes = ['/lotofacil','/mega-sena','/quina','/dupla-sena','/dia-de-sorte','/super-sete','/mais-milionaria','/timemania','/blog','/sitemap.xml'];
+  const ssrRoutes = ['/lotofacil','/mega-sena','/quina','/dupla-sena','/dia-de-sorte','/super-sete','/mais-milionaria','/timemania','/bets','/blog','/sitemap.xml'];
   if (ssrRoutes.some(r => url.pathname === r || url.pathname.startsWith(r + '/'))) {
     return;
   }

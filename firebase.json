@@ -26,6 +26,8 @@
       { "source": "/mais-milionaria/**", "function": "ssrPages" },
       { "source": "/timemania", "function": "ssrPages" },
       { "source": "/timemania/**", "function": "ssrPages" },
+      { "source": "/bets", "function": "ssrPages" },
+      { "source": "/bets/**", "function": "ssrPages" },
       { "source": "/blog", "function": "ssrPages" },
       { "source": "/blog/**", "function": "ssrPages" },
       { "source": "/sitemap.xml", "function": "ssrPages" },
