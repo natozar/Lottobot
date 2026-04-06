@@ -485,6 +485,102 @@ async function gerarArtigoBets(ligaKey, ligaNome, eventos, valueBets, sureBets) 
 // ══════════════════════════════════════════════
 // SSR TEMPLATES — CSS compartilhado
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// SCHEMA MARKUP — JSON-LD helpers
+// ══════════════════════════════════════════════
+function schemaOrg() {
+  return { "@context": "https://schema.org", "@type": "Organization", "name": "Lottobot", "url": "https://lottobot.com.br", "logo": "https://lottobot.com.br/icons/icon-512x512.png", "description": "Gerador analitico inteligente de loterias brasileiras" };
+}
+
+function schemaSoftwareApp() {
+  return { "@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Lottobot", "operatingSystem": "Web, Android, iOS", "applicationCategory": "UtilitiesApplication", "offers": { "@type": "AggregateOffer", "lowPrice": "0", "highPrice": "19.90", "priceCurrency": "BRL", "offerCount": "3" } };
+}
+
+function schemaBreadcrumb(items) {
+  return { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": items.map((it, i) => ({ "@type": "ListItem", "position": i + 1, "name": it.name, "item": `https://lottobot.com.br${it.url}` })) };
+}
+
+function schemaPageLoteria(loteria, dados, stats) {
+  const nums = (dados.listaDezenas || dados.dezenas || dados.numeros || []).map(String);
+  const concurso = dados.concurso || dados.numero;
+  const acum = dados.valorAcumuladoProximoConcurso || dados.valorAcumulado || 0;
+  const acumFmt = (acum / 1e6).toFixed(1);
+  const dataStr = dados.dataApuracao || dados.data || '';
+  const qTop = stats.quentes ? stats.quentes.slice(0, 5).map(q => q[0]).join(', ') : '';
+
+  const webPage = { "@context": "https://schema.org", "@type": "WebPage", "name": `Resultado ${loteria.nomeFull} Concurso ${concurso}`, "description": `Numeros sorteados ${loteria.nomeFull} concurso ${concurso}: ${nums.join(', ')}.`, "url": `https://lottobot.com.br/${loteria.slug}`, "dateModified": new Date().toISOString(), "isPartOf": { "@type": "WebSite", "name": "Lottobot", "url": "https://lottobot.com.br" }, "mainEntity": { "@type": "Dataset", "name": `Resultados ${loteria.nomeFull}`, "description": `Base de dados com resultados da ${loteria.nomeFull}`, "url": `https://lottobot.com.br/${loteria.slug}/estatisticas`, "creator": { "@type": "Organization", "name": "Caixa Economica Federal" }, "temporalCoverage": "1996/.." } };
+
+  const faq = { "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+    { "@type": "Question", "name": `Qual o resultado da ${loteria.nomeFull} concurso ${concurso}?`, "acceptedAnswer": { "@type": "Answer", "text": `Os numeros sorteados da ${loteria.nomeFull} concurso ${concurso} foram: ${nums.join(', ')}. Sorteio realizado em ${dataStr}.${acum > 0 ? ' Proximo concurso acumulado em R$' + acumFmt + ' milhoes.' : ''}` } },
+    { "@type": "Question", "name": `Quais os numeros que mais saem na ${loteria.nomeFull}?`, "acceptedAnswer": { "@type": "Answer", "text": `Os numeros mais frequentes nos ultimos ${stats.totalConcursos} concursos sao: ${qTop}. Use o Lottobot para gerar combinacoes inteligentes baseadas nessa analise.` } },
+    { "@type": "Question", "name": `Como jogar na ${loteria.nomeFull}?`, "acceptedAnswer": { "@type": "Answer", "text": `Na ${loteria.nomeFull} voce escolhe ${loteria.pick} numeros de 1 a ${loteria.numeros}. No Lottobot, voce pode gerar combinacoes otimizadas com analise estatistica e modo IA gratuitamente.` } },
+    { "@type": "Question", "name": `A ${loteria.nomeFull} acumulou?`, "acceptedAnswer": { "@type": "Answer", "text": acum > 0 ? `Sim, o premio acumulou para R$${acumFmt} milhoes.` : 'Nao, houve ganhadores neste concurso.' } },
+    { "@type": "Question", "name": 'O Lottobot e gratuito?', "acceptedAnswer": { "@type": "Answer", "text": 'Sim! O plano gratuito inclui gerador basico para Lotofacil, Mega-Sena e Quina. Os planos Pro (R$9,90/mes) e Ultra (R$19,90/mes) desbloqueiam todas as 8 loterias, modo IA, filtros avancados e Bets Scanner.' } }
+  ] };
+
+  return [webPage, faq];
+}
+
+function schemaEstatisticas(loteria, stats) {
+  const qTop = stats.quentes ? stats.quentes.slice(0, 10).map(q => q[0]).join(', ') : '';
+  const fTop = stats.frios ? stats.frios.slice(0, 10).map(q => q[0]).join(', ') : '';
+
+  const dataset = { "@context": "https://schema.org", "@type": "Dataset", "name": `Estatisticas ${loteria.nomeFull}`, "description": `Analise estatistica da ${loteria.nomeFull}: numeros mais sorteados, frios, atrasados e padroes dos ultimos ${stats.totalConcursos} concursos.`, "url": `https://lottobot.com.br/${loteria.slug}/estatisticas`, "creator": { "@type": "Organization", "name": "Lottobot" }, "keywords": [loteria.nomeFull, "estatisticas", "numeros quentes", "numeros frios", "frequencia"] };
+
+  const howTo = { "@context": "https://schema.org", "@type": "HowTo", "name": `Como usar estatisticas para jogar na ${loteria.nomeFull}`, "description": `Aprenda a usar dados estatisticos para montar jogos inteligentes na ${loteria.nomeFull}.`, "totalTime": "PT5M", "estimatedCost": { "@type": "MonetaryAmount", "currency": "BRL", "value": "0" }, "tool": [{ "@type": "HowToTool", "name": "Lottobot (lottobot.com.br)" }], "step": [
+    { "@type": "HowToStep", "name": "Analise os numeros quentes", "text": `Veja quais numeros foram mais sorteados nos ultimos ${stats.totalConcursos} concursos da ${loteria.nomeFull}. Estes sao os numeros com maior frequencia.`, "url": `https://lottobot.com.br/${loteria.slug}/estatisticas` },
+    { "@type": "HowToStep", "name": "Identifique numeros atrasados", "text": "Numeros que nao saem ha muitos concursos podem estar proximos de serem sorteados. O Lottobot mostra o atraso de cada numero." },
+    { "@type": "HowToStep", "name": "Equilibre pares e impares", "text": `Na ${loteria.nomeFull}, a maioria dos sorteios tem equilibrio entre pares e impares. Evite jogos extremos.` },
+    { "@type": "HowToStep", "name": "Use o gerador inteligente", "text": "Abra o Lottobot, selecione a loteria e clique em Gerar. O algoritmo considera frequencia, atraso e padroes historicos.", "url": "https://lottobot.com.br" },
+    { "@type": "HowToStep", "name": "Ative o Modo IA (opcional)", "text": "Com o plano Pro (R$9,90/mes), ative o Modo IA para analise preditiva com Monte Carlo e filtros avancados." }
+  ] };
+
+  const faq = { "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+    { "@type": "Question", "name": `Quais numeros mais saem na ${loteria.nomeFull}?`, "acceptedAnswer": { "@type": "Answer", "text": `Os numeros mais sorteados nos ultimos ${stats.totalConcursos} concursos sao: ${qTop}. Analise atualizada a cada novo sorteio.` } },
+    { "@type": "Question", "name": `Quais numeros estao atrasados na ${loteria.nomeFull}?`, "acceptedAnswer": { "@type": "Answer", "text": `Os numeros menos frequentes sao: ${fTop}. Numeros atrasados podem indicar maior probabilidade nos proximos concursos.` } },
+    { "@type": "Question", "name": 'Funciona usar estatisticas na loteria?', "acceptedAnswer": { "@type": "Answer", "text": 'Cada sorteio e independente e aleatorio. Porem, analise estatistica ajuda a evitar combinacoes muito improvaveis e a distribuir melhor os numeros. O Lottobot usa esses dados para gerar jogos mais equilibrados.' } }
+  ] };
+
+  return [dataset, howTo, faq];
+}
+
+function schemaArticle(post, slug) {
+  return { "@context": "https://schema.org", "@type": "Article", "headline": post.titulo, "description": post.metaDescription || '', "url": `https://lottobot.com.br/blog/${slug}`, "datePublished": post.data || '', "dateModified": new Date().toISOString(), "author": { "@type": "Organization", "name": "Lottobot", "url": "https://lottobot.com.br" }, "publisher": { "@type": "Organization", "name": "Lottobot", "logo": { "@type": "ImageObject", "url": "https://lottobot.com.br/icons/icon-512x512.png" } }, "image": "https://lottobot.com.br/icons/icon-512x512.png", "mainEntityOfPage": { "@type": "WebPage", "@id": `https://lottobot.com.br/blog/${slug}` }, "articleSection": post.tipo === 'bets' ? 'Analise de Apostas Esportivas' : 'Resultados de Loterias', "inLanguage": "pt-BR" };
+}
+
+function schemaArticleFaq(post) {
+  const nums = post.numeros || [];
+  const nome = post.loteria ? (LOTERIAS[post.loteria] || {}).nomeFull || post.loteria : '';
+  if (post.tipo === 'bets') {
+    return { "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+      { "@type": "Question", "name": "O que e value bet?", "acceptedAnswer": { "@type": "Answer", "text": "Value bet e quando a probabilidade real de um resultado e maior do que a probabilidade implicita pela odd oferecida. O Lottobot Bets Scanner identifica automaticamente value bets comparando odds de diversas casas de apostas." } },
+      { "@type": "Question", "name": "As odds sao atualizadas em tempo real?", "acceptedAnswer": { "@type": "Answer", "text": "O Lottobot atualiza as odds periodicamente usando dados de multiplas casas de apostas. O plano Ultra inclui alertas push quando uma value bet acima de 15% e detectada." } }
+    ] };
+  }
+  return { "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+    { "@type": "Question", "name": `Qual o resultado da ${nome} concurso ${post.concurso}?`, "acceptedAnswer": { "@type": "Answer", "text": `Os numeros sorteados foram: ${nums.join(', ')}.` } },
+    { "@type": "Question", "name": `Como gerar numeros para a ${nome}?`, "acceptedAnswer": { "@type": "Answer", "text": `Acesse lottobot.com.br, selecione ${nome} e clique em Gerar. O Lottobot analisa estatisticas dos ultimos concursos para criar combinacoes inteligentes.` } }
+  ] };
+}
+
+function schemaBlogIndex(artigos) {
+  return { "@context": "https://schema.org", "@type": "CollectionPage", "name": "Blog Lottobot — Resultados, Estatisticas e Analises", "description": "Artigos automaticos com resultados de loterias brasileiras e analises estatisticas.", "url": "https://lottobot.com.br/blog", "mainEntity": { "@type": "ItemList", "numberOfItems": artigos.length, "itemListElement": artigos.slice(0, 20).map((a, i) => ({ "@type": "ListItem", "position": i + 1, "url": `https://lottobot.com.br/blog/${a.slug}`, "name": a.titulo })) } };
+}
+
+function schemaBetsPage(events) {
+  const itemList = { "@context": "https://schema.org", "@type": "ItemList", "name": "Jogos Brasileirao — Odds Atuais", "numberOfItems": events.length, "itemListElement": events.slice(0, 10).map((ev, i) => ({ "@type": "ListItem", "position": i + 1, "item": { "@type": "SportsEvent", "name": `${ev.home} vs ${ev.away}`, "startDate": ev.commence } })) };
+  const faq = { "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+    { "@type": "Question", "name": "O que e o Bets Scanner do Lottobot?", "acceptedAnswer": { "@type": "Answer", "text": "O Bets Scanner compara odds de multiplas casas de apostas em tempo real, identifica value bets e sure bets automaticamente. Disponivel nos planos Pro e Ultra." } },
+    { "@type": "Question", "name": "As odds sao atualizadas em tempo real?", "acceptedAnswer": { "@type": "Answer", "text": "O Lottobot atualiza as odds periodicamente usando dados de mais de 10 casas de apostas." } }
+  ] };
+  return [itemList, faq];
+}
+
+function injectJsonLd(schemas) {
+  const all = [schemaOrg(), schemaSoftwareApp(), ...schemas];
+  return all.map(s => `<script type="application/ld+json">${JSON.stringify(s)}</script>`).join('\n  ');
+}
+
 const SSR_CSS = `
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter',system-ui,-apple-system,sans-serif; background:#09090b; color:#fafafa; line-height:1.6; }
@@ -604,12 +700,10 @@ function renderPaginaLoteria(loteria, dados, estatisticas, artigos) {
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Resultado ${loteria.nomeFull} #${concurso}">
   <meta name="twitter:description" content="Numeros: ${nums.join(', ')}. Analise completa no Lottobot.">
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","name":"Resultado ${loteria.nomeFull} Concurso ${concurso}","description":"Resultado e analise estatistica do concurso ${concurso} da ${loteria.nomeFull}","url":"https://lottobot.com.br/${loteria.slug}","dateModified":"${new Date().toISOString()}","publisher":{"@type":"Organization","name":"Lottobot","url":"https://lottobot.com.br"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Lottobot","item":"https://lottobot.com.br"},{"@type":"ListItem","position":2,"name":"${loteria.nomeFull}","item":"https://lottobot.com.br/${loteria.slug}"}]}}
-  </script>
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Qual o resultado da ${loteria.nomeFull} concurso ${concurso}?","acceptedAnswer":{"@type":"Answer","text":"Os numeros sorteados no concurso ${concurso} da ${loteria.nomeFull} foram: ${nums.join(', ')}. O sorteio foi realizado em ${dataApuracao}."}},{"@type":"Question","name":"Quais os numeros que mais saem na ${loteria.nomeFull}?","acceptedAnswer":{"@type":"Answer","text":"Os numeros mais frequentes nos ultimos ${estatisticas.totalConcursos} concursos sao: ${estatisticas.quentes.slice(0, 5).map(q => q[0]).join(', ')}."}},{"@type":"Question","name":"A ${loteria.nomeFull} acumulou?","acceptedAnswer":{"@type":"Answer","text":"${acumulado ? 'Sim, o premio acumulou para o proximo concurso.' : 'Nao, houve ganhadores neste concurso.'}"}}]}
-  </script>
+  ${injectJsonLd([
+    schemaBreadcrumb([{ name: 'Lottobot', url: '/' }, { name: loteria.nomeFull, url: '/' + loteria.slug }]),
+    ...schemaPageLoteria(loteria, dados, estatisticas)
+  ])}
   <style>${SSR_CSS}</style>
 </head>
 <body>
@@ -689,9 +783,10 @@ function renderPaginaEstatisticas(loteria, stats) {
   <meta property="og:description" content="Numeros mais e menos sorteados nos ultimos ${stats.totalConcursos} concursos da ${loteria.nomeFull}.">
   <meta property="og:url" content="https://lottobot.com.br/${loteria.slug}/estatisticas">
   <meta property="og:type" content="article">
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","name":"Estatisticas ${loteria.nomeFull}","url":"https://lottobot.com.br/${loteria.slug}/estatisticas","publisher":{"@type":"Organization","name":"Lottobot"}}
-  </script>
+  ${injectJsonLd([
+    schemaBreadcrumb([{ name: 'Lottobot', url: '/' }, { name: loteria.nomeFull, url: '/' + loteria.slug }, { name: 'Estatisticas', url: '/' + loteria.slug + '/estatisticas' }]),
+    ...schemaEstatisticas(loteria, stats)
+  ])}
   <style>${SSR_CSS}</style>
 </head>
 <body>
@@ -778,9 +873,10 @@ async function renderPaginaBets(req, res) {
   <meta property="og:description" content="${allEvents.length} jogos, ${allValueBets.length} value bets detectados.">
   <meta property="og:url" content="https://lottobot.com.br/bets">
   <meta property="og:type" content="website">
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","name":"Odds Brasileirao - Lottobot","url":"https://lottobot.com.br/bets","publisher":{"@type":"Organization","name":"Lottobot"}}
-  </script>
+  ${injectJsonLd([
+    schemaBreadcrumb([{ name: 'Lottobot', url: '/' }, { name: 'Bets', url: '/bets' }]),
+    ...schemaBetsPage(allEvents)
+  ])}
   <style>${SSR_CSS}</style>
 </head>
 <body>
@@ -882,9 +978,10 @@ async function renderPaginaBetsLiga(req, res, ligaSlug) {
   <meta property="og:title" content="Odds ${liga.nomeFull} &mdash; Lottobot">
   <meta property="og:url" content="https://lottobot.com.br/bets/${ligaSlug}">
   <meta property="og:type" content="website">
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","name":"Odds ${liga.nomeFull}","url":"https://lottobot.com.br/bets/${ligaSlug}","publisher":{"@type":"Organization","name":"Lottobot"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Lottobot","item":"https://lottobot.com.br"},{"@type":"ListItem","position":2,"name":"Bets","item":"https://lottobot.com.br/bets"},{"@type":"ListItem","position":3,"name":"${liga.nomeFull}","item":"https://lottobot.com.br/bets/${ligaSlug}"}]}}
-  </script>
+  ${injectJsonLd([
+    schemaBreadcrumb([{ name: 'Lottobot', url: '/' }, { name: 'Bets', url: '/bets' }, { name: liga.nomeFull, url: '/bets/' + ligaSlug }]),
+    ...schemaBetsPage(events)
+  ])}
   <style>${SSR_CSS}</style>
 </head>
 <body>
@@ -979,9 +1076,10 @@ async function renderBlogIndex(req, res) {
   <meta property="og:description" content="Analises automaticas de cada sorteio e rodada de apostas.">
   <meta property="og:url" content="https://lottobot.com.br/blog">
   <meta property="og:type" content="website">
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"Blog","name":"Blog Lottobot","url":"https://lottobot.com.br/blog","publisher":{"@type":"Organization","name":"Lottobot"}}
-  </script>
+  ${injectJsonLd([
+    schemaBreadcrumb([{ name: 'Lottobot', url: '/' }, { name: 'Blog', url: '/blog' }]),
+    schemaBlogIndex(artigos)
+  ])}
   <style>${SSR_CSS}</style>
 </head>
 <body>
@@ -1037,9 +1135,11 @@ async function renderBlogPost(req, res, slug) {
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://lottobot.com.br/blog/${slug}">
   <meta property="article:published_time" content="${post.data || ''}">
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"Article","headline":"${post.titulo}","datePublished":"${post.data || ''}","author":{"@type":"Organization","name":"Lottobot"},"publisher":{"@type":"Organization","name":"Lottobot"}}
-  </script>
+  ${injectJsonLd([
+    schemaBreadcrumb([{ name: 'Lottobot', url: '/' }, { name: 'Blog', url: '/blog' }, { name: post.titulo, url: '/blog/' + slug }]),
+    schemaArticle(post, slug),
+    schemaArticleFaq(post)
+  ])}
   <style>${SSR_CSS}</style>
 </head>
 <body>
