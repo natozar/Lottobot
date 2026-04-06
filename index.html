@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v58';
+    var V='lottobot-v59';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -1973,6 +1973,7 @@
       <div id="headerSpinner"></div>
       <div class="header-actions">
         <a href="/bets.html" class="header-icon-btn" title="Bets Scanner" style="text-decoration:none">⚽</a>
+        <a href="/blog" target="_blank" class="header-icon-btn" title="Blog" style="text-decoration:none">📰</a>
         <button class="header-icon-btn" id="btnCheckUpdate" onclick="checkForUpdate()" title="Verificar atualizacao">🔄</button>
         <button class="header-icon-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Alternar tema" title="Tema claro/escuro">🌙</button>
       </div>
@@ -2487,6 +2488,16 @@
           </div>
         </details>
         <button class="reset-exclusions" onclick="resetExclusions()">↩ Resetar Selecoes</button>
+
+        <!-- Blog Preview -->
+        <div style="margin-top:24px;padding:16px;background:var(--bg-surface-2);border-radius:12px;border:1px solid var(--border-default);">
+          <h3 style="font-size:16px;color:var(--text-primary);margin-bottom:8px;">📰 Analises no Blog</h3>
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">Artigos automaticos com analise detalhada de cada sorteio, numeros quentes/frios, Fibonacci e mais.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="/blog" target="_blank" style="display:inline-block;padding:8px 16px;background:var(--color-moss-primary);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">Ver Blog →</a>
+            <a href="/bets" target="_blank" style="display:inline-block;padding:8px 16px;background:var(--bg-surface-3);color:var(--text-secondary);border-radius:8px;text-decoration:none;font-size:13px;font-weight:500;border:1px solid var(--border-default);">⚽ Bets</a>
+          </div>
+        </div>
       </div>
 
       <div id="tabHistorico" class="tab-content" role="tabpanel" aria-label="Jogos salvos">
@@ -2629,6 +2640,12 @@
         <p style="color: var(--text-secondary); margin-bottom: 16px;">Se Lottobot foi útil para você, considere fazer uma doação via PIX.</p>
         <code id="pixKey">lottobot.io@gmail.com</code>
         <button id="btnCopyPix">📋 Copiar Chave PIX</button>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:16px;">
+          Compartilhe o Lottobot:
+          <a href="/blog" target="_blank" style="color:var(--color-moss-primary);text-decoration:none;">Blog</a> ·
+          <a href="/lotofacil" target="_blank" style="color:var(--color-moss-primary);text-decoration:none;">Resultados</a> ·
+          <a href="/bets" target="_blank" style="color:var(--color-moss-primary);text-decoration:none;">Bets</a>
+        </p>
       </div>
     </div>
   </div>
