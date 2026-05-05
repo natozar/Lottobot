@@ -9,6 +9,9 @@
       "setup.sh",
       ".gitignore"
     ],
+    "redirects": [
+      { "source": "/paivencedor", "destination": "/pai", "type": 301 }
+    ],
     "rewrites": [
       { "source": "/lotofacil", "function": "ssrPages" },
       { "source": "/lotofacil/**", "function": "ssrPages" },
@@ -31,7 +34,6 @@
       { "source": "/blog", "function": "ssrPages" },
       { "source": "/blog/**", "function": "ssrPages" },
       { "source": "/sitemap.xml", "function": "ssrPages" },
-      { "source": "/paivencedor", "destination": "/paivencedor.html" },
       { "source": "/pai", "destination": "/paivencedor.html" },
       { "source": "**", "destination": "/index.html" }
     ],
