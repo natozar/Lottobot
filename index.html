@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v66';
+    var V='lottobot-v67';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -811,6 +811,43 @@
     .ball-miss {
       opacity: 0.2;
     }
+
+    .cartela-grid {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(212,168,83,0.18);
+      border-radius: 10px;
+    }
+
+    .cartela-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.72rem;
+      border-radius: 50%;
+      color: rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      user-select: none;
+    }
+
+    .cartela-cell.ball {
+      width: auto;
+      height: auto;
+      color: white;
+      border: 1px solid transparent;
+      box-shadow: 0 0 0 1px rgba(212,168,83,0.35) inset;
+    }
+
+    .cartela-grid.cols-6 .cartela-cell,
+    .cartela-grid.cols-7 .cartela-cell,
+    .cartela-grid.cols-8 .cartela-cell { font-size: 0.62rem; }
 
     @keyframes pulse {
       0% { transform: scale(1.2); }
@@ -2075,6 +2112,8 @@
           <option value="5" selected>5 Jogos</option>
           <option value="10">10 Jogos</option>
           <option value="20">20 Jogos</option>
+          <option value="30">30 Jogos</option>
+          <option value="50">50 Jogos</option>
         </select>
       </div>
 
@@ -3248,14 +3287,19 @@ function applyPlanRestrictions(){
   // Qtd jogos
   const sel=document.getElementById('qtdJogos');
   if(sel){
+    const pai=isPaiVencedor();
     Array.from(sel.options).forEach(o=>{
       const v=parseInt(o.value);
-      if(isFree()&&v>5)o.disabled=true;
-      else if(isPro()&&!isUltra()&&v>20)o.disabled=true;
+      if(pai)o.disabled=false;
+      else if(isFree()&&v>5)o.disabled=true;
+      else if(v>20)o.disabled=true;
       else o.disabled=false;
     });
-    if(isFree()&&parseInt(sel.value)>5)sel.value='5';
-    else if(isPro()&&!isUltra()&&parseInt(sel.value)>20)sel.value='20';
+    const cur=parseInt(sel.value);
+    if(!pai){
+      if(isFree()&&cur>5)sel.value='5';
+      else if(cur>20)sel.value='20';
+    }
   }
 }
 
@@ -4073,8 +4117,9 @@ function gerarJogos(){
     return;
   }
   let qtd=parseInt(document.getElementById('qtdJogos').value);
-  if(isFree()&&qtd>5)qtd=5;
-  else if(isPro()&&!isUltra()&&qtd>20)qtd=20;
+  if(isPaiVencedor()){if(qtd>50)qtd=50}
+  else if(isFree()&&qtd>5)qtd=5;
+  else if(qtd>20)qtd=20;
   let mod=getModelos()[selectedModelo];
   if(!mod){selectedModelo='B';mod=getModelos()[selectedModelo]}
   if(!mod){selectedModelo=Object.keys(getModelos())[0];mod=getModelos()[selectedModelo]}
@@ -4448,6 +4493,37 @@ function runHistoricalAnalysis(){
 }
 
 // ══════ RENDER GAMES ══════
+function getCartelaCols(){
+  const k=selectedLottery;
+  if(k==='lotofacil')return 5;
+  if(k==='megasena')return 6;
+  if(k==='quina'||k==='timemania')return 8;
+  if(k==='supersete')return 7;
+  return 5;
+}
+function renderCartela(j){
+  const lot=getLottery();
+  const cols=getCartelaCols();
+  if(selectedLottery==='supersete'){
+    let html='<div class="cartela-grid cols-7" style="grid-template-columns:repeat(7,1fr)">';
+    for(let row=0;row<10;row++){
+      for(let col=0;col<7;col++){
+        const isPicked=j[col]===row;
+        if(isPicked){html+=`<div class="cartela-cell ball ${getBallClass(row)}">${row}</div>`}
+        else{html+=`<div class="cartela-cell">${row}</div>`}
+      }
+    }
+    html+='</div>';return html;
+  }
+  const min=getMinNum(),max=lot.total,set=new Set(j);
+  let html=`<div class="cartela-grid cols-${cols}" style="grid-template-columns:repeat(${cols},1fr)">`;
+  for(let n=min;n<=max;n++){
+    if(set.has(n)){html+=`<div class="cartela-cell ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(dNum(n))}</div>`}
+    else{html+=`<div class="cartela-cell">${esc(dNum(n))}</div>`}
+  }
+  html+='</div>';return html;
+}
+
 function renderJogos(){
   const c=document.getElementById('jogosContainer'),e=document.getElementById('emptyState'),b=document.getElementById('exportBar');
   if(!c)return;
@@ -4456,13 +4532,15 @@ function renderJogos(){
   const cnt=document.getElementById('exportCount'),ref=document.getElementById('exportRef');
   if(cnt)cnt.textContent=jogos.length+' jogos';
   if(ref)ref.textContent='Ref: #'+concRef;
+  const useCartela=isPaiVencedor();
   c.innerHTML=jogos.map((j,i)=>{
     const p=j.filter(n=>n%2===0).length,s=j.reduce((a,b)=>a+b,0),r=ULT?j.filter(n=>ULT.numeros.includes(n)).length:0;
     const pr=j.filter(n=>getPrimos().has(n)).length;
     const cc=selectedLottery==='lotofacil'?j.filter(n=>CENTRO_NUMS.includes(n)).length:null;
+    const ballsHtml=useCartela?renderCartela(j):`<div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(dNum(n))}</div>`).join('')}</div>`;
     return `<div class="game-card" id="gc${i}" style="animation-delay:${i*0.05}s">
       <div class="game-header"><div class="game-number">#${i+1}${j.desdobramento?'<span class="badge-desdobramento">DESDOBRAMENTO</span>':''}</div><div class="score-badge ${j.cls.cls}">${j.score} · ${j.cls.label}</div></div>
-      <div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(dNum(n))}</div>`).join('')}</div>
+      ${ballsHtml}
       ${j.mes?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">🗓️ Mes da Sorte: <strong>'+esc(j.mes)+'</strong></div>':''}
       ${j.trevos?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">🍀 Trevos: <strong>'+j.trevos.join(' e ')+'</strong></div>':''}
       ${j.time?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">⚽ Time: <strong>'+esc(j.time)+'</strong></div>':''}

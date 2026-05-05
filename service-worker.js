@@ -46,7 +46,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ══════ CACHE (existing functionality) ══════
-const CACHE_NAME = 'lottobot-v66';
+const CACHE_NAME = 'lottobot-v67';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
