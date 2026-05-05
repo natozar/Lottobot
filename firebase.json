@@ -31,6 +31,7 @@
       { "source": "/blog", "function": "ssrPages" },
       { "source": "/blog/**", "function": "ssrPages" },
       { "source": "/sitemap.xml", "function": "ssrPages" },
+      { "source": "/paivencedor", "destination": "/paivencedor.html" },
       { "source": "**", "destination": "/index.html" }
     ],
     "headers": [

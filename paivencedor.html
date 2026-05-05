@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#00a651">
+<title>Para você, pai · LottoBot</title>
+<meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas.">
+
+<!-- Link preview (WhatsApp, mensagens, redes) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LottoBot">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="https://lottobot.com.br/paivencedor">
+<meta property="og:title" content="Para você, pai 💚">
+<meta property="og:description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. 🍀">
+<meta property="og:image" content="https://lottobot.com.br/og-paivencedor.png">
+<meta property="og:image:secure_url" content="https://lottobot.com.br/og-paivencedor.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Para você, pai — LottoBot Lotofácil">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Para você, pai 💚">
+<meta name="twitter:description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas.">
+<meta name="twitter:image" content="https://lottobot.com.br/og-paivencedor.png">
+<meta name="twitter:image:alt" content="Para você, pai — LottoBot Lotofácil">
+
+<link rel="canonical" href="https://lottobot.com.br/paivencedor">
+
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#00a651;
+  --primary-dark:#007a3d;
+  --primary-soft:rgba(0,166,81,.08);
+  --warm:#f5a623;
+  --bg:#f6f7f5;
+  --card:#fff;
+  --text:#1a1a1a;
+  --muted:#6b6b6b;
+  --border:#e6e6e6;
+  --cell-bg:#ececec;
+  --cell-text:#9a9a9a;
+  --error:#d63031;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08);
+  --r-sm:8px;--r-md:12px;--r-lg:16px;
+}
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overscroll-behavior:none;
+}
+body{
+  min-height:100dvh;min-height:100vh;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+button{font-family:inherit;font-size:1rem;border:0;background:none;cursor:pointer;color:inherit}
+input{font-family:inherit}
+.hidden{display:none!important}
+
+/* PIN + Lockout shared wrap */
+.pin-wrap{
+  min-height:100dvh;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  background:linear-gradient(160deg,#f6f7f5 0%,#ebf6ee 100%);
+}
+.pin-card,.lockout-card{
+  background:var(--card);
+  padding:32px 28px;
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-md);
+  width:100%;max-width:360px;
+  text-align:center;
+}
+.pin-card h1{
+  font-size:1.4rem;font-weight:600;
+  color:var(--primary-dark);
+  margin-bottom:6px;
+}
+.pin-card .sub{color:var(--muted);font-size:.9rem;margin-bottom:24px}
+.pin-input{
+  width:100%;
+  font-size:2rem;text-align:center;letter-spacing:.6em;
+  padding:14px 8px;
+  border:2px solid var(--border);
+  border-radius:var(--r-md);
+  outline:none;
+  margin-bottom:16px;
+  transition:border-color .15s;
+  font-variant-numeric:tabular-nums;
+}
+.pin-input:focus{border-color:var(--primary)}
+.pin-input.error{border-color:var(--error);animation:shake .4s}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+.pin-btn{
+  width:100%;
+  background:var(--primary);color:#fff;
+  padding:14px;border-radius:var(--r-md);
+  font-weight:600;font-size:1rem;
+  transition:background .15s;
+}
+.pin-btn:hover{background:var(--primary-dark)}
+.pin-msg{margin-top:12px;font-size:.85rem;color:var(--muted);min-height:20px}
+.pin-msg.error{color:var(--error)}
+
+.lockout-icon{font-size:2.5rem;margin-bottom:12px}
+.lockout-card h1{font-size:1.2rem;color:var(--primary-dark);margin-bottom:6px}
+.lockout-card p{color:var(--muted);font-size:.9rem}
+.countdown{
+  font-size:2.4rem;font-weight:600;
+  color:var(--primary-dark);
+  font-variant-numeric:tabular-nums;
+  margin:12px 0;
+  letter-spacing:.05em;
+}
+
+/* App */
+.app{display:flex;flex-direction:column;min-height:100dvh;min-height:100vh}
+.app-header{
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+  color:#fff;
+  padding:18px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:var(--shadow-sm);
+}
+.app-title{font-size:1.1rem;font-weight:600}
+.app-title small{display:block;font-size:.75rem;font-weight:400;opacity:.85;margin-top:2px}
+.logout-btn{
+  background:rgba(255,255,255,.18);color:#fff;
+  padding:6px 14px;border-radius:999px;
+  font-size:.85rem;font-weight:500;
+  transition:background .15s;
+}
+.logout-btn:hover{background:rgba(255,255,255,.28)}
+
+main{
+  flex:1;
+  padding:20px 16px 40px;
+  max-width:1400px;width:100%;
+  margin:0 auto;
+}
+
+.controls{
+  background:var(--card);
+  padding:20px;
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-sm);
+  margin-bottom:20px;
+}
+.section-title{
+  font-size:.95rem;font-weight:600;
+  margin-bottom:12px;color:var(--text);
+}
+.modes{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.mode-option{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;
+  border:2px solid var(--border);
+  border-radius:var(--r-md);
+  cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+.mode-option input{accent-color:var(--primary)}
+.mode-option.active{border-color:var(--primary);background:var(--primary-soft)}
+.mode-option .mode-text{font-size:.9rem;font-weight:500;line-height:1.3}
+.qty-row{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.qty-row label{font-size:.9rem;color:var(--muted)}
+.qty-input{
+  width:72px;
+  padding:10px 8px;
+  border:2px solid var(--border);
+  border-radius:var(--r-md);
+  font-size:1rem;text-align:center;
+  font-variant-numeric:tabular-nums;
+  outline:none;
+}
+.qty-input:focus{border-color:var(--primary)}
+.qty-slider{flex:1;accent-color:var(--primary)}
+.generate-btn{
+  width:100%;
+  background:var(--primary);color:#fff;
+  padding:14px;border-radius:var(--r-md);
+  font-weight:600;font-size:1rem;
+  transition:background .15s,transform .1s;
+}
+.generate-btn:hover{background:var(--primary-dark)}
+.generate-btn:active{transform:scale(.99)}
+.generate-btn:disabled{opacity:.5;cursor:not-allowed}
+.data-info{
+  font-size:.78rem;color:var(--muted);
+  margin-top:14px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  flex-wrap:wrap;
+}
+.refresh-btn{
+  font-size:.78rem;color:var(--primary);
+  text-decoration:underline;padding:4px 0;
+}
+
+/* Loading */
+.loading-state{text-align:center;padding:48px 16px;color:var(--muted)}
+.spinner{
+  width:40px;height:40px;
+  border:3px solid var(--border);border-top-color:var(--primary);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  margin:0 auto 16px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress{font-size:.85rem;margin-top:8px;font-variant-numeric:tabular-nums}
+
+/* Results */
+.results{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:600px){.results{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.results{grid-template-columns:repeat(3,1fr)}}
+
+.game-card{
+  background:var(--card);
+  border-radius:var(--r-lg);
+  padding:16px;
+  box-shadow:var(--shadow-sm);
+  display:flex;flex-direction:column;gap:10px;
+}
+.game-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.game-title{font-size:.95rem;font-weight:600;color:var(--text)}
+.copy-btn{
+  font-size:.78rem;color:var(--primary);
+  padding:5px 12px;border-radius:999px;
+  border:1px solid var(--primary);
+  transition:background .15s,color .15s;
+  white-space:nowrap;
+}
+.copy-btn:hover{background:var(--primary);color:#fff}
+.copy-btn.copied{background:var(--primary);color:#fff}
+
+.cartela{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+}
+.cell{
+  aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;font-weight:600;
+  border-radius:50%;
+  background:var(--cell-bg);color:var(--cell-text);
+  font-variant-numeric:tabular-nums;
+}
+.cell.marked{
+  background:var(--primary);color:#fff;
+  box-shadow:0 2px 4px rgba(0,166,81,.25);
+}
+.stats{
+  font-size:.75rem;color:var(--muted);
+  display:flex;flex-wrap:wrap;gap:4px 10px;
+  font-variant-numeric:tabular-nums;
+}
+.stats span{white-space:nowrap}
+
+/* Error */
+.error-state{
+  text-align:center;padding:32px 16px;
+  background:var(--card);border-radius:var(--r-lg);
+  box-shadow:var(--shadow-sm);margin-bottom:20px;
+}
+.error-state p{color:var(--muted);margin-bottom:14px;font-size:.95rem}
+.error-state button{max-width:240px;margin:0 auto}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#1a1a1a;color:#fff;
+  padding:12px 20px;border-radius:999px;
+  font-size:.9rem;box-shadow:var(--shadow-md);
+  opacity:0;
+  transition:opacity .2s,transform .2s;
+  pointer-events:none;z-index:1000;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.app-footer{text-align:center;font-size:.75rem;color:var(--muted);padding:16px;margin-top:8px}
+
+/* Welcome (post-PIN portal) */
+.welcome-wrap{display:flex;flex-direction:column;min-height:100dvh;min-height:100vh}
+.welcome-header{
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+  color:#fff;
+  padding:18px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:var(--shadow-sm);
+}
+.welcome-header-title{font-size:1.05rem;font-weight:600}
+.welcome-main{
+  flex:1;
+  display:flex;align-items:center;justify-content:center;
+  padding:32px 20px;
+  background:linear-gradient(160deg,#f6f7f5 0%,#ebf6ee 100%);
+}
+.welcome-card{
+  width:100%;max-width:420px;
+  background:var(--card);
+  padding:36px 28px;
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-md);
+  text-align:center;
+}
+.welcome-title{
+  font-size:1.6rem;font-weight:700;
+  color:var(--primary-dark);
+  margin-bottom:10px;
+  line-height:1.2;
+}
+.welcome-sub{
+  font-size:1rem;color:var(--muted);
+  margin-bottom:28px;line-height:1.4;
+}
+.welcome-btn{
+  width:100%;
+  padding:16px;
+  border-radius:var(--r-md);
+  font-weight:600;font-size:1rem;
+  margin-bottom:12px;
+  transition:background .15s,transform .1s;
+}
+.welcome-btn:active{transform:scale(.99)}
+.welcome-btn.primary{background:var(--primary);color:#fff}
+.welcome-btn.primary:hover{background:var(--primary-dark)}
+.welcome-btn.secondary{
+  background:transparent;color:var(--primary-dark);
+  border:2px solid var(--primary);
+  font-size:.9rem;padding:14px;
+}
+.welcome-btn.secondary:hover{background:var(--primary-soft)}
+.welcome-footer{
+  text-align:center;
+  font-size:.75rem;color:var(--muted);
+  padding:14px;
+}
+@media(max-width:480px){
+  .welcome-card{padding:28px 22px}
+  .welcome-title{font-size:1.4rem}
+}
+
+@media(max-width:480px){
+  .cell{font-size:.78rem}
+  .pin-card,.lockout-card{padding:24px 20px}
+  main{padding:16px 12px 32px}
+  .game-card{padding:14px}
+  .controls{padding:16px}
+  .app-header{padding:14px 16px}
+  .app-title{font-size:1rem}
+}
+@media(max-width:380px){
+  .cell{font-size:.72rem}
+  .cartela{gap:4px}
+}
+</style>
+</head>
+<body>
+
+<!-- PIN Screen -->
+<div id="pinScreen" class="pin-wrap">
+  <div class="pin-card">
+    <h1>Para você, pai</h1>
+    <p class="sub">Digite o PIN para entrar</p>
+    <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="pinInput" class="pin-input" autocomplete="off" />
+    <button id="pinSubmit" class="pin-btn">Entrar</button>
+    <p id="pinMsg" class="pin-msg"></p>
+  </div>
+</div>
+
+<!-- Lockout Screen -->
+<div id="lockoutScreen" class="pin-wrap hidden">
+  <div class="lockout-card">
+    <div class="lockout-icon">⏳</div>
+    <h1>Pausa de segurança</h1>
+    <p>Tente novamente em</p>
+    <div id="countdown" class="countdown">5:00</div>
+    <p>Aguarde para tentar de novo.</p>
+  </div>
+</div>
+
+<!-- Welcome (post-PIN portal) -->
+<div id="welcomeScreen" class="welcome-wrap hidden">
+  <header class="welcome-header">
+    <div class="welcome-header-title">Para você, pai 💚</div>
+    <button id="welcomeLogoutBtn" class="logout-btn">Sair</button>
+  </header>
+  <main class="welcome-main">
+    <div class="welcome-card">
+      <h1 class="welcome-title">Bem-vindo, pai 💚</h1>
+      <p class="welcome-sub">Tudo aqui é seu. Sem limites.</p>
+      <button id="enterAppBtn" class="welcome-btn primary">Entrar no LottoBot</button>
+      <button id="enterGeneratorBtn" class="welcome-btn secondary">Gerador especial 4 fatores</button>
+    </div>
+  </main>
+  <div class="welcome-footer">Página pessoal · feita com carinho</div>
+</div>
+
+<!-- App (gerador 4 fatores) -->
+<div id="app" class="app hidden">
+  <header class="app-header">
+    <div class="app-title">
+      Gerador especial
+      <small>4 fatores · Lotofácil</small>
+    </div>
+    <button id="logoutBtn" class="logout-btn">← Voltar</button>
+  </header>
+
+  <main>
+    <div id="loadingState" class="loading-state">
+      <div class="spinner"></div>
+      <div id="loadingMsg">Carregando ultimos sorteios...</div>
+      <div id="progress" class="progress"></div>
+    </div>
+
+    <div id="errorState" class="error-state hidden">
+      <p id="errorMsg">Nao consegui carregar os sorteios.</p>
+      <button id="retryBtn" class="generate-btn">Tentar de novo</button>
+    </div>
+
+    <div id="mainArea" class="hidden">
+      <section class="controls">
+        <div class="section-title">Modelo de jogo</div>
+        <div class="modes" id="modes">
+          <label class="mode-option">
+            <input type="radio" name="mode" value="9-6" checked>
+            <span class="mode-text">9 repetidos do último concurso + 6 que não saíram</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="mode" value="10-5">
+            <span class="mode-text">10 repetidos do último concurso + 5 que não saíram</span>
+          </label>
+        </div>
+
+        <div class="section-title">Quantidade de jogos</div>
+        <div class="qty-row">
+          <input type="number" id="qty" class="qty-input" min="1" max="50" value="10" inputmode="numeric">
+          <input type="range" id="qtySlider" class="qty-slider" min="1" max="50" value="10" aria-label="Quantidade">
+        </div>
+
+        <button id="generateBtn" class="generate-btn">Gerar jogos</button>
+
+        <div class="data-info">
+          <span id="dataInfo">Carregando...</span>
+          <button id="refreshBtn" class="refresh-btn">Atualizar dados</button>
+        </div>
+      </section>
+
+      <div id="results" class="results"></div>
+    </div>
+  </main>
+
+  <div class="app-footer">Página pessoal · feita com carinho</div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+// ============ CONSTANTS ============
+var PIN = '0606';
+var MAX_ATTEMPTS = 3;
+var LOCKOUT_MS = 5 * 60 * 1000;
+var KEY_UNLOCKED = 'paiVencedor_pin_unlocked';
+var KEY_ATTEMPTS = 'paiVencedor_pin_attempts';
+var KEY_LOCKOUT = 'paiVencedor_pin_lockout';
+var KEY_DATA_CACHE = 'paiVencedor_data_cache';
+var KEY_GRANT = 'paiVencedor_grant';
+var KEY_GRANT_DATE = 'paiVencedor_grantDate';
+var DATA_CACHE_TTL = 6 * 60 * 60 * 1000;
+var API_BASE = 'https://loteriascaixa-api.herokuapp.com/api/lotofacil';
+var HISTORY_SIZE = 50;
+var FETCH_TIMEOUT_MS = 10000;
+var FETCH_CHUNK = 10;
+
+var NUMBERS = [];
+for (var i = 1; i <= 25; i++) NUMBERS.push(i);
+var PRIMES = {2:1,3:1,5:1,7:1,11:1,13:1,17:1,19:1,23:1};
+
+var MODES = {
+  '9-6':  { kRep: 9,  kNs: 6, label: '9 + 6' },
+  '10-5': { kRep: 10, kNs: 5, label: '10 + 5' }
+};
+
+var state = {
+  latest: null,
+  history: [],
+  frequencies: {},
+  repetidas: [],
+  naoSairam: []
+};
+
+var lockoutInterval = null;
+
+// ============ DOM HELPERS ============
+function $(id){ return document.getElementById(id); }
+function show(el){ el.classList.remove('hidden'); }
+function hide(el){ el.classList.add('hidden'); }
+function pad2(n){ return n < 10 ? '0' + n : '' + n; }
+
+var toastTimer = null;
+function showToast(msg){
+  var t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2000);
+}
+
+function safeGet(key){
+  try { return localStorage.getItem(key); } catch(e){ return null; }
+}
+function safeSet(key, val){
+  try { localStorage.setItem(key, val); } catch(e){}
+}
+function safeRemove(key){
+  try { localStorage.removeItem(key); } catch(e){}
+}
+
+// ============ PIN LOGIC ============
+function getAttempts(){ return parseInt(safeGet(KEY_ATTEMPTS) || '0', 10); }
+function getLockoutUntil(){ return parseInt(safeGet(KEY_LOCKOUT) || '0', 10); }
+function isUnlocked(){ return safeGet(KEY_UNLOCKED) === '1'; }
+
+function setUnlocked(){
+  safeSet(KEY_UNLOCKED, '1');
+  safeRemove(KEY_ATTEMPTS);
+  safeRemove(KEY_LOCKOUT);
+}
+function clearUnlock(){ safeRemove(KEY_UNLOCKED); }
+
+function bumpFailedAttempt(){
+  var n = getAttempts() + 1;
+  safeSet(KEY_ATTEMPTS, String(n));
+  if (n >= MAX_ATTEMPTS){
+    safeSet(KEY_LOCKOUT, String(Date.now() + LOCKOUT_MS));
+    return true;
+  }
+  return false;
+}
+
+function showPinScreen(){
+  hide($('app'));
+  hide($('lockoutScreen'));
+  hide($('welcomeScreen'));
+  show($('pinScreen'));
+  var inp = $('pinInput');
+  inp.value = '';
+  $('pinMsg').textContent = '';
+  $('pinMsg').classList.remove('error');
+  setTimeout(function(){ try { inp.focus(); } catch(e){} }, 60);
+}
+
+function showLockoutScreen(){
+  hide($('app'));
+  hide($('pinScreen'));
+  hide($('welcomeScreen'));
+  show($('lockoutScreen'));
+  updateCountdown();
+  if (lockoutInterval) clearInterval(lockoutInterval);
+  lockoutInterval = setInterval(updateCountdown, 1000);
+}
+
+function showWelcomeScreen(){
+  hide($('app'));
+  hide($('pinScreen'));
+  hide($('lockoutScreen'));
+  show($('welcomeScreen'));
+}
+
+function updateCountdown(){
+  var until = getLockoutUntil();
+  var rem = until - Date.now();
+  if (rem <= 0){
+    if (lockoutInterval){ clearInterval(lockoutInterval); lockoutInterval = null; }
+    safeRemove(KEY_LOCKOUT);
+    safeRemove(KEY_ATTEMPTS);
+    showPinScreen();
+    return;
+  }
+  var s = Math.ceil(rem / 1000);
+  var mm = Math.floor(s / 60);
+  var ss = s % 60;
+  $('countdown').textContent = mm + ':' + (ss < 10 ? '0' + ss : ss);
+}
+
+function handlePinSubmit(){
+  var input = $('pinInput');
+  var msg = $('pinMsg');
+  var val = (input.value || '').trim();
+  if (val === PIN){
+    setUnlocked();
+    showWelcomeScreen();
+    return;
+  }
+  var locked = bumpFailedAttempt();
+  input.classList.add('error');
+  setTimeout(function(){ input.classList.remove('error'); }, 400);
+  input.value = '';
+  if (locked){
+    msg.textContent = 'Acesso nao autorizado.';
+    msg.classList.add('error');
+    setTimeout(function(){ window.location.replace('/'); }, 900);
+    return;
+  }
+  var left = MAX_ATTEMPTS - getAttempts();
+  msg.textContent = 'PIN incorreto. ' + left + ' tentativa' + (left === 1 ? '' : 's') + ' restante' + (left === 1 ? '' : 's') + '.';
+  msg.classList.add('error');
+}
+
+function fullLogout(){
+  clearUnlock();
+  safeRemove(KEY_GRANT);
+  safeRemove(KEY_GRANT_DATE);
+  if (lockoutInterval){ clearInterval(lockoutInterval); lockoutInterval = null; }
+  showPinScreen();
+}
+
+function enterMainApp(){
+  try {
+    localStorage.setItem(KEY_GRANT, 'true');
+    localStorage.setItem(KEY_GRANT_DATE, new Date().toISOString());
+  } catch(e){}
+  if (window.console && console.log) console.log('Acesso especial ativado');
+  window.location.href = '/';
+}
+
+function backToWelcome(){
+  showWelcomeScreen();
+}
+
+// ============ DATA FETCHING ============
+function fetchWithTimeout(url, ms){
+  return new Promise(function(resolve, reject){
+    var ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var to = setTimeout(function(){
+      if (ac){ try { ac.abort(); } catch(e){} }
+      reject(new Error('timeout'));
+    }, ms);
+    var opts = ac ? { signal: ac.signal } : undefined;
+    fetch(url, opts).then(function(r){
+      clearTimeout(to);
+      if (!r.ok){ reject(new Error('http ' + r.status)); return; }
+      r.json().then(resolve, reject);
+    }, function(e){ clearTimeout(to); reject(e); });
+  });
+}
+
+function fetchLatest(){ return fetchWithTimeout(API_BASE, FETCH_TIMEOUT_MS); }
+function fetchContest(id){ return fetchWithTimeout(API_BASE + '/' + id, FETCH_TIMEOUT_MS); }
+
+function loadCachedData(){
+  try {
+    var raw = safeGet(KEY_DATA_CACHE);
+    if (!raw) return null;
+    var d = JSON.parse(raw);
+    if (!d || !d.timestamp || !d.latest) return null;
+    if (Date.now() - d.timestamp > DATA_CACHE_TTL) return null;
+    return d;
+  } catch(e){ return null; }
+}
+function saveCachedData(latest, history, frequencies){
+  try {
+    var minimal = {
+      timestamp: Date.now(),
+      latest: { concurso: latest.concurso, dezenas: latest.dezenas, data: latest.data },
+      history: history.map(function(c){ return { concurso: c.concurso, dezenas: c.dezenas }; }),
+      frequencies: frequencies
+    };
+    safeSet(KEY_DATA_CACHE, JSON.stringify(minimal));
+  } catch(e){}
+}
+function clearCachedData(){ safeRemove(KEY_DATA_CACHE); }
+
+function parseDezenas(arr){
+  if (!arr || !arr.map) return [];
+  return arr.map(function(s){ return parseInt(s, 10); }).filter(function(n){ return n >= 1 && n <= 25; });
+}
+
+function computeFrequencies(history){
+  var counts = {};
+  for (var i = 1; i <= 25; i++) counts[i] = 0;
+  history.forEach(function(c){
+    parseDezenas(c.dezenas).forEach(function(n){ counts[n]++; });
+  });
+  var freq = {};
+  var total = history.length || 1;
+  for (var j = 1; j <= 25; j++) freq[j] = counts[j] / total;
+  return freq;
+}
+
+function setLoadingMsg(text, progress){
+  $('loadingMsg').textContent = text;
+  $('progress').textContent = progress || '';
+}
+
+function loadData(forceRefresh){
+  hide($('errorState'));
+  hide($('mainArea'));
+  show($('loadingState'));
+  setLoadingMsg('Carregando ultimos sorteios...', '');
+
+  if (!forceRefresh){
+    var cached = loadCachedData();
+    if (cached){
+      applyData(cached.latest, cached.history, cached.frequencies);
+      onDataReady(true);
+      return;
+    }
+  }
+
+  fetchLatest().then(function(latest){
+    if (!latest || !latest.concurso || !latest.dezenas){
+      throw new Error('resposta invalida');
+    }
+    state.latest = latest;
+    setLoadingMsg('Aprendendo com os ultimos ' + HISTORY_SIZE + ' sorteios...', '1 / ' + HISTORY_SIZE);
+    var ids = [];
+    for (var i = 1; i < HISTORY_SIZE; i++){
+      var id = latest.concurso - i;
+      if (id >= 1) ids.push(id);
+    }
+    var collected = [latest];
+    function fetchChunk(start){
+      if (start >= ids.length) return Promise.resolve();
+      var chunk = ids.slice(start, start + FETCH_CHUNK);
+      return Promise.all(chunk.map(function(id){
+        return fetchContest(id).catch(function(){ return null; });
+      })).then(function(arr){
+        arr.forEach(function(c){ if (c && c.dezenas) collected.push(c); });
+        setLoadingMsg('Aprendendo com os ultimos ' + HISTORY_SIZE + ' sorteios...', collected.length + ' / ' + HISTORY_SIZE);
+        return fetchChunk(start + FETCH_CHUNK);
+      });
+    }
+    return fetchChunk(0).then(function(){
+      if (collected.length < 5) throw new Error('poucos dados');
+      var freq = computeFrequencies(collected);
+      applyData(latest, collected, freq);
+      saveCachedData(latest, collected, freq);
+      onDataReady(false);
+    });
+  }).catch(function(err){
+    if (window.console && console.error) console.error('load error', err);
+    hide($('loadingState'));
+    show($('errorState'));
+    var cached = loadCachedData();
+    if (cached){
+      $('errorMsg').textContent = 'Sem internet agora. Posso usar dados salvos?';
+      $('retryBtn').textContent = 'Usar dados salvos';
+      $('retryBtn').onclick = function(){
+        applyData(cached.latest, cached.history, cached.frequencies);
+        onDataReady(true);
+      };
+    } else {
+      $('errorMsg').textContent = 'Nao consegui carregar os sorteios. Tente de novo.';
+      $('retryBtn').textContent = 'Tentar de novo';
+      $('retryBtn').onclick = function(){ loadData(true); };
+    }
+  });
+}
+
+function applyData(latest, history, frequencies){
+  state.latest = latest;
+  state.history = history;
+  state.frequencies = frequencies;
+  state.repetidas = parseDezenas(latest.dezenas);
+  state.naoSairam = NUMBERS.filter(function(n){ return state.repetidas.indexOf(n) === -1; });
+}
+
+function onDataReady(fromCache){
+  hide($('loadingState'));
+  hide($('errorState'));
+  show($('mainArea'));
+  var d = state.latest;
+  var label = 'Concurso ' + d.concurso + (d.data ? ' · ' + d.data : '') + ' · ' + state.history.length + ' sorteios';
+  if (fromCache) label += ' (cache)';
+  $('dataInfo').textContent = label;
+}
+
+// ============ GENERATION ============
+function isEven(n){ return n % 2 === 0; }
+function rowOf(n){ return Math.ceil(n / 5); }
+function colOf(n){ return ((n - 1) % 5) + 1; }
+
+function freqWeight(f){
+  if (f > 0.55) return 1.3;
+  if (f < 0.45) return 0.7;
+  return 1.0;
+}
+function calcWeights(pool, counters){
+  var freq = state.frequencies;
+  return pool.map(function(n){
+    var cw = 1 / ((counters[n] || 0) + 1);
+    var fw = freqWeight(freq[n] != null ? freq[n] : 0.6);
+    return cw * fw;
+  });
+}
+function weightedSampleNoReplace(pool, weights, k){
+  var items = pool.slice();
+  var w = weights.slice();
+  var picked = [];
+  for (var i = 0; i < k && items.length > 0; i++){
+    var total = 0;
+    for (var j = 0; j < w.length; j++) total += w[j];
+    var idx;
+    if (total <= 0){
+      idx = Math.floor(Math.random() * items.length);
+    } else {
+      var r = Math.random() * total;
+      idx = 0;
+      while (idx < w.length - 1 && r > w[idx]){ r -= w[idx]; idx++; }
+    }
+    picked.push(items[idx]);
+    items.splice(idx, 1);
+    w.splice(idx, 1);
+  }
+  return picked;
+}
+
+function gameStats(game){
+  var sorted = game.slice().sort(function(a,b){ return a-b; });
+  var pares = 0, primos = 0, soma = 0, maxRun = 1, run = 1;
+  var lines = [0,0,0,0,0];
+  var cols = [0,0,0,0,0];
+  for (var i = 0; i < sorted.length; i++){
+    var n = sorted[i];
+    soma += n;
+    if (isEven(n)) pares++;
+    if (PRIMES[n]) primos++;
+    lines[rowOf(n) - 1]++;
+    cols[colOf(n) - 1]++;
+    if (i > 0){
+      if (sorted[i] === sorted[i-1] + 1){ run++; if (run > maxRun) maxRun = run; }
+      else run = 1;
+    }
+  }
+  return {
+    pares: pares, impares: sorted.length - pares,
+    primos: primos, soma: soma,
+    maxRun: maxRun, lines: lines, cols: cols, sorted: sorted
+  };
+}
+
+function countViolations(stats, game, prevGames){
+  var v = 0;
+  if (stats.pares < 6 || stats.pares > 9) v++;
+  for (var i = 0; i < 5; i++){ if (stats.lines[i] < 2){ v++; break; } }
+  for (var j = 0; j < 5; j++){ if (stats.cols[j] < 2){ v++; break; } }
+  if (stats.soma < 175 || stats.soma > 220) v++;
+  if (stats.primos < 4 || stats.primos > 7) v++;
+  if (stats.maxRun > 4) v++;
+  if (prevGames.length > 0){
+    var maxOverlap = 0;
+    var setA = {};
+    for (var a = 0; a < game.length; a++) setA[game[a]] = 1;
+    for (var p = 0; p < prevGames.length; p++){
+      var prev = prevGames[p];
+      var ov = 0;
+      for (var k = 0; k < prev.length; k++) if (setA[prev[k]]) ov++;
+      if (ov > maxOverlap) maxOverlap = ov;
+    }
+    if (maxOverlap >= 14) v++;
+  }
+  return v;
+}
+
+function generateBatch(modeKey, qty){
+  var mode = MODES[modeKey];
+  if (!mode) throw new Error('mode invalido');
+  if (state.repetidas.length !== 15 || state.naoSairam.length !== 10){
+    throw new Error('dados insuficientes');
+  }
+  var counters = {};
+  for (var i = 1; i <= 25; i++) counters[i] = 0;
+  var games = [];
+  var degraded = 0;
+
+  for (var g = 0; g < qty; g++){
+    var bestGame = null;
+    var bestViol = Infinity;
+    for (var attempt = 0; attempt < 50; attempt++){
+      var wRep = calcWeights(state.repetidas, counters);
+      var pickedRep = weightedSampleNoReplace(state.repetidas, wRep, mode.kRep);
+      var wNs = calcWeights(state.naoSairam, counters);
+      var pickedNs = weightedSampleNoReplace(state.naoSairam, wNs, mode.kNs);
+      var candidate = pickedRep.concat(pickedNs);
+      var stats = gameStats(candidate);
+      var v = countViolations(stats, candidate, games);
+      if (v === 0){ bestGame = stats.sorted; bestViol = 0; break; }
+      if (v < bestViol){ bestGame = stats.sorted; bestViol = v; }
+    }
+    if (bestViol > 0){
+      degraded++;
+      if (window.console && console.warn) console.warn('Jogo', g+1, 'aceito com', bestViol, 'violacoes');
+    }
+    games.push(bestGame);
+    for (var x = 0; x < bestGame.length; x++) counters[bestGame[x]]++;
+  }
+  if (degraded > 0 && window.console && console.info){
+    console.info(degraded + ' de ' + qty + ' jogo(s) aceitos sub-otimos');
+  }
+  return games;
+}
+
+// ============ RENDERING ============
+function renderResults(games){
+  var root = $('results');
+  root.innerHTML = '';
+  games.forEach(function(g, idx){
+    var card = document.createElement('div');
+    card.className = 'game-card';
+    var stats = gameStats(g);
+    var marked = {};
+    for (var i = 0; i < g.length; i++) marked[g[i]] = 1;
+    var cells = '';
+    for (var n = 1; n <= 25; n++){
+      cells += '<div class="cell' + (marked[n] ? ' marked' : '') + '">' + pad2(n) + '</div>';
+    }
+    card.innerHTML =
+      '<div class="game-header">' +
+        '<div class="game-title">Jogo ' + (idx + 1) + '</div>' +
+        '<button class="copy-btn" data-idx="' + idx + '">Copiar dezenas</button>' +
+      '</div>' +
+      '<div class="cartela">' + cells + '</div>' +
+      '<div class="stats">' +
+        '<span>' + stats.pares + ' pares</span>' +
+        '<span>' + stats.impares + ' impares</span>' +
+        '<span>' + stats.primos + ' primos</span>' +
+        '<span>soma ' + stats.soma + '</span>' +
+      '</div>';
+    root.appendChild(card);
+  });
+  var btns = root.querySelectorAll('.copy-btn');
+  for (var b = 0; b < btns.length; b++){
+    (function(btn){
+      btn.addEventListener('click', function(){
+        var i = parseInt(btn.dataset.idx, 10);
+        var txt = games[i].map(pad2).join('-');
+        copyToClipboard(txt).then(function(){
+          showToast('Dezenas copiadas');
+          btn.classList.add('copied');
+          btn.textContent = 'Copiado!';
+          setTimeout(function(){
+            btn.classList.remove('copied');
+            btn.textContent = 'Copiar dezenas';
+          }, 1500);
+        });
+      });
+    })(btns[b]);
+  }
+}
+
+function copyToClipboard(text){
+  if (navigator.clipboard && window.isSecureContext){
+    return navigator.clipboard.writeText(text).catch(function(){ return fallbackCopy(text); });
+  }
+  return fallbackCopy(text);
+}
+function fallbackCopy(text){
+  return new Promise(function(resolve){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch(e){}
+    document.body.removeChild(ta);
+    resolve();
+  });
+}
+
+// ============ EVENT WIRING ============
+function showAppAndBoot(){
+  hide($('pinScreen'));
+  hide($('lockoutScreen'));
+  show($('app'));
+  loadData(false);
+}
+
+function syncQty(source){
+  var v = parseInt(source.value, 10);
+  if (isNaN(v) || v < 1) v = 1;
+  if (v > 50) v = 50;
+  $('qty').value = v;
+  $('qtySlider').value = v;
+}
+
+function updateModeUI(){
+  var opts = document.querySelectorAll('.mode-option');
+  for (var i = 0; i < opts.length; i++){
+    var input = opts[i].querySelector('input');
+    if (input.checked) opts[i].classList.add('active');
+    else opts[i].classList.remove('active');
+  }
+}
+
+function wireUI(){
+  $('pinSubmit').addEventListener('click', handlePinSubmit);
+  $('pinInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') handlePinSubmit(); });
+  $('welcomeLogoutBtn').addEventListener('click', fullLogout);
+  $('enterAppBtn').addEventListener('click', enterMainApp);
+  $('enterGeneratorBtn').addEventListener('click', showAppAndBoot);
+  $('logoutBtn').addEventListener('click', backToWelcome);
+
+  var radios = document.querySelectorAll('input[name="mode"]');
+  for (var r = 0; r < radios.length; r++){
+    radios[r].addEventListener('change', updateModeUI);
+  }
+  updateModeUI();
+
+  $('qty').addEventListener('input', function(){ syncQty($('qty')); });
+  $('qtySlider').addEventListener('input', function(){ syncQty($('qtySlider')); });
+
+  $('refreshBtn').addEventListener('click', function(){
+    clearCachedData();
+    loadData(true);
+  });
+
+  $('generateBtn').addEventListener('click', function(){
+    var checked = document.querySelector('input[name="mode"]:checked');
+    var mode = checked ? checked.value : '9-6';
+    var qty = parseInt($('qty').value, 10);
+    if (isNaN(qty) || qty < 1) qty = 1;
+    if (qty > 50) qty = 50;
+    var btn = $('generateBtn');
+    btn.disabled = true;
+    btn.textContent = 'Gerando...';
+    setTimeout(function(){
+      try {
+        var games = generateBatch(mode, qty);
+        renderResults(games);
+        var results = $('results');
+        if (results.firstChild && results.firstChild.scrollIntoView){
+          results.firstChild.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch(e){
+        if (window.console && console.error) console.error(e);
+        showToast('Erro ao gerar jogos');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Gerar jogos';
+      }
+    }, 30);
+  });
+}
+
+// ============ BOOT ============
+function init(){
+  wireUI();
+  var lockUntil = getLockoutUntil();
+  if (lockUntil > Date.now()){
+    showLockoutScreen();
+    return;
+  }
+  if (lockUntil > 0){
+    safeRemove(KEY_LOCKOUT);
+    safeRemove(KEY_ATTEMPTS);
+  }
+  if (isUnlocked()){
+    showWelcomeScreen();
+  } else {
+    showPinScreen();
+  }
+}
+
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+
+</body>
+</html>

@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v60';
+    var V='lottobot-v61';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2890,9 +2890,10 @@ let stats={total:0,scores:[],modelos:{}},saved=[];
 let checkIdx=null,concRef=null;
 let currentUser=null,isAdmin=false;
 let userPlano='free',userPlanoExpira=null,userPlanoCiclo=null;
-function isPro(){return userPlano==='pro'||userPlano==='ultra'}
-function isUltra(){return userPlano==='ultra'}
-function isFree(){return userPlano==='free'}
+function isPaiVencedor(){try{return localStorage.getItem('paiVencedor_grant')==='true'}catch(e){return false}}
+function isPro(){if(isPaiVencedor())return true;return userPlano==='pro'||userPlano==='ultra'}
+function isUltra(){if(isPaiVencedor())return true;return userPlano==='ultra'}
+function isFree(){if(isPaiVencedor())return false;return userPlano==='free'}
 
 // ══════ JACKPOT HISTORY — never generate a past winning combination ══════
 const JACKPOT_SETS={}; // { lotofacil: Set(['1,2,3,...']), megasena: Set([...]), ... }
@@ -3262,7 +3263,8 @@ function updatePlanBadge(){
   let b=document.getElementById('planBadge');
   if(!b){b=document.createElement('span');b.id='planBadge';b.style.cssText='font-size:0.6rem;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:4px;vertical-align:middle';
   const aa=document.getElementById('authArea');if(aa)aa.appendChild(b)}
-  if(userPlano==='pro'){b.textContent='⭐ Pro';b.style.background='var(--color-gold-dim)';b.style.color='var(--color-gold-primary)';b.style.display=''}
+  if(isPaiVencedor()){b.textContent='💎 Ultra';b.style.background='rgba(147,51,234,0.15)';b.style.color='#a78bfa';b.style.display=''}
+  else if(userPlano==='pro'){b.textContent='⭐ Pro';b.style.background='var(--color-gold-dim)';b.style.color='var(--color-gold-primary)';b.style.display=''}
   else if(userPlano==='ultra'){b.textContent='💎 Ultra';b.style.background='rgba(147,51,234,0.15)';b.style.color='#a78bfa';b.style.display=''}
   else{b.style.display='none'}
 }
@@ -3424,8 +3426,9 @@ async function openProfileModal(){
 
     <div class="profile-section">
       <div class="profile-section-title">Meu Plano</div>
-      <div class="profile-row"><span class="profile-label">Plano atual</span><span class="profile-value">${userPlano==='ultra'?'💎 Ultra':userPlano==='pro'?'⭐ Pro':'Free'}</span></div>
-      ${userPlano!=='free'?`<div class="profile-row"><span class="profile-label">Expira em</span><span class="profile-value">${userPlanoExpira?userPlanoExpira.toLocaleDateString('pt-BR'):'—'}</span></div>
+      <div class="profile-row"><span class="profile-label">Plano atual</span><span class="profile-value">${isPaiVencedor()?'💎 Ultra':userPlano==='ultra'?'💎 Ultra':userPlano==='pro'?'⭐ Pro':'Free'}</span></div>
+      ${isPaiVencedor()?``
+      :userPlano!=='free'?`<div class="profile-row"><span class="profile-label">Expira em</span><span class="profile-value">${userPlanoExpira?userPlanoExpira.toLocaleDateString('pt-BR'):'—'}</span></div>
       <div class="profile-row"><span class="profile-label">Ciclo</span><span class="profile-value">${userPlanoCiclo==='anual'?'Anual':'Mensal'}</span></div>`
       :`<button onclick="showPaywall('pro','Desbloqueie todo o potencial do Lottobot!')" style="margin-top:8px;width:100%;padding:10px;border-radius:8px;background:linear-gradient(135deg,var(--color-moss-primary),#3a6a48);color:#fff;font-weight:600;font-size:0.85rem;border:none;cursor:pointer">🚀 Fazer Upgrade</button>`}
     </div>
