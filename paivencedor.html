@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#00a651">
 <meta name="robots" content="noindex, follow">
+<!-- Cache buster pra PWAs antigas -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="pai-version" content="v79">
 <title>Para você, pai · LottoBot</title>
 <meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. Feito com muito amor, pra você.">
 
@@ -405,18 +410,24 @@ main{
   transition:box-shadow .3s,transform .25s;
 }
 .filters-panel::before{
-  content:"🎯  FILTROS DOS JOGOS";
+  content:"🎯  ESCOLHER OS MELHORES JOGOS";
   position:absolute;
   top:-18px;left:50%;
   transform:translateX(-50%);
   background:linear-gradient(135deg,#00a651 0%,#00c46a 100%);
   color:#fff;
-  padding:9px 22px;
+  padding:9px 20px;
   border-radius:999px;
-  font-size:.95rem;font-weight:800;
-  letter-spacing:.06em;
+  font-size:.85rem;font-weight:800;
+  letter-spacing:.04em;
   box-shadow:0 6px 16px rgba(0,166,81,.55);
   white-space:nowrap;
+  max-width:calc(100% - 24px);
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+@media(max-width:380px){
+  .filters-panel::before{font-size:.75rem;padding:8px 14px;letter-spacing:.02em}
 }
 .filters-panel.just-arrived{
   animation:filtersPulse 1.2s ease-in-out 4;
@@ -425,6 +436,31 @@ main{
   0%,100%{box-shadow:0 14px 36px rgba(0,166,81,.28),0 3px 8px rgba(0,0,0,.06),0 0 0 0 rgba(0,166,81,.55)}
   50%{box-shadow:0 14px 36px rgba(0,166,81,.28),0 3px 8px rgba(0,0,0,.06),0 0 0 18px rgba(0,166,81,0)}
 }
+
+/* Botão "↻ Gerar novos jogos" no topo do card — volta pros controles */
+.back-to-controls{
+  display:block;
+  width:100%;
+  background:rgba(255,255,255,.95);
+  color:var(--primary-dark);
+  border:1.5px solid var(--primary);
+  padding:11px 16px;
+  border-radius:12px;
+  font-size:.92rem;
+  font-weight:700;
+  min-height:44px;
+  margin-bottom:14px;
+  cursor:pointer;
+  transition:all .15s;
+  text-align:center;
+  font-family:inherit;
+  box-shadow:0 2px 6px rgba(0,0,0,.04);
+}
+.back-to-controls:hover{
+  background:var(--primary);
+  color:#fff;
+}
+.back-to-controls:active{transform:scale(.98)}
 
 /* Contador GIGANTE — manchete do card */
 .filters-status{
@@ -1076,7 +1112,7 @@ main{
   .pin-wrap,.lockout-card,.welcome-wrap,
   .app-header,.app-footer,
   .controls,.filters-panel,.filters-cta,.tut-overlay,.selection-bar,.toast,
-  .step-banner,.fab-filters,
+  .step-banner,.fab-filters,.back-to-controls,
   #loadingState,#errorState,
   .copy-btn,.select-btn,.refresh-btn,.data-info{
     display:none !important;
@@ -1322,6 +1358,7 @@ main{
 
       <!-- ═══ CARD ÚNICO DE FILTROS — aparece quando há jogos ═══ -->
       <div id="filtersPanel" class="filters-panel hidden">
+        <button id="showControlsBtn" class="back-to-controls" type="button">↻ Gerar novos jogos</button>
         <div class="filters-header">
           <button id="filtersHelp" class="filters-help" type="button" aria-label="Ver tutorial dos filtros" title="Como usar os filtros">?</button>
           <button class="filters-toggle" id="filtersToggle" type="button">Ocultar</button>
@@ -2638,6 +2675,11 @@ function renderResults(games){
   }
   var panel = $('filtersPanel');
   panel.classList.remove('hidden');
+
+  // FIX 1 (H-B): esconde os controles pra card virar 1º elemento abaixo do header
+  var ctrl = document.querySelector('section.controls');
+  if (ctrl) ctrl.style.display = 'none';
+
   writeFiltersToUI();
   applyFiltersToUI();
   updateSelectionUI();
@@ -2647,6 +2689,45 @@ function renderResults(games){
   void panel.offsetWidth;
   panel.classList.add('just-arrived');
   setTimeout(function(){ panel.classList.remove('just-arrived'); }, 5200);
+}
+
+// FIX 2 (H-E): scroll robusto.
+// Com controls escondido, o card já é o 1º elemento abaixo do header.
+// Scroll pra 0 garante: header → card (com badge) → peek dos jogos.
+// rAF duplo pra layout estabilizar + try/catch pra iOS Safari + setTimeout fallback síncrono.
+function scrollToFiltersDefensive(){
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      try {
+        window.scrollTo({ top: 0, behavior:'smooth' });
+      } catch (e){
+        window.scrollTo(0, 0);
+      }
+      // Fallback síncrono se smooth scroll falhou
+      setTimeout(function(){
+        if (window.pageYOffset > 60){
+          window.scrollTo(0, 0);
+        }
+      }, 700);
+    });
+  });
+}
+
+// Volta pra tela inicial (mostra controls, esconde card+jogos)
+function showControlsAgain(){
+  var ctrl = document.querySelector('section.controls');
+  if (ctrl) ctrl.style.display = '';
+  var panel = $('filtersPanel');
+  if (panel) panel.classList.add('hidden');
+  var results = $('results');
+  if (results) results.innerHTML = '';
+  // Limpa seleção
+  if (typeof selected !== 'undefined' && selected.clear){ selected.clear(); }
+  updateSelectionUI();
+  allGames = [];
+  // Volta pro topo
+  try { window.scrollTo({ top: 0, behavior:'smooth' }); }
+  catch(e){ window.scrollTo(0, 0); }
 }
 
 function copyToClipboard(text){
@@ -2709,6 +2790,9 @@ function wireUI(){
   bindSelectionBar();
   bindResultsClickDelegate();
 
+  var backBtn = $('showControlsBtn');
+  if (backBtn) backBtn.addEventListener('click', showControlsAgain);
+
   var radios = document.querySelectorAll('input[name="mode"]');
   for (var r = 0; r < radios.length; r++){
     radios[r].addEventListener('change', updateModeUI);
@@ -2737,12 +2821,7 @@ function wireUI(){
         var games = generateBatch(mode, qty);
         renderResults(games);
         showToast(games.length + ' jogos prontos · use o card de filtros 👇');
-        var anchor = $('filtersPanel');
-        if (anchor && anchor.scrollIntoView){
-          // pequeno offset pra mostrar o badge "🎯 FILTROS DOS JOGOS" que flutua acima da borda
-          var y = anchor.getBoundingClientRect().top + window.pageYOffset - 24;
-          window.scrollTo({ top: y, behavior:'smooth' });
-        }
+        scrollToFiltersDefensive();
       } catch(e){
         if (window.console && console.error) console.error(e);
         showToast('Erro ao gerar jogos');
