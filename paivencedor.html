@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="pai-version" content="v84">
+<meta name="pai-version" content="v85">
 <title>Para você, pai · LottoBot</title>
 <meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. Feito com muito amor, pra você.">
 
@@ -1369,8 +1369,8 @@ main{
         </div>
       </section>
 
-      <!-- ═══ CARD STICKY no topo — alto contraste + inline styles ═══ -->
-      <div id="filtersPanel" class="filters-panel" style="display:block !important;visibility:visible !important;opacity:1 !important;background:#fff !important;border:4px solid #007a3d !important;border-radius:16px !important;margin:12px 0 16px !important;padding:0 !important;overflow:hidden !important;box-shadow:0 12px 32px rgba(0,122,61,.4) !important;position:sticky !important;top:8px !important;z-index:50 !important;">
+      <!-- ═══ CARD NUCLEAR v85 — JS move pra <body> com position:fixed ═══ -->
+      <div id="filtersPanel" class="filters-panel" style="display:block !important;visibility:visible !important;opacity:1 !important;background:#fff !important;">
         <!-- Header strip verde-escuro (alto contraste com body) -->
         <div class="filters-strip" style="background:linear-gradient(135deg,#007a3d 0%,#00a651 100%) !important;color:#fff !important;padding:14px 18px !important;text-align:center !important;font-weight:900 !important;font-size:1.05rem !important;letter-spacing:.04em !important;display:block !important;border-bottom:2px solid #00622f !important;text-shadow:0 1px 2px rgba(0,0,0,.18) !important;">
           🎯 ESCOLHER OS MELHORES JOGOS
@@ -2724,7 +2724,7 @@ function renderResults(games){
   // Debug pro Renato: confirma que o card foi processado
   if (window.console && console.info){
     var cs = getComputedStyle(panel);
-    console.info('[pai/v84] renderResults: ' + games.length + ' jogos · panel.display=' + cs.display + ' · panel.visibility=' + cs.visibility + ' · has-games=' + panel.classList.contains('has-games') + ' · position=' + cs.position);
+    console.warn('[pai/v85 NUCLEAR] renderResults: ' + games.length + ' jogos · panel.display=' + cs.display + ' · visibility=' + cs.visibility + ' · has-games=' + panel.classList.contains('has-games') + ' · position=' + cs.position + ' · z-index=' + cs.zIndex + ' · parentTag=' + (panel.parentNode ? panel.parentNode.tagName : 'null'));
   }
 }
 
@@ -2822,18 +2822,50 @@ function wireUI(){
   $('enterGeneratorBtn').addEventListener('click', showAppAndBoot);
   $('logoutBtn').addEventListener('click', backToWelcome);
 
-  // v84: Move filtersPanel pra ANTES do controlsSection no DOM real.
-  // Resultado: card eh o 1o elemento abaixo do header, posicao sticky funciona,
-  // pai ve o card desde que entra no Gerador.
+  // v85 NUCLEAR: Move filtersPanel pra ser FILHO DIRETO do <body>.
+  // Bypassa qualquer parent que possa estar escondendo (overflow, transform, etc).
+  // Position:fixed no topo do viewport. Z-index 999999. Inline styles !important.
+  // Body recebe padding-top dinamico pra nao cobrir conteudo.
   try {
-    var mainArea = document.getElementById('mainArea');
     var panel = document.getElementById('filtersPanel');
-    var controls = document.getElementById('controlsSection');
-    if (mainArea && panel && controls && controls.parentNode === mainArea){
-      mainArea.insertBefore(panel, controls);
-      if (window.console && console.info) console.info('[pai/v84] filtersPanel movido pra antes do controlsSection');
+    if (panel && panel.parentNode !== document.body){
+      document.body.appendChild(panel);
+      panel.style.cssText = (
+        'position:fixed !important;' +
+        'top:0 !important;' +
+        'left:0 !important;' +
+        'right:0 !important;' +
+        'z-index:999999 !important;' +
+        'background:#ffffff !important;' +
+        'border:0 !important;' +
+        'border-bottom:6px solid #007a3d !important;' +
+        'border-radius:0 0 16px 16px !important;' +
+        'margin:0 !important;' +
+        'padding:0 !important;' +
+        'box-shadow:0 8px 28px rgba(0,0,0,.5) !important;' +
+        'max-height:75vh !important;' +
+        'overflow-y:auto !important;' +
+        '-webkit-overflow-scrolling:touch !important;' +
+        'display:block !important;' +
+        'visibility:visible !important;' +
+        'opacity:1 !important;' +
+        'transform:none !important;' +
+        'width:100% !important;'
+      );
+      // Push body content abaixo do card fixed
+      var adjustBodyPadding = function(){
+        var h = panel.offsetHeight;
+        if (h > 0) document.body.style.paddingTop = (h + 4) + 'px';
+      };
+      adjustBodyPadding();
+      window.addEventListener('resize', adjustBodyPadding);
+      // Re-ajusta apos mudancas no card (presets, manual expand, etc)
+      if (window.MutationObserver){
+        new MutationObserver(adjustBodyPadding).observe(panel, {childList:true, subtree:true, attributes:true});
+      }
+      if (window.console && console.warn) console.warn('[pai/v85 NUCLEAR] filtersPanel movido pra <body> direto · position:fixed · z-index:999999');
     }
-  } catch(e){ if (window.console && console.warn) console.warn('[pai/v84] erro ao mover panel:', e); }
+  } catch(e){ if (window.console && console.error) console.error('[pai/v85] erro ao mover panel:', e); }
 
   loadFilters();
   bindFilters();
