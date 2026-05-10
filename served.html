@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="pai-version" content="v82">
+<meta name="pai-version" content="v81">
 <title>Para você, pai · LottoBot</title>
 <meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. Feito com muito amor, pra você.">
 
@@ -436,37 +436,6 @@ main{
   0%,100%{box-shadow:0 14px 36px rgba(0,166,81,.28),0 3px 8px rgba(0,0,0,.06),0 0 0 0 rgba(0,166,81,.55)}
   50%{box-shadow:0 14px 36px rgba(0,166,81,.28),0 3px 8px rgba(0,0,0,.06),0 0 0 18px rgba(0,166,81,0)}
 }
-
-/* Estado pré-geração — card vazio amigável */
-.filters-pregenerate{
-  display:flex;align-items:center;gap:14px;
-  background:#fff;
-  border:2px dashed var(--primary);
-  border-radius:14px;
-  padding:18px 16px;
-  font-size:.95rem;line-height:1.5;
-  color:var(--text);
-}
-.filters-pregenerate-icon{
-  font-size:2rem;flex-shrink:0;
-  animation:bounceArrow 1.4s ease-in-out infinite;
-}
-@keyframes bounceArrow{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(6px)}
-}
-.filters-pregenerate-text{flex:1}
-.filters-pregenerate-text b{
-  color:var(--primary-dark);
-  display:block;margin-bottom:4px;
-  font-size:1.02rem;
-}
-/* Quando há jogos, esconde o pre-state */
-.filters-panel.has-games .filters-pregenerate{display:none}
-/* Quando NÃO há jogos, esconde o conteúdo de filtros */
-.filters-panel:not(.has-games) .filters-header,
-.filters-panel:not(.has-games) .filters-status,
-.filters-panel:not(.has-games) .filters-body{display:none}
 
 /* Botão "↻ Gerar novos jogos" no topo do card — volta pros controles */
 .back-to-controls{
@@ -1387,16 +1356,9 @@ main{
         </div>
       </section>
 
-      <!-- ═══ CARD ÚNICO DE FILTROS — sempre visível ═══ -->
-      <div id="filtersPanel" class="filters-panel">
-        <button id="showControlsBtn" class="back-to-controls hidden" type="button">↻ Gerar novos jogos</button>
-        <div id="filtersPreGenerate" class="filters-pregenerate">
-          <span class="filters-pregenerate-icon" aria-hidden="true">👇</span>
-          <span class="filters-pregenerate-text">
-            <b>Aqui você escolhe os melhores jogos 💚</b>
-            Primeiro gere os jogos clicando no botão verde abaixo. Depois este card vai te ajudar a separar os bons.
-          </span>
-        </div>
+      <!-- ═══ CARD ÚNICO DE FILTROS — aparece quando há jogos ═══ -->
+      <div id="filtersPanel" class="filters-panel hidden">
+        <button id="showControlsBtn" class="back-to-controls" type="button">↻ Gerar novos jogos</button>
         <div class="filters-header">
           <button id="filtersHelp" class="filters-help" type="button" aria-label="Ver tutorial dos filtros" title="Como usar os filtros">?</button>
           <button class="filters-toggle" id="filtersToggle" type="button">Ocultar</button>
@@ -2713,11 +2675,6 @@ function renderResults(games){
   }
   var panel = $('filtersPanel');
   panel.classList.remove('hidden');
-  panel.classList.add('has-games');
-
-  // Mostra o botão "↻ Gerar novos jogos" só quando há jogos
-  var backBtn = $('showControlsBtn');
-  if (backBtn) backBtn.classList.remove('hidden');
 
   // FIX 1 (H-B): esconde os controles pra card virar 1º elemento abaixo do header
   var ctrl = document.querySelector('section.controls');
@@ -2732,12 +2689,6 @@ function renderResults(games){
   void panel.offsetWidth;
   panel.classList.add('just-arrived');
   setTimeout(function(){ panel.classList.remove('just-arrived'); }, 5200);
-
-  // Debug pro Renato: confirma que o card foi processado
-  if (window.console && console.info){
-    var cs = getComputedStyle(panel);
-    console.info('[pai/v82] renderResults: ' + games.length + ' jogos · panel.display=' + cs.display + ' · panel.visibility=' + cs.visibility + ' · has-games=' + panel.classList.contains('has-games'));
-  }
 }
 
 // FIX 2 (H-E): scroll robusto.
@@ -2762,21 +2713,19 @@ function scrollToFiltersDefensive(){
   });
 }
 
-// Volta pra tela inicial (mostra controls, card no estado pre-generate)
+// Volta pra tela inicial (mostra controls, esconde card+jogos)
 function showControlsAgain(){
   var ctrl = document.querySelector('section.controls');
   if (ctrl) ctrl.style.display = '';
   var panel = $('filtersPanel');
-  if (panel){
-    panel.classList.remove('has-games');  // volta pro estado pre-generate
-  }
-  var backBtn = $('showControlsBtn');
-  if (backBtn) backBtn.classList.add('hidden');
+  if (panel) panel.classList.add('hidden');
   var results = $('results');
   if (results) results.innerHTML = '';
+  // Limpa seleção
   if (typeof selected !== 'undefined' && selected.clear){ selected.clear(); }
   updateSelectionUI();
   allGames = [];
+  // Volta pro topo
   try { window.scrollTo({ top: 0, behavior:'smooth' }); }
   catch(e){ window.scrollTo(0, 0); }
 }
