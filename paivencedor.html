@@ -291,56 +291,44 @@ main{
   transition:transform .15s ease;
 }
 .cell.marked{
-  background:
-    radial-gradient(circle at 30% 22%,#9bffb6 0%,#3aff7a 30%,#0ddc55 60%,#00a542 100%);
-  color:#04200f;
-  font-weight:900;
-  font-size:1rem;
-  text-shadow:
-    0 1px 0 rgba(255,255,255,.45),
-    0 0 4px rgba(255,255,255,.3);
-  border:2px solid #b8ffce;
+  background:#0ddc55 !important;
+  background-image:radial-gradient(circle at 30% 22%,#9bffb6 0%,#3aff7a 30%,#0ddc55 60%,#00a542 100%) !important;
+  color:#04200f !important;
+  font-weight:900 !important;
+  font-size:1rem !important;
+  text-shadow:0 1px 0 rgba(255,255,255,.45),0 0 4px rgba(255,255,255,.3) !important;
+  border:2px solid #b8ffce !important;
   box-shadow:
     0 0 0 2px rgba(155,255,182,.55),
     0 0 12px 2px rgba(58,255,122,.95),
-    0 0 24px 6px rgba(13,220,85,.7),
-    0 0 42px 10px rgba(0,165,66,.45),
+    0 0 24px 6px rgba(13,220,85,.6),
     0 4px 10px rgba(0,80,30,.5),
     inset 0 2px 4px rgba(255,255,255,.65),
-    inset 0 -2px 3px rgba(0,90,35,.5);
-  transform:scale(1.08);
+    inset 0 -2px 3px rgba(0,90,35,.5) !important;
+  transform:scale(1.06);
   position:relative;
   z-index:2;
+  -webkit-animation:markedPulse 2.4s ease-in-out infinite;
   animation:markedPulse 2.4s ease-in-out infinite;
 }
 .cell.marked::after{
   content:"";
-  position:absolute;inset:-8px;
+  position:absolute;inset:-6px;
   border-radius:50%;
-  background:radial-gradient(circle,rgba(155,255,182,.55) 0%,rgba(58,255,122,.25) 45%,rgba(13,220,85,0) 75%);
+  background:radial-gradient(circle,rgba(155,255,182,.45) 0%,rgba(58,255,122,.18) 45%,rgba(13,220,85,0) 75%);
   pointer-events:none;
   z-index:-1;
 }
+@-webkit-keyframes markedPulse{
+  0%,100%{transform:scale(1.06)}
+  50%{transform:scale(1.12)}
+}
 @keyframes markedPulse{
-  0%,100%{box-shadow:
-    0 0 0 2px rgba(155,255,182,.55),
-    0 0 12px 2px rgba(58,255,122,.95),
-    0 0 24px 6px rgba(13,220,85,.7),
-    0 0 42px 10px rgba(0,165,66,.45),
-    0 4px 10px rgba(0,80,30,.5),
-    inset 0 2px 4px rgba(255,255,255,.65),
-    inset 0 -2px 3px rgba(0,90,35,.5)}
-  50%{box-shadow:
-    0 0 0 2px rgba(155,255,182,.8),
-    0 0 18px 4px rgba(58,255,122,1),
-    0 0 32px 8px rgba(13,220,85,.85),
-    0 0 56px 14px rgba(0,165,66,.55),
-    0 4px 10px rgba(0,80,30,.5),
-    inset 0 2px 4px rgba(255,255,255,.8),
-    inset 0 -2px 3px rgba(0,90,35,.5)}
+  0%,100%{transform:scale(1.06)}
+  50%{transform:scale(1.12)}
 }
 @media (prefers-reduced-motion: reduce){
-  .cell.marked{animation:none}
+  .cell.marked{-webkit-animation:none;animation:none}
 }
 .count-cell{
   aspect-ratio:1;
