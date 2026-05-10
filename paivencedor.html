@@ -277,30 +277,59 @@ main{
   display:flex;align-items:center;justify-content:center;
   font-size:.85rem;font-weight:600;
   border-radius:50%;
-  background:var(--cell-bg);color:var(--cell-text);
+  background:#e9ebe7;color:#b5b5b5;
   font-variant-numeric:tabular-nums;
   transition:transform .15s ease;
+  opacity:.7;
 }
 .cell.marked{
-  background:radial-gradient(circle at 30% 30%,#34d27a 0%,var(--primary) 55%,var(--primary-dark) 100%);
+  background:radial-gradient(circle at 30% 25%,#7bff9c 0%,#22e26a 35%,#00c85a 70%,#008a3e 100%);
   color:#fff;
-  font-weight:700;
-  text-shadow:0 1px 2px rgba(0,0,0,.25);
+  font-weight:800;
+  font-size:.92rem;
+  text-shadow:
+    0 1px 2px rgba(0,80,30,.55),
+    0 0 6px rgba(255,255,255,.35);
+  border:2px solid #7bff9c;
   box-shadow:
-    0 0 0 2px rgba(0,166,81,.18),
-    0 4px 12px rgba(0,166,81,.45),
-    inset 0 1px 1px rgba(255,255,255,.35);
-  transform:scale(1.04);
+    0 0 0 2px rgba(123,255,156,.55),
+    0 0 14px 3px rgba(34,226,106,.85),
+    0 0 28px 6px rgba(0,200,90,.55),
+    0 6px 14px rgba(0,120,50,.45),
+    inset 0 2px 4px rgba(255,255,255,.55),
+    inset 0 -2px 3px rgba(0,80,30,.35);
+  transform:scale(1.08);
   position:relative;
-  z-index:1;
+  z-index:2;
+  opacity:1;
+  animation:markedPulse 2.4s ease-in-out infinite;
 }
 .cell.marked::after{
   content:"";
-  position:absolute;inset:-3px;
+  position:absolute;inset:-6px;
   border-radius:50%;
-  box-shadow:0 0 16px 2px rgba(0,166,81,.4);
+  background:radial-gradient(circle,rgba(123,255,156,.45) 0%,rgba(34,226,106,.18) 45%,rgba(0,200,90,0) 75%);
   pointer-events:none;
   z-index:-1;
+}
+@keyframes markedPulse{
+  0%,100%{box-shadow:
+    0 0 0 2px rgba(123,255,156,.55),
+    0 0 14px 3px rgba(34,226,106,.85),
+    0 0 28px 6px rgba(0,200,90,.55),
+    0 6px 14px rgba(0,120,50,.45),
+    inset 0 2px 4px rgba(255,255,255,.55),
+    inset 0 -2px 3px rgba(0,80,30,.35)}
+  50%{box-shadow:
+    0 0 0 2px rgba(123,255,156,.75),
+    0 0 18px 4px rgba(34,226,106,1),
+    0 0 36px 9px rgba(0,200,90,.75),
+    0 6px 16px rgba(0,120,50,.6),
+    inset 0 2px 4px rgba(255,255,255,.7),
+    inset 0 -2px 3px rgba(0,80,30,.35)}
+}
+@media (prefers-reduced-motion: reduce){
+  .cell.marked{animation:none}
 }
 .stats{
   font-size:.75rem;color:var(--muted);
