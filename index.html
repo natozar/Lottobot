@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v70';
+    var V='lottobot-v71';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -3155,10 +3155,21 @@ document.addEventListener('DOMContentLoaded',async()=>{
       document.getElementById('authModal').classList.remove('active');
       document.getElementById('authCloseBtn').style.display='';
       await syncUserDoc(user);
-      // Carregar plano
+      // Carregar plano + sincronizar pai grant entre dispositivos via Firestore
       try{const ud=await _db.collection('users').doc(user.uid).get();
       if(ud.exists){const d=ud.data();userPlano=d.plano||'free';userPlanoExpira=d.planoExpira?d.planoExpira.toDate():null;userPlanoCiclo=d.planoCiclo||null;
-      if(userPlanoExpira&&userPlanoExpira<new Date()){userPlano='free';userPlanoExpira=null;userPlanoCiclo=null}}}catch(e){}
+      if(userPlanoExpira&&userPlanoExpira<new Date()){userPlano='free';userPlanoExpira=null;userPlanoCiclo=null}
+      // Pai grant: Firestore -> localStorage (pull) ou localStorage -> Firestore (push)
+      const localPai=(function(){try{return localStorage.getItem('paiVencedor_grant')==='true'}catch(e){return false}})();
+      if(d.paiGrant===true&&!localPai){
+        try{localStorage.setItem('paiVencedor_grant','true');localStorage.setItem('paiVencedor_grantDate',d.paiGrantDate||new Date().toISOString())}catch(e){}
+      }else if(localPai&&d.paiGrant!==true){
+        try{await _db.collection('users').doc(user.uid).update({paiGrant:true,paiGrantDate:firebase.firestore.FieldValue.serverTimestamp()})}catch(e){}
+      }}else{
+        // Doc não existe ainda — se tem localStorage, criar
+        const localPai=(function(){try{return localStorage.getItem('paiVencedor_grant')==='true'}catch(e){return false}})();
+        if(localPai){try{await _db.collection('users').doc(user.uid).set({paiGrant:true,paiGrantDate:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})}catch(e){}}
+      }}catch(e){}
       applyPlanRestrictions();updatePlanBadge();
       await loadSavedFromCloud();
       await requestPushPermission();
