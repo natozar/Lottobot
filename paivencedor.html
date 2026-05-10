@@ -279,10 +279,28 @@ main{
   border-radius:50%;
   background:var(--cell-bg);color:var(--cell-text);
   font-variant-numeric:tabular-nums;
+  transition:transform .15s ease;
 }
 .cell.marked{
-  background:var(--primary);color:#fff;
-  box-shadow:0 2px 4px rgba(0,166,81,.25);
+  background:radial-gradient(circle at 30% 30%,#34d27a 0%,var(--primary) 55%,var(--primary-dark) 100%);
+  color:#fff;
+  font-weight:700;
+  text-shadow:0 1px 2px rgba(0,0,0,.25);
+  box-shadow:
+    0 0 0 2px rgba(0,166,81,.18),
+    0 4px 12px rgba(0,166,81,.45),
+    inset 0 1px 1px rgba(255,255,255,.35);
+  transform:scale(1.04);
+  position:relative;
+  z-index:1;
+}
+.cell.marked::after{
+  content:"";
+  position:absolute;inset:-3px;
+  border-radius:50%;
+  box-shadow:0 0 16px 2px rgba(0,166,81,.4);
+  pointer-events:none;
+  z-index:-1;
 }
 .stats{
   font-size:.75rem;color:var(--muted);
