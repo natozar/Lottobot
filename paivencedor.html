@@ -391,24 +391,60 @@ main{
 
 .app-footer{text-align:center;font-size:.75rem;color:var(--muted);padding:16px;margin-top:8px}
 
-/* ═══ FILTROS ═══ */
+/* ═══ FILTROS — MEGA CARD ═══ */
 .filters-panel{
-  background:var(--card);
-  border-radius:var(--r-md);
-  padding:16px 16px 14px;
-  margin-bottom:16px;
-  box-shadow:var(--shadow-sm);
-  border:2px solid transparent;
-  transition:border-color .3s,box-shadow .3s;
+  position:relative;
+  background:linear-gradient(180deg,#ffffff 0%,#f6fbf7 100%);
+  border-radius:18px;
+  padding:32px 18px 18px;
+  margin:28px 0 22px;
+  box-shadow:0 10px 28px rgba(0,166,81,.18),0 2px 6px rgba(0,0,0,.05);
+  border:3px solid var(--primary);
+  transition:box-shadow .3s,transform .25s;
+}
+.filters-panel::before{
+  content:"🎯  FILTROS DOS JOGOS";
+  position:absolute;
+  top:-16px;left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(135deg,#00a651 0%,#00c46a 100%);
+  color:#fff;
+  padding:7px 18px;
+  border-radius:999px;
+  font-size:.85rem;font-weight:800;
+  letter-spacing:.05em;
+  box-shadow:0 4px 12px rgba(0,166,81,.45);
+  white-space:nowrap;
 }
 .filters-panel.just-arrived{
-  animation:filtersPulse 1.6s ease-in-out 2;
-  border-color:var(--primary);
-  box-shadow:0 0 0 4px rgba(0,166,81,.18),var(--shadow-md);
+  animation:filtersPulse 1.6s ease-in-out 3;
 }
 @keyframes filtersPulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(0,166,81,.45),var(--shadow-md)}
-  50%{box-shadow:0 0 0 10px rgba(0,166,81,0),var(--shadow-md)}
+  0%,100%{box-shadow:0 10px 28px rgba(0,166,81,.18),0 2px 6px rgba(0,0,0,.05),0 0 0 0 rgba(0,166,81,.5)}
+  50%{box-shadow:0 10px 28px rgba(0,166,81,.18),0 2px 6px rgba(0,0,0,.05),0 0 0 14px rgba(0,166,81,0)}
+}
+
+/* Status line — explicita o que o filtro CONTROLA */
+.filters-status{
+  background:#fff;
+  border:1.5px solid var(--primary-soft);
+  border-radius:var(--r-md);
+  padding:11px 14px;
+  margin:4px 0 14px;
+  display:flex;align-items:center;gap:10px;
+  font-size:.9rem;line-height:1.4;
+  color:var(--text);
+}
+.filters-status-icon{font-size:1.2rem;flex-shrink:0}
+.filters-status-text{flex:1}
+.filters-status-text b{
+  color:var(--primary-dark);
+  font-size:1.1rem;font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+.filters-status .impl{
+  display:block;color:var(--muted);
+  font-size:.78rem;margin-top:2px;
 }
 
 /* ═══ STEP BANNERS — Passo 1, 2, 3 ═══ */
@@ -518,12 +554,8 @@ main{
 
 .filters-header{
   display:flex;align-items:center;gap:10px;
+  justify-content:flex-end;
   flex-wrap:wrap;
-}
-.filters-title{
-  font-weight:800;font-size:1.05rem;
-  color:var(--primary-dark);
-  display:inline-flex;align-items:center;gap:6px;
 }
 .filters-help{
   width:30px;height:30px;
@@ -1203,15 +1235,6 @@ main{
     </div>
 
     <div id="mainArea" class="hidden">
-      <!-- ═══ PASSO 1 · GERAR ═══ -->
-      <div class="step-banner" id="step1Banner">
-        <span class="step-num">1</span>
-        <span class="step-text">
-          <span class="step-title">Gere os jogos</span>
-          <span class="step-sub">Escolha o modelo e a quantidade. Toque em <b>Gerar jogos</b>.</span>
-        </span>
-      </div>
-
       <section class="controls" id="controlsSection">
         <div class="section-title">Modelo de jogo</div>
         <div class="modes" id="modes">
@@ -1239,24 +1262,20 @@ main{
         </div>
       </section>
 
-      <!-- ═══ PASSO 2 · FILTRAR (só aparece com jogos) ═══ -->
-      <div class="step-banner hidden" id="step2Banner">
-        <span class="step-num">2</span>
-        <span class="step-text">
-          <span class="step-title">Filtre os jogos</span>
-          <span class="step-sub">Use ⭐ <b>Recomendado</b> (um toque) ou ajuste <b>manualmente</b> abaixo.</span>
-        </span>
-      </div>
-
-      <!-- ═══ FILTROS — entre PASSO 2 e PASSO 3 ═══ -->
+      <!-- ═══ CARD ÚNICO DE FILTROS — aparece quando há jogos ═══ -->
       <div id="filtersPanel" class="filters-panel hidden">
         <div class="filters-header">
-          <span class="filters-title">🎯 Filtros dos jogos</span>
           <button id="filtersHelp" class="filters-help" type="button" aria-label="Ver tutorial dos filtros" title="Como usar os filtros">?</button>
-          <span class="filters-counter" id="filtersCounter"><strong>—</strong> de — visíveis</span>
           <button class="filters-toggle" id="filtersToggle" type="button">Ocultar</button>
         </div>
-        <p class="filters-intro">Os filtros <strong>escondem</strong> os jogos que você não quer ver — eles continuam ali, só ficam apagados. <strong>Comece pelo modo fácil abaixo</strong>. Depois, se quiser, ajuste manualmente.</p>
+        <div class="filters-status" id="filtersStatus">
+          <span class="filters-status-icon" aria-hidden="true">📊</span>
+          <span class="filters-status-text">
+            <b><span id="filtersCounter">— de —</span> jogos visíveis</b>
+            <span class="impl">Só esses entram em <b>Imprimir</b>, <b>Compartilhar</b> e <b>Copiar</b>.</span>
+          </span>
+        </div>
+        <p class="filters-intro">Os filtros <strong>escondem</strong> os jogos que você não quer ver — eles continuam ali, só ficam apagados. <strong>Comece pelo modo fácil</strong>. Depois, se quiser, ajuste manualmente.</p>
         <div class="filters-body" id="filtersBody">
 
           <!-- ── MODO FÁCIL ── -->
@@ -1508,15 +1527,6 @@ main{
         </div>
       </div>
 
-      <!-- ═══ PASSO 3 · ESCOLHER (só aparece com jogos) ═══ -->
-      <div class="step-banner hidden" id="step3Banner">
-        <span class="step-num">3</span>
-        <span class="step-text">
-          <span class="step-title">Escolha seus jogos</span>
-          <span class="step-sub">Toque em <b>+ Escolher</b> nos jogos que gostar. Aparece uma barra embaixo pra <b>Imprimir, Compartilhar ou Copiar</b>.</span>
-        </span>
-      </div>
-
       <!-- Header só na impressão -->
       <div class="print-only print-header">
         <h1>Para você, pai 💚</h1>
@@ -1553,31 +1563,29 @@ main{
       <button id="tutClose" class="tut-close" type="button" aria-label="Fechar tutorial">✕</button>
     </div>
     <div class="tut-body">
-      <p class="tut-lead">A página tem <strong>3 passos numerados</strong>. Você está no <strong>PASSO 2</strong> agora. Veja como funciona:</p>
+      <p class="tut-lead">Depois que você gera os jogos, aparece um <strong>card verde "🎯 FILTROS DOS JOGOS"</strong> bem grande. Ele <strong>controla quais jogos vão pra Imprimir, Compartilhar e Copiar</strong>. Os jogos cortados pelo filtro <strong>não somem</strong> — só ficam apagados.</p>
 
       <div class="tut-step">
         <div class="tut-step-num">1</div>
         <div class="tut-step-body">
-          <div class="tut-step-title">PASSO 1 — Gerar jogos</div>
-          <div class="tut-step-text">Lá em cima, escolha o modelo e quantos jogos quer. Toque em <code>Gerar jogos</code>. Já feito ✅.</div>
+          <div class="tut-step-title">Modo fácil — um toque só</div>
+          <div class="tut-step-text">Dentro do card, toque em <code>⭐ Recomendado</code>. Ele liga as melhores opções automaticamente. Veja o contador <code>X de Y jogos visíveis</code> mudar — só esses sobraram.</div>
         </div>
       </div>
 
       <div class="tut-step">
         <div class="tut-step-num">2</div>
         <div class="tut-step-body">
-          <div class="tut-step-title">PASSO 2 — Filtrar <small>(você está aqui)</small></div>
-          <div class="tut-step-text">O painel <strong>verde "🎯 Filtros dos jogos"</strong> tem 2 modos:
-            <br>· <b>⚡ Modo fácil</b>: toque em <code>⭐ Recomendado</code> e pronto.
-            <br>· <b>✏️ Modo manual</b>: ajuste os 8 filtros numerados (1 a 8). Ex.: pra deixar <b>no máximo 2 números na última linha</b>, vá no filtro <b>2</b> "Limite por linha", role até <b>Linha 5</b> e escolha <b>no máximo 2</b>.</div>
+          <div class="tut-step-title">Modo manual — ajuste à vontade</div>
+          <div class="tut-step-text">No mesmo card, mais pra baixo, tem <strong>8 filtros numerados (1 a 8)</strong>. Use só os que quiser. Exemplo: pra deixar <b>no máximo 2 números na última linha</b>, vá no filtro <b>2 · Limite por linha</b>, role até <b>Linha 5 (21,22,23,24,25)</b> e escolha <b>no máximo 2</b>.</div>
         </div>
       </div>
 
       <div class="tut-step">
         <div class="tut-step-num">3</div>
         <div class="tut-step-body">
-          <div class="tut-step-title">PASSO 3 — Escolher</div>
-          <div class="tut-step-text">Os jogos cortados ficam <strong>apagados</strong>. Nos que sobraram, toque em <code>+ Escolher</code>. No fim aparece a barra com <b>Imprimir, Compartilhar e Copiar</b>.</div>
+          <div class="tut-step-title">Escolha os jogos que sobraram</div>
+          <div class="tut-step-text">Abaixo do card, os jogos cortados ficam <strong>apagados</strong>. Nos que aparecerem normais, toque em <code>+ Escolher</code>. No fim da tela aparece uma barra com <b>Imprimir / Compartilhar / Copiar</b>.</div>
         </div>
       </div>
 
@@ -1585,7 +1593,7 @@ main{
         <div class="tut-step-num" style="background:var(--warm)">↑</div>
         <div class="tut-step-body">
           <div class="tut-step-title">Botão flutuante "↑ Filtros"</div>
-          <div class="tut-step-text">Se você rolar pra ver os jogos e quiser <strong>voltar pros filtros</strong>, toque no botão verde flutuante no canto da tela. Ele mostra quantos jogos estão visíveis (ex.: <code>7/10</code>).</div>
+          <div class="tut-step-text">Se rolar pra baixo e perder o card de vista, aparece um botão verde no canto da tela: <code>↑ Filtros · 7/10</code>. Toque pra voltar pro card a qualquer momento.</div>
         </div>
       </div>
 
@@ -2136,7 +2144,7 @@ function applyFiltersToUI(){
     }
   }
   var counter = $('filtersCounter');
-  if (counter) counter.innerHTML = '<strong>' + visible + '</strong> de ' + allGames.length + ' visíveis';
+  if (counter) counter.textContent = visible + ' de ' + allGames.length;
 
   // Atualiza contador no FAB
   var fabCount = $('fabCount');
@@ -2339,10 +2347,10 @@ function bindFabFilters(){
   var fab = $('fabFilters');
   if (!fab) return;
   fab.addEventListener('click', function(){
-    var step = $('step2Banner');
-    var anchor = (step && !step.classList.contains('hidden')) ? step : $('filtersPanel');
+    var anchor = $('filtersPanel');
     if (anchor && anchor.scrollIntoView){
-      anchor.scrollIntoView({ behavior:'smooth', block:'start' });
+      var y = anchor.getBoundingClientRect().top + window.pageYOffset - 24;
+      window.scrollTo({ top: y, behavior:'smooth' });
     }
   });
 
@@ -2580,24 +2588,11 @@ function renderResults(games){
   applyFiltersToUI();
   updateSelectionUI();
 
-  // Mostra os banners de PASSO 2 e PASSO 3 (só aparecem após geração)
-  var step2 = $('step2Banner');
-  var step3 = $('step3Banner');
-  if (step2){
-    step2.classList.remove('hidden');
-    step2.classList.add('active');
-    step2.classList.remove('pulsing');
-    void step2.offsetWidth;
-    step2.classList.add('pulsing');
-    setTimeout(function(){ step2.classList.remove('pulsing'); }, 3400);
-  }
-  if (step3) step3.classList.remove('hidden');
-
-  // Pulsa também o painel pra chamar atenção
+  // Pulsa o card de filtros pra chamar atenção
   panel.classList.remove('just-arrived');
   void panel.offsetWidth;
   panel.classList.add('just-arrived');
-  setTimeout(function(){ panel.classList.remove('just-arrived'); }, 3400);
+  setTimeout(function(){ panel.classList.remove('just-arrived'); }, 5200);
 
   // Abre o tutorial automaticamente na primeira vez
   if (!tutorialSeen()){
@@ -2692,11 +2687,12 @@ function wireUI(){
       try {
         var games = generateBatch(mode, qty);
         renderResults(games);
-        showToast(games.length + ' jogos prontos · PASSO 2 · filtrar 👇');
-        var anchor = $('step2Banner');
-        if (!anchor || anchor.classList.contains('hidden')) anchor = $('filtersPanel');
+        showToast(games.length + ' jogos prontos · use o card de filtros 👇');
+        var anchor = $('filtersPanel');
         if (anchor && anchor.scrollIntoView){
-          anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // pequeno offset pra mostrar o badge "🎯 FILTROS DOS JOGOS" que flutua acima da borda
+          var y = anchor.getBoundingClientRect().top + window.pageYOffset - 24;
+          window.scrollTo({ top: y, behavior:'smooth' });
         }
       } catch(e){
         if (window.console && console.error) console.error(e);
