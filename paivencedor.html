@@ -395,50 +395,152 @@ main{
 .filters-panel{
   background:var(--card);
   border-radius:var(--r-md);
-  padding:14px 16px;
+  padding:16px 16px 14px;
   margin-bottom:16px;
   box-shadow:var(--shadow-sm);
+  border:2px solid transparent;
+  transition:border-color .3s,box-shadow .3s;
 }
+.filters-panel.just-arrived{
+  animation:filtersPulse 1.6s ease-in-out 2;
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px rgba(0,166,81,.18),var(--shadow-md);
+}
+@keyframes filtersPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(0,166,81,.45),var(--shadow-md)}
+  50%{box-shadow:0 0 0 10px rgba(0,166,81,0),var(--shadow-md)}
+}
+
+/* Banner de chegada — chama atenção pro filtro */
+.filters-cta{
+  background:linear-gradient(135deg,#00a651 0%,#00c46a 100%);
+  color:#fff;
+  border-radius:var(--r-md);
+  padding:14px 16px;
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 4px 14px rgba(0,166,81,.28);
+  cursor:pointer;
+  position:relative;
+  animation:ctaIn .45s ease both;
+}
+@keyframes ctaIn{
+  from{opacity:0;transform:translateY(-8px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.filters-cta-icon{
+  font-size:1.6rem;flex-shrink:0;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.18));
+}
+.filters-cta-text{flex:1;line-height:1.32}
+.filters-cta-title{font-weight:800;font-size:1rem;display:block;margin-bottom:2px}
+.filters-cta-sub{font-size:.82rem;opacity:.95}
+.filters-cta-close{
+  background:rgba(255,255,255,.2);
+  color:#fff;border-radius:999px;
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;flex-shrink:0;
+  font-weight:700;
+}
+.filters-cta-close:hover{background:rgba(255,255,255,.32)}
+
 .filters-header{
-  display:flex;align-items:center;gap:8px;
+  display:flex;align-items:center;gap:10px;
   flex-wrap:wrap;
 }
 .filters-title{
-  font-weight:700;font-size:.92rem;
+  font-weight:800;font-size:1.05rem;
   color:var(--primary-dark);
+  display:inline-flex;align-items:center;gap:6px;
 }
+.filters-help{
+  width:30px;height:30px;
+  border-radius:999px;
+  background:var(--primary-soft);
+  color:var(--primary-dark);
+  border:2px solid var(--primary);
+  font-weight:900;font-size:.95rem;
+  display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  transition:background .15s,transform .1s;
+}
+.filters-help:hover{background:var(--primary);color:#fff}
+.filters-help:active{transform:scale(.94)}
 .filters-counter{
-  flex:1;font-size:.82rem;color:var(--muted);
+  flex:1;font-size:.85rem;color:var(--muted);
   text-align:right;font-variant-numeric:tabular-nums;
 }
-.filters-counter strong{color:var(--primary);font-weight:800;font-size:1rem}
+.filters-counter strong{color:var(--primary);font-weight:800;font-size:1.1rem}
 .filters-toggle{
-  font-size:.78rem;color:var(--primary);
-  padding:5px 12px;border-radius:999px;
-  border:1px solid var(--primary);
-  background:#fff;
+  font-size:.82rem;color:var(--primary);
+  padding:6px 14px;border-radius:999px;
+  border:1.5px solid var(--primary);
+  background:#fff;font-weight:700;
 }
 .filters-toggle:hover{background:var(--primary-soft)}
 .filters-body{display:flex;flex-direction:column;gap:14px;margin-top:14px}
 .filters-body.collapsed{display:none}
+
+/* Presets — atalhos de um toque */
+.preset-row{
+  display:flex;flex-wrap:wrap;gap:8px;
+  background:#fafaf7;
+  border:1px dashed var(--border);
+  border-radius:var(--r-md);
+  padding:10px 12px;
+}
+.preset-label{
+  width:100%;
+  font-size:.76rem;font-weight:700;
+  color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em;
+  margin-bottom:2px;
+}
+.preset-btn{
+  flex:1;min-width:120px;
+  padding:11px 12px;
+  border-radius:var(--r-md);
+  border:1.5px solid var(--border);
+  background:#fff;
+  font-size:.88rem;font-weight:700;
+  color:var(--text);
+  cursor:pointer;
+  transition:all .15s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  min-height:42px;
+  line-height:1.15;
+  text-align:center;
+}
+.preset-btn:hover{border-color:var(--primary);color:var(--primary-dark)}
+.preset-btn:active{transform:scale(.97)}
+.preset-btn.preset-best{
+  background:var(--primary);
+  color:#fff;
+  border-color:var(--primary);
+  box-shadow:0 3px 10px rgba(0,166,81,.28);
+}
+.preset-btn.preset-best:hover{background:var(--primary-dark);color:#fff}
+
 .filter-group{border-top:1px solid var(--border);padding-top:12px}
 .filter-group:first-child{border-top:0;padding-top:0}
 .filter-label{
-  font-size:.78rem;font-weight:700;
+  font-size:.85rem;font-weight:800;
   color:var(--text);margin-bottom:8px;
-  text-transform:uppercase;letter-spacing:.04em;
+  letter-spacing:.01em;
 }
 .filter-chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
-  padding:7px 12px;
+  padding:9px 14px;
   border:1.5px solid var(--border);
   border-radius:999px;
-  font-size:.82rem;
+  font-size:.88rem;
   cursor:pointer;
   transition:border-color .15s,background .15s,color .15s;
   background:#fff;
   user-select:none;
+  min-height:38px;
 }
 .chip input{display:none}
 .chip-active{
@@ -448,30 +550,33 @@ main{
   font-weight:700;
 }
 .chip-count{
-  font-size:.72rem;color:var(--muted);
+  font-size:.74rem;color:var(--muted);
   font-variant-numeric:tabular-nums;
-  font-weight:600;
+  font-weight:700;
 }
 .chip-active .chip-count{color:var(--primary)}
 .filter-range{
   display:flex;align-items:center;gap:8px;flex-wrap:wrap;
 }
 .filter-range input{
-  width:64px;
-  padding:7px 8px;
+  width:68px;
+  padding:9px 8px;
   border:1.5px solid var(--border);
   border-radius:var(--r-sm);
-  font-size:.85rem;text-align:center;
+  font-size:.95rem;text-align:center;
   font-variant-numeric:tabular-nums;
   outline:none;
   background:#fff;
+  font-weight:600;
 }
 .filter-range input:focus{border-color:var(--primary)}
-.filter-range > span{color:var(--muted);font-size:.85rem}
+.filter-range > span{color:var(--muted);font-size:.88rem}
 .filter-range-hint{
-  font-size:.7rem;color:var(--muted);
+  font-size:.75rem;color:var(--muted);
   margin-left:auto;
   font-variant-numeric:tabular-nums;
+  background:#fafaf7;
+  padding:3px 9px;border-radius:999px;
 }
 .filters-actions{
   border-top:1px solid var(--border);
@@ -480,17 +585,17 @@ main{
   flex-wrap:wrap;
 }
 .filters-hint{
-  font-size:.72rem;color:var(--muted);
-  flex:1;line-height:1.35;
+  font-size:.78rem;color:var(--muted);
+  flex:1;line-height:1.4;
 }
 .filter-clear{
   background:transparent;
   color:var(--muted);
-  font-size:.82rem;
-  padding:8px 16px;
+  font-size:.85rem;
+  padding:9px 18px;
   border:1.5px solid var(--border);
   border-radius:var(--r-md);
-  font-weight:600;
+  font-weight:700;
   transition:border-color .15s,color .15s;
 }
 .filter-clear:hover{border-color:var(--error);color:var(--error)}
@@ -501,10 +606,134 @@ main{
   pointer-events:none;
 }
 .filters-intro{
-  font-size:.78rem;color:var(--muted);
-  line-height:1.45;margin-top:8px;
+  font-size:.88rem;color:var(--text);
+  line-height:1.5;margin-top:10px;
+  background:#fffdf4;
+  border-left:3px solid var(--warm);
+  padding:10px 12px;
+  border-radius:var(--r-sm);
 }
-.filters-intro strong{color:var(--primary-dark);font-weight:700}
+.filters-intro strong{color:var(--primary-dark);font-weight:800}
+
+/* ═══ TUTORIAL MODAL ═══ */
+.tut-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s;
+}
+.tut-overlay.show{opacity:1;pointer-events:auto}
+.tut-card{
+  background:var(--card);
+  border-radius:var(--r-lg);
+  max-width:520px;width:100%;
+  max-height:90dvh;max-height:90vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  overflow:hidden;
+  transform:scale(.96) translateY(8px);
+  transition:transform .25s ease;
+}
+.tut-overlay.show .tut-card{transform:scale(1) translateY(0)}
+.tut-head{
+  background:linear-gradient(135deg,#00a651 0%,#00c46a 100%);
+  color:#fff;
+  padding:18px 22px;
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;
+}
+.tut-head-icon{font-size:1.5rem}
+.tut-head-title{font-weight:800;font-size:1.15rem;flex:1}
+.tut-close{
+  background:rgba(255,255,255,.22);
+  color:#fff;border-radius:999px;
+  width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.05rem;font-weight:700;
+  flex-shrink:0;
+}
+.tut-close:hover{background:rgba(255,255,255,.36)}
+.tut-body{
+  padding:18px 22px 12px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.tut-lead{
+  font-size:1rem;line-height:1.55;color:var(--text);
+  margin-bottom:14px;
+}
+.tut-lead strong{color:var(--primary-dark);font-weight:800}
+.tut-step{
+  display:flex;gap:12px;
+  padding:12px 0;
+  border-top:1px solid var(--border);
+}
+.tut-step:first-of-type{border-top:0;padding-top:4px}
+.tut-step-num{
+  flex-shrink:0;
+  width:30px;height:30px;
+  border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:800;font-size:.95rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.tut-step-body{flex:1;line-height:1.5}
+.tut-step-title{font-weight:800;color:var(--text);font-size:.98rem;margin-bottom:3px}
+.tut-step-text{font-size:.9rem;color:#444}
+.tut-step-text code{
+  background:var(--primary-soft);
+  color:var(--primary-dark);
+  padding:1px 7px;border-radius:6px;
+  font-family:inherit;font-weight:700;font-size:.88rem;
+}
+.tut-glossary{
+  background:#fafaf7;
+  border:1px solid var(--border);
+  border-radius:var(--r-md);
+  padding:12px 14px;
+  margin-top:8px;
+}
+.tut-glossary-title{
+  font-weight:800;font-size:.82rem;
+  color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em;
+  margin-bottom:8px;
+}
+.tut-gloss-item{
+  font-size:.88rem;line-height:1.45;
+  padding:5px 0;
+}
+.tut-gloss-item b{color:var(--primary-dark);font-weight:800;display:inline-block;min-width:0}
+.tut-foot{
+  padding:14px 22px calc(14px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--border);
+  display:flex;gap:10px;
+  flex-shrink:0;
+  background:#fafaf7;
+}
+.tut-btn{
+  flex:1;
+  padding:13px 18px;
+  border-radius:var(--r-md);
+  font-weight:800;font-size:.95rem;
+  background:var(--primary);
+  color:#fff;
+  border:0;cursor:pointer;
+  transition:background .15s,transform .1s;
+  min-height:46px;
+}
+.tut-btn:hover{background:var(--primary-dark)}
+.tut-btn:active{transform:scale(.98)}
+.tut-btn.tut-btn-ghost{
+  background:#fff;
+  color:var(--text);
+  border:1.5px solid var(--border);
+}
+.tut-btn.tut-btn-ghost:hover{border-color:var(--primary);color:var(--primary-dark)}
 
 /* ═══ SELEÇÃO DE JOGOS ═══ */
 .select-btn{
@@ -601,7 +830,7 @@ main{
   body{background:#fff !important;padding:0 !important;min-height:0}
   .pin-wrap,.lockout-card,.welcome-wrap,
   .app-header,.app-footer,
-  .controls,.filters-panel,.selection-bar,.toast,
+  .controls,.filters-panel,.filters-cta,.tut-overlay,.selection-bar,.toast,
   #loadingState,#errorState,
   .copy-btn,.select-btn,.refresh-btn,.data-info{
     display:none !important;
@@ -845,15 +1074,34 @@ main{
         </div>
       </section>
 
+      <!-- ═══ BANNER DE CHEGADA DOS FILTROS ═══ -->
+      <div id="filtersCta" class="filters-cta hidden" role="button" tabindex="0" aria-label="Ver tutorial dos filtros">
+        <span class="filters-cta-icon" aria-hidden="true">🎯</span>
+        <span class="filters-cta-text">
+          <span class="filters-cta-title">Aqui em baixo: os filtros</span>
+          <span class="filters-cta-sub">Use eles pra escolher só os melhores jogos. Toque pra ver como funciona.</span>
+        </span>
+        <button id="filtersCtaClose" class="filters-cta-close" type="button" aria-label="Fechar aviso">✕</button>
+      </div>
+
       <!-- ═══ FILTROS ═══ -->
       <div id="filtersPanel" class="filters-panel hidden">
         <div class="filters-header">
-          <span class="filters-title">🎯 Filtros</span>
+          <span class="filters-title">🎯 Filtros dos jogos</span>
+          <button id="filtersHelp" class="filters-help" type="button" aria-label="Ver tutorial dos filtros" title="Como usar os filtros">?</button>
           <span class="filters-counter" id="filtersCounter"><strong>—</strong> de — visíveis</span>
           <button class="filters-toggle" id="filtersToggle" type="button">Ocultar</button>
         </div>
-        <p class="filters-intro">Toque nos botões para <strong>cortar</strong> jogos que você não quer ver. O número ao lado de cada filtro mostra quantos dos jogos passariam <strong>se você ligar só aquele filtro</strong>. Os jogos cortados ficam apagados — toque em "Limpar tudo" para voltar.</p>
+        <p class="filters-intro">Os filtros <strong>escondem</strong> os jogos que você não quer ver. Comece pelo botão <strong>⭐ Recomendado</strong> abaixo — ele já liga as melhores opções pra você. Depois é só escolher os jogos que mais gostar.</p>
         <div class="filters-body" id="filtersBody">
+
+          <!-- Atalhos de um toque -->
+          <div class="preset-row" role="group" aria-label="Atalhos rápidos">
+            <span class="preset-label">⚡ Atalhos de um toque</span>
+            <button class="preset-btn preset-best" data-preset="best" type="button">⭐ Recomendado</button>
+            <button class="preset-btn" data-preset="balanced" type="button">⚖️ Mais aberto</button>
+            <button class="preset-btn" data-preset="clear" type="button">🎲 Mostrar tudo</button>
+          </div>
 
           <div class="filter-group">
             <div class="filter-label">📐 Linhas e colunas da cartela</div>
@@ -969,6 +1217,59 @@ main{
   </div>
 
   <div class="app-footer">Página pessoal · feita com carinho</div>
+</div>
+
+<!-- ═══ TUTORIAL DOS FILTROS ═══ -->
+<div id="tutOverlay" class="tut-overlay" role="dialog" aria-modal="true" aria-labelledby="tutTitle">
+  <div class="tut-card">
+    <div class="tut-head">
+      <span class="tut-head-icon" aria-hidden="true">🎯</span>
+      <span class="tut-head-title" id="tutTitle">Como escolher os melhores jogos</span>
+      <button id="tutClose" class="tut-close" type="button" aria-label="Fechar tutorial">✕</button>
+    </div>
+    <div class="tut-body">
+      <p class="tut-lead">Depois que você gera as cartelas, aparecem os <strong>filtros</strong>. Eles servem pra <strong>esconder</strong> os jogos mais fracos e deixar só os bons à vista. <strong>Não precisa entender de matemática</strong> — siga estes 3 passos:</p>
+
+      <div class="tut-step">
+        <div class="tut-step-num">1</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Toque em <code>⭐ Recomendado</code></div>
+          <div class="tut-step-text">É o atalho mais usado. Ele já liga os filtros mais seguros: sem linha vazia, sem coluna vazia, soma equilibrada e poucas sequências.</div>
+        </div>
+      </div>
+
+      <div class="tut-step">
+        <div class="tut-step-num">2</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Veja os jogos que <strong>sobraram</strong></div>
+          <div class="tut-step-text">Os jogos cortados ficam <strong>apagados</strong> (não somem). Na parte de cima do filtro aparece, por exemplo: <code>7 de 10 visíveis</code>. Se cortou demais, toque em <code>⚖️ Mais aberto</code> ou <code>🎲 Mostrar tudo</code>.</div>
+        </div>
+      </div>
+
+      <div class="tut-step">
+        <div class="tut-step-num">3</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Toque em <code>+ Escolher</code> nos jogos que gostar</div>
+          <div class="tut-step-text">No final aparece a barra com <strong>Imprimir, Compartilhar e Copiar</strong>. Pronto — é só levar pra lotérica ou jogar pelo aplicativo.</div>
+        </div>
+      </div>
+
+      <div class="tut-glossary">
+        <div class="tut-glossary-title">📖 O que cada filtro faz</div>
+        <div class="tut-gloss-item"><b>📐 Sem linha/coluna vazia</b> — garante que toda fileira e toda coluna da cartela tenha pelo menos um número.</div>
+        <div class="tut-gloss-item"><b>🔢 Soma</b> — quanto dão as 15 dezenas somadas. O comum fica entre <b>175 e 220</b>.</div>
+        <div class="tut-gloss-item"><b>⚖️ Pares</b> — quantos números pares aparecem (de 0 a 15). O comum é <b>6 a 9</b>.</div>
+        <div class="tut-gloss-item"><b>✨ Primos</b> — primos são: 2, 3, 5, 7, 11, 13, 17, 19, 23. O comum é <b>4 a 7</b>.</div>
+        <div class="tut-gloss-item"><b>🔗 Sequências</b> — números seguidos (ex: 12-13-14). Geralmente é melhor ter no <b>máximo 3 ou 4</b> seguidos.</div>
+        <div class="tut-gloss-item"><b>🔁 Repetidos</b> — quantas dezenas do último concurso voltaram. O comum é <b>8 a 11</b>.</div>
+      </div>
+
+      <p class="tut-lead" style="margin-top:14px;margin-bottom:4px">💡 <strong>Dica do filho:</strong> Os filtros não somem com os jogos — só apagam os mais fracos. Pode ligar e desligar à vontade. O botão <strong>Limpar tudo</strong> volta ao começo.</p>
+    </div>
+    <div class="tut-foot">
+      <button id="tutOk" class="tut-btn" type="button">Entendi, vamos lá 💚</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -1568,6 +1869,83 @@ function clearFilters(){
   showToast('Filtros limpos');
 }
 
+// ── PRESETS ──
+function presetBest(){
+  return {
+    noEmptyRow:true, noEmptyCol:true,
+    maxRow4:false, maxCol4:false,
+    seq3:false, seq4:true,
+    somaMin:175, somaMax:220,
+    paresMin:6, paresMax:9,
+    primosMin:4, primosMax:7,
+    repsMin:8, repsMax:11
+  };
+}
+function presetBalanced(){
+  return {
+    noEmptyRow:false, noEmptyCol:true,
+    maxRow4:false, maxCol4:false,
+    seq3:false, seq4:true,
+    somaMin:165, somaMax:230,
+    paresMin:null, paresMax:null,
+    primosMin:null, primosMax:null,
+    repsMin:null, repsMax:null
+  };
+}
+function applyPreset(name){
+  var label = '';
+  if (name === 'best'){ filters = presetBest(); label = 'Filtro recomendado aplicado'; }
+  else if (name === 'balanced'){ filters = presetBalanced(); label = 'Filtro mais aberto aplicado'; }
+  else { filters = defaultFilters(); label = 'Mostrando todos os jogos'; }
+  writeFiltersToUI();
+  applyFiltersToUI();
+  var visible = countPassing(filters);
+  showToast('✅ ' + label + ' · ' + visible + ' de ' + allGames.length + ' jogos');
+}
+
+// ── TUTORIAL ──
+var TUT_KEY = 'paiVencedor_tutorialSeen_v1';
+function tutorialSeen(){ try{ return safeGet(TUT_KEY) === '1'; }catch(e){ return false; } }
+function markTutorialSeen(){ try{ localStorage.setItem(TUT_KEY, '1'); }catch(e){} }
+function openTutorial(){
+  var ov = $('tutOverlay');
+  if (!ov) return;
+  ov.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeTutorial(){
+  var ov = $('tutOverlay');
+  if (!ov) return;
+  ov.classList.remove('show');
+  document.body.style.overflow = '';
+  markTutorialSeen();
+}
+function bindTutorial(){
+  var ov = $('tutOverlay');
+  $('filtersHelp').addEventListener('click', openTutorial);
+  $('tutClose').addEventListener('click', closeTutorial);
+  $('tutOk').addEventListener('click', closeTutorial);
+  ov.addEventListener('click', function(e){ if (e.target === ov) closeTutorial(); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && ov.classList.contains('show')) closeTutorial();
+  });
+}
+
+function bindFiltersCta(){
+  var cta = $('filtersCta');
+  $('filtersCtaClose').addEventListener('click', function(e){
+    e.stopPropagation();
+    cta.classList.add('hidden');
+  });
+  cta.addEventListener('click', function(e){
+    if (e.target.id === 'filtersCtaClose') return;
+    openTutorial();
+  });
+  cta.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openTutorial(); }
+  });
+}
+
 function bindFilters(){
   ['fNoEmptyRow','fNoEmptyCol','fMaxRow4','fMaxCol4','fSeq3','fSeq4'].forEach(function(id){
     $(id).addEventListener('change', function(){ readFiltersFromUI(); applyFiltersToUI(); });
@@ -1582,6 +1960,12 @@ function bindFilters(){
     if (body.classList.contains('collapsed')){ body.classList.remove('collapsed'); btn.textContent = 'Ocultar'; }
     else { body.classList.add('collapsed'); btn.textContent = 'Mostrar'; }
   });
+  var presets = document.querySelectorAll('.preset-btn');
+  for (var i = 0; i < presets.length; i++){
+    (function(btn){
+      btn.addEventListener('click', function(){ applyPreset(btn.getAttribute('data-preset')); });
+    })(presets[i]);
+  }
 }
 
 // ── SELECTION ──
@@ -1748,10 +2132,25 @@ function renderResults(games){
       });
     })(selBtns[s]);
   }
-  $('filtersPanel').classList.remove('hidden');
+  var panel = $('filtersPanel');
+  panel.classList.remove('hidden');
   writeFiltersToUI();
   applyFiltersToUI();
   updateSelectionUI();
+
+  // Mostra o banner de chegada e pulsa o painel pra chamar atenção
+  var cta = $('filtersCta');
+  if (cta) cta.classList.remove('hidden');
+  panel.classList.remove('just-arrived');
+  // reflow pra reiniciar a animação
+  void panel.offsetWidth;
+  panel.classList.add('just-arrived');
+  setTimeout(function(){ panel.classList.remove('just-arrived'); }, 3400);
+
+  // Abre o tutorial automaticamente na primeira vez
+  if (!tutorialSeen()){
+    setTimeout(openTutorial, 650);
+  }
 }
 
 function copyToClipboard(text){
@@ -1809,6 +2208,8 @@ function wireUI(){
 
   loadFilters();
   bindFilters();
+  bindTutorial();
+  bindFiltersCta();
   bindSelectionBar();
   bindResultsClickDelegate();
 
@@ -1839,10 +2240,11 @@ function wireUI(){
       try {
         var games = generateBatch(mode, qty);
         renderResults(games);
-        showToast(games.length + ' jogos · use os filtros e escolha os melhores');
-        var fp = $('filtersPanel');
-        if (fp && fp.scrollIntoView){
-          fp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast(games.length + ' jogos prontos · use os filtros abaixo 👇');
+        var anchor = $('filtersCta');
+        if (!anchor || anchor.classList.contains('hidden')) anchor = $('filtersPanel');
+        if (anchor && anchor.scrollIntoView){
+          anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       } catch(e){
         if (window.console && console.error) console.error(e);
