@@ -46,7 +46,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ══════ CACHE (existing functionality) ══════
-const CACHE_NAME = 'lottobot-v86';
+const CACHE_NAME = 'lottobot-v87';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -89,6 +89,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Skip non-http(s) schemes (chrome-extension://, moz-extension://, etc) — Cache API nao suporta
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
 
   // Skip Firebase/Google SDK requests — let them go through network
   if (url.hostname.includes('googleapis.com') || url.hostname.includes('gstatic.com') || url.hostname.includes('firebaseapp.com') || url.hostname.includes('firebaseio.com')) {

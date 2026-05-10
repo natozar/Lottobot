@@ -29,5 +29,14 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Para você, pai",
+      "short_name": "Pai 💚",
+      "description": "Gerador especial 4 fatores — Lotofacil",
+      "url": "/pai",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
