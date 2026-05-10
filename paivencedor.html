@@ -169,7 +169,7 @@ input{font-family:inherit}
 
 main{
   flex:1;
-  padding:20px 16px 40px;
+  padding:20px 16px 120px;
   max-width:1400px;width:100%;
   margin:0 auto;
 }
@@ -391,6 +391,289 @@ main{
 
 .app-footer{text-align:center;font-size:.75rem;color:var(--muted);padding:16px;margin-top:8px}
 
+/* ═══ FILTROS ═══ */
+.filters-panel{
+  background:var(--card);
+  border-radius:var(--r-md);
+  padding:14px 16px;
+  margin-bottom:16px;
+  box-shadow:var(--shadow-sm);
+}
+.filters-header{
+  display:flex;align-items:center;gap:8px;
+  flex-wrap:wrap;
+}
+.filters-title{
+  font-weight:700;font-size:.92rem;
+  color:var(--primary-dark);
+}
+.filters-counter{
+  flex:1;font-size:.82rem;color:var(--muted);
+  text-align:right;font-variant-numeric:tabular-nums;
+}
+.filters-counter strong{color:var(--primary);font-weight:800;font-size:1rem}
+.filters-toggle{
+  font-size:.78rem;color:var(--primary);
+  padding:5px 12px;border-radius:999px;
+  border:1px solid var(--primary);
+  background:#fff;
+}
+.filters-toggle:hover{background:var(--primary-soft)}
+.filters-body{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.filters-body.collapsed{display:none}
+.filter-group{border-top:1px solid var(--border);padding-top:12px}
+.filter-group:first-child{border-top:0;padding-top:0}
+.filter-label{
+  font-size:.78rem;font-weight:700;
+  color:var(--text);margin-bottom:8px;
+  text-transform:uppercase;letter-spacing:.04em;
+}
+.filter-chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 12px;
+  border:1.5px solid var(--border);
+  border-radius:999px;
+  font-size:.82rem;
+  cursor:pointer;
+  transition:border-color .15s,background .15s,color .15s;
+  background:#fff;
+  user-select:none;
+}
+.chip input{display:none}
+.chip-active{
+  border-color:var(--primary);
+  background:var(--primary-soft);
+  color:var(--primary-dark);
+  font-weight:700;
+}
+.chip-count{
+  font-size:.72rem;color:var(--muted);
+  font-variant-numeric:tabular-nums;
+  font-weight:600;
+}
+.chip-active .chip-count{color:var(--primary)}
+.filter-range{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.filter-range input{
+  width:64px;
+  padding:7px 8px;
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  font-size:.85rem;text-align:center;
+  font-variant-numeric:tabular-nums;
+  outline:none;
+  background:#fff;
+}
+.filter-range input:focus{border-color:var(--primary)}
+.filter-range > span{color:var(--muted);font-size:.85rem}
+.filter-range-hint{
+  font-size:.7rem;color:var(--muted);
+  margin-left:auto;
+  font-variant-numeric:tabular-nums;
+}
+.filters-actions{
+  border-top:1px solid var(--border);
+  padding-top:12px;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  flex-wrap:wrap;
+}
+.filters-hint{
+  font-size:.72rem;color:var(--muted);
+  flex:1;line-height:1.35;
+}
+.filter-clear{
+  background:transparent;
+  color:var(--muted);
+  font-size:.82rem;
+  padding:8px 16px;
+  border:1.5px solid var(--border);
+  border-radius:var(--r-md);
+  font-weight:600;
+  transition:border-color .15s,color .15s;
+}
+.filter-clear:hover{border-color:var(--error);color:var(--error)}
+.game-card.filtered-out{
+  opacity:.22;
+  filter:grayscale(.65);
+  transition:opacity .25s ease,filter .25s ease;
+  pointer-events:none;
+}
+.filters-intro{
+  font-size:.78rem;color:var(--muted);
+  line-height:1.45;margin-top:8px;
+}
+.filters-intro strong{color:var(--primary-dark);font-weight:700}
+
+/* ═══ SELEÇÃO DE JOGOS ═══ */
+.select-btn{
+  font-size:.78rem;color:var(--primary);
+  padding:6px 14px;border-radius:999px;
+  border:1.5px solid var(--primary);
+  background:#fff;
+  font-weight:700;
+  transition:background .15s,color .15s,transform .1s;
+  white-space:nowrap;
+  min-height:32px;
+}
+.select-btn:active{transform:scale(.96)}
+.select-btn.active{
+  background:var(--primary);
+  color:#fff;
+  box-shadow:0 0 0 2px rgba(0,166,81,.18),0 4px 10px rgba(0,166,81,.35);
+}
+.game-card{
+  position:relative;
+  transition:box-shadow .2s ease,transform .15s ease;
+}
+.game-card.selected{
+  outline:3px solid var(--primary);
+  outline-offset:-2px;
+  box-shadow:0 6px 18px rgba(0,166,81,.25);
+}
+.game-card.selected .game-title::before{
+  content:"✓ ";
+  color:var(--primary);
+  font-weight:900;
+}
+.game-header{flex-wrap:wrap;gap:6px}
+
+/* ═══ BARRA DE SELEÇÃO (sticky bottom) ═══ */
+.selection-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--card);
+  border-top:2px solid var(--primary);
+  box-shadow:0 -4px 16px rgba(0,0,0,.12);
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:10px;
+  flex-wrap:wrap;
+  z-index:50;
+  transform:translateY(100%);
+  transition:transform .25s ease;
+}
+.selection-bar.show{transform:translateY(0)}
+.selection-info{
+  display:flex;align-items:baseline;gap:6px;
+  font-size:.88rem;
+}
+.selection-count{
+  font-size:1.5rem;font-weight:800;
+  color:var(--primary);
+  font-variant-numeric:tabular-nums;
+}
+.selection-label{color:var(--text);font-weight:600}
+.selection-actions{
+  display:flex;gap:6px;flex-wrap:wrap;
+  margin-left:auto;
+}
+.sel-btn{
+  font-size:.82rem;font-weight:700;
+  padding:9px 14px;border-radius:var(--r-md);
+  border:1.5px solid var(--border);
+  background:#fff;color:var(--text);
+  cursor:pointer;
+  transition:all .15s;
+  white-space:nowrap;
+  min-height:38px;
+}
+.sel-btn:active{transform:scale(.97)}
+.sel-btn.primary{
+  background:var(--primary);color:#fff;
+  border-color:var(--primary);
+}
+.sel-btn.primary:hover{background:var(--primary-dark)}
+.sel-btn.ghost{color:var(--muted)}
+.sel-btn.ghost:hover{color:var(--error);border-color:var(--error)}
+@media(max-width:480px){
+  .selection-actions{width:100%;margin-left:0}
+  .sel-btn{flex:1 1 calc(50% - 3px);min-height:42px;font-size:.85rem;padding:11px 8px}
+}
+
+/* ═══ PRINT ═══ */
+.print-only{display:none}
+@media print{
+  *{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+    color-adjust:exact !important;
+  }
+  body{background:#fff !important;padding:0 !important;min-height:0}
+  .pin-wrap,.lockout-card,.welcome-wrap,
+  .app-header,.app-footer,
+  .controls,.filters-panel,.selection-bar,.toast,
+  #loadingState,#errorState,
+  .copy-btn,.select-btn,.refresh-btn,.data-info{
+    display:none !important;
+  }
+  .app{min-height:0}
+  main{padding:6mm;max-width:100%;margin:0}
+  .print-only{display:block !important}
+  .print-header{
+    text-align:center;
+    border-bottom:2px solid #00a651;
+    padding-bottom:6mm;
+    margin-bottom:8mm;
+  }
+  .print-header h1{
+    color:#00a651;font-size:18pt;font-weight:700;
+    margin-bottom:2mm;
+  }
+  .print-header p{color:#666;font-size:10pt}
+  .results{display:grid;grid-template-columns:repeat(2,1fr);gap:6mm}
+  .game-card{
+    break-inside:avoid;page-break-inside:avoid;
+    box-shadow:none;border:1px solid #aaa;
+    border-radius:8px;
+    padding:4mm;
+    background:#fff !important;
+    outline:none !important;
+  }
+  .game-card:not(.selected){display:none !important}
+  .game-card.selected{
+    display:block !important;
+    opacity:1 !important;
+    filter:none !important;
+    outline:none !important;
+  }
+  .game-card.selected .game-title::before{
+    content:"✓ " !important;color:#00a651 !important;
+  }
+  .cartela-wrap{
+    background:#fff !important;
+    padding:0 !important;
+    border:0 !important;
+  }
+  .cell{
+    background:#f0f0f0 !important;
+    color:#999 !important;
+    border:1px solid #ddd !important;
+    box-shadow:none !important;
+  }
+  .cell.marked{
+    background:#00a651 !important;
+    background-image:none !important;
+    color:#fff !important;
+    border:1px solid #007a3d !important;
+    box-shadow:none !important;
+    transform:none !important;
+    font-weight:800 !important;
+    -webkit-animation:none !important;
+    animation:none !important;
+  }
+  .cell.marked::after{display:none !important}
+  .count-cell{
+    color:#00a651 !important;
+    background:#f6fff8 !important;
+    border:1px solid #c5e8d0 !important;
+  }
+  .count-cell.zero{color:#aaa !important;background:#f8f8f8 !important;border-color:#eee !important}
+  .count-cell.total{background:#e8f7ed !important;color:#007a3d !important;border-color:#00a651 !important}
+  .game-header{margin-bottom:3mm}
+  .game-title{font-size:11pt;font-weight:700;color:#000}
+  .stats{font-size:8pt;color:#444;margin-top:2mm}
+}
+
 /* Welcome (post-PIN portal) */
 .welcome-wrap{display:flex;flex-direction:column;min-height:100dvh;min-height:100vh}
 .welcome-header{
@@ -562,9 +845,128 @@ main{
         </div>
       </section>
 
+      <!-- ═══ FILTROS ═══ -->
+      <div id="filtersPanel" class="filters-panel hidden">
+        <div class="filters-header">
+          <span class="filters-title">🎯 Filtros</span>
+          <span class="filters-counter" id="filtersCounter"><strong>—</strong> de — visíveis</span>
+          <button class="filters-toggle" id="filtersToggle" type="button">Ocultar</button>
+        </div>
+        <p class="filters-intro">Toque nos botões para <strong>cortar</strong> jogos que você não quer ver. O número ao lado de cada filtro mostra quantos dos jogos passariam <strong>se você ligar só aquele filtro</strong>. Os jogos cortados ficam apagados — toque em "Limpar tudo" para voltar.</p>
+        <div class="filters-body" id="filtersBody">
+
+          <div class="filter-group">
+            <div class="filter-label">📐 Linhas e colunas da cartela</div>
+            <div class="filter-chips">
+              <label class="chip" id="chipNoEmptyRow">
+                <input type="checkbox" id="fNoEmptyRow">
+                <span>Sem linha vazia</span>
+                <span class="chip-count" id="cNoEmptyRow">—</span>
+              </label>
+              <label class="chip" id="chipNoEmptyCol">
+                <input type="checkbox" id="fNoEmptyCol">
+                <span>Sem coluna vazia</span>
+                <span class="chip-count" id="cNoEmptyCol">—</span>
+              </label>
+              <label class="chip" id="chipMaxRow4">
+                <input type="checkbox" id="fMaxRow4">
+                <span>Linha cheia ≤ 4</span>
+                <span class="chip-count" id="cMaxRow4">—</span>
+              </label>
+              <label class="chip" id="chipMaxCol4">
+                <input type="checkbox" id="fMaxCol4">
+                <span>Coluna cheia ≤ 4</span>
+                <span class="chip-count" id="cMaxCol4">—</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">🔢 Soma das dezenas</div>
+            <div class="filter-range">
+              <input type="number" id="fSomaMin" min="0" max="375" inputmode="numeric" placeholder="mín">
+              <span>até</span>
+              <input type="number" id="fSomaMax" min="0" max="375" inputmode="numeric" placeholder="máx">
+              <span class="filter-range-hint">comum: 175 a 220</span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">⚖️ Pares (de 0 a 15)</div>
+            <div class="filter-range">
+              <input type="number" id="fParesMin" min="0" max="15" inputmode="numeric" placeholder="mín">
+              <span>até</span>
+              <input type="number" id="fParesMax" min="0" max="15" inputmode="numeric" placeholder="máx">
+              <span class="filter-range-hint">comum: 6 a 9</span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">✨ Primos (de 0 a 9)</div>
+            <div class="filter-range">
+              <input type="number" id="fPrimosMin" min="0" max="9" inputmode="numeric" placeholder="mín">
+              <span>até</span>
+              <input type="number" id="fPrimosMax" min="0" max="9" inputmode="numeric" placeholder="máx">
+              <span class="filter-range-hint">comum: 4 a 7</span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">🔗 Sequências (números seguidos)</div>
+            <div class="filter-chips">
+              <label class="chip" id="chipSeq3">
+                <input type="checkbox" id="fSeq3">
+                <span>Máx. 3 em sequência</span>
+                <span class="chip-count" id="cSeq3">—</span>
+              </label>
+              <label class="chip" id="chipSeq4">
+                <input type="checkbox" id="fSeq4">
+                <span>Máx. 4 em sequência</span>
+                <span class="chip-count" id="cSeq4">—</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">🔁 Repetidos do último concurso</div>
+            <div class="filter-range">
+              <input type="number" id="fRepsMin" min="0" max="15" inputmode="numeric" placeholder="mín">
+              <span>até</span>
+              <input type="number" id="fRepsMax" min="0" max="15" inputmode="numeric" placeholder="máx">
+              <span class="filter-range-hint">comum: 8 a 11</span>
+            </div>
+          </div>
+
+          <div class="filters-actions">
+            <span class="filters-hint">Pode ligar/desligar a vontade. Os jogos não somem — só ficam apagados.</span>
+            <button id="fClear" class="filter-clear" type="button">Limpar tudo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header só na impressão -->
+      <div class="print-only print-header">
+        <h1>Para você, pai 💚</h1>
+        <p id="printSubtitle">Jogos escolhidos · Lotofácil</p>
+      </div>
+
       <div id="results" class="results"></div>
     </div>
   </main>
+
+  <!-- ═══ BARRA DE SELEÇÃO ═══ -->
+  <div id="selectionBar" class="selection-bar" role="region" aria-label="Jogos escolhidos">
+    <div class="selection-info">
+      <span class="selection-count" id="selectionCount">0</span>
+      <span class="selection-label">jogo(s) escolhido(s)</span>
+    </div>
+    <div class="selection-actions">
+      <button id="selPrint" class="sel-btn primary" type="button">🖨️ Imprimir / PDF</button>
+      <button id="selShare" class="sel-btn" type="button">💬 Compartilhar</button>
+      <button id="selCopy" class="sel-btn" type="button">📋 Copiar</button>
+      <button id="selClear" class="sel-btn ghost" type="button">✕ Limpar</button>
+    </div>
+  </div>
 
   <div class="app-footer">Página pessoal · feita com carinho</div>
 </div>
@@ -1020,14 +1422,268 @@ function generateBatch(modeKey, qty){
   return games;
 }
 
+// ============ FILTERS + SELECTION ============
+var allGames = []; // [{ game, stats, reps }]
+var selected = new Set();
+
+function defaultFilters(){
+  return {
+    noEmptyRow:false, noEmptyCol:false,
+    maxRow4:false, maxCol4:false,
+    seq3:false, seq4:false,
+    somaMin:null, somaMax:null,
+    paresMin:null, paresMax:null,
+    primosMin:null, primosMax:null,
+    repsMin:null, repsMax:null
+  };
+}
+var filters = defaultFilters();
+
+function gameRepsCount(g, repetidas){
+  var c = 0;
+  for (var i = 0; i < g.length; i++) if (repetidas.indexOf(g[i]) !== -1) c++;
+  return c;
+}
+
+function gamePasses(stats, reps, f){
+  if (f.noEmptyRow && stats.lines.indexOf(0) !== -1) return false;
+  if (f.noEmptyCol && stats.cols.indexOf(0) !== -1) return false;
+  if (f.maxRow4){ for (var i=0;i<stats.lines.length;i++) if (stats.lines[i] > 4) return false; }
+  if (f.maxCol4){ for (var j=0;j<stats.cols.length;j++) if (stats.cols[j] > 4) return false; }
+  if (f.somaMin != null && stats.soma < f.somaMin) return false;
+  if (f.somaMax != null && stats.soma > f.somaMax) return false;
+  if (f.paresMin != null && stats.pares < f.paresMin) return false;
+  if (f.paresMax != null && stats.pares > f.paresMax) return false;
+  if (f.primosMin != null && stats.primos < f.primosMin) return false;
+  if (f.primosMax != null && stats.primos > f.primosMax) return false;
+  if (f.seq3 && stats.maxRun > 3) return false;
+  if (f.seq4 && stats.maxRun > 4) return false;
+  if (f.repsMin != null && reps < f.repsMin) return false;
+  if (f.repsMax != null && reps > f.repsMax) return false;
+  return true;
+}
+
+function countPassing(f){
+  var c = 0;
+  for (var i = 0; i < allGames.length; i++){
+    if (gamePasses(allGames[i].stats, allGames[i].reps, f)) c++;
+  }
+  return c;
+}
+
+function applyFiltersToUI(){
+  var cards = document.querySelectorAll('#results .game-card');
+  var visible = 0;
+  for (var i = 0; i < allGames.length; i++){
+    var pass = gamePasses(allGames[i].stats, allGames[i].reps, filters);
+    if (pass) visible++;
+    if (cards[i]){
+      if (pass) cards[i].classList.remove('filtered-out');
+      else cards[i].classList.add('filtered-out');
+    }
+  }
+  var counter = $('filtersCounter');
+  if (counter) counter.innerHTML = '<strong>' + visible + '</strong> de ' + allGames.length + ' visíveis';
+
+  function setChip(chipId, countId, key){
+    var f = defaultFilters(); f[key] = true;
+    var n = countPassing(f);
+    var el = $(countId); if (el) el.textContent = '(' + n + ')';
+    var chip = $(chipId);
+    if (chip){
+      var input = chip.querySelector('input');
+      if (input && input.checked) chip.classList.add('chip-active');
+      else chip.classList.remove('chip-active');
+    }
+  }
+  setChip('chipNoEmptyRow','cNoEmptyRow','noEmptyRow');
+  setChip('chipNoEmptyCol','cNoEmptyCol','noEmptyCol');
+  setChip('chipMaxRow4','cMaxRow4','maxRow4');
+  setChip('chipMaxCol4','cMaxCol4','maxCol4');
+  setChip('chipSeq3','cSeq3','seq3');
+  setChip('chipSeq4','cSeq4','seq4');
+
+  saveFilters();
+}
+
+function saveFilters(){ try{ localStorage.setItem('paiVencedor_filters', JSON.stringify(filters)); }catch(e){} }
+function loadFilters(){
+  try {
+    var raw = safeGet('paiVencedor_filters');
+    if (!raw) return;
+    var f = JSON.parse(raw);
+    if (f && typeof f === 'object'){
+      var d = defaultFilters();
+      for (var k in d) if (Object.prototype.hasOwnProperty.call(f, k)) d[k] = f[k];
+      filters = d;
+    }
+  } catch(e){}
+}
+
+function parseIntOrNull(s){
+  s = (s||'').toString().trim();
+  if (!s) return null;
+  var n = parseInt(s, 10);
+  return isNaN(n) ? null : n;
+}
+
+function readFiltersFromUI(){
+  filters.noEmptyRow = $('fNoEmptyRow').checked;
+  filters.noEmptyCol = $('fNoEmptyCol').checked;
+  filters.maxRow4 = $('fMaxRow4').checked;
+  filters.maxCol4 = $('fMaxCol4').checked;
+  filters.seq3 = $('fSeq3').checked;
+  filters.seq4 = $('fSeq4').checked;
+  filters.somaMin = parseIntOrNull($('fSomaMin').value);
+  filters.somaMax = parseIntOrNull($('fSomaMax').value);
+  filters.paresMin = parseIntOrNull($('fParesMin').value);
+  filters.paresMax = parseIntOrNull($('fParesMax').value);
+  filters.primosMin = parseIntOrNull($('fPrimosMin').value);
+  filters.primosMax = parseIntOrNull($('fPrimosMax').value);
+  filters.repsMin = parseIntOrNull($('fRepsMin').value);
+  filters.repsMax = parseIntOrNull($('fRepsMax').value);
+}
+
+function writeFiltersToUI(){
+  $('fNoEmptyRow').checked = !!filters.noEmptyRow;
+  $('fNoEmptyCol').checked = !!filters.noEmptyCol;
+  $('fMaxRow4').checked = !!filters.maxRow4;
+  $('fMaxCol4').checked = !!filters.maxCol4;
+  $('fSeq3').checked = !!filters.seq3;
+  $('fSeq4').checked = !!filters.seq4;
+  $('fSomaMin').value = filters.somaMin != null ? filters.somaMin : '';
+  $('fSomaMax').value = filters.somaMax != null ? filters.somaMax : '';
+  $('fParesMin').value = filters.paresMin != null ? filters.paresMin : '';
+  $('fParesMax').value = filters.paresMax != null ? filters.paresMax : '';
+  $('fPrimosMin').value = filters.primosMin != null ? filters.primosMin : '';
+  $('fPrimosMax').value = filters.primosMax != null ? filters.primosMax : '';
+  $('fRepsMin').value = filters.repsMin != null ? filters.repsMin : '';
+  $('fRepsMax').value = filters.repsMax != null ? filters.repsMax : '';
+}
+
+function clearFilters(){
+  filters = defaultFilters();
+  writeFiltersToUI();
+  applyFiltersToUI();
+  showToast('Filtros limpos');
+}
+
+function bindFilters(){
+  ['fNoEmptyRow','fNoEmptyCol','fMaxRow4','fMaxCol4','fSeq3','fSeq4'].forEach(function(id){
+    $(id).addEventListener('change', function(){ readFiltersFromUI(); applyFiltersToUI(); });
+  });
+  ['fSomaMin','fSomaMax','fParesMin','fParesMax','fPrimosMin','fPrimosMax','fRepsMin','fRepsMax'].forEach(function(id){
+    $(id).addEventListener('input', function(){ readFiltersFromUI(); applyFiltersToUI(); });
+  });
+  $('fClear').addEventListener('click', clearFilters);
+  $('filtersToggle').addEventListener('click', function(){
+    var body = $('filtersBody');
+    var btn = $('filtersToggle');
+    if (body.classList.contains('collapsed')){ body.classList.remove('collapsed'); btn.textContent = 'Ocultar'; }
+    else { body.classList.add('collapsed'); btn.textContent = 'Mostrar'; }
+  });
+}
+
+// ── SELECTION ──
+function toggleSelect(idx){
+  if (selected.has(idx)) selected.delete(idx); else selected.add(idx);
+  updateSelectionUI();
+}
+function clearSelection(){ selected.clear(); updateSelectionUI(); }
+
+function updateSelectionUI(){
+  var cards = document.querySelectorAll('#results .game-card');
+  for (var i = 0; i < cards.length; i++){
+    var btn = cards[i].querySelector('.select-btn');
+    if (selected.has(i)){
+      cards[i].classList.add('selected');
+      if (btn){ btn.classList.add('active'); btn.textContent = '✓ Escolhido'; }
+    } else {
+      cards[i].classList.remove('selected');
+      if (btn){ btn.classList.remove('active'); btn.textContent = '+ Escolher'; }
+    }
+  }
+  var bar = $('selectionBar');
+  $('selectionCount').textContent = selected.size;
+  if (selected.size > 0) bar.classList.add('show');
+  else bar.classList.remove('show');
+}
+
+function getSelectedGames(){
+  var arr = [];
+  var keys = Array.from(selected).sort(function(a,b){ return a - b; });
+  for (var i = 0; i < keys.length; i++){
+    if (allGames[keys[i]]) arr.push(allGames[keys[i]].game);
+  }
+  return arr;
+}
+
+function buildShareText(){
+  var games = getSelectedGames();
+  var d = state.latest;
+  var head = 'Para você, pai 💚\nLotofácil';
+  if (d) head += ' · próximo concurso ' + (d.concurso + 1);
+  head += '\n' + games.length + ' jogo(s) escolhido(s)\n─────';
+  var body = games.map(function(g, i){
+    return 'Jogo ' + (i+1) + ':  ' + g.map(pad2).join(' · ');
+  }).join('\n');
+  return head + '\n' + body;
+}
+
+function printSelection(){
+  if (selected.size === 0){ showToast('Escolha ao menos 1 jogo'); return; }
+  var d = state.latest;
+  var sub = $('printSubtitle');
+  if (sub) sub.textContent = 'Lotofácil' + (d ? ' · próximo concurso ' + (d.concurso + 1) : '') + ' · ' + selected.size + ' jogo(s) · ' + new Date().toLocaleDateString('pt-BR');
+  setTimeout(function(){ window.print(); }, 50);
+}
+
+function shareSelection(){
+  if (selected.size === 0){ showToast('Escolha ao menos 1 jogo'); return; }
+  var text = buildShareText();
+  if (navigator.share){
+    navigator.share({ title: 'Para você, pai', text: text }).catch(function(){});
+  } else {
+    copyToClipboard(text).then(function(){ showToast('Copiado pra área de transferência'); });
+  }
+}
+
+function copySelection(){
+  if (selected.size === 0){ showToast('Escolha ao menos 1 jogo'); return; }
+  copyToClipboard(buildShareText()).then(function(){ showToast('Jogos copiados'); });
+}
+
+function bindSelectionBar(){
+  $('selPrint').addEventListener('click', printSelection);
+  $('selShare').addEventListener('click', shareSelection);
+  $('selCopy').addEventListener('click', copySelection);
+  $('selClear').addEventListener('click', clearSelection);
+}
+
+function bindResultsClickDelegate(){
+  $('results').addEventListener('click', function(e){
+    if (e.target.closest('.copy-btn') || e.target.closest('.select-btn')) return;
+    var card = e.target.closest('.game-card');
+    if (!card) return;
+    if (card.classList.contains('filtered-out')) return;
+    var i = parseInt(card.dataset.idx, 10);
+    if (!isNaN(i)) toggleSelect(i);
+  });
+}
+
 // ============ RENDERING ============
 function renderResults(games){
   var root = $('results');
   root.innerHTML = '';
+  allGames = [];
+  selected.clear();
   games.forEach(function(g, idx){
     var card = document.createElement('div');
     card.className = 'game-card';
+    card.dataset.idx = idx;
     var stats = gameStats(g);
+    var reps = gameRepsCount(g, state.repetidas);
+    allGames.push({ game: g, stats: stats, reps: reps });
     var marked = {};
     for (var i = 0; i < g.length; i++) marked[g[i]] = 1;
     var rowCounts = [0,0,0,0,0];
@@ -1051,35 +1707,51 @@ function renderResults(games){
     card.innerHTML =
       '<div class="game-header">' +
         '<div class="game-title">Jogo ' + (idx + 1) + '</div>' +
-        '<button class="copy-btn" data-idx="' + idx + '">Copiar dezenas</button>' +
+        '<button class="select-btn" data-idx="' + idx + '" type="button">+ Escolher</button>' +
+        '<button class="copy-btn" data-idx="' + idx + '" type="button">📋 Copiar</button>' +
       '</div>' +
       '<div class="cartela-wrap">' + grid + '</div>' +
       '<div class="stats">' +
         '<span>' + stats.pares + ' pares</span>' +
-        '<span>' + stats.impares + ' impares</span>' +
+        '<span>' + stats.impares + ' ímpares</span>' +
         '<span>' + stats.primos + ' primos</span>' +
         '<span>soma ' + stats.soma + '</span>' +
+        '<span>' + reps + ' repetidos</span>' +
+        '<span>seq. máx ' + stats.maxRun + '</span>' +
       '</div>';
     root.appendChild(card);
   });
-  var btns = root.querySelectorAll('.copy-btn');
-  for (var b = 0; b < btns.length; b++){
+  var copyBtns = root.querySelectorAll('.copy-btn');
+  for (var b = 0; b < copyBtns.length; b++){
     (function(btn){
-      btn.addEventListener('click', function(){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
         var i = parseInt(btn.dataset.idx, 10);
-        var txt = games[i].map(pad2).join('-');
+        if (!allGames[i]) return;
+        var txt = allGames[i].game.map(pad2).join('-');
         copyToClipboard(txt).then(function(){
           showToast('Dezenas copiadas');
-          btn.classList.add('copied');
-          btn.textContent = 'Copiado!';
-          setTimeout(function(){
-            btn.classList.remove('copied');
-            btn.textContent = 'Copiar dezenas';
-          }, 1500);
+          var orig = btn.textContent;
+          btn.textContent = '✓ Copiado';
+          setTimeout(function(){ btn.textContent = orig; }, 1200);
         });
       });
-    })(btns[b]);
+    })(copyBtns[b]);
   }
+  var selBtns = root.querySelectorAll('.select-btn');
+  for (var s = 0; s < selBtns.length; s++){
+    (function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var i = parseInt(btn.dataset.idx, 10);
+        toggleSelect(i);
+      });
+    })(selBtns[s]);
+  }
+  $('filtersPanel').classList.remove('hidden');
+  writeFiltersToUI();
+  applyFiltersToUI();
+  updateSelectionUI();
 }
 
 function copyToClipboard(text){
@@ -1135,6 +1807,11 @@ function wireUI(){
   $('enterGeneratorBtn').addEventListener('click', showAppAndBoot);
   $('logoutBtn').addEventListener('click', backToWelcome);
 
+  loadFilters();
+  bindFilters();
+  bindSelectionBar();
+  bindResultsClickDelegate();
+
   var radios = document.querySelectorAll('input[name="mode"]');
   for (var r = 0; r < radios.length; r++){
     radios[r].addEventListener('change', updateModeUI);
@@ -1162,9 +1839,10 @@ function wireUI(){
       try {
         var games = generateBatch(mode, qty);
         renderResults(games);
-        var results = $('results');
-        if (results.firstChild && results.firstChild.scrollIntoView){
-          results.firstChild.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast(games.length + ' jogos · use os filtros e escolha os melhores');
+        var fp = $('filtersPanel');
+        if (fp && fp.scrollIntoView){
+          fp.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       } catch(e){
         if (window.console && console.error) console.error(e);
