@@ -522,13 +522,97 @@ main{
 }
 .preset-btn.preset-best:hover{background:var(--primary-dark);color:#fff}
 
-.filter-group{border-top:1px solid var(--border);padding-top:12px}
-.filter-group:first-child{border-top:0;padding-top:0}
-.filter-label{
-  font-size:.85rem;font-weight:800;
-  color:var(--text);margin-bottom:8px;
-  letter-spacing:.01em;
+.filter-group{
+  border-top:1px solid var(--border);
+  padding-top:14px;margin-top:2px;
 }
+.filter-group:first-child{border-top:0;padding-top:0;margin-top:0}
+.filter-label{
+  font-size:.95rem;font-weight:800;
+  color:var(--text);margin-bottom:3px;
+  letter-spacing:.01em;
+  display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;
+}
+.filter-why{
+  font-size:.82rem;color:var(--muted);
+  line-height:1.4;margin-bottom:10px;
+  font-style:italic;
+}
+.filter-why b{color:var(--primary-dark);font-style:normal;font-weight:700}
+
+/* Por-linha / Por-coluna — selects nativos como chip */
+.row-grid{display:flex;flex-direction:column;gap:6px}
+.row-line{
+  display:flex;align-items:center;gap:10px;
+  background:#fafaf7;
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  padding:8px 10px;
+  min-height:46px;
+}
+.row-line.active{
+  background:var(--primary-soft);
+  border-color:var(--primary);
+}
+.row-line-label{
+  flex:1;font-size:.88rem;font-weight:700;
+  color:var(--text);line-height:1.25;
+}
+.row-line-label small{
+  display:block;color:var(--muted);
+  font-weight:500;font-size:.74rem;margin-top:1px;
+}
+.row-pick{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background:#fff;
+  border:1.5px solid var(--border);
+  border-radius:999px;
+  padding:8px 30px 8px 14px;
+  font-size:.92rem;
+  font-weight:700;
+  color:var(--text);
+  font-family:inherit;
+  cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%236b6b6b' d='M6 8L0 0h12z'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+  background-size:10px;
+  min-width:118px;
+  text-align:left;
+}
+.row-pick:focus{outline:none;border-color:var(--primary)}
+.row-pick.set{
+  border-color:var(--primary);
+  background-color:var(--primary-soft);
+  color:var(--primary-dark);
+}
+
+/* Empty state — nenhum jogo passa */
+.filters-empty{
+  background:#fff7e6;
+  border:1.5px dashed var(--warm);
+  border-radius:var(--r-md);
+  padding:12px 14px;
+  margin-top:12px;
+  display:none;
+  align-items:center;gap:12px;
+}
+.filters-empty.show{display:flex}
+.filters-empty-icon{font-size:1.5rem;flex-shrink:0}
+.filters-empty-text{
+  flex:1;font-size:.88rem;line-height:1.4;color:var(--text);
+}
+.filters-empty-text b{color:#b8730a}
+.filters-empty-btn{
+  background:var(--warm);
+  color:#fff;
+  border-radius:var(--r-md);
+  padding:9px 14px;
+  font-size:.85rem;font-weight:800;
+  flex-shrink:0;
+  min-height:38px;
+}
+.filters-empty-btn:hover{filter:brightness(.95)}
 .filter-chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
@@ -1047,6 +1131,261 @@ main{
     </div>
 
     <div id="mainArea" class="hidden">
+      <!-- ═══ BANNER DE CHEGADA DOS FILTROS ═══ -->
+      <div id="filtersCta" class="filters-cta hidden" role="button" tabindex="0" aria-label="Ver tutorial dos filtros">
+        <span class="filters-cta-icon" aria-hidden="true">🎯</span>
+        <span class="filters-cta-text">
+          <span class="filters-cta-title">Aqui em cima: os filtros</span>
+          <span class="filters-cta-sub">Use pra escolher só os melhores jogos. Toque aqui pra ver como funciona.</span>
+        </span>
+        <button id="filtersCtaClose" class="filters-cta-close" type="button" aria-label="Fechar aviso">✕</button>
+      </div>
+
+      <!-- ═══ FILTROS — logo abaixo do cabeçalho ═══ -->
+      <div id="filtersPanel" class="filters-panel hidden">
+        <div class="filters-header">
+          <span class="filters-title">🎯 Filtros dos jogos</span>
+          <button id="filtersHelp" class="filters-help" type="button" aria-label="Ver tutorial dos filtros" title="Como usar os filtros">?</button>
+          <span class="filters-counter" id="filtersCounter"><strong>—</strong> de — visíveis</span>
+          <button class="filters-toggle" id="filtersToggle" type="button">Ocultar</button>
+        </div>
+        <p class="filters-intro">Os filtros <strong>escondem</strong> os jogos que você não quer ver. Comece pelo botão <strong>⭐ Recomendado</strong> abaixo — ele já liga as melhores opções pra você. Depois é só rolar pra baixo e escolher os jogos que gostar.</p>
+        <div class="filters-body" id="filtersBody">
+
+          <!-- Atalhos de um toque -->
+          <div class="preset-row" role="group" aria-label="Atalhos rápidos">
+            <span class="preset-label">⚡ Atalhos de um toque</span>
+            <button class="preset-btn preset-best" data-preset="best" type="button">⭐ Recomendado</button>
+            <button class="preset-btn" data-preset="balanced" type="button">⚖️ Mais aberto</button>
+            <button class="preset-btn" data-preset="clear" type="button">🎲 Mostrar tudo</button>
+          </div>
+
+          <!-- Empty state: nenhum jogo passa -->
+          <div id="filtersEmpty" class="filters-empty" role="alert">
+            <span class="filters-empty-icon" aria-hidden="true">🚫</span>
+            <span class="filters-empty-text"><b>Nenhum jogo passa.</b> Os filtros estão muito apertados — afrouxe ou limpe.</span>
+            <button id="fClearEmpty" class="filters-empty-btn" type="button">Limpar</button>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">📐 Linhas e colunas da cartela</div>
+            <div class="filter-why">Evita <b>buracos</b> na cartela. Cartelas com linhas ou colunas vazias raramente pagam — espalhar os números aumenta a chance.</div>
+            <div class="filter-chips">
+              <label class="chip" id="chipNoEmptyRow">
+                <input type="checkbox" id="fNoEmptyRow">
+                <span>Sem linha vazia</span>
+                <span class="chip-count" id="cNoEmptyRow">—</span>
+              </label>
+              <label class="chip" id="chipNoEmptyCol">
+                <input type="checkbox" id="fNoEmptyCol">
+                <span>Sem coluna vazia</span>
+                <span class="chip-count" id="cNoEmptyCol">—</span>
+              </label>
+              <label class="chip" id="chipMaxRow4">
+                <input type="checkbox" id="fMaxRow4">
+                <span>Nenhuma linha com 5</span>
+                <span class="chip-count" id="cMaxRow4">—</span>
+              </label>
+              <label class="chip" id="chipMaxCol4">
+                <input type="checkbox" id="fMaxCol4">
+                <span>Nenhuma coluna com 5</span>
+                <span class="chip-count" id="cMaxCol4">—</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">📍 Limite por linha</div>
+            <div class="filter-why">Para cada linha da cartela, <b>quantos números no máximo</b>. Use pra evitar "amontoado" numa linha só. Ex.: máx. 2 na última linha = poucos números altos.</div>
+            <div class="row-grid">
+              <div class="row-line" id="lineRow1">
+                <span class="row-line-label">Linha 1 <small>(1, 2, 3, 4, 5)</small></span>
+                <select class="row-pick" id="fRowMax1" aria-label="Máximo na linha 1">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+              <div class="row-line" id="lineRow2">
+                <span class="row-line-label">Linha 2 <small>(6, 7, 8, 9, 10)</small></span>
+                <select class="row-pick" id="fRowMax2" aria-label="Máximo na linha 2">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+              <div class="row-line" id="lineRow3">
+                <span class="row-line-label">Linha 3 <small>(11, 12, 13, 14, 15)</small></span>
+                <select class="row-pick" id="fRowMax3" aria-label="Máximo na linha 3">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+              <div class="row-line" id="lineRow4">
+                <span class="row-line-label">Linha 4 <small>(16, 17, 18, 19, 20)</small></span>
+                <select class="row-pick" id="fRowMax4" aria-label="Máximo na linha 4">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+              <div class="row-line" id="lineRow5">
+                <span class="row-line-label">Linha 5 <small>(21, 22, 23, 24, 25)</small></span>
+                <select class="row-pick" id="fRowMax5" aria-label="Máximo na linha 5">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">📍 Limite por coluna</div>
+            <div class="filter-why">Mesma ideia, mas <b>vertical</b>. Cada coluna tem 5 números — limite quantos podem aparecer.</div>
+            <div class="row-grid">
+              <div class="row-line" id="lineCol1">
+                <span class="row-line-label">Coluna 1 <small>(1, 6, 11, 16, 21)</small></span>
+                <select class="row-pick" id="fColMax1" aria-label="Máximo na coluna 1">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+              <div class="row-line" id="lineCol2">
+                <span class="row-line-label">Coluna 2 <small>(2, 7, 12, 17, 22)</small></span>
+                <select class="row-pick" id="fColMax2" aria-label="Máximo na coluna 2">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+              <div class="row-line" id="lineCol3">
+                <span class="row-line-label">Coluna 3 <small>(3, 8, 13, 18, 23)</small></span>
+                <select class="row-pick" id="fColMax3" aria-label="Máximo na coluna 3">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+              <div class="row-line" id="lineCol4">
+                <span class="row-line-label">Coluna 4 <small>(4, 9, 14, 19, 24)</small></span>
+                <select class="row-pick" id="fColMax4" aria-label="Máximo na coluna 4">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+              <div class="row-line" id="lineCol5">
+                <span class="row-line-label">Coluna 5 <small>(5, 10, 15, 20, 25)</small></span>
+                <select class="row-pick" id="fColMax5" aria-label="Máximo na coluna 5">
+                  <option value="">livre</option>
+                  <option value="4">no máximo 4</option>
+                  <option value="3">no máximo 3</option>
+                  <option value="2">no máximo 2</option>
+                  <option value="1">no máximo 1</option>
+                  <option value="0">nenhum</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">🔢 Soma das dezenas</div>
+            <div class="filter-why">Soma das 15 dezenas escolhidas. Nos concursos passados, <b>quase sempre fica entre 175 e 220</b>.</div>
+            <div class="filter-range">
+              <input type="number" id="fSomaMin" min="0" max="375" inputmode="numeric" placeholder="mín">
+              <span>até</span>
+              <input type="number" id="fSomaMax" min="0" max="375" inputmode="numeric" placeholder="máx">
+              <span class="filter-range-hint">comum: 175 a 220</span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">⚖️ Pares (de 0 a 15)</div>
+            <div class="filter-why">Quantos dos 15 números escolhidos são <b>pares</b>. Costuma ficar perto da metade — 6 a 9.</div>
+            <div class="filter-range">
+              <input type="number" id="fParesMin" min="0" max="15" inputmode="numeric" placeholder="mín">
+              <span>até</span>
+              <input type="number" id="fParesMax" min="0" max="15" inputmode="numeric" placeholder="máx">
+              <span class="filter-range-hint">comum: 6 a 9</span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">✨ Primos (de 0 a 9)</div>
+            <div class="filter-why">Os 9 primos da Lotofácil: <b>2, 3, 5, 7, 11, 13, 17, 19, 23</b>. Geralmente saem 4 a 7 deles.</div>
+            <div class="filter-range">
+              <input type="number" id="fPrimosMin" min="0" max="9" inputmode="numeric" placeholder="mín">
+              <span>até</span>
+              <input type="number" id="fPrimosMax" min="0" max="9" inputmode="numeric" placeholder="máx">
+              <span class="filter-range-hint">comum: 4 a 7</span>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">🔗 Sequências (números seguidos)</div>
+            <div class="filter-why">Conta o maior <b>trecho de números seguidos</b> no jogo (ex.: 12-13-14 = 3). Raríssimo passar de 4 seguidos.</div>
+            <div class="filter-chips">
+              <label class="chip" id="chipSeq3">
+                <input type="checkbox" id="fSeq3">
+                <span>Máx. 3 em sequência</span>
+                <span class="chip-count" id="cSeq3">—</span>
+              </label>
+              <label class="chip" id="chipSeq4">
+                <input type="checkbox" id="fSeq4">
+                <span>Máx. 4 em sequência</span>
+                <span class="chip-count" id="cSeq4">—</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">🔁 Repetidos do último concurso</div>
+            <div class="filter-why">Quantas das 15 dezenas <b>já saíram no último concurso</b>. Em média, 8 a 11 voltam.</div>
+            <div class="filter-range">
+              <input type="number" id="fRepsMin" min="0" max="15" inputmode="numeric" placeholder="mín">
+              <span>até</span>
+              <input type="number" id="fRepsMax" min="0" max="15" inputmode="numeric" placeholder="máx">
+              <span class="filter-range-hint">comum: 8 a 11</span>
+            </div>
+          </div>
+
+          <div class="filters-actions">
+            <span class="filters-hint">Pode ligar/desligar a vontade. Os jogos não somem — só ficam apagados.</span>
+            <button id="fClear" class="filter-clear" type="button">Limpar tudo</button>
+          </div>
+        </div>
+      </div>
+
       <section class="controls">
         <div class="section-title">Modelo de jogo</div>
         <div class="modes" id="modes">
@@ -1073,124 +1412,6 @@ main{
           <button id="refreshBtn" class="refresh-btn">Atualizar dados</button>
         </div>
       </section>
-
-      <!-- ═══ BANNER DE CHEGADA DOS FILTROS ═══ -->
-      <div id="filtersCta" class="filters-cta hidden" role="button" tabindex="0" aria-label="Ver tutorial dos filtros">
-        <span class="filters-cta-icon" aria-hidden="true">🎯</span>
-        <span class="filters-cta-text">
-          <span class="filters-cta-title">Aqui em baixo: os filtros</span>
-          <span class="filters-cta-sub">Use eles pra escolher só os melhores jogos. Toque pra ver como funciona.</span>
-        </span>
-        <button id="filtersCtaClose" class="filters-cta-close" type="button" aria-label="Fechar aviso">✕</button>
-      </div>
-
-      <!-- ═══ FILTROS ═══ -->
-      <div id="filtersPanel" class="filters-panel hidden">
-        <div class="filters-header">
-          <span class="filters-title">🎯 Filtros dos jogos</span>
-          <button id="filtersHelp" class="filters-help" type="button" aria-label="Ver tutorial dos filtros" title="Como usar os filtros">?</button>
-          <span class="filters-counter" id="filtersCounter"><strong>—</strong> de — visíveis</span>
-          <button class="filters-toggle" id="filtersToggle" type="button">Ocultar</button>
-        </div>
-        <p class="filters-intro">Os filtros <strong>escondem</strong> os jogos que você não quer ver. Comece pelo botão <strong>⭐ Recomendado</strong> abaixo — ele já liga as melhores opções pra você. Depois é só escolher os jogos que mais gostar.</p>
-        <div class="filters-body" id="filtersBody">
-
-          <!-- Atalhos de um toque -->
-          <div class="preset-row" role="group" aria-label="Atalhos rápidos">
-            <span class="preset-label">⚡ Atalhos de um toque</span>
-            <button class="preset-btn preset-best" data-preset="best" type="button">⭐ Recomendado</button>
-            <button class="preset-btn" data-preset="balanced" type="button">⚖️ Mais aberto</button>
-            <button class="preset-btn" data-preset="clear" type="button">🎲 Mostrar tudo</button>
-          </div>
-
-          <div class="filter-group">
-            <div class="filter-label">📐 Linhas e colunas da cartela</div>
-            <div class="filter-chips">
-              <label class="chip" id="chipNoEmptyRow">
-                <input type="checkbox" id="fNoEmptyRow">
-                <span>Sem linha vazia</span>
-                <span class="chip-count" id="cNoEmptyRow">—</span>
-              </label>
-              <label class="chip" id="chipNoEmptyCol">
-                <input type="checkbox" id="fNoEmptyCol">
-                <span>Sem coluna vazia</span>
-                <span class="chip-count" id="cNoEmptyCol">—</span>
-              </label>
-              <label class="chip" id="chipMaxRow4">
-                <input type="checkbox" id="fMaxRow4">
-                <span>Linha cheia ≤ 4</span>
-                <span class="chip-count" id="cMaxRow4">—</span>
-              </label>
-              <label class="chip" id="chipMaxCol4">
-                <input type="checkbox" id="fMaxCol4">
-                <span>Coluna cheia ≤ 4</span>
-                <span class="chip-count" id="cMaxCol4">—</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <div class="filter-label">🔢 Soma das dezenas</div>
-            <div class="filter-range">
-              <input type="number" id="fSomaMin" min="0" max="375" inputmode="numeric" placeholder="mín">
-              <span>até</span>
-              <input type="number" id="fSomaMax" min="0" max="375" inputmode="numeric" placeholder="máx">
-              <span class="filter-range-hint">comum: 175 a 220</span>
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <div class="filter-label">⚖️ Pares (de 0 a 15)</div>
-            <div class="filter-range">
-              <input type="number" id="fParesMin" min="0" max="15" inputmode="numeric" placeholder="mín">
-              <span>até</span>
-              <input type="number" id="fParesMax" min="0" max="15" inputmode="numeric" placeholder="máx">
-              <span class="filter-range-hint">comum: 6 a 9</span>
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <div class="filter-label">✨ Primos (de 0 a 9)</div>
-            <div class="filter-range">
-              <input type="number" id="fPrimosMin" min="0" max="9" inputmode="numeric" placeholder="mín">
-              <span>até</span>
-              <input type="number" id="fPrimosMax" min="0" max="9" inputmode="numeric" placeholder="máx">
-              <span class="filter-range-hint">comum: 4 a 7</span>
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <div class="filter-label">🔗 Sequências (números seguidos)</div>
-            <div class="filter-chips">
-              <label class="chip" id="chipSeq3">
-                <input type="checkbox" id="fSeq3">
-                <span>Máx. 3 em sequência</span>
-                <span class="chip-count" id="cSeq3">—</span>
-              </label>
-              <label class="chip" id="chipSeq4">
-                <input type="checkbox" id="fSeq4">
-                <span>Máx. 4 em sequência</span>
-                <span class="chip-count" id="cSeq4">—</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <div class="filter-label">🔁 Repetidos do último concurso</div>
-            <div class="filter-range">
-              <input type="number" id="fRepsMin" min="0" max="15" inputmode="numeric" placeholder="mín">
-              <span>até</span>
-              <input type="number" id="fRepsMax" min="0" max="15" inputmode="numeric" placeholder="máx">
-              <span class="filter-range-hint">comum: 8 a 11</span>
-            </div>
-          </div>
-
-          <div class="filters-actions">
-            <span class="filters-hint">Pode ligar/desligar a vontade. Os jogos não somem — só ficam apagados.</span>
-            <button id="fClear" class="filter-clear" type="button">Limpar tudo</button>
-          </div>
-        </div>
-      </div>
 
       <!-- Header só na impressão -->
       <div class="print-only print-header">
@@ -1255,16 +1476,18 @@ main{
       </div>
 
       <div class="tut-glossary">
-        <div class="tut-glossary-title">📖 O que cada filtro faz</div>
-        <div class="tut-gloss-item"><b>📐 Sem linha/coluna vazia</b> — garante que toda fileira e toda coluna da cartela tenha pelo menos um número.</div>
-        <div class="tut-gloss-item"><b>🔢 Soma</b> — quanto dão as 15 dezenas somadas. O comum fica entre <b>175 e 220</b>.</div>
-        <div class="tut-gloss-item"><b>⚖️ Pares</b> — quantos números pares aparecem (de 0 a 15). O comum é <b>6 a 9</b>.</div>
-        <div class="tut-gloss-item"><b>✨ Primos</b> — primos são: 2, 3, 5, 7, 11, 13, 17, 19, 23. O comum é <b>4 a 7</b>.</div>
-        <div class="tut-gloss-item"><b>🔗 Sequências</b> — números seguidos (ex: 12-13-14). Geralmente é melhor ter no <b>máximo 3 ou 4</b> seguidos.</div>
-        <div class="tut-gloss-item"><b>🔁 Repetidos</b> — quantas dezenas do último concurso voltaram. O comum é <b>8 a 11</b>.</div>
+        <div class="tut-glossary-title">📖 O que cada filtro faz e por que usar</div>
+        <div class="tut-gloss-item"><b>📐 Sem linha/coluna vazia</b> — toda fileira e toda coluna da cartela com pelo menos 1 número. <i>Evita "buracos".</i></div>
+        <div class="tut-gloss-item"><b>📍 Limite por linha (1ª a 5ª)</b> — você escolhe o máximo de números em cada linha da cartela. Ex.: na 5ª linha (21-25), no máximo 2 = poucos números altos. <i>Pra quem joga "no estilo dele".</i></div>
+        <div class="tut-gloss-item"><b>📍 Limite por coluna (1ª a 5ª)</b> — igual, mas vertical. Cada coluna tem 5 números — você limita quantos podem entrar.</div>
+        <div class="tut-gloss-item"><b>🔢 Soma</b> — soma das 15 dezenas. <i>Quase sempre fica entre 175 e 220.</i></div>
+        <div class="tut-gloss-item"><b>⚖️ Pares</b> — quantos números pares (de 0 a 15). <i>Costuma sair perto da metade — 6 a 9.</i></div>
+        <div class="tut-gloss-item"><b>✨ Primos</b> — são <b>2, 3, 5, 7, 11, 13, 17, 19, 23</b>. <i>Geralmente saem de 4 a 7.</i></div>
+        <div class="tut-gloss-item"><b>🔗 Sequências</b> — números seguidos (ex.: 12-13-14). <i>Raríssimo passar de 3 ou 4 em sequência.</i></div>
+        <div class="tut-gloss-item"><b>🔁 Repetidos</b> — quantas dezenas vieram do último sorteio. <i>Em média, 8 a 11 voltam.</i></div>
       </div>
 
-      <p class="tut-lead" style="margin-top:14px;margin-bottom:4px">💡 <strong>Dica do filho:</strong> Os filtros não somem com os jogos — só apagam os mais fracos. Pode ligar e desligar à vontade. O botão <strong>Limpar tudo</strong> volta ao começo.</p>
+      <p class="tut-lead" style="margin-top:14px;margin-bottom:4px">💡 <strong>Dica do filho:</strong> Você não precisa entender tudo. Só toque em <strong>⭐ Recomendado</strong> e veja os jogos que sobraram. Se quiser apertar mais (ex.: <i>"no máximo 2 números na última linha"</i>), use os campos <b>Limite por linha</b>. Os filtros nunca somem com os jogos — só apagam. <strong>Limpar tudo</strong> volta ao começo.</p>
     </div>
     <div class="tut-foot">
       <button id="tutOk" class="tut-btn" type="button">Entendi, vamos lá 💚</button>
@@ -1735,7 +1958,9 @@ function defaultFilters(){
     somaMin:null, somaMax:null,
     paresMin:null, paresMax:null,
     primosMin:null, primosMax:null,
-    repsMin:null, repsMax:null
+    repsMin:null, repsMax:null,
+    rowMax:[null,null,null,null,null],
+    colMax:[null,null,null,null,null]
   };
 }
 var filters = defaultFilters();
@@ -1761,6 +1986,12 @@ function gamePasses(stats, reps, f){
   if (f.seq4 && stats.maxRun > 4) return false;
   if (f.repsMin != null && reps < f.repsMin) return false;
   if (f.repsMax != null && reps > f.repsMax) return false;
+  if (f.rowMax){
+    for (var r=0;r<5;r++){ if (f.rowMax[r] != null && stats.lines[r] > f.rowMax[r]) return false; }
+  }
+  if (f.colMax){
+    for (var c=0;c<5;c++){ if (f.colMax[c] != null && stats.cols[c] > f.colMax[c]) return false; }
+  }
   return true;
 }
 
@@ -1786,6 +2017,13 @@ function applyFiltersToUI(){
   var counter = $('filtersCounter');
   if (counter) counter.innerHTML = '<strong>' + visible + '</strong> de ' + allGames.length + ' visíveis';
 
+  // Empty state
+  var emptyEl = $('filtersEmpty');
+  if (emptyEl){
+    if (allGames.length > 0 && visible === 0) emptyEl.classList.add('show');
+    else emptyEl.classList.remove('show');
+  }
+
   function setChip(chipId, countId, key){
     var f = defaultFilters(); f[key] = true;
     var n = countPassing(f);
@@ -1803,6 +2041,20 @@ function applyFiltersToUI(){
   setChip('chipMaxCol4','cMaxCol4','maxCol4');
   setChip('chipSeq3','cSeq3','seq3');
   setChip('chipSeq4','cSeq4','seq4');
+
+  // Destaque visual nos selects de linha/coluna ativos
+  for (var k = 0; k < 5; k++){
+    var rEl = $('fRowMax' + (k+1));
+    var cEl = $('fColMax' + (k+1));
+    var rLine = $('lineRow' + (k+1));
+    var cLine = $('lineCol' + (k+1));
+    var rOn = rEl && rEl.value !== '';
+    var cOn = cEl && cEl.value !== '';
+    if (rEl){ rEl.classList.toggle('set', !!rOn); }
+    if (cEl){ cEl.classList.toggle('set', !!cOn); }
+    if (rLine){ rLine.classList.toggle('active', !!rOn); }
+    if (cLine){ cLine.classList.toggle('active', !!cOn); }
+  }
 
   saveFilters();
 }
@@ -1843,6 +2095,20 @@ function readFiltersFromUI(){
   filters.primosMax = parseIntOrNull($('fPrimosMax').value);
   filters.repsMin = parseIntOrNull($('fRepsMin').value);
   filters.repsMax = parseIntOrNull($('fRepsMax').value);
+  filters.rowMax = [
+    parseIntOrNull($('fRowMax1').value),
+    parseIntOrNull($('fRowMax2').value),
+    parseIntOrNull($('fRowMax3').value),
+    parseIntOrNull($('fRowMax4').value),
+    parseIntOrNull($('fRowMax5').value)
+  ];
+  filters.colMax = [
+    parseIntOrNull($('fColMax1').value),
+    parseIntOrNull($('fColMax2').value),
+    parseIntOrNull($('fColMax3').value),
+    parseIntOrNull($('fColMax4').value),
+    parseIntOrNull($('fColMax5').value)
+  ];
 }
 
 function writeFiltersToUI(){
@@ -1860,6 +2126,14 @@ function writeFiltersToUI(){
   $('fPrimosMax').value = filters.primosMax != null ? filters.primosMax : '';
   $('fRepsMin').value = filters.repsMin != null ? filters.repsMin : '';
   $('fRepsMax').value = filters.repsMax != null ? filters.repsMax : '';
+  var rm = filters.rowMax || [null,null,null,null,null];
+  var cm = filters.colMax || [null,null,null,null,null];
+  for (var i = 0; i < 5; i++){
+    var rEl = $('fRowMax' + (i+1));
+    var cEl = $('fColMax' + (i+1));
+    if (rEl) rEl.value = rm[i] != null ? String(rm[i]) : '';
+    if (cEl) cEl.value = cm[i] != null ? String(cm[i]) : '';
+  }
 }
 
 function clearFilters(){
@@ -1878,7 +2152,9 @@ function presetBest(){
     somaMin:175, somaMax:220,
     paresMin:6, paresMax:9,
     primosMin:4, primosMax:7,
-    repsMin:8, repsMax:11
+    repsMin:8, repsMax:11,
+    rowMax:[null,null,null,null,null],
+    colMax:[null,null,null,null,null]
   };
 }
 function presetBalanced(){
@@ -1889,7 +2165,9 @@ function presetBalanced(){
     somaMin:165, somaMax:230,
     paresMin:null, paresMax:null,
     primosMin:null, primosMax:null,
-    repsMin:null, repsMax:null
+    repsMin:null, repsMax:null,
+    rowMax:[null,null,null,null,null],
+    colMax:[null,null,null,null,null]
   };
 }
 function applyPreset(name){
@@ -1953,7 +2231,17 @@ function bindFilters(){
   ['fSomaMin','fSomaMax','fParesMin','fParesMax','fPrimosMin','fPrimosMax','fRepsMin','fRepsMax'].forEach(function(id){
     $(id).addEventListener('input', function(){ readFiltersFromUI(); applyFiltersToUI(); });
   });
+  for (var k = 1; k <= 5; k++){
+    (function(idx){
+      var rEl = $('fRowMax' + idx);
+      var cEl = $('fColMax' + idx);
+      if (rEl) rEl.addEventListener('change', function(){ readFiltersFromUI(); applyFiltersToUI(); });
+      if (cEl) cEl.addEventListener('change', function(){ readFiltersFromUI(); applyFiltersToUI(); });
+    })(k);
+  }
   $('fClear').addEventListener('click', clearFilters);
+  var emptyBtn = $('fClearEmpty');
+  if (emptyBtn) emptyBtn.addEventListener('click', clearFilters);
   $('filtersToggle').addEventListener('click', function(){
     var body = $('filtersBody');
     var btn = $('filtersToggle');
