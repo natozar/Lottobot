@@ -308,8 +308,10 @@ main{
   transform:scale(1.06);
   position:relative;
   z-index:2;
-  -webkit-animation:markedPulse 2.4s ease-in-out infinite;
-  animation:markedPulse 2.4s ease-in-out infinite;
+  -webkit-animation:markedPulse 2.4s ease-in-out 5;
+  animation:markedPulse 2.4s ease-in-out 5;
+  -webkit-animation-fill-mode:forwards;
+  animation-fill-mode:forwards;
 }
 .cell.marked::after{
   content:"";
@@ -394,57 +396,68 @@ main{
 /* ═══ FILTROS — MEGA CARD ═══ */
 .filters-panel{
   position:relative;
-  background:linear-gradient(180deg,#ffffff 0%,#f6fbf7 100%);
-  border-radius:18px;
-  padding:32px 18px 18px;
-  margin:28px 0 22px;
-  box-shadow:0 10px 28px rgba(0,166,81,.18),0 2px 6px rgba(0,0,0,.05);
+  background:linear-gradient(180deg,#e9f7ee 0%,#dff3e6 100%);
+  border-radius:20px;
+  padding:38px 16px 16px;
+  margin:32px 0 22px;
+  box-shadow:0 14px 36px rgba(0,166,81,.28),0 3px 8px rgba(0,0,0,.06);
   border:3px solid var(--primary);
   transition:box-shadow .3s,transform .25s;
 }
 .filters-panel::before{
   content:"🎯  FILTROS DOS JOGOS";
   position:absolute;
-  top:-16px;left:50%;
+  top:-18px;left:50%;
   transform:translateX(-50%);
   background:linear-gradient(135deg,#00a651 0%,#00c46a 100%);
   color:#fff;
-  padding:7px 18px;
+  padding:9px 22px;
   border-radius:999px;
-  font-size:.85rem;font-weight:800;
-  letter-spacing:.05em;
-  box-shadow:0 4px 12px rgba(0,166,81,.45);
+  font-size:.95rem;font-weight:800;
+  letter-spacing:.06em;
+  box-shadow:0 6px 16px rgba(0,166,81,.55);
   white-space:nowrap;
 }
 .filters-panel.just-arrived{
-  animation:filtersPulse 1.6s ease-in-out 3;
+  animation:filtersPulse 1.2s ease-in-out 4;
 }
 @keyframes filtersPulse{
-  0%,100%{box-shadow:0 10px 28px rgba(0,166,81,.18),0 2px 6px rgba(0,0,0,.05),0 0 0 0 rgba(0,166,81,.5)}
-  50%{box-shadow:0 10px 28px rgba(0,166,81,.18),0 2px 6px rgba(0,0,0,.05),0 0 0 14px rgba(0,166,81,0)}
+  0%,100%{box-shadow:0 14px 36px rgba(0,166,81,.28),0 3px 8px rgba(0,0,0,.06),0 0 0 0 rgba(0,166,81,.55)}
+  50%{box-shadow:0 14px 36px rgba(0,166,81,.28),0 3px 8px rgba(0,0,0,.06),0 0 0 18px rgba(0,166,81,0)}
 }
 
-/* Status line — explicita o que o filtro CONTROLA */
+/* Contador GIGANTE — manchete do card */
 .filters-status{
   background:#fff;
-  border:1.5px solid var(--primary-soft);
-  border-radius:var(--r-md);
-  padding:11px 14px;
-  margin:4px 0 14px;
-  display:flex;align-items:center;gap:10px;
-  font-size:.9rem;line-height:1.4;
-  color:var(--text);
+  border:2px solid var(--primary);
+  border-radius:14px;
+  padding:14px 16px;
+  margin:0 0 14px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  gap:4px;
+  box-shadow:0 4px 12px rgba(0,166,81,.12);
 }
-.filters-status-icon{font-size:1.2rem;flex-shrink:0}
-.filters-status-text{flex:1}
+.filters-status-icon{display:none}
+.filters-status-text{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%}
 .filters-status-text b{
   color:var(--primary-dark);
-  font-size:1.1rem;font-weight:900;
+  font-size:2.4rem;font-weight:900;
   font-variant-numeric:tabular-nums;
+  line-height:1.05;letter-spacing:-.02em;
+}
+.filters-status-text b::after{
+  content:" jogos visíveis";
+  font-size:.95rem;font-weight:700;color:var(--text);
+  letter-spacing:0;
+  margin-left:4px;vertical-align:middle;
 }
 .filters-status .impl{
-  display:block;color:var(--muted);
-  font-size:.78rem;margin-top:2px;
+  color:var(--muted);
+  font-size:.84rem;line-height:1.4;margin-top:4px;
+}
+@media(max-width:380px){
+  .filters-status-text b{font-size:1.9rem}
+  .filters-status-text b::after{display:block;margin-left:0;margin-top:-2px}
 }
 
 /* ═══ STEP BANNERS — Passo 1, 2, 3 ═══ */
@@ -585,45 +598,90 @@ main{
 .filters-body{display:flex;flex-direction:column;gap:14px;margin-top:14px}
 .filters-body.collapsed{display:none}
 
-/* Presets — atalhos de um toque */
+/* Presets — atalhos de um toque (FULL-WIDTH no card) */
 .preset-row{
-  display:flex;flex-wrap:wrap;gap:8px;
-  background:#fafaf7;
-  border:1px dashed var(--border);
-  border-radius:var(--r-md);
-  padding:10px 12px;
+  display:flex;flex-direction:column;gap:10px;
+  background:transparent;
+  border:0;
+  padding:0;
+  margin-bottom:14px;
 }
 .preset-label{
   width:100%;
-  font-size:.76rem;font-weight:700;
-  color:var(--muted);
+  font-size:.85rem;font-weight:800;
+  color:var(--primary-dark);
   text-transform:uppercase;letter-spacing:.05em;
-  margin-bottom:2px;
+  margin-bottom:4px;
 }
 .preset-btn{
-  flex:1;min-width:120px;
-  padding:11px 12px;
-  border-radius:var(--r-md);
-  border:1.5px solid var(--border);
+  width:100%;
+  padding:16px 16px;
+  border-radius:14px;
+  border:2px solid var(--border);
   background:#fff;
-  font-size:.88rem;font-weight:700;
+  font-size:1.05rem;font-weight:800;
   color:var(--text);
   cursor:pointer;
   transition:all .15s;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  min-height:42px;
-  line-height:1.15;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-height:54px;
+  line-height:1.2;
   text-align:center;
+  box-shadow:0 2px 6px rgba(0,0,0,.04);
 }
 .preset-btn:hover{border-color:var(--primary);color:var(--primary-dark)}
-.preset-btn:active{transform:scale(.97)}
+.preset-btn:active{transform:scale(.98)}
 .preset-btn.preset-best{
-  background:var(--primary);
+  background:linear-gradient(135deg,#00a651 0%,#00c46a 100%);
   color:#fff;
-  border-color:var(--primary);
+  border-color:var(--primary-dark);
+  font-size:1.15rem;
+  box-shadow:0 6px 18px rgba(0,166,81,.45);
   box-shadow:0 3px 10px rgba(0,166,81,.28);
 }
-.preset-btn.preset-best:hover{background:var(--primary-dark);color:#fff}
+.preset-btn.preset-best:hover{filter:brightness(.95);color:#fff}
+
+/* Filtros manuais collapsável — <details> */
+.manual-details{
+  background:#fff;
+  border:2px solid var(--border);
+  border-radius:14px;
+  margin-top:6px;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.manual-details[open]{border-color:var(--primary)}
+.manual-summary{
+  list-style:none;
+  cursor:pointer;
+  padding:14px 16px;
+  display:flex;align-items:center;gap:10px;
+  font-size:1rem;font-weight:800;
+  color:var(--text);
+  user-select:none;
+  min-height:54px;
+}
+.manual-summary::-webkit-details-marker{display:none}
+.manual-summary::marker{display:none}
+.manual-summary-icon{
+  font-size:1.3rem;flex-shrink:0;
+  transition:transform .25s;
+}
+.manual-details[open] .manual-summary-icon{transform:rotate(90deg)}
+.manual-summary-text{flex:1;line-height:1.3}
+.manual-summary-text small{
+  display:block;font-size:.75rem;font-weight:500;
+  color:var(--muted);margin-top:2px;
+}
+.manual-summary-chev{
+  font-size:1.1rem;color:var(--primary);
+  font-weight:900;flex-shrink:0;
+}
+.manual-body{
+  padding:6px 14px 14px;
+  border-top:1px dashed var(--border);
+  display:flex;flex-direction:column;gap:14px;
+}
 
 .filter-group{
   border-top:1px solid var(--border);
@@ -1269,24 +1327,15 @@ main{
           <button class="filters-toggle" id="filtersToggle" type="button">Ocultar</button>
         </div>
         <div class="filters-status" id="filtersStatus">
-          <span class="filters-status-icon" aria-hidden="true">📊</span>
           <span class="filters-status-text">
-            <b><span id="filtersCounter">— de —</span> jogos visíveis</b>
+            <b id="filtersCounter">— de —</b>
             <span class="impl">Só esses entram em <b>Imprimir</b>, <b>Compartilhar</b> e <b>Copiar</b>.</span>
           </span>
         </div>
-        <p class="filters-intro">Os filtros <strong>escondem</strong> os jogos que você não quer ver — eles continuam ali, só ficam apagados. <strong>Comece pelo modo fácil</strong>. Depois, se quiser, ajuste manualmente.</p>
         <div class="filters-body" id="filtersBody">
 
-          <!-- ── MODO FÁCIL ── -->
-          <div class="subdiv subdiv-easy">
-            <span class="subdiv-icon" aria-hidden="true">⚡</span>
-            <span class="subdiv-text">
-              <span class="subdiv-title">Modo fácil — atalhos de um toque</span>
-              <span class="subdiv-sub">O jeito mais rápido. Escolha um destes:</span>
-            </span>
-          </div>
           <div class="preset-row" role="group" aria-label="Atalhos rápidos">
+            <span class="preset-label">⚡ Escolha um atalho:</span>
             <button class="preset-btn preset-best" data-preset="best" type="button">⭐ Recomendado</button>
             <button class="preset-btn" data-preset="balanced" type="button">⚖️ Mais aberto</button>
             <button class="preset-btn" data-preset="clear" type="button">🎲 Mostrar tudo</button>
@@ -1299,14 +1348,17 @@ main{
             <button id="fClearEmpty" class="filters-empty-btn" type="button">Limpar</button>
           </div>
 
-          <!-- ── MODO MANUAL ── -->
-          <div class="subdiv subdiv-manual">
-            <span class="subdiv-icon" aria-hidden="true">✏️</span>
-            <span class="subdiv-text">
-              <span class="subdiv-title">Modo manual — ajuste à vontade</span>
-              <span class="subdiv-sub">8 filtros, cada um com explicação. Use só os que quiser.</span>
-            </span>
-          </div>
+          <!-- ── MODO MANUAL — collapsável ── -->
+          <details class="manual-details" id="manualDetails">
+            <summary class="manual-summary">
+              <span class="manual-summary-icon" aria-hidden="true">▶</span>
+              <span class="manual-summary-text">
+                ✏️ Ajustar filtros manualmente
+                <small>8 filtros detalhados — toque para abrir</small>
+              </span>
+              <span class="manual-summary-chev" aria-hidden="true">+</span>
+            </summary>
+            <div class="manual-body">
 
           <div class="filter-group">
             <div class="filter-label"><span class="filter-num">1</span> 📐 Linhas e colunas da cartela</div>
@@ -1524,6 +1576,8 @@ main{
             <span class="filters-hint">Pode ligar/desligar a vontade. Os jogos não somem — só ficam apagados.</span>
             <button id="fClear" class="filter-clear" type="button">Limpar tudo</button>
           </div>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -2588,16 +2642,11 @@ function renderResults(games){
   applyFiltersToUI();
   updateSelectionUI();
 
-  // Pulsa o card de filtros pra chamar atenção
+  // Pulsa o card de filtros pra chamar atenção (sem abrir modal que cobre tudo)
   panel.classList.remove('just-arrived');
   void panel.offsetWidth;
   panel.classList.add('just-arrived');
   setTimeout(function(){ panel.classList.remove('just-arrived'); }, 5200);
-
-  // Abre o tutorial automaticamente na primeira vez
-  if (!tutorialSeen()){
-    setTimeout(openTutorial, 650);
-  }
 }
 
 function copyToClipboard(text){
