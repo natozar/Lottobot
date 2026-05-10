@@ -411,39 +411,110 @@ main{
   50%{box-shadow:0 0 0 10px rgba(0,166,81,0),var(--shadow-md)}
 }
 
-/* Banner de chegada — chama atenção pro filtro */
-.filters-cta{
+/* ═══ STEP BANNERS — Passo 1, 2, 3 ═══ */
+.step-banner{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;
+  border-radius:var(--r-md);
+  margin:18px 0 10px;
+  background:#fff;
+  border:1.5px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  animation:stepIn .45s ease both;
+}
+@keyframes stepIn{
+  from{opacity:0;transform:translateY(-6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.step-banner.active{
   background:linear-gradient(135deg,#00a651 0%,#00c46a 100%);
   color:#fff;
-  border-radius:var(--r-md);
-  padding:14px 16px;
-  margin-bottom:12px;
-  display:flex;align-items:center;gap:12px;
-  box-shadow:0 4px 14px rgba(0,166,81,.28);
-  cursor:pointer;
-  position:relative;
-  animation:ctaIn .45s ease both;
+  border-color:var(--primary-dark);
+  box-shadow:0 6px 18px rgba(0,166,81,.32);
 }
-@keyframes ctaIn{
-  from{opacity:0;transform:translateY(-8px) scale(.97)}
-  to{opacity:1;transform:translateY(0) scale(1)}
+.step-banner.active .step-num{
+  background:#fff;color:var(--primary-dark);
 }
-.filters-cta-icon{
-  font-size:1.6rem;flex-shrink:0;
-  filter:drop-shadow(0 1px 2px rgba(0,0,0,.18));
-}
-.filters-cta-text{flex:1;line-height:1.32}
-.filters-cta-title{font-weight:800;font-size:1rem;display:block;margin-bottom:2px}
-.filters-cta-sub{font-size:.82rem;opacity:.95}
-.filters-cta-close{
-  background:rgba(255,255,255,.2);
-  color:#fff;border-radius:999px;
-  width:28px;height:28px;
+.step-banner.active .step-sub{color:rgba(255,255,255,.95)}
+.step-num{
+  flex-shrink:0;
+  width:36px;height:36px;border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:900;font-size:1.1rem;
   display:flex;align-items:center;justify-content:center;
-  font-size:.95rem;flex-shrink:0;
-  font-weight:700;
+  box-shadow:0 2px 6px rgba(0,0,0,.18);
 }
-.filters-cta-close:hover{background:rgba(255,255,255,.32)}
+.step-text{flex:1;line-height:1.3}
+.step-title{
+  font-weight:800;font-size:1.05rem;
+  display:block;letter-spacing:.01em;
+}
+.step-sub{
+  font-size:.84rem;color:var(--muted);
+  display:block;margin-top:2px;
+}
+.step-banner.pulsing{animation:stepIn .45s ease both, stepPulse 1.4s ease-in-out 2 .5s}
+@keyframes stepPulse{
+  0%,100%{box-shadow:0 6px 18px rgba(0,166,81,.32)}
+  50%{box-shadow:0 6px 24px rgba(0,166,81,.7),0 0 0 4px rgba(0,166,81,.2)}
+}
+
+/* Floating FAB — voltar pros filtros */
+.fab-filters{
+  position:fixed;
+  right:14px;
+  top:calc(env(safe-area-inset-top) + 70px);
+  background:var(--primary);
+  color:#fff;
+  border:0;border-radius:999px;
+  padding:10px 16px 10px 14px;
+  font-size:.9rem;font-weight:800;
+  display:none;align-items:center;gap:8px;
+  box-shadow:0 6px 18px rgba(0,166,81,.4);
+  cursor:pointer;z-index:60;
+  font-family:inherit;
+  animation:fabIn .25s ease both;
+}
+.fab-filters.show{display:inline-flex}
+@keyframes fabIn{
+  from{opacity:0;transform:translateY(-8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.fab-filters:hover{background:var(--primary-dark)}
+.fab-filters .fab-arrow{font-size:1rem;line-height:1}
+.fab-filters .fab-count{
+  background:rgba(255,255,255,.22);
+  padding:2px 8px;border-radius:999px;
+  font-size:.8rem;font-variant-numeric:tabular-nums;
+}
+
+/* Subdivisões dentro do painel: MODO FÁCIL / MODO MANUAL */
+.subdiv{
+  margin:6px 0 4px;
+  padding:8px 10px;
+  background:#fafaf7;
+  border-radius:var(--r-sm);
+  display:flex;align-items:center;gap:8px;
+}
+.subdiv-easy{background:linear-gradient(135deg,#e6f7ec 0%,#f5fbf7 100%);border-left:4px solid var(--primary)}
+.subdiv-manual{background:linear-gradient(135deg,#fff6e1 0%,#fffaf0 100%);border-left:4px solid var(--warm)}
+.subdiv-icon{font-size:1.2rem}
+.subdiv-text{flex:1;line-height:1.3}
+.subdiv-title{font-weight:800;font-size:.92rem;color:var(--text);display:block}
+.subdiv-sub{font-size:.78rem;color:var(--muted);display:block;margin-top:1px}
+
+/* Numerinho ao lado do label do filtro */
+.filter-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;
+  background:var(--primary-soft);
+  color:var(--primary-dark);
+  border-radius:999px;
+  font-size:.78rem;font-weight:900;
+  margin-right:2px;
+  flex-shrink:0;
+}
 
 .filters-header{
   display:flex;align-items:center;gap:10px;
@@ -915,6 +986,7 @@ main{
   .pin-wrap,.lockout-card,.welcome-wrap,
   .app-header,.app-footer,
   .controls,.filters-panel,.filters-cta,.tut-overlay,.selection-bar,.toast,
+  .step-banner,.fab-filters,
   #loadingState,#errorState,
   .copy-btn,.select-btn,.refresh-btn,.data-info{
     display:none !important;
@@ -1131,17 +1203,52 @@ main{
     </div>
 
     <div id="mainArea" class="hidden">
-      <!-- ═══ BANNER DE CHEGADA DOS FILTROS ═══ -->
-      <div id="filtersCta" class="filters-cta hidden" role="button" tabindex="0" aria-label="Ver tutorial dos filtros">
-        <span class="filters-cta-icon" aria-hidden="true">🎯</span>
-        <span class="filters-cta-text">
-          <span class="filters-cta-title">Aqui em cima: os filtros</span>
-          <span class="filters-cta-sub">Use pra escolher só os melhores jogos. Toque aqui pra ver como funciona.</span>
+      <!-- ═══ PASSO 1 · GERAR ═══ -->
+      <div class="step-banner" id="step1Banner">
+        <span class="step-num">1</span>
+        <span class="step-text">
+          <span class="step-title">Gere os jogos</span>
+          <span class="step-sub">Escolha o modelo e a quantidade. Toque em <b>Gerar jogos</b>.</span>
         </span>
-        <button id="filtersCtaClose" class="filters-cta-close" type="button" aria-label="Fechar aviso">✕</button>
       </div>
 
-      <!-- ═══ FILTROS — logo abaixo do cabeçalho ═══ -->
+      <section class="controls" id="controlsSection">
+        <div class="section-title">Modelo de jogo</div>
+        <div class="modes" id="modes">
+          <label class="mode-option">
+            <input type="radio" name="mode" value="9-6" checked>
+            <span class="mode-text">9 repetidos do último concurso + 6 que não saíram</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="mode" value="10-5">
+            <span class="mode-text">10 repetidos do último concurso + 5 que não saíram</span>
+          </label>
+        </div>
+
+        <div class="section-title">Quantidade de jogos</div>
+        <div class="qty-row">
+          <input type="number" id="qty" class="qty-input" min="1" max="50" value="10" inputmode="numeric">
+          <input type="range" id="qtySlider" class="qty-slider" min="1" max="50" value="10" aria-label="Quantidade">
+        </div>
+
+        <button id="generateBtn" class="generate-btn">Gerar jogos</button>
+
+        <div class="data-info">
+          <span id="dataInfo">Carregando...</span>
+          <button id="refreshBtn" class="refresh-btn">Atualizar dados</button>
+        </div>
+      </section>
+
+      <!-- ═══ PASSO 2 · FILTRAR (só aparece com jogos) ═══ -->
+      <div class="step-banner hidden" id="step2Banner">
+        <span class="step-num">2</span>
+        <span class="step-text">
+          <span class="step-title">Filtre os jogos</span>
+          <span class="step-sub">Use ⭐ <b>Recomendado</b> (um toque) ou ajuste <b>manualmente</b> abaixo.</span>
+        </span>
+      </div>
+
+      <!-- ═══ FILTROS — entre PASSO 2 e PASSO 3 ═══ -->
       <div id="filtersPanel" class="filters-panel hidden">
         <div class="filters-header">
           <span class="filters-title">🎯 Filtros dos jogos</span>
@@ -1149,12 +1256,18 @@ main{
           <span class="filters-counter" id="filtersCounter"><strong>—</strong> de — visíveis</span>
           <button class="filters-toggle" id="filtersToggle" type="button">Ocultar</button>
         </div>
-        <p class="filters-intro">Os filtros <strong>escondem</strong> os jogos que você não quer ver. Comece pelo botão <strong>⭐ Recomendado</strong> abaixo — ele já liga as melhores opções pra você. Depois é só rolar pra baixo e escolher os jogos que gostar.</p>
+        <p class="filters-intro">Os filtros <strong>escondem</strong> os jogos que você não quer ver — eles continuam ali, só ficam apagados. <strong>Comece pelo modo fácil abaixo</strong>. Depois, se quiser, ajuste manualmente.</p>
         <div class="filters-body" id="filtersBody">
 
-          <!-- Atalhos de um toque -->
+          <!-- ── MODO FÁCIL ── -->
+          <div class="subdiv subdiv-easy">
+            <span class="subdiv-icon" aria-hidden="true">⚡</span>
+            <span class="subdiv-text">
+              <span class="subdiv-title">Modo fácil — atalhos de um toque</span>
+              <span class="subdiv-sub">O jeito mais rápido. Escolha um destes:</span>
+            </span>
+          </div>
           <div class="preset-row" role="group" aria-label="Atalhos rápidos">
-            <span class="preset-label">⚡ Atalhos de um toque</span>
             <button class="preset-btn preset-best" data-preset="best" type="button">⭐ Recomendado</button>
             <button class="preset-btn" data-preset="balanced" type="button">⚖️ Mais aberto</button>
             <button class="preset-btn" data-preset="clear" type="button">🎲 Mostrar tudo</button>
@@ -1167,8 +1280,17 @@ main{
             <button id="fClearEmpty" class="filters-empty-btn" type="button">Limpar</button>
           </div>
 
+          <!-- ── MODO MANUAL ── -->
+          <div class="subdiv subdiv-manual">
+            <span class="subdiv-icon" aria-hidden="true">✏️</span>
+            <span class="subdiv-text">
+              <span class="subdiv-title">Modo manual — ajuste à vontade</span>
+              <span class="subdiv-sub">8 filtros, cada um com explicação. Use só os que quiser.</span>
+            </span>
+          </div>
+
           <div class="filter-group">
-            <div class="filter-label">📐 Linhas e colunas da cartela</div>
+            <div class="filter-label"><span class="filter-num">1</span> 📐 Linhas e colunas da cartela</div>
             <div class="filter-why">Evita <b>buracos</b> na cartela. Cartelas com linhas ou colunas vazias raramente pagam — espalhar os números aumenta a chance.</div>
             <div class="filter-chips">
               <label class="chip" id="chipNoEmptyRow">
@@ -1195,8 +1317,8 @@ main{
           </div>
 
           <div class="filter-group">
-            <div class="filter-label">📍 Limite por linha</div>
-            <div class="filter-why">Para cada linha da cartela, <b>quantos números no máximo</b>. Use pra evitar "amontoado" numa linha só. Ex.: máx. 2 na última linha = poucos números altos.</div>
+            <div class="filter-label"><span class="filter-num">2</span> 📍 Limite por linha <small style="font-weight:600;color:var(--muted);font-size:.78rem">— ajuste manual</small></div>
+            <div class="filter-why">Para cada linha da cartela, <b>quantos números no máximo</b>. Toque no seletor à direita pra escolher. Ex.: máx. 2 na última linha = poucos números altos.</div>
             <div class="row-grid">
               <div class="row-line" id="lineRow1">
                 <span class="row-line-label">Linha 1 <small>(1, 2, 3, 4, 5)</small></span>
@@ -1257,7 +1379,7 @@ main{
           </div>
 
           <div class="filter-group">
-            <div class="filter-label">📍 Limite por coluna</div>
+            <div class="filter-label"><span class="filter-num">3</span> 📍 Limite por coluna <small style="font-weight:600;color:var(--muted);font-size:.78rem">— ajuste manual</small></div>
             <div class="filter-why">Mesma ideia, mas <b>vertical</b>. Cada coluna tem 5 números — limite quantos podem aparecer.</div>
             <div class="row-grid">
               <div class="row-line" id="lineCol1">
@@ -1319,7 +1441,7 @@ main{
           </div>
 
           <div class="filter-group">
-            <div class="filter-label">🔢 Soma das dezenas</div>
+            <div class="filter-label"><span class="filter-num">4</span> 🔢 Soma das dezenas</div>
             <div class="filter-why">Soma das 15 dezenas escolhidas. Nos concursos passados, <b>quase sempre fica entre 175 e 220</b>.</div>
             <div class="filter-range">
               <input type="number" id="fSomaMin" min="0" max="375" inputmode="numeric" placeholder="mín">
@@ -1330,7 +1452,7 @@ main{
           </div>
 
           <div class="filter-group">
-            <div class="filter-label">⚖️ Pares (de 0 a 15)</div>
+            <div class="filter-label"><span class="filter-num">5</span> ⚖️ Pares (de 0 a 15)</div>
             <div class="filter-why">Quantos dos 15 números escolhidos são <b>pares</b>. Costuma ficar perto da metade — 6 a 9.</div>
             <div class="filter-range">
               <input type="number" id="fParesMin" min="0" max="15" inputmode="numeric" placeholder="mín">
@@ -1341,7 +1463,7 @@ main{
           </div>
 
           <div class="filter-group">
-            <div class="filter-label">✨ Primos (de 0 a 9)</div>
+            <div class="filter-label"><span class="filter-num">6</span> ✨ Primos (de 0 a 9)</div>
             <div class="filter-why">Os 9 primos da Lotofácil: <b>2, 3, 5, 7, 11, 13, 17, 19, 23</b>. Geralmente saem 4 a 7 deles.</div>
             <div class="filter-range">
               <input type="number" id="fPrimosMin" min="0" max="9" inputmode="numeric" placeholder="mín">
@@ -1352,7 +1474,7 @@ main{
           </div>
 
           <div class="filter-group">
-            <div class="filter-label">🔗 Sequências (números seguidos)</div>
+            <div class="filter-label"><span class="filter-num">7</span> 🔗 Sequências (números seguidos)</div>
             <div class="filter-why">Conta o maior <b>trecho de números seguidos</b> no jogo (ex.: 12-13-14 = 3). Raríssimo passar de 4 seguidos.</div>
             <div class="filter-chips">
               <label class="chip" id="chipSeq3">
@@ -1369,7 +1491,7 @@ main{
           </div>
 
           <div class="filter-group">
-            <div class="filter-label">🔁 Repetidos do último concurso</div>
+            <div class="filter-label"><span class="filter-num">8</span> 🔁 Repetidos do último concurso</div>
             <div class="filter-why">Quantas das 15 dezenas <b>já saíram no último concurso</b>. Em média, 8 a 11 voltam.</div>
             <div class="filter-range">
               <input type="number" id="fRepsMin" min="0" max="15" inputmode="numeric" placeholder="mín">
@@ -1386,32 +1508,14 @@ main{
         </div>
       </div>
 
-      <section class="controls">
-        <div class="section-title">Modelo de jogo</div>
-        <div class="modes" id="modes">
-          <label class="mode-option">
-            <input type="radio" name="mode" value="9-6" checked>
-            <span class="mode-text">9 repetidos do último concurso + 6 que não saíram</span>
-          </label>
-          <label class="mode-option">
-            <input type="radio" name="mode" value="10-5">
-            <span class="mode-text">10 repetidos do último concurso + 5 que não saíram</span>
-          </label>
-        </div>
-
-        <div class="section-title">Quantidade de jogos</div>
-        <div class="qty-row">
-          <input type="number" id="qty" class="qty-input" min="1" max="50" value="10" inputmode="numeric">
-          <input type="range" id="qtySlider" class="qty-slider" min="1" max="50" value="10" aria-label="Quantidade">
-        </div>
-
-        <button id="generateBtn" class="generate-btn">Gerar jogos</button>
-
-        <div class="data-info">
-          <span id="dataInfo">Carregando...</span>
-          <button id="refreshBtn" class="refresh-btn">Atualizar dados</button>
-        </div>
-      </section>
+      <!-- ═══ PASSO 3 · ESCOLHER (só aparece com jogos) ═══ -->
+      <div class="step-banner hidden" id="step3Banner">
+        <span class="step-num">3</span>
+        <span class="step-text">
+          <span class="step-title">Escolha seus jogos</span>
+          <span class="step-sub">Toque em <b>+ Escolher</b> nos jogos que gostar. Aparece uma barra embaixo pra <b>Imprimir, Compartilhar ou Copiar</b>.</span>
+        </span>
+      </div>
 
       <!-- Header só na impressão -->
       <div class="print-only print-header">
@@ -1449,29 +1553,39 @@ main{
       <button id="tutClose" class="tut-close" type="button" aria-label="Fechar tutorial">✕</button>
     </div>
     <div class="tut-body">
-      <p class="tut-lead">Depois que você gera as cartelas, aparecem os <strong>filtros</strong>. Eles servem pra <strong>esconder</strong> os jogos mais fracos e deixar só os bons à vista. <strong>Não precisa entender de matemática</strong> — siga estes 3 passos:</p>
+      <p class="tut-lead">A página tem <strong>3 passos numerados</strong>. Você está no <strong>PASSO 2</strong> agora. Veja como funciona:</p>
 
       <div class="tut-step">
         <div class="tut-step-num">1</div>
         <div class="tut-step-body">
-          <div class="tut-step-title">Toque em <code>⭐ Recomendado</code></div>
-          <div class="tut-step-text">É o atalho mais usado. Ele já liga os filtros mais seguros: sem linha vazia, sem coluna vazia, soma equilibrada e poucas sequências.</div>
+          <div class="tut-step-title">PASSO 1 — Gerar jogos</div>
+          <div class="tut-step-text">Lá em cima, escolha o modelo e quantos jogos quer. Toque em <code>Gerar jogos</code>. Já feito ✅.</div>
         </div>
       </div>
 
       <div class="tut-step">
         <div class="tut-step-num">2</div>
         <div class="tut-step-body">
-          <div class="tut-step-title">Veja os jogos que <strong>sobraram</strong></div>
-          <div class="tut-step-text">Os jogos cortados ficam <strong>apagados</strong> (não somem). Na parte de cima do filtro aparece, por exemplo: <code>7 de 10 visíveis</code>. Se cortou demais, toque em <code>⚖️ Mais aberto</code> ou <code>🎲 Mostrar tudo</code>.</div>
+          <div class="tut-step-title">PASSO 2 — Filtrar <small>(você está aqui)</small></div>
+          <div class="tut-step-text">O painel <strong>verde "🎯 Filtros dos jogos"</strong> tem 2 modos:
+            <br>· <b>⚡ Modo fácil</b>: toque em <code>⭐ Recomendado</code> e pronto.
+            <br>· <b>✏️ Modo manual</b>: ajuste os 8 filtros numerados (1 a 8). Ex.: pra deixar <b>no máximo 2 números na última linha</b>, vá no filtro <b>2</b> "Limite por linha", role até <b>Linha 5</b> e escolha <b>no máximo 2</b>.</div>
         </div>
       </div>
 
       <div class="tut-step">
         <div class="tut-step-num">3</div>
         <div class="tut-step-body">
-          <div class="tut-step-title">Toque em <code>+ Escolher</code> nos jogos que gostar</div>
-          <div class="tut-step-text">No final aparece a barra com <strong>Imprimir, Compartilhar e Copiar</strong>. Pronto — é só levar pra lotérica ou jogar pelo aplicativo.</div>
+          <div class="tut-step-title">PASSO 3 — Escolher</div>
+          <div class="tut-step-text">Os jogos cortados ficam <strong>apagados</strong>. Nos que sobraram, toque em <code>+ Escolher</code>. No fim aparece a barra com <b>Imprimir, Compartilhar e Copiar</b>.</div>
+        </div>
+      </div>
+
+      <div class="tut-step">
+        <div class="tut-step-num" style="background:var(--warm)">↑</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Botão flutuante "↑ Filtros"</div>
+          <div class="tut-step-text">Se você rolar pra ver os jogos e quiser <strong>voltar pros filtros</strong>, toque no botão verde flutuante no canto da tela. Ele mostra quantos jogos estão visíveis (ex.: <code>7/10</code>).</div>
         </div>
       </div>
 
@@ -1494,6 +1608,13 @@ main{
     </div>
   </div>
 </div>
+
+<!-- Botão flutuante: aparece quando o pai rola além dos filtros -->
+<button id="fabFilters" class="fab-filters" type="button" aria-label="Voltar para os filtros">
+  <span class="fab-arrow" aria-hidden="true">↑</span>
+  <span>Filtros</span>
+  <span class="fab-count" id="fabCount">0/0</span>
+</button>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -2017,6 +2138,10 @@ function applyFiltersToUI(){
   var counter = $('filtersCounter');
   if (counter) counter.innerHTML = '<strong>' + visible + '</strong> de ' + allGames.length + ' visíveis';
 
+  // Atualiza contador no FAB
+  var fabCount = $('fabCount');
+  if (fabCount) fabCount.textContent = visible + '/' + allGames.length;
+
   // Empty state
   var emptyEl = $('filtersEmpty');
   if (emptyEl){
@@ -2209,19 +2334,48 @@ function bindTutorial(){
   });
 }
 
-function bindFiltersCta(){
-  var cta = $('filtersCta');
-  $('filtersCtaClose').addEventListener('click', function(e){
-    e.stopPropagation();
-    cta.classList.add('hidden');
+// FAB — botão flutuante "↑ Filtros" que aparece ao rolar além do painel
+function bindFabFilters(){
+  var fab = $('fabFilters');
+  if (!fab) return;
+  fab.addEventListener('click', function(){
+    var step = $('step2Banner');
+    var anchor = (step && !step.classList.contains('hidden')) ? step : $('filtersPanel');
+    if (anchor && anchor.scrollIntoView){
+      anchor.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
   });
-  cta.addEventListener('click', function(e){
-    if (e.target.id === 'filtersCtaClose') return;
-    openTutorial();
-  });
-  cta.addEventListener('keydown', function(e){
-    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openTutorial(); }
-  });
+
+  // Mostra o FAB quando o painel de filtros sai do viewport (rolando pra baixo).
+  // Esconde quando o painel está visível.
+  if (!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function(entries){
+    var panel = $('filtersPanel');
+    if (!panel || panel.classList.contains('hidden')){ fab.classList.remove('show'); return; }
+    entries.forEach(function(e){
+      // Só mostra se o painel está fora E o usuário rolou pra baixo (i.e., painel está acima da viewport)
+      var rect = panel.getBoundingClientRect();
+      var paneAbove = rect.bottom < 0;
+      if (paneAbove) fab.classList.add('show');
+      else fab.classList.remove('show');
+    });
+  }, { threshold:0 });
+  io.observe($('filtersPanel'));
+
+  // Fallback adicional: listener de scroll (caso IntersectionObserver vacile)
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var panel = $('filtersPanel');
+      if (!panel || panel.classList.contains('hidden')){ fab.classList.remove('show'); ticking = false; return; }
+      var rect = panel.getBoundingClientRect();
+      if (rect.bottom < 0) fab.classList.add('show');
+      else fab.classList.remove('show');
+      ticking = false;
+    });
+  }, { passive:true });
 }
 
 function bindFilters(){
@@ -2426,11 +2580,21 @@ function renderResults(games){
   applyFiltersToUI();
   updateSelectionUI();
 
-  // Mostra o banner de chegada e pulsa o painel pra chamar atenção
-  var cta = $('filtersCta');
-  if (cta) cta.classList.remove('hidden');
+  // Mostra os banners de PASSO 2 e PASSO 3 (só aparecem após geração)
+  var step2 = $('step2Banner');
+  var step3 = $('step3Banner');
+  if (step2){
+    step2.classList.remove('hidden');
+    step2.classList.add('active');
+    step2.classList.remove('pulsing');
+    void step2.offsetWidth;
+    step2.classList.add('pulsing');
+    setTimeout(function(){ step2.classList.remove('pulsing'); }, 3400);
+  }
+  if (step3) step3.classList.remove('hidden');
+
+  // Pulsa também o painel pra chamar atenção
   panel.classList.remove('just-arrived');
-  // reflow pra reiniciar a animação
   void panel.offsetWidth;
   panel.classList.add('just-arrived');
   setTimeout(function(){ panel.classList.remove('just-arrived'); }, 3400);
@@ -2497,7 +2661,7 @@ function wireUI(){
   loadFilters();
   bindFilters();
   bindTutorial();
-  bindFiltersCta();
+  bindFabFilters();
   bindSelectionBar();
   bindResultsClickDelegate();
 
@@ -2528,8 +2692,8 @@ function wireUI(){
       try {
         var games = generateBatch(mode, qty);
         renderResults(games);
-        showToast(games.length + ' jogos prontos · use os filtros abaixo 👇');
-        var anchor = $('filtersCta');
+        showToast(games.length + ' jogos prontos · PASSO 2 · filtrar 👇');
+        var anchor = $('step2Banner');
         if (!anchor || anchor.classList.contains('hidden')) anchor = $('filtersPanel');
         if (anchor && anchor.scrollIntoView){
           anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
