@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v97';
+    var V='lottobot-v98';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2037,40 +2037,40 @@
     .loteria-card.locked::after{content:'🔒';position:absolute;top:-2px;right:-2px;font-size:0.55rem}
     .ciclo-btn.active{background:var(--color-moss-primary)!important;color:#fff!important;border-color:var(--color-moss-primary)!important}
 
-    /* ═══ v97: Card de filtros (modo /pai, Lotofacil) ═══ */
-    .pai-filter-card{background:#fff;border:3px solid #007a3d;border-radius:14px;margin:8px 0 14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,122,61,.3);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-    .pai-filter-strip{background:linear-gradient(135deg,#007a3d,#00a651);color:#fff;text-align:center;padding:11px 14px;font-weight:900;font-size:.95rem;letter-spacing:.04em;border-bottom:2px solid #00622f;text-shadow:0 1px 2px rgba(0,0,0,.18)}
-    .pai-filter-body{padding:14px;color:#1a1a1a}
-    .pai-filter-counter{background:#f9fbf9;border:2px solid #00a651;border-radius:12px;padding:12px 14px;text-align:center;margin-bottom:12px}
-    .pai-filter-counter b{display:block;color:#007a3d;font-size:1.8rem;font-weight:900;line-height:1;margin-bottom:2px;font-variant-numeric:tabular-nums}
-    .pai-filter-counter small{display:block;color:#5a6a66;font-size:.78rem;margin-top:4px;line-height:1.35}
+    /* ═══ v98: Card de filtros — tema LottoBot (moss + gold, dark/light auto) ═══ */
+    .pai-filter-card{background:var(--bg-surface-1);border:1.5px solid var(--color-moss-primary);border-radius:14px;margin:8px 0 14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:inherit}
+    .pai-filter-strip{background:linear-gradient(135deg,var(--color-moss-primary) 0%,var(--color-gold-primary) 130%);color:#fff;text-align:center;padding:11px 14px;font-weight:800;font-size:.92rem;letter-spacing:.04em;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+    .pai-filter-body{padding:14px;color:var(--text-primary)}
+    .pai-filter-counter{background:var(--bg-surface-2);border:1.5px solid var(--color-gold-primary);border-radius:12px;padding:12px 14px;text-align:center;margin-bottom:12px}
+    .pai-filter-counter b{display:block;color:var(--color-gold-primary);font-size:1.8rem;font-weight:900;line-height:1;margin-bottom:2px;font-variant-numeric:tabular-nums}
+    .pai-filter-counter small{display:block;color:var(--text-muted);font-size:.78rem;margin-top:4px;line-height:1.35}
     .pai-preset-row{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
-    .pai-preset-btn{width:100%;padding:13px 14px;border-radius:10px;border:2px solid #e0e8e3;background:#fff;color:#1a1a1a;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit;min-height:46px;transition:all .15s}
-    .pai-preset-btn:hover{border-color:#00a651;color:#007a3d}
+    .pai-preset-btn{width:100%;padding:13px 14px;border-radius:10px;border:1.5px solid var(--border-default,rgba(255,255,255,0.08));background:var(--bg-surface-2);color:var(--text-primary);font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:46px;transition:all .15s}
+    .pai-preset-btn:hover{border-color:var(--color-moss-primary);color:var(--color-moss-primary)}
     .pai-preset-btn:active{transform:scale(.98)}
-    .pai-preset-btn.preset-best{background:linear-gradient(135deg,#00a651,#00c46a);color:#fff;border-color:#007a3d;box-shadow:0 4px 12px rgba(0,166,81,.35);font-size:1rem}
-    .pai-preset-btn.preset-best:hover{filter:brightness(1.05);color:#fff}
-    .pai-manual-details{background:#fff;border:1.5px solid #e0e8e3;border-radius:10px;margin-top:6px}
-    .pai-manual-details[open]{border-color:#00a651}
-    .pai-manual-summary{padding:11px 14px;font-weight:800;font-size:.92rem;color:#1a1a1a;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:44px}
+    .pai-preset-btn.preset-best{background:linear-gradient(135deg,var(--color-moss-primary),var(--color-gold-primary));color:#fff;border-color:var(--color-gold-primary);box-shadow:0 4px 12px rgba(212,168,83,.25);font-size:1rem;font-weight:800}
+    .pai-preset-btn.preset-best:hover{filter:brightness(1.08);color:#fff}
+    .pai-manual-details{background:var(--bg-surface-2);border:1.5px solid var(--border-default,rgba(255,255,255,0.06));border-radius:10px;margin-top:6px}
+    .pai-manual-details[open]{border-color:var(--color-moss-primary)}
+    .pai-manual-summary{padding:11px 14px;font-weight:700;font-size:.9rem;color:var(--text-primary);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:44px}
     .pai-manual-summary::-webkit-details-marker{display:none}
     .pai-manual-summary::marker{display:none}
-    .pai-manual-chev{color:#00a651;font-weight:900;font-size:1.1rem;transition:transform .25s}
+    .pai-manual-chev{color:var(--color-gold-primary);font-weight:900;font-size:1.1rem;transition:transform .25s}
     .pai-manual-details[open] .pai-manual-chev{transform:rotate(45deg)}
-    .pai-manual-body{padding:6px 14px 14px;border-top:1px dashed #e0e8e3;display:flex;flex-direction:column;gap:14px}
-    .pai-fg{padding-top:8px;border-top:1px solid #f0f4f1}
+    .pai-manual-body{padding:6px 14px 14px;border-top:1px dashed var(--border-default,rgba(255,255,255,0.08));display:flex;flex-direction:column;gap:14px}
+    .pai-fg{padding-top:8px;border-top:1px solid var(--border-default,rgba(255,255,255,0.05))}
     .pai-fg:first-child{border-top:0;padding-top:0}
-    .pai-fl{font-weight:800;font-size:.85rem;color:#1a1a1a;margin-bottom:8px}
-    .pai-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1.5px solid #e0e8e3;border-radius:999px;font-size:.85rem;cursor:pointer;background:#fff;margin:0 6px 6px 0;color:#1a1a1a;min-height:34px}
-    .pai-chip input{margin:0}
-    .pai-chip:has(input:checked){background:rgba(0,166,81,.1);border-color:#00a651;color:#007a3d;font-weight:700}
+    .pai-fl{font-weight:700;font-size:.84rem;color:var(--text-primary);margin-bottom:8px}
+    .pai-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1.5px solid var(--border-default,rgba(255,255,255,0.1));border-radius:999px;font-size:.84rem;cursor:pointer;background:var(--bg-surface-1);margin:0 6px 6px 0;color:var(--text-secondary);min-height:34px;transition:all .15s}
+    .pai-chip input{margin:0;accent-color:var(--color-moss-primary)}
+    .pai-chip:has(input:checked){background:var(--color-gold-dim);border-color:var(--color-gold-primary);color:var(--color-gold-primary);font-weight:700}
     .pai-fr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .pai-fr input{width:60px;padding:7px 8px;border:1.5px solid #e0e8e3;border-radius:8px;font-size:.9rem;text-align:center;font-variant-numeric:tabular-nums;color:#1a1a1a;background:#fff}
-    .pai-fr input:focus{outline:none;border-color:#00a651}
-    .pai-fr span{color:#5a6a66;font-size:.85rem}
-    .pai-fa{padding-top:10px;border-top:1px solid #f0f4f1;display:flex;justify-content:flex-end}
-    .pai-fc-btn{background:#fff;color:#5a6a66;border:1.5px solid #e0e8e3;padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit}
-    .pai-fc-btn:hover{border-color:#d63031;color:#d63031}
+    .pai-fr input{width:60px;padding:7px 8px;border:1.5px solid var(--border-default,rgba(255,255,255,0.1));border-radius:8px;font-size:.9rem;text-align:center;font-variant-numeric:tabular-nums;color:var(--text-primary);background:var(--bg-surface-1);font-family:inherit}
+    .pai-fr input:focus{outline:none;border-color:var(--color-moss-primary)}
+    .pai-fr span{color:var(--text-muted);font-size:.85rem}
+    .pai-fa{padding-top:10px;border-top:1px solid var(--border-default,rgba(255,255,255,0.06));display:flex;justify-content:flex-end}
+    .pai-fc-btn{background:transparent;color:var(--text-muted);border:1.5px solid var(--border-default,rgba(255,255,255,0.1));padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit}
+    .pai-fc-btn:hover{border-color:var(--color-ball-hot);color:var(--color-ball-hot)}
     .game-card.pai-filtered-out{opacity:.22;filter:grayscale(.65);pointer-events:none;transition:opacity .25s,filter .25s}
     @media(max-width:600px){
       .pai-filter-counter b{font-size:1.5rem}
