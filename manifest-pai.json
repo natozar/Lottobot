@@ -1,0 +1,32 @@
+{
+  "name": "Para você, pai 💚",
+  "short_name": "Pai 💚",
+  "description": "Gerador especial 4 fatores — feito com carinho",
+  "id": "/lottobot-pai",
+  "start_url": "/pai",
+  "scope": "/pai",
+  "display": "standalone",
+  "lang": "pt-BR",
+  "background_color": "#00a651",
+  "theme_color": "#00a651",
+  "orientation": "portrait",
+  "categories": ["games", "utilities"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
