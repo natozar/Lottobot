@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="pai-version" content="v91">
+<meta name="pai-version" content="v92">
 <title>Para você, pai · LottoBot</title>
 <meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. Feito com muito amor, pra você.">
 
@@ -57,15 +57,67 @@
 <link rel="icon" type="image/png" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
 
+<!-- v92: Captura GLOBAL de erros — antes de qualquer outro script -->
+<script>
+  (function(){
+    var KEY = 'paiErrors';
+    var MAX = 20;
+    function save(entry){
+      try {
+        var arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+        arr.unshift(entry);
+        if (arr.length > MAX) arr = arr.slice(0, MAX);
+        localStorage.setItem(KEY, JSON.stringify(arr));
+        // marca como nao-visto pra badge
+        localStorage.setItem('paiErrorsUnseen', '1');
+      } catch(e){}
+    }
+    window.addEventListener('error', function(ev){
+      save({
+        t: new Date().toISOString(),
+        type: 'error',
+        msg: ev.message || String(ev.error || ev),
+        src: (ev.filename || '') + ':' + (ev.lineno || '?') + ':' + (ev.colno || '?'),
+        stack: (ev.error && ev.error.stack) ? String(ev.error.stack).split('\n').slice(0,8).join('\n') : '',
+        url: location.pathname + location.search,
+        ua: (navigator.userAgent || '').substring(0, 200)
+      });
+    });
+    window.addEventListener('unhandledrejection', function(ev){
+      var r = ev.reason || {};
+      save({
+        t: new Date().toISOString(),
+        type: 'unhandledrejection',
+        msg: (r.message || String(r)).substring(0, 400),
+        src: '',
+        stack: (r.stack ? String(r.stack).split('\n').slice(0,8).join('\n') : ''),
+        url: location.pathname + location.search,
+        ua: (navigator.userAgent || '').substring(0, 200)
+      });
+    });
+    // expoe utilidade pro Renato copiar tudo
+    window.__paiErrorsExport = function(){
+      try { return localStorage.getItem(KEY) || '[]'; } catch(e){ return '[]'; }
+    };
+    window.__paiErrorsClear = function(){
+      try { localStorage.removeItem(KEY); localStorage.removeItem('paiErrorsUnseen'); } catch(e){}
+    };
+  })();
+</script>
+
 <!-- Firebase SDK pra auth unificada com admin -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
-  // Mesma config do app principal — garante mesma conta entre /pai e admin
+  // v92: authDomain = lottobot.com.br (mesmo domain do app) pra evitar
+  // storage partitioning quebrando o signInWithRedirect.
+  // Erro fix: 'Nao foi possivel processar a solicitacao devido a falta do estado inicial'
   firebase.initializeApp({
     apiKey:"AIzaSyAJ5GdmAKuBJQhHcbtn1dgN8Am5n--SJBo",
-    authDomain:"lottobot-8d75e.firebaseapp.com",
+    authDomain: location.hostname === 'lottobot.com.br' || location.hostname === 'www.lottobot.com.br'
+      ? location.hostname
+      : 'lottobot-8d75e.firebaseapp.com',
     projectId:"lottobot-8d75e",
     storageBucket:"lottobot-8d75e.firebasestorage.app",
     messagingSenderId:"764623255861",
@@ -541,6 +593,99 @@ main{
 .filters-panel:not(.has-games) .filters-header,
 .filters-panel:not(.has-games) .filters-status,
 .filters-panel:not(.has-games) .filters-body{display:none}
+
+/* v92: Badge de erros (canto inferior esquerdo) + viewer modal */
+.err-badge{
+  position:fixed;
+  left:12px;
+  bottom:calc(12px + env(safe-area-inset-bottom));
+  background:#d63031;
+  color:#fff;
+  border:0;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:.82rem;font-weight:700;
+  z-index:999998;
+  cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
+  box-shadow:0 4px 14px rgba(214,48,49,.45);
+  font-family:inherit;
+  animation:errBadgePulse 1.8s ease-in-out infinite;
+}
+@keyframes errBadgePulse{
+  0%,100%{box-shadow:0 4px 14px rgba(214,48,49,.45),0 0 0 0 rgba(214,48,49,.6)}
+  50%{box-shadow:0 4px 14px rgba(214,48,49,.45),0 0 0 10px rgba(214,48,49,0)}
+}
+.err-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.6);
+  z-index:999999;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+}
+.err-overlay.hidden{display:none}
+.err-card{
+  background:#fff;
+  border-radius:14px;
+  max-width:560px;width:100%;max-height:80dvh;
+  display:flex;flex-direction:column;
+  box-shadow:0 20px 50px rgba(0,0,0,.4);
+  overflow:hidden;
+}
+.err-head{
+  background:#d63031;color:#fff;
+  padding:14px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-weight:800;font-size:1rem;
+}
+.err-close{
+  background:rgba(255,255,255,.2);color:#fff;
+  border:0;border-radius:999px;
+  width:30px;height:30px;
+  cursor:pointer;font-size:1rem;
+}
+.err-body{
+  padding:14px;
+  overflow-y:auto;
+  flex:1;
+  font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:.78rem;line-height:1.4;
+  background:#fafaf7;
+}
+.err-entry{
+  background:#fff;
+  border-left:3px solid #d63031;
+  padding:10px 12px;
+  margin-bottom:10px;
+  border-radius:6px;
+  word-break:break-word;
+}
+.err-entry .err-t{color:#666;font-size:.72rem;margin-bottom:4px}
+.err-entry .err-msg{color:#d63031;font-weight:700;margin-bottom:4px}
+.err-entry .err-src{color:#0066cc;font-size:.72rem;margin-bottom:4px}
+.err-entry .err-stack{
+  color:#444;font-size:.7rem;
+  white-space:pre-wrap;
+  background:#f5f5f5;
+  padding:6px 8px;border-radius:4px;
+  margin-top:4px;
+}
+.err-foot{
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid #e6e6e6;
+  display:flex;gap:8px;
+  background:#fff;
+}
+.err-btn{
+  flex:1;background:#00a651;color:#fff;
+  border:0;border-radius:10px;
+  padding:11px 14px;font-weight:700;font-size:.88rem;
+  cursor:pointer;font-family:inherit;
+  min-height:42px;
+}
+.err-btn:hover{background:#007a3d}
+.err-btn-ghost{background:#fff;color:#666;border:1.5px solid #e6e6e6;flex:0 0 auto;padding:11px 16px}
+.err-btn-ghost:hover{border-color:#d63031;color:#d63031;background:#fff}
 
 /* Botão "↻ Gerar novos jogos" no topo do card — volta pros controles */
 .back-to-controls{
@@ -1466,7 +1611,7 @@ main{
       Gerador especial
       <small>4 fatores · Lotofácil</small>
     </div>
-    <button id="logoutBtn" class="logout-btn">← Voltar</button>
+    <button id="logoutBtn" class="logout-btn">Sair</button>
   </header>
 
   <main>
@@ -1874,6 +2019,22 @@ main{
   </div>
 </div>
 
+<!-- v92: Badge de erros capturados (canto inferior esquerdo) + viewer modal -->
+<button id="errBadge" class="err-badge hidden" type="button" aria-label="Ver erros capturados">⚠️ <span id="errBadgeCount">0</span></button>
+<div id="errOverlay" class="err-overlay hidden" role="dialog" aria-modal="true">
+  <div class="err-card">
+    <div class="err-head">
+      <span>⚠️ Erros capturados</span>
+      <button id="errClose" class="err-close" type="button" aria-label="Fechar">✕</button>
+    </div>
+    <div class="err-body" id="errBody"></div>
+    <div class="err-foot">
+      <button id="errCopy" class="err-btn" type="button">📋 Copiar tudo (JSON)</button>
+      <button id="errClear" class="err-btn err-btn-ghost" type="button">🗑️ Limpar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Botão flutuante: aparece quando o pai rola além dos filtros -->
 <button id="fabFilters" class="fab-filters" type="button" aria-label="Voltar para os filtros">
   <span class="fab-arrow" aria-hidden="true">↑</span>
@@ -2014,6 +2175,89 @@ function updateCountdown(){
   $('countdown').textContent = mm + ':' + (ss < 10 ? '0' + ss : ss);
 }
 
+// v92: Viewer de erros capturados (badge + modal)
+function setupErrorViewer(){
+  var badge = $('errBadge');
+  var overlay = $('errOverlay');
+  var body = $('errBody');
+  var btnCopy = $('errCopy');
+  var btnClear = $('errClear');
+  var btnClose = $('errClose');
+  var countEl = $('errBadgeCount');
+  if (!badge || !overlay) return;
+
+  function getErrors(){
+    try { return JSON.parse(localStorage.getItem('paiErrors') || '[]'); }
+    catch(e){ return []; }
+  }
+  function refreshBadge(){
+    var arr = getErrors();
+    if (countEl) countEl.textContent = arr.length;
+    if (arr.length > 0) badge.classList.remove('hidden');
+    else badge.classList.add('hidden');
+  }
+  function renderBody(){
+    var arr = getErrors();
+    if (arr.length === 0){
+      body.innerHTML = '<div style="text-align:center;color:#666;padding:20px">Nenhum erro capturado 🎉</div>';
+      return;
+    }
+    body.innerHTML = arr.map(function(e){
+      return '<div class="err-entry">'
+        + '<div class="err-t">' + (e.t || '') + ' · ' + (e.type || 'error') + '</div>'
+        + '<div class="err-msg">' + escapeHtml(e.msg || '') + '</div>'
+        + (e.src ? '<div class="err-src">' + escapeHtml(e.src) + '</div>' : '')
+        + (e.url ? '<div class="err-src">URL: ' + escapeHtml(e.url) + '</div>' : '')
+        + (e.stack ? '<div class="err-stack">' + escapeHtml(e.stack) + '</div>' : '')
+        + '</div>';
+    }).join('');
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+
+  badge.addEventListener('click', function(){
+    renderBody();
+    overlay.classList.remove('hidden');
+    try { localStorage.removeItem('paiErrorsUnseen'); } catch(e){}
+  });
+  btnClose.addEventListener('click', function(){ overlay.classList.add('hidden'); });
+  overlay.addEventListener('click', function(e){
+    if (e.target === overlay) overlay.classList.add('hidden');
+  });
+  btnCopy.addEventListener('click', function(){
+    var txt = JSON.stringify(getErrors(), null, 2);
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){
+        btnCopy.textContent = '✓ Copiado!';
+        setTimeout(function(){ btnCopy.textContent = '📋 Copiar tudo (JSON)'; }, 1500);
+      });
+    } else {
+      // fallback
+      var ta = document.createElement('textarea');
+      ta.value = txt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch(e){}
+      ta.remove();
+      btnCopy.textContent = '✓ Copiado!';
+      setTimeout(function(){ btnCopy.textContent = '📋 Copiar tudo (JSON)'; }, 1500);
+    }
+  });
+  btnClear.addEventListener('click', function(){
+    try {
+      localStorage.removeItem('paiErrors');
+      localStorage.removeItem('paiErrorsUnseen');
+    } catch(e){}
+    refreshBadge();
+    renderBody();
+  });
+
+  refreshBadge();
+  // re-check a cada 2s pra capturar novos
+  setInterval(refreshBadge, 2000);
+}
+
 // v91: Login com Google (mesma conta do admin) — com defesas robustas
 var ADMIN_EMAILS = ['chatsagrado@gmail.com'];
 
@@ -2108,7 +2352,8 @@ function setupAuthListener(){
         setGoogleMsg('✓ Logado como ' + email, false);
         var pin = $('pinScreen');
         if (pin && !pin.classList.contains('hidden')){
-          setTimeout(function(){ showWelcomeScreen(); }, 600);
+          // v92: pula Welcome direto pro Gerador
+          setTimeout(function(){ showAppAndBoot(); }, 600);
         }
       } else {
         setGoogleMsg('Conta ' + email + ' nao tem acesso /pai. Use PIN 0606.', true);
@@ -2125,7 +2370,8 @@ function handlePinSubmit(){
   var val = (input.value || '').trim();
   if (val === PIN){
     setUnlocked();
-    showWelcomeScreen();
+    // v92: pula Welcome — modo /pai acessa direto, sem fricao
+    showAppAndBoot();
     return;
   }
   var locked = bumpFailedAttempt();
@@ -3067,9 +3313,11 @@ function wireUI(){
   $('welcomeLogoutBtn').addEventListener('click', fullLogout);
   $('enterAppBtn').addEventListener('click', enterMainApp);
   $('enterGeneratorBtn').addEventListener('click', showAppAndBoot);
-  $('logoutBtn').addEventListener('click', backToWelcome);
+  // v92: logout completo (era backToWelcome — Welcome foi removido do fluxo)
+  $('logoutBtn').addEventListener('click', fullLogout);
 
   setupAuthListener();
+  setupErrorViewer();
 
   // v90: Card volta a viver DENTRO do #mainArea (em flow).
   // Quando PIN/Welcome estao visiveis, mainArea esta .hidden (display:none) e
@@ -3139,7 +3387,8 @@ function init(){
     safeRemove(KEY_ATTEMPTS);
   }
   if (isUnlocked()){
-    showWelcomeScreen();
+    // v92: modo /pai = acesso direto. Sem fricao de Welcome com 2 opcoes.
+    showAppAndBoot();
   } else {
     showPinScreen();
   }
