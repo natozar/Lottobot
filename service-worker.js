@@ -46,7 +46,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ══════ CACHE (existing functionality) ══════
-const CACHE_NAME = 'lottobot-v94';
+const CACHE_NAME = 'lottobot-v95';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -141,8 +141,16 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => {
-          return caches.match(request).then(c => c || caches.match('/index.html'));
+        .catch(async () => {
+          // v95: garante Response valido, nunca undefined
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          const fallback = await caches.match('/index.html');
+          if (fallback) return fallback;
+          return new Response('<h1>Offline</h1><p>Sem conexao agora.</p>', {
+            status: 503,
+            headers: { 'Content-Type': 'text/html; charset=utf-8' }
+          });
         })
     );
     return;
@@ -159,6 +167,6 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       });
-    }).catch(() => null)
+    }).catch(() => new Response('', { status: 504, statusText: 'Gateway Timeout' }))
   );
 });

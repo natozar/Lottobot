@@ -26,6 +26,9 @@ Erros em runtime também são capturados automaticamente no localStorage `paiErr
 | 6 | 2026-05-10 | PWA start_url apontava pra / | 🟢 fixed | v88 (manifest-pai.json) |
 | 7 | 2026-05-10 | Cache HTTP 1h em /pai | 🟢 fixed | v80 (regra explicita firebase.json) |
 | 8 | 2026-05-10 | Welcome com 2 opções era fricção pro pai | 🟢 fixed | v92 (pula Welcome — acesso direto) |
+| 9 | 2026-05-11 | redirect_uri_mismatch no Google login | 🟢 fixed | v93 (popup-only) |
+| 10 | 2026-05-11 | API loteriascaixa retorna array em /lotofacil mas código esperava objeto | 🟢 fixed | v95 (usar /lotofacil/latest + normalizeResp) |
+| 11 | 2026-05-11 | SW retornando null no fetch → 'Failed to convert value to Response' | 🟢 fixed | v95 (fallback Response sempre) |
 
 ---
 

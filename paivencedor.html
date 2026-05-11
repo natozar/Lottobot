@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="pai-version" content="v94">
+<meta name="pai-version" content="v95">
 <title>Para você, pai · LottoBot</title>
 <meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. Feito com muito amor, pra você.">
 
@@ -1572,7 +1572,7 @@ main{
     <button id="googleLoginBtn" class="pin-btn pin-btn-google" type="button">🔑 Entrar com Google</button>
     <p id="googleLoginMsg" class="pin-msg"></p>
     <p class="footer-love">feito com amor por seu filho 💚</p>
-    <p style="font-size:.65rem;color:#aaa;margin-top:8px;letter-spacing:.1em">v94 · pai mode</p>
+    <p style="font-size:.65rem;color:#aaa;margin-top:8px;letter-spacing:.1em">v95 · pai mode</p>
   </div>
 </div>
 
@@ -2440,8 +2440,11 @@ function fetchWithTimeout(url, ms){
   });
 }
 
-function fetchLatest(){ return fetchWithTimeout(API_BASE, FETCH_TIMEOUT_MS); }
+// v95: API retorna array no endpoint raiz / objeto em /latest. Usar /latest.
+function fetchLatest(){ return fetchWithTimeout(API_BASE + '/latest', FETCH_TIMEOUT_MS); }
 function fetchContest(id){ return fetchWithTimeout(API_BASE + '/' + id, FETCH_TIMEOUT_MS); }
+// Helper: aceita tanto objeto quanto array (pega [0])
+function normalizeResp(r){ return (r && r.length !== undefined && r[0]) ? r[0] : r; }
 
 function loadCachedData(){
   try {
@@ -2503,7 +2506,8 @@ function loadData(forceRefresh){
     }
   }
 
-  fetchLatest().then(function(latest){
+  fetchLatest().then(function(resp){
+    var latest = normalizeResp(resp);
     if (!latest || !latest.concurso || !latest.dezenas){
       throw new Error('resposta invalida');
     }
