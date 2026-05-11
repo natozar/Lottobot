@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v98';
+    var V='lottobot-v99';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2072,6 +2072,15 @@
     .pai-fc-btn{background:transparent;color:var(--text-muted);border:1.5px solid var(--border-default,rgba(255,255,255,0.1));padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit}
     .pai-fc-btn:hover{border-color:var(--color-ball-hot);color:var(--color-ball-hot)}
     .game-card.pai-filtered-out{opacity:.22;filter:grayscale(.65);pointer-events:none;transition:opacity .25s,filter .25s}
+    /* v99: Limite por linha/coluna — select nativo estilizado */
+    .pai-row-grid{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+    .pai-row-line{display:flex;align-items:center;gap:10px;background:var(--bg-surface-1);border:1px solid var(--border-default,rgba(255,255,255,0.06));border-radius:8px;padding:8px 10px;min-height:44px}
+    .pai-row-line:has(.pai-row-pick.set){background:var(--color-gold-dim);border-color:var(--color-gold-primary)}
+    .pai-row-lbl{flex:1;font-size:.85rem;font-weight:700;color:var(--text-primary);line-height:1.25}
+    .pai-row-lbl small{display:block;color:var(--text-muted);font-weight:500;font-size:.72rem;margin-top:1px}
+    .pai-row-pick{appearance:none;-webkit-appearance:none;-moz-appearance:none;background:var(--bg-surface-2);border:1.5px solid var(--border-default,rgba(255,255,255,0.1));border-radius:999px;padding:7px 28px 7px 12px;font-size:.88rem;font-weight:700;color:var(--text-primary);font-family:inherit;cursor:pointer;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23a1a1aa' d='M6 8L0 0h12z'/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:9px;min-width:110px;text-align:left}
+    .pai-row-pick:focus{outline:none;border-color:var(--color-moss-primary)}
+    .pai-row-pick.set{border-color:var(--color-gold-primary);background-color:var(--color-gold-dim);color:var(--color-gold-primary)}
     @media(max-width:600px){
       .pai-filter-counter b{font-size:1.5rem}
       .pai-preset-btn{font-size:.9rem;padding:11px}
@@ -2511,6 +2520,36 @@
                   <label class="pai-chip"><input type="checkbox" id="paiFNoEmptyCol"> Sem coluna vazia</label>
                   <label class="pai-chip"><input type="checkbox" id="paiFMaxRow4"> Nenhuma linha com 5</label>
                   <label class="pai-chip"><input type="checkbox" id="paiFMaxCol4"> Nenhuma coluna com 5</label>
+                </div>
+                <div class="pai-fg">
+                  <div class="pai-fl">📍 Limite por linha <small style="font-weight:500;color:var(--text-muted)">— máx de números em cada linha</small></div>
+                  <div class="pai-row-grid">
+                    <div class="pai-row-line"><span class="pai-row-lbl">Linha 1 <small>(1, 2, 3, 4, 5)</small></span>
+                      <select class="pai-row-pick" id="paiFRowMax1"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                    <div class="pai-row-line"><span class="pai-row-lbl">Linha 2 <small>(6, 7, 8, 9, 10)</small></span>
+                      <select class="pai-row-pick" id="paiFRowMax2"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                    <div class="pai-row-line"><span class="pai-row-lbl">Linha 3 <small>(11, 12, 13, 14, 15)</small></span>
+                      <select class="pai-row-pick" id="paiFRowMax3"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                    <div class="pai-row-line"><span class="pai-row-lbl">Linha 4 <small>(16, 17, 18, 19, 20)</small></span>
+                      <select class="pai-row-pick" id="paiFRowMax4"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                    <div class="pai-row-line"><span class="pai-row-lbl">Linha 5 <small>(21, 22, 23, 24, 25)</small></span>
+                      <select class="pai-row-pick" id="paiFRowMax5"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                  </div>
+                </div>
+                <div class="pai-fg">
+                  <div class="pai-fl">📍 Limite por coluna <small style="font-weight:500;color:var(--text-muted)">— máx em cada coluna</small></div>
+                  <div class="pai-row-grid">
+                    <div class="pai-row-line"><span class="pai-row-lbl">Coluna 1 <small>(1, 6, 11, 16, 21)</small></span>
+                      <select class="pai-row-pick" id="paiFColMax1"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                    <div class="pai-row-line"><span class="pai-row-lbl">Coluna 2 <small>(2, 7, 12, 17, 22)</small></span>
+                      <select class="pai-row-pick" id="paiFColMax2"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                    <div class="pai-row-line"><span class="pai-row-lbl">Coluna 3 <small>(3, 8, 13, 18, 23)</small></span>
+                      <select class="pai-row-pick" id="paiFColMax3"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                    <div class="pai-row-line"><span class="pai-row-lbl">Coluna 4 <small>(4, 9, 14, 19, 24)</small></span>
+                      <select class="pai-row-pick" id="paiFColMax4"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                    <div class="pai-row-line"><span class="pai-row-lbl">Coluna 5 <small>(5, 10, 15, 20, 25)</small></span>
+                      <select class="pai-row-pick" id="paiFColMax5"><option value="">livre</option><option value="4">máx 4</option><option value="3">máx 3</option><option value="2">máx 2</option><option value="1">máx 1</option><option value="0">nenhum</option></select></div>
+                  </div>
                 </div>
                 <div class="pai-fg">
                   <div class="pai-fl">🔢 Soma (comum 175-220)</div>
@@ -4701,7 +4740,8 @@ function renderJogos(){
 var paiFilters = paiDefaultFilters();
 function paiDefaultFilters(){
   return {noEmptyRow:false,noEmptyCol:false,maxRow4:false,maxCol4:false,seq3:false,seq4:false,
-    somaMin:null,somaMax:null,paresMin:null,paresMax:null,primosMin:null,primosMax:null,repsMin:null,repsMax:null};
+    somaMin:null,somaMax:null,paresMin:null,paresMax:null,primosMin:null,primosMax:null,repsMin:null,repsMax:null,
+    rowMax:[null,null,null,null,null],colMax:[null,null,null,null,null]};
 }
 function paiActive(){
   // Card so faz sentido pra Lotofacil + modo /pai + jogos gerados
@@ -4744,12 +4784,16 @@ function paiPasses(stats,reps,f){
   if(f.seq4 && stats.maxRun>4)return false;
   if(f.repsMin!=null && reps<f.repsMin)return false;
   if(f.repsMax!=null && reps>f.repsMax)return false;
+  if(f.rowMax){for(var r=0;r<5;r++)if(f.rowMax[r]!=null && stats.lines[r]>f.rowMax[r])return false}
+  if(f.colMax){for(var c=0;c<5;c++)if(f.colMax[c]!=null && stats.cols[c]>f.colMax[c])return false}
   return true;
 }
 function paiPresetBest(){return {noEmptyRow:true,noEmptyCol:true,maxRow4:false,maxCol4:false,seq3:false,seq4:true,
-  somaMin:175,somaMax:220,paresMin:6,paresMax:9,primosMin:4,primosMax:7,repsMin:8,repsMax:11}}
+  somaMin:175,somaMax:220,paresMin:6,paresMax:9,primosMin:4,primosMax:7,repsMin:8,repsMax:11,
+  rowMax:[null,null,null,null,null],colMax:[null,null,null,null,null]}}
 function paiPresetBalanced(){return {noEmptyRow:false,noEmptyCol:true,maxRow4:false,maxCol4:false,seq3:false,seq4:true,
-  somaMin:165,somaMax:230,paresMin:null,paresMax:null,primosMin:null,primosMax:null,repsMin:null,repsMax:null}}
+  somaMin:165,somaMax:230,paresMin:null,paresMax:null,primosMin:null,primosMax:null,repsMin:null,repsMax:null,
+  rowMax:[null,null,null,null,null],colMax:[null,null,null,null,null]}}
 function paiApplyPreset(name){
   if(name==='best')paiFilters=paiPresetBest();
   else if(name==='balanced')paiFilters=paiPresetBalanced();
@@ -4768,6 +4812,8 @@ function paiReadUI(){
   paiFilters.paresMin=pi('paiFParesMin');paiFilters.paresMax=pi('paiFParesMax');
   paiFilters.primosMin=pi('paiFPrimosMin');paiFilters.primosMax=pi('paiFPrimosMax');
   paiFilters.repsMin=pi('paiFRepsMin');paiFilters.repsMax=pi('paiFRepsMax');
+  paiFilters.rowMax=[pi('paiFRowMax1'),pi('paiFRowMax2'),pi('paiFRowMax3'),pi('paiFRowMax4'),pi('paiFRowMax5')];
+  paiFilters.colMax=[pi('paiFColMax1'),pi('paiFColMax2'),pi('paiFColMax3'),pi('paiFColMax4'),pi('paiFColMax5')];
 }
 function paiWriteUI(){
   document.getElementById('paiFNoEmptyRow').checked=!!paiFilters.noEmptyRow;
@@ -4781,6 +4827,14 @@ function paiWriteUI(){
   v('paiFParesMin',paiFilters.paresMin);v('paiFParesMax',paiFilters.paresMax);
   v('paiFPrimosMin',paiFilters.primosMin);v('paiFPrimosMax',paiFilters.primosMax);
   v('paiFRepsMin',paiFilters.repsMin);v('paiFRepsMax',paiFilters.repsMax);
+  var rm=paiFilters.rowMax||[null,null,null,null,null];
+  var cm=paiFilters.colMax||[null,null,null,null,null];
+  for(var k=0;k<5;k++){
+    var rEl=document.getElementById('paiFRowMax'+(k+1));
+    var cEl=document.getElementById('paiFColMax'+(k+1));
+    if(rEl)rEl.value=rm[k]!=null?String(rm[k]):'';
+    if(cEl)cEl.value=cm[k]!=null?String(cm[k]):'';
+  }
 }
 function paiApplyToUI(){
   var cards=document.querySelectorAll('#jogosContainer .game-card');
@@ -4797,6 +4851,13 @@ function paiApplyToUI(){
   }
   var counter=document.getElementById('paiFilterCount');
   if(counter)counter.textContent=visible+' de '+jogos.length;
+  // v99: marca selects ativos (.set) pra estilizacao gold
+  for(var k=0;k<5;k++){
+    var rEl=document.getElementById('paiFRowMax'+(k+1));
+    var cEl=document.getElementById('paiFColMax'+(k+1));
+    if(rEl)rEl.classList.toggle('set', rEl.value!=='');
+    if(cEl)cEl.classList.toggle('set', cEl.value!=='');
+  }
 }
 function paiClearFilters(){paiFilters=paiDefaultFilters();paiWriteUI();paiApplyToUI()}
 function paiShowOrHideCard(){
@@ -4812,6 +4873,15 @@ function paiBindFilters(){
   ['paiFSomaMin','paiFSomaMax','paiFParesMin','paiFParesMax','paiFPrimosMin','paiFPrimosMax','paiFRepsMin','paiFRepsMax'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.addEventListener('input',function(){paiReadUI();paiApplyToUI()});
   });
+  // v99: selects por linha/coluna
+  for(var k=1;k<=5;k++){
+    (function(idx){
+      var rEl=document.getElementById('paiFRowMax'+idx);
+      var cEl=document.getElementById('paiFColMax'+idx);
+      if(rEl)rEl.addEventListener('change',function(){paiReadUI();paiApplyToUI()});
+      if(cEl)cEl.addEventListener('change',function(){paiReadUI();paiApplyToUI()});
+    })(k);
+  }
   var presets=document.querySelectorAll('.pai-preset-btn');
   for(var i=0;i<presets.length;i++){
     (function(btn){btn.addEventListener('click',function(){paiApplyPreset(btn.getAttribute('data-pai-preset'))})})(presets[i]);
