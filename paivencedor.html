@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="pai-version" content="v95">
+<meta name="pai-version" content="v96">
 <title>Para você, pai · LottoBot</title>
 <meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. Feito com muito amor, pra você.">
 
@@ -1572,7 +1572,7 @@ main{
     <button id="googleLoginBtn" class="pin-btn pin-btn-google" type="button">🔑 Entrar com Google</button>
     <p id="googleLoginMsg" class="pin-msg"></p>
     <p class="footer-love">feito com amor por seu filho 💚</p>
-    <p style="font-size:.65rem;color:#aaa;margin-top:8px;letter-spacing:.1em">v95 · pai mode</p>
+    <p style="font-size:.65rem;color:#aaa;margin-top:8px;letter-spacing:.1em">v96 · pai mode</p>
   </div>
 </div>
 
@@ -1618,7 +1618,7 @@ main{
       Gerador especial
       <small>4 fatores · Lotofácil</small>
     </div>
-    <button id="logoutBtn" class="logout-btn">Sair</button>
+    <button id="logoutBtn" class="logout-btn">← Voltar</button>
   </header>
 
   <main>
@@ -2124,6 +2124,13 @@ function setUnlocked(){
   safeSet(KEY_UNLOCKED, '1');
   safeRemove(KEY_ATTEMPTS);
   safeRemove(KEY_LOCKOUT);
+  // v96: tambem seta paiVencedor_grant — ativa modo /pai no LOTTOBOT
+  // (isPaiVencedor() em index.html linha 2968 checa essa flag pra
+  // habilitar cartelas visuais, plano Ultra, etc).
+  try {
+    localStorage.setItem(KEY_GRANT, 'true');
+    localStorage.setItem(KEY_GRANT_DATE, new Date().toISOString());
+  } catch(e){}
 }
 function clearUnlock(){ safeRemove(KEY_UNLOCKED); }
 
@@ -2359,12 +2366,12 @@ function setupAuthListener(){
       var isAdmin = ADMIN_EMAILS.indexOf(email) !== -1;
       if (window.console && console.info) console.info('[pai/v91] auth state · email=' + email + ' · isAdmin=' + isAdmin);
       if (isAdmin){
-        setUnlocked();
+        setUnlocked();  // ja seta paiGrant tb (v96)
         setGoogleMsg('✓ Logado como ' + email, false);
         var pin = $('pinScreen');
         if (pin && !pin.classList.contains('hidden')){
-          // v92: pula Welcome direto pro Gerador
-          setTimeout(function(){ showAppAndBoot(); }, 600);
+          // v96: volta o Welcome com 2 opcoes — LottoBot completo OU Gerador especial
+          setTimeout(function(){ showWelcomeScreen(); }, 600);
         }
       } else {
         setGoogleMsg('Conta ' + email + ' nao tem acesso /pai. Use PIN 0606.', true);
@@ -2376,15 +2383,16 @@ function setupAuthListener(){
 }
 
 function handlePinSubmit(){
-  if (window.console) console.info('[pai/v94] handlePinSubmit chamado');
+  if (window.console) console.info('[pai/v96] handlePinSubmit chamado');
   var input = $('pinInput');
   var msg = $('pinMsg');
   var val = (input.value || '').trim();
-  if (window.console) console.info('[pai/v94] PIN value len=' + val.length + ' · esperado=' + PIN.length);
+  if (window.console) console.info('[pai/v96] PIN value len=' + val.length + ' · esperado=' + PIN.length);
   if (val === PIN){
-    if (window.console) console.info('[pai/v94] PIN CORRETO — setUnlocked + showAppAndBoot');
-    setUnlocked();
-    showAppAndBoot();
+    if (window.console) console.info('[pai/v96] PIN CORRETO — setUnlocked + showWelcomeScreen');
+    setUnlocked();  // ja seta paiGrant tb (v96)
+    // v96: volta o Welcome com escolha LottoBot vs Gerador especial
+    showWelcomeScreen();
     return;
   }
   var locked = bumpFailedAttempt();
@@ -3330,8 +3338,8 @@ function wireUI(){
   $('welcomeLogoutBtn').addEventListener('click', fullLogout);
   $('enterAppBtn').addEventListener('click', enterMainApp);
   $('enterGeneratorBtn').addEventListener('click', showAppAndBoot);
-  // v92: logout completo (era backToWelcome — Welcome foi removido do fluxo)
-  $('logoutBtn').addEventListener('click', fullLogout);
+  // v96: volta pro Welcome (escolha LottoBot completo ou Gerador especial)
+  $('logoutBtn').addEventListener('click', backToWelcome);
 
   setupAuthListener();
   setupErrorViewer();
@@ -3411,10 +3419,10 @@ function init(){
     safeRemove(KEY_ATTEMPTS);
   }
   if (isUnlocked()){
-    if (window.console) console.info('[pai/v94] ja unlocked — showAppAndBoot direto');
-    showAppAndBoot();
+    if (window.console) console.info('[pai/v96] ja unlocked — showWelcomeScreen');
+    showWelcomeScreen();  // v96: volta o Welcome
   } else {
-    if (window.console) console.info('[pai/v94] nao unlocked — showPinScreen');
+    if (window.console) console.info('[pai/v96] nao unlocked — showPinScreen');
     showPinScreen();
   }
 }
