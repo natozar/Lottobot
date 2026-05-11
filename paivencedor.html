@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="pai-version" content="v92">
+<meta name="pai-version" content="v93">
 <title>Para você, pai · LottoBot</title>
 <meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. Feito com muito amor, pra você.">
 
@@ -110,14 +110,15 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
-  // v92: authDomain = lottobot.com.br (mesmo domain do app) pra evitar
-  // storage partitioning quebrando o signInWithRedirect.
-  // Erro fix: 'Nao foi possivel processar a solicitacao devido a falta do estado inicial'
+  // v93: authDomain = firebaseapp.com (default Firebase, redirect_uri OK).
+  // Auth flow agora SEMPRE via popup — popups nao precisam compartilhar
+  // sessionStorage entre origins (a janela principal mantem estado, handler
+  // so retorna via postMessage). Resolve simultaneamente:
+  //   - redirect_uri_mismatch (handler em firebaseapp.com esta registrado)
+  //   - storage partitioning (popup nao depende de cross-origin storage)
   firebase.initializeApp({
     apiKey:"AIzaSyAJ5GdmAKuBJQhHcbtn1dgN8Am5n--SJBo",
-    authDomain: location.hostname === 'lottobot.com.br' || location.hostname === 'www.lottobot.com.br'
-      ? location.hostname
-      : 'lottobot-8d75e.firebaseapp.com',
+    authDomain:"lottobot-8d75e.firebaseapp.com",
     projectId:"lottobot-8d75e",
     storageBucket:"lottobot-8d75e.firebasestorage.app",
     messagingSenderId:"764623255861",
@@ -2280,35 +2281,39 @@ function setGoogleMsg(text, isError){
 
 function handleGoogleLogin(){
   if (!firebaseReady()){
-    setGoogleMsg('Login Google indisponível agora. Use o PIN 0606.', true);
-    if (window.console && console.error) console.error('[pai/v91] firebase nao carregou — usar PIN');
+    setGoogleMsg('Login Google indisponivel. Use o PIN 0606.', true);
     return;
   }
   setGoogleMsg('Abrindo Google…', false);
   try {
     var provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    // Mobile: redirect (popups são bloqueados). Desktop: popup (mais confiável, sem cross-domain).
-    if (isMobile()){
-      firebase.auth().signInWithRedirect(provider);
-    } else {
-      firebase.auth().signInWithPopup(provider)
-        .then(function(result){
-          if (window.console && console.info) console.info('[pai/v91] popup OK:', result.user && result.user.email);
-        })
-        .catch(function(e){
-          var msg = '[' + (e.code || '?') + '] ' + (e.message || 'erro desconhecido');
-          if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user'){
-            // fallback pra redirect se popup bloqueado
-            try { firebase.auth().signInWithRedirect(provider); return; } catch(_){}
-          }
-          setGoogleMsg('Falha: ' + msg + ' — pode usar PIN 0606', true);
-          if (window.console && console.error) console.error('[pai/v91] popup error:', e);
-        });
-    }
+    // v93: SEMPRE popup. Popup nao precisa cross-origin storage e nao depende
+    // de redirect_uri match no Google Cloud Console (so usa firebaseapp.com
+    // handler que ja eh autorizado por padrao).
+    firebase.auth().signInWithPopup(provider)
+      .then(function(result){
+        if (window.console && console.info) console.info('[pai/v93] popup OK:', result.user && result.user.email);
+        // onAuthStateChanged ja trata o setUnlocked + showAppAndBoot
+      })
+      .catch(function(e){
+        var code = e.code || '?';
+        var msg;
+        if (code === 'auth/popup-blocked'){
+          msg = 'Seu navegador bloqueou o popup. Permita popups pra esta pagina, ou use o PIN 0606.';
+        } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request'){
+          msg = 'Popup fechado. Tente de novo ou use o PIN 0606.';
+        } else if (code === 'auth/unauthorized-domain'){
+          msg = 'Dominio nao autorizado no Firebase Console. Use o PIN 0606.';
+        } else {
+          msg = '[' + code + '] ' + (e.message || 'erro') + ' — use PIN 0606';
+        }
+        setGoogleMsg(msg, true);
+        if (window.console && console.error) console.error('[pai/v93] popup error:', e);
+      });
   } catch(e){
-    setGoogleMsg('Erro ao iniciar login: ' + (e.message || e) + ' — use PIN 0606', true);
-    if (window.console && console.error) console.error('[pai/v91] handleGoogleLogin:', e);
+    setGoogleMsg('Erro: ' + (e.message || e) + ' — use PIN 0606', true);
+    if (window.console && console.error) console.error('[pai/v93] handleGoogleLogin:', e);
   }
 }
 
