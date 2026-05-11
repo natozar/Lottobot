@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="pai-version" content="v93">
+<meta name="pai-version" content="v94">
 <title>Para você, pai · LottoBot</title>
 <meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. Feito com muito amor, pra você.">
 
@@ -110,20 +110,25 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
-  // v93: authDomain = firebaseapp.com (default Firebase, redirect_uri OK).
-  // Auth flow agora SEMPRE via popup — popups nao precisam compartilhar
-  // sessionStorage entre origins (a janela principal mantem estado, handler
-  // so retorna via postMessage). Resolve simultaneamente:
-  //   - redirect_uri_mismatch (handler em firebaseapp.com esta registrado)
-  //   - storage partitioning (popup nao depende de cross-origin storage)
-  firebase.initializeApp({
-    apiKey:"AIzaSyAJ5GdmAKuBJQhHcbtn1dgN8Am5n--SJBo",
-    authDomain:"lottobot-8d75e.firebaseapp.com",
-    projectId:"lottobot-8d75e",
-    storageBucket:"lottobot-8d75e.firebasestorage.app",
-    messagingSenderId:"764623255861",
-    appId:"1:764623255861:web:0e741825f6316f0be3347c"
-  });
+  // v94: Firebase init dentro de try/catch — se Firebase nao carregar (rede,
+  // ad blocker), o resto do app ainda funciona com PIN 0606.
+  try {
+    if (typeof firebase !== 'undefined' && firebase.initializeApp){
+      firebase.initializeApp({
+        apiKey:"AIzaSyAJ5GdmAKuBJQhHcbtn1dgN8Am5n--SJBo",
+        authDomain:"lottobot-8d75e.firebaseapp.com",
+        projectId:"lottobot-8d75e",
+        storageBucket:"lottobot-8d75e.firebasestorage.app",
+        messagingSenderId:"764623255861",
+        appId:"1:764623255861:web:0e741825f6316f0be3347c"
+      });
+      console.info('[pai/v94] Firebase init OK');
+    } else {
+      console.warn('[pai/v94] Firebase SDK nao carregou — PIN 0606 funciona normal');
+    }
+  } catch(e){
+    console.error('[pai/v94] Firebase init erro:', e);
+  }
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1567,6 +1572,7 @@ main{
     <button id="googleLoginBtn" class="pin-btn pin-btn-google" type="button">🔑 Entrar com Google</button>
     <p id="googleLoginMsg" class="pin-msg"></p>
     <p class="footer-love">feito com amor por seu filho 💚</p>
+    <p style="font-size:.65rem;color:#aaa;margin-top:8px;letter-spacing:.1em">v94 · pai mode</p>
   </div>
 </div>
 
@@ -2370,12 +2376,14 @@ function setupAuthListener(){
 }
 
 function handlePinSubmit(){
+  if (window.console) console.info('[pai/v94] handlePinSubmit chamado');
   var input = $('pinInput');
   var msg = $('pinMsg');
   var val = (input.value || '').trim();
+  if (window.console) console.info('[pai/v94] PIN value len=' + val.length + ' · esperado=' + PIN.length);
   if (val === PIN){
+    if (window.console) console.info('[pai/v94] PIN CORRETO — setUnlocked + showAppAndBoot');
     setUnlocked();
-    // v92: pula Welcome — modo /pai acessa direto, sem fricao
     showAppAndBoot();
     return;
   }
@@ -3381,9 +3389,16 @@ function wireUI(){
 
 // ============ BOOT ============
 function init(){
-  wireUI();
+  if (window.console) console.info('[pai/v94] init() inicio');
+  try {
+    wireUI();
+    if (window.console) console.info('[pai/v94] wireUI OK');
+  } catch(e){
+    if (window.console) console.error('[pai/v94] wireUI ERRO:', e);
+  }
   var lockUntil = getLockoutUntil();
   if (lockUntil > Date.now()){
+    if (window.console) console.info('[pai/v94] lockout ativo — showLockoutScreen');
     showLockoutScreen();
     return;
   }
@@ -3392,9 +3407,10 @@ function init(){
     safeRemove(KEY_ATTEMPTS);
   }
   if (isUnlocked()){
-    // v92: modo /pai = acesso direto. Sem fricao de Welcome com 2 opcoes.
+    if (window.console) console.info('[pai/v94] ja unlocked — showAppAndBoot direto');
     showAppAndBoot();
   } else {
+    if (window.console) console.info('[pai/v94] nao unlocked — showPinScreen');
     showPinScreen();
   }
 }
