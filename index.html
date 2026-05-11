@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v96';
+    var V='lottobot-v97';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2036,6 +2036,46 @@
     .loteria-card.locked{opacity:0.35;position:relative}
     .loteria-card.locked::after{content:'🔒';position:absolute;top:-2px;right:-2px;font-size:0.55rem}
     .ciclo-btn.active{background:var(--color-moss-primary)!important;color:#fff!important;border-color:var(--color-moss-primary)!important}
+
+    /* ═══ v97: Card de filtros (modo /pai, Lotofacil) ═══ */
+    .pai-filter-card{background:#fff;border:3px solid #007a3d;border-radius:14px;margin:8px 0 14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,122,61,.3);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+    .pai-filter-strip{background:linear-gradient(135deg,#007a3d,#00a651);color:#fff;text-align:center;padding:11px 14px;font-weight:900;font-size:.95rem;letter-spacing:.04em;border-bottom:2px solid #00622f;text-shadow:0 1px 2px rgba(0,0,0,.18)}
+    .pai-filter-body{padding:14px;color:#1a1a1a}
+    .pai-filter-counter{background:#f9fbf9;border:2px solid #00a651;border-radius:12px;padding:12px 14px;text-align:center;margin-bottom:12px}
+    .pai-filter-counter b{display:block;color:#007a3d;font-size:1.8rem;font-weight:900;line-height:1;margin-bottom:2px;font-variant-numeric:tabular-nums}
+    .pai-filter-counter small{display:block;color:#5a6a66;font-size:.78rem;margin-top:4px;line-height:1.35}
+    .pai-preset-row{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+    .pai-preset-btn{width:100%;padding:13px 14px;border-radius:10px;border:2px solid #e0e8e3;background:#fff;color:#1a1a1a;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit;min-height:46px;transition:all .15s}
+    .pai-preset-btn:hover{border-color:#00a651;color:#007a3d}
+    .pai-preset-btn:active{transform:scale(.98)}
+    .pai-preset-btn.preset-best{background:linear-gradient(135deg,#00a651,#00c46a);color:#fff;border-color:#007a3d;box-shadow:0 4px 12px rgba(0,166,81,.35);font-size:1rem}
+    .pai-preset-btn.preset-best:hover{filter:brightness(1.05);color:#fff}
+    .pai-manual-details{background:#fff;border:1.5px solid #e0e8e3;border-radius:10px;margin-top:6px}
+    .pai-manual-details[open]{border-color:#00a651}
+    .pai-manual-summary{padding:11px 14px;font-weight:800;font-size:.92rem;color:#1a1a1a;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:44px}
+    .pai-manual-summary::-webkit-details-marker{display:none}
+    .pai-manual-summary::marker{display:none}
+    .pai-manual-chev{color:#00a651;font-weight:900;font-size:1.1rem;transition:transform .25s}
+    .pai-manual-details[open] .pai-manual-chev{transform:rotate(45deg)}
+    .pai-manual-body{padding:6px 14px 14px;border-top:1px dashed #e0e8e3;display:flex;flex-direction:column;gap:14px}
+    .pai-fg{padding-top:8px;border-top:1px solid #f0f4f1}
+    .pai-fg:first-child{border-top:0;padding-top:0}
+    .pai-fl{font-weight:800;font-size:.85rem;color:#1a1a1a;margin-bottom:8px}
+    .pai-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1.5px solid #e0e8e3;border-radius:999px;font-size:.85rem;cursor:pointer;background:#fff;margin:0 6px 6px 0;color:#1a1a1a;min-height:34px}
+    .pai-chip input{margin:0}
+    .pai-chip:has(input:checked){background:rgba(0,166,81,.1);border-color:#00a651;color:#007a3d;font-weight:700}
+    .pai-fr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .pai-fr input{width:60px;padding:7px 8px;border:1.5px solid #e0e8e3;border-radius:8px;font-size:.9rem;text-align:center;font-variant-numeric:tabular-nums;color:#1a1a1a;background:#fff}
+    .pai-fr input:focus{outline:none;border-color:#00a651}
+    .pai-fr span{color:#5a6a66;font-size:.85rem}
+    .pai-fa{padding-top:10px;border-top:1px solid #f0f4f1;display:flex;justify-content:flex-end}
+    .pai-fc-btn{background:#fff;color:#5a6a66;border:1.5px solid #e0e8e3;padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit}
+    .pai-fc-btn:hover{border-color:#d63031;color:#d63031}
+    .game-card.pai-filtered-out{opacity:.22;filter:grayscale(.65);pointer-events:none;transition:opacity .25s,filter .25s}
+    @media(max-width:600px){
+      .pai-filter-counter b{font-size:1.5rem}
+      .pai-preset-btn{font-size:.9rem;padding:11px}
+    }
   </style>
 </head>
 <body>
@@ -2449,6 +2489,55 @@
       </div>
 
       <div id="tabJogos" class="tab-content active" role="tabpanel" aria-label="Jogos gerados">
+        <!-- v97: Card de filtros (modo /pai, Lotofácil) — aparece após gerar jogos -->
+        <div id="paiFilterCard" class="pai-filter-card" style="display:none">
+          <div class="pai-filter-strip">🎯 ESCOLHER OS MELHORES JOGOS</div>
+          <div class="pai-filter-body">
+            <div class="pai-filter-counter">
+              <b id="paiFilterCount">— de —</b> jogos visíveis
+              <small>Só esses entram em Copiar, WhatsApp, PDF e Card.</small>
+            </div>
+            <div class="pai-preset-row">
+              <button class="pai-preset-btn pai-preset-best" data-pai-preset="best" type="button">⭐ Recomendado</button>
+              <button class="pai-preset-btn" data-pai-preset="balanced" type="button">⚖️ Mais aberto</button>
+              <button class="pai-preset-btn" data-pai-preset="clear" type="button">🎲 Mostrar tudo</button>
+            </div>
+            <details class="pai-manual-details">
+              <summary class="pai-manual-summary">✏️ Ajustar filtros manualmente <span class="pai-manual-chev">+</span></summary>
+              <div class="pai-manual-body">
+                <div class="pai-fg">
+                  <div class="pai-fl">📐 Linhas e colunas</div>
+                  <label class="pai-chip"><input type="checkbox" id="paiFNoEmptyRow"> Sem linha vazia</label>
+                  <label class="pai-chip"><input type="checkbox" id="paiFNoEmptyCol"> Sem coluna vazia</label>
+                  <label class="pai-chip"><input type="checkbox" id="paiFMaxRow4"> Nenhuma linha com 5</label>
+                  <label class="pai-chip"><input type="checkbox" id="paiFMaxCol4"> Nenhuma coluna com 5</label>
+                </div>
+                <div class="pai-fg">
+                  <div class="pai-fl">🔢 Soma (comum 175-220)</div>
+                  <div class="pai-fr"><input type="number" id="paiFSomaMin" placeholder="mín" inputmode="numeric"><span>até</span><input type="number" id="paiFSomaMax" placeholder="máx" inputmode="numeric"></div>
+                </div>
+                <div class="pai-fg">
+                  <div class="pai-fl">⚖️ Pares (comum 6-9)</div>
+                  <div class="pai-fr"><input type="number" id="paiFParesMin" placeholder="mín" inputmode="numeric"><span>até</span><input type="number" id="paiFParesMax" placeholder="máx" inputmode="numeric"></div>
+                </div>
+                <div class="pai-fg">
+                  <div class="pai-fl">✨ Primos (comum 4-7)</div>
+                  <div class="pai-fr"><input type="number" id="paiFPrimosMin" placeholder="mín" inputmode="numeric"><span>até</span><input type="number" id="paiFPrimosMax" placeholder="máx" inputmode="numeric"></div>
+                </div>
+                <div class="pai-fg">
+                  <div class="pai-fl">🔗 Sequências</div>
+                  <label class="pai-chip"><input type="checkbox" id="paiFSeq3"> Máx 3 em sequência</label>
+                  <label class="pai-chip"><input type="checkbox" id="paiFSeq4"> Máx 4 em sequência</label>
+                </div>
+                <div class="pai-fg">
+                  <div class="pai-fl">🔁 Repetidos do último (comum 8-11)</div>
+                  <div class="pai-fr"><input type="number" id="paiFRepsMin" placeholder="mín" inputmode="numeric"><span>até</span><input type="number" id="paiFRepsMax" placeholder="máx" inputmode="numeric"></div>
+                </div>
+                <div class="pai-fa"><button id="paiFClear" class="pai-fc-btn" type="button">Limpar tudo</button></div>
+              </div>
+            </details>
+          </div>
+        </div>
         <div id="jogosContainer"></div>
         <div id="emptyState" class="show">
           <div style="font-size: 2.5rem; opacity: 0.15; margin-bottom: 8px;">🎲</div>
@@ -4575,7 +4664,7 @@ function renderCartela(j){
 function renderJogos(){
   const c=document.getElementById('jogosContainer'),e=document.getElementById('emptyState'),b=document.getElementById('exportBar');
   if(!c)return;
-  if(!jogos.length){c.innerHTML='';if(e)e.classList.add('show');if(b)b.classList.remove('show');return}
+  if(!jogos.length){c.innerHTML='';if(e)e.classList.add('show');if(b)b.classList.remove('show');if(typeof paiShowOrHideCard==='function')paiShowOrHideCard();return}
   if(e)e.classList.remove('show');if(b)b.classList.add('show');
   const cnt=document.getElementById('exportCount'),ref=document.getElementById('exportRef');
   if(cnt)cnt.textContent=jogos.length+' jogos';
@@ -4604,7 +4693,135 @@ function renderJogos(){
         <button class="btn-action" onclick="shareGame(${i})">💬 Enviar</button>
       </div>
     </div>`}).join('');
+  // v97: mostrar/esconder o card de filtros + aplicar filtros
+  if(typeof paiShowOrHideCard==='function'){paiShowOrHideCard();if(typeof paiApplyToUI==='function'&&paiActive())paiApplyToUI()}
 }
+
+// ══════ v97: PAI FILTER CARD (Lotofacil) ══════
+var paiFilters = paiDefaultFilters();
+function paiDefaultFilters(){
+  return {noEmptyRow:false,noEmptyCol:false,maxRow4:false,maxCol4:false,seq3:false,seq4:false,
+    somaMin:null,somaMax:null,paresMin:null,paresMax:null,primosMin:null,primosMax:null,repsMin:null,repsMax:null};
+}
+function paiActive(){
+  // Card so faz sentido pra Lotofacil + modo /pai + jogos gerados
+  return selectedLottery==='lotofacil' && isPaiVencedor() && jogos && jogos.length>0;
+}
+function paiStats(g){
+  var sorted=g.slice().sort(function(a,b){return a-b});
+  var pares=0,primos=0,soma=0,maxRun=1,run=1;
+  var lines=[0,0,0,0,0],cols=[0,0,0,0,0];
+  var primos9={2:1,3:1,5:1,7:1,11:1,13:1,17:1,19:1,23:1};
+  for(var i=0;i<sorted.length;i++){
+    var n=sorted[i];
+    soma+=n;
+    if(n%2===0)pares++;
+    if(primos9[n])primos++;
+    lines[Math.ceil(n/5)-1]++;
+    cols[((n-1)%5)]++;
+    if(i>0){
+      if(sorted[i]===sorted[i-1]+1){run++;if(run>maxRun)maxRun=run}else run=1;
+    }
+  }
+  return {pares:pares,primos:primos,soma:soma,maxRun:maxRun,lines:lines,cols:cols};
+}
+function paiRepsCount(g){
+  if(!ULT||!ULT.numeros)return 0;
+  var c=0;for(var i=0;i<g.length;i++)if(ULT.numeros.indexOf(g[i])!==-1)c++;return c;
+}
+function paiPasses(stats,reps,f){
+  if(f.noEmptyRow && stats.lines.indexOf(0)!==-1)return false;
+  if(f.noEmptyCol && stats.cols.indexOf(0)!==-1)return false;
+  if(f.maxRow4){for(var i=0;i<5;i++)if(stats.lines[i]>4)return false}
+  if(f.maxCol4){for(var j=0;j<5;j++)if(stats.cols[j]>4)return false}
+  if(f.somaMin!=null && stats.soma<f.somaMin)return false;
+  if(f.somaMax!=null && stats.soma>f.somaMax)return false;
+  if(f.paresMin!=null && stats.pares<f.paresMin)return false;
+  if(f.paresMax!=null && stats.pares>f.paresMax)return false;
+  if(f.primosMin!=null && stats.primos<f.primosMin)return false;
+  if(f.primosMax!=null && stats.primos>f.primosMax)return false;
+  if(f.seq3 && stats.maxRun>3)return false;
+  if(f.seq4 && stats.maxRun>4)return false;
+  if(f.repsMin!=null && reps<f.repsMin)return false;
+  if(f.repsMax!=null && reps>f.repsMax)return false;
+  return true;
+}
+function paiPresetBest(){return {noEmptyRow:true,noEmptyCol:true,maxRow4:false,maxCol4:false,seq3:false,seq4:true,
+  somaMin:175,somaMax:220,paresMin:6,paresMax:9,primosMin:4,primosMax:7,repsMin:8,repsMax:11}}
+function paiPresetBalanced(){return {noEmptyRow:false,noEmptyCol:true,maxRow4:false,maxCol4:false,seq3:false,seq4:true,
+  somaMin:165,somaMax:230,paresMin:null,paresMax:null,primosMin:null,primosMax:null,repsMin:null,repsMax:null}}
+function paiApplyPreset(name){
+  if(name==='best')paiFilters=paiPresetBest();
+  else if(name==='balanced')paiFilters=paiPresetBalanced();
+  else paiFilters=paiDefaultFilters();
+  paiWriteUI();paiApplyToUI();
+}
+function paiReadUI(){
+  paiFilters.noEmptyRow=document.getElementById('paiFNoEmptyRow').checked;
+  paiFilters.noEmptyCol=document.getElementById('paiFNoEmptyCol').checked;
+  paiFilters.maxRow4=document.getElementById('paiFMaxRow4').checked;
+  paiFilters.maxCol4=document.getElementById('paiFMaxCol4').checked;
+  paiFilters.seq3=document.getElementById('paiFSeq3').checked;
+  paiFilters.seq4=document.getElementById('paiFSeq4').checked;
+  var pi=function(id){var v=document.getElementById(id).value.trim();if(!v)return null;var n=parseInt(v,10);return isNaN(n)?null:n};
+  paiFilters.somaMin=pi('paiFSomaMin');paiFilters.somaMax=pi('paiFSomaMax');
+  paiFilters.paresMin=pi('paiFParesMin');paiFilters.paresMax=pi('paiFParesMax');
+  paiFilters.primosMin=pi('paiFPrimosMin');paiFilters.primosMax=pi('paiFPrimosMax');
+  paiFilters.repsMin=pi('paiFRepsMin');paiFilters.repsMax=pi('paiFRepsMax');
+}
+function paiWriteUI(){
+  document.getElementById('paiFNoEmptyRow').checked=!!paiFilters.noEmptyRow;
+  document.getElementById('paiFNoEmptyCol').checked=!!paiFilters.noEmptyCol;
+  document.getElementById('paiFMaxRow4').checked=!!paiFilters.maxRow4;
+  document.getElementById('paiFMaxCol4').checked=!!paiFilters.maxCol4;
+  document.getElementById('paiFSeq3').checked=!!paiFilters.seq3;
+  document.getElementById('paiFSeq4').checked=!!paiFilters.seq4;
+  var v=function(id,val){document.getElementById(id).value=val!=null?val:''};
+  v('paiFSomaMin',paiFilters.somaMin);v('paiFSomaMax',paiFilters.somaMax);
+  v('paiFParesMin',paiFilters.paresMin);v('paiFParesMax',paiFilters.paresMax);
+  v('paiFPrimosMin',paiFilters.primosMin);v('paiFPrimosMax',paiFilters.primosMax);
+  v('paiFRepsMin',paiFilters.repsMin);v('paiFRepsMax',paiFilters.repsMax);
+}
+function paiApplyToUI(){
+  var cards=document.querySelectorAll('#jogosContainer .game-card');
+  var visible=0;
+  for(var i=0;i<jogos.length;i++){
+    var st=paiStats(jogos[i]);
+    var rp=paiRepsCount(jogos[i]);
+    var pass=paiPasses(st,rp,paiFilters);
+    if(pass)visible++;
+    if(cards[i]){
+      if(pass)cards[i].classList.remove('pai-filtered-out');
+      else cards[i].classList.add('pai-filtered-out');
+    }
+  }
+  var counter=document.getElementById('paiFilterCount');
+  if(counter)counter.textContent=visible+' de '+jogos.length;
+}
+function paiClearFilters(){paiFilters=paiDefaultFilters();paiWriteUI();paiApplyToUI()}
+function paiShowOrHideCard(){
+  var card=document.getElementById('paiFilterCard');
+  if(!card)return;
+  if(paiActive())card.style.display='';
+  else card.style.display='none';
+}
+function paiBindFilters(){
+  ['paiFNoEmptyRow','paiFNoEmptyCol','paiFMaxRow4','paiFMaxCol4','paiFSeq3','paiFSeq4'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.addEventListener('change',function(){paiReadUI();paiApplyToUI()});
+  });
+  ['paiFSomaMin','paiFSomaMax','paiFParesMin','paiFParesMax','paiFPrimosMin','paiFPrimosMax','paiFRepsMin','paiFRepsMax'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.addEventListener('input',function(){paiReadUI();paiApplyToUI()});
+  });
+  var presets=document.querySelectorAll('.pai-preset-btn');
+  for(var i=0;i<presets.length;i++){
+    (function(btn){btn.addEventListener('click',function(){paiApplyPreset(btn.getAttribute('data-pai-preset'))})})(presets[i]);
+  }
+  var clear=document.getElementById('paiFClear');
+  if(clear)clear.addEventListener('click',paiClearFilters);
+}
+// Bind ao carregar
+if(document.readyState!=='loading'){paiBindFilters()}
+else{document.addEventListener('DOMContentLoaded',paiBindFilters)}
 
 // ══════ CONFERIR / SALVAR / SHARE ══════
 async function conferir(i){
