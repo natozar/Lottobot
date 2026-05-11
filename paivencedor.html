@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="pai-version" content="v90">
+<meta name="pai-version" content="v91">
 <title>Para você, pai · LottoBot</title>
 <meta name="description" content="Tudo que eu aprendi com você, agora em forma de aplicativo. As tabelas que você fazia no caderno, agora prontas. Feito com muito amor, pra você.">
 
@@ -2014,57 +2014,109 @@ function updateCountdown(){
   $('countdown').textContent = mm + ':' + (ss < 10 ? '0' + ss : ss);
 }
 
-// v90: Login com Google (mesma conta do admin)
+// v91: Login com Google (mesma conta do admin) — com defesas robustas
 var ADMIN_EMAILS = ['chatsagrado@gmail.com'];
 
-function handleGoogleLogin(){
+function firebaseReady(){
+  return typeof window.firebase !== 'undefined'
+      && typeof firebase.auth === 'function';
+}
+
+function isMobile(){
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
+}
+
+function setGoogleMsg(text, isError){
   var msg = $('googleLoginMsg');
-  if (!window.firebase || !firebase.auth){
-    msg.textContent = 'Firebase nao carregou. Tente recarregar a pagina.';
-    msg.classList.add('error');
+  if (!msg) return;
+  msg.textContent = text || '';
+  if (isError) msg.classList.add('error');
+  else msg.classList.remove('error');
+}
+
+function handleGoogleLogin(){
+  if (!firebaseReady()){
+    setGoogleMsg('Login Google indisponível agora. Use o PIN 0606.', true);
+    if (window.console && console.error) console.error('[pai/v91] firebase nao carregou — usar PIN');
     return;
   }
-  msg.textContent = 'Abrindo Google...';
-  msg.classList.remove('error');
+  setGoogleMsg('Abrindo Google…', false);
   try {
-    firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    // Mobile: redirect (popups são bloqueados). Desktop: popup (mais confiável, sem cross-domain).
+    if (isMobile()){
+      firebase.auth().signInWithRedirect(provider);
+    } else {
+      firebase.auth().signInWithPopup(provider)
+        .then(function(result){
+          if (window.console && console.info) console.info('[pai/v91] popup OK:', result.user && result.user.email);
+        })
+        .catch(function(e){
+          var msg = '[' + (e.code || '?') + '] ' + (e.message || 'erro desconhecido');
+          if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user'){
+            // fallback pra redirect se popup bloqueado
+            try { firebase.auth().signInWithRedirect(provider); return; } catch(_){}
+          }
+          setGoogleMsg('Falha: ' + msg + ' — pode usar PIN 0606', true);
+          if (window.console && console.error) console.error('[pai/v91] popup error:', e);
+        });
+    }
   } catch(e){
-    msg.textContent = 'Erro: ' + e.message;
-    msg.classList.add('error');
+    setGoogleMsg('Erro ao iniciar login: ' + (e.message || e) + ' — use PIN 0606', true);
+    if (window.console && console.error) console.error('[pai/v91] handleGoogleLogin:', e);
   }
 }
 
 // Listener de auth state — auto-unlock se for admin
 function setupAuthListener(){
-  if (!window.firebase || !firebase.auth) return;
-  // Trata o resultado do redirect (volta do Google)
+  if (!firebaseReady()){
+    // Se Firebase nao carregou (ad blocker, rede ruim), esconde o botao Google
+    var btn = $('googleLoginBtn');
+    var divider = document.querySelector('.pin-divider');
+    if (btn) btn.style.display = 'none';
+    if (divider) divider.style.display = 'none';
+    if (window.console && console.warn) console.warn('[pai/v91] firebase indisponivel — escondendo Google login');
+    return;
+  }
+  // Trata o resultado do redirect (volta do Google) — mostra erro pro usuario
   try {
-    firebase.auth().getRedirectResult().then(function(result){
-      if (result && result.user){
-        if (window.console && console.info) console.info('[pai/v90] Google login OK:', result.user.email);
-      }
-    }).catch(function(e){
-      if (e && e.code !== 'auth/null-user' && window.console && console.warn) console.warn('[pai/v90] getRedirectResult:', e.code, e.message);
-    });
-  } catch(e){}
+    firebase.auth().getRedirectResult()
+      .then(function(result){
+        if (result && result.user){
+          if (window.console && console.info) console.info('[pai/v91] redirect OK:', result.user.email);
+        }
+      })
+      .catch(function(e){
+        if (!e || e.code === 'auth/null-user') return;
+        var human = '[' + (e.code || '?') + '] ' + (e.message || 'erro');
+        setGoogleMsg('Falha login Google: ' + human + ' — use PIN 0606', true);
+        if (window.console && console.error) console.error('[pai/v91] getRedirectResult:', e);
+      });
+  } catch(e){
+    if (window.console && console.error) console.error('[pai/v91] getRedirectResult sync:', e);
+  }
 
-  firebase.auth().onAuthStateChanged(function(user){
-    if (!user) return;
-    var email = (user.email || '').toLowerCase();
-    var isAdmin = ADMIN_EMAILS.indexOf(email) !== -1;
-    if (window.console && console.info) console.info('[pai/v90] auth state changed · email=' + email + ' · isAdmin=' + isAdmin);
-    if (isAdmin){
-      // Conta admin = conta /pai. Auto-unlock.
-      setUnlocked();
-      var msg = $('googleLoginMsg');
-      if (msg){ msg.textContent = '✓ Logado como ' + email; msg.classList.remove('error'); }
-      // Se ainda esta na tela de PIN, avanca pro Welcome
-      var pin = $('pinScreen');
-      if (pin && !pin.classList.contains('hidden')){
-        setTimeout(function(){ showWelcomeScreen(); }, 600);
+  try {
+    firebase.auth().onAuthStateChanged(function(user){
+      if (!user) return;
+      var email = (user.email || '').toLowerCase();
+      var isAdmin = ADMIN_EMAILS.indexOf(email) !== -1;
+      if (window.console && console.info) console.info('[pai/v91] auth state · email=' + email + ' · isAdmin=' + isAdmin);
+      if (isAdmin){
+        setUnlocked();
+        setGoogleMsg('✓ Logado como ' + email, false);
+        var pin = $('pinScreen');
+        if (pin && !pin.classList.contains('hidden')){
+          setTimeout(function(){ showWelcomeScreen(); }, 600);
+        }
+      } else {
+        setGoogleMsg('Conta ' + email + ' nao tem acesso /pai. Use PIN 0606.', true);
       }
-    }
-  });
+    });
+  } catch(e){
+    if (window.console && console.error) console.error('[pai/v91] onAuthStateChanged:', e);
+  }
 }
 
 function handlePinSubmit(){
