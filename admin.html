@@ -203,6 +203,7 @@ function showToast(msg){
 }
 
 const ADMIN_PHONE='+5516999916690';
+const ADMIN_EMAILS=['chatsagrado@gmail.com'];
 let _gateConfirm=null;
 let _gateRecaptcha=null;
 
@@ -263,18 +264,21 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('adminScreen').classList.add('hidden');
     return;
   }
-  // Check admin: phone match OR Firestore flag
+  // Check admin: phone match OR email match OR Firestore flag
   const phoneAdmin=user.phoneNumber===ADMIN_PHONE;
+  const emailAdmin=user.email && ADMIN_EMAILS.indexOf(user.email.toLowerCase())!==-1;
   const doc=await db.collection('users').doc(user.uid).get();
   const firestoreAdmin=doc.exists&&doc.data().isAdmin;
-  if(!phoneAdmin&&!firestoreAdmin){
-    document.getElementById('gateError').textContent='Voce nao tem permissao de administrador.';
+  if(!phoneAdmin&&!emailAdmin&&!firestoreAdmin){
+    document.getElementById('gateError').textContent='Voce nao tem permissao de administrador. (login: '+(user.email||user.phoneNumber||user.uid)+')';
     auth.signOut();
     return;
   }
-  // Ensure admin flag is set in Firestore
-  if(phoneAdmin&&doc.exists&&!doc.data().isAdmin){
-    await db.collection('users').doc(user.uid).update({isAdmin:true});
+  // Ensure admin flag is set in Firestore (cria doc se nao existir)
+  if((phoneAdmin||emailAdmin) && (!doc.exists || !doc.data().isAdmin)){
+    try {
+      await db.collection('users').doc(user.uid).set({isAdmin:true, email:user.email||null, phone:user.phoneNumber||null, updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+    } catch(e){ console.warn('falhou ao set isAdmin:', e); }
   }
   adminUser=user;
   document.getElementById('gateScreen').classList.add('hidden');
