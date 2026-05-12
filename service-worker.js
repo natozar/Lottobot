@@ -31,12 +31,13 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const data = event.notification.data || {};
-  const url = data.url || '/';
+  // v102: se notificacao de jogo salvo, abre na aba Salvos
+  const url = data.url || (data.saved ? '/#salvos' : '/');
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
       for (const client of clientList) {
-        if (client.url.includes('index.html') && 'focus' in client) {
-          client.navigate(url);
+        if ((client.url.includes('lottobot') || client.url.includes('localhost')) && 'focus' in client) {
+          try { client.navigate(url); } catch(e){}
           return client.focus();
         }
       }
@@ -46,7 +47,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ══════ CACHE (existing functionality) ══════
-const CACHE_NAME = 'lottobot-v101';
+const CACHE_NAME = 'lottobot-v102';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

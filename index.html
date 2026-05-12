@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v101';
+    var V='lottobot-v102';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -4143,6 +4143,12 @@ function setupEventListeners(){
     setTimeout(()=>{isDesdobramentoOn()?gerarDesdobramento():gerarJogos()},150);
   });
   document.querySelectorAll('.tab-button').forEach(b=>b.addEventListener('click',function(){switchTab(this.dataset.tab)}));
+  // v102: hash #salvos abre aba Salvos (vinda de notificacao de jogo salvo)
+  try {
+    if(location.hash==='#salvos' || location.hash==='#historico'){
+      setTimeout(function(){switchTab('historico');history.replaceState(null,'',location.pathname+location.search)},200);
+    }
+  } catch(e){}
   document.querySelectorAll('.nav-button').forEach(b=>b.addEventListener('click',function(){
     const nav=this.dataset.nav;
     if(!nav) return;
@@ -5076,6 +5082,14 @@ function paiSaveAll(){
   var msg='💾 '+novos+' jogo(s) salvo(s)';
   if(dups>0)msg+=' · '+dups+' ja salvos';
   showToast(msg);
+  // v102: notificacao local em batch
+  if(novos>0 && typeof notifyGameSaved==='function'){
+    var lastSaved=saved[0];
+    var avgScore=0;
+    for(var s=0;s<Math.min(novos,saved.length);s++)avgScore+=(saved[s].score||0);
+    avgScore=novos>0?Math.round(avgScore/Math.min(novos,saved.length)):0;
+    notifyGameSaved({n:lastSaved.n,score:avgScore,ref:lastSaved.ref,id:Date.now()},novos);
+  }
   paiClearSelection();
 }
 function paiShareAll(){
@@ -5185,6 +5199,40 @@ function salvar(i){
   if(saved.length>100)saved.pop();persist();updateStats();renderSaved();
   saveToCloud(game);
   showToast(currentUser?'💾 Jogo salvo na nuvem':'💾 Jogo salvo (entre para sincronizar)');
+  // v102: dispara notificacao local pro jogo salvo
+  if(typeof notifyGameSaved==='function')notifyGameSaved(game,1);
+}
+
+// v102: Notificacao local quando jogo eh salvo (cliente, sem servidor)
+// - Web: Notification API
+// - PWA standalone: notification.show via SW se possivel, fallback Notification API
+function notifyGameSaved(game,count){
+  try {
+    if(!('Notification' in window))return;
+    if(Notification.permission!=='granted')return; // user precisa ter aceitado push antes
+    var lot=getLottery().name;
+    var nums=game.n.map(function(n){return (typeof pad==='function')?pad(n):(n<10?'0'+n:''+n)}).join(' · ');
+    var title=count>1?('💾 '+count+' jogos salvos · '+lot):('💾 Jogo salvo · '+lot);
+    var body=count>1?('Score médio: '+(game.score||'-')+' · Ref #'+(game.ref||concRef||'-')):(nums+'  ·  Score '+game.score);
+    var opts={
+      body:body,
+      icon:'/icon-192.png',
+      badge:'/icon-192.png',
+      tag:'lottobot-saved-'+(game.id||Date.now()),
+      renotify:false,
+      vibrate:[120,60,120],
+      requireInteraction:false,
+      data:{lot:selectedLottery,ref:game.ref||concRef,saved:true}
+    };
+    // SW route (PWA): usar registration.showNotification — funciona em background
+    if('serviceWorker' in navigator && navigator.serviceWorker.ready){
+      navigator.serviceWorker.ready.then(function(reg){
+        try{reg.showNotification(title,opts)}catch(e){new Notification(title,opts)}
+      }).catch(function(){try{new Notification(title,opts)}catch(e){}});
+    } else {
+      new Notification(title,opts);
+    }
+  } catch(e){if(window.console&&console.warn)console.warn('[notify] erro:',e)}
 }
 
 function shareGame(i){
