@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v99';
+    var V='lottobot-v100';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2071,7 +2071,29 @@
     .pai-fa{padding-top:10px;border-top:1px solid var(--border-default,rgba(255,255,255,0.06));display:flex;justify-content:flex-end}
     .pai-fc-btn{background:transparent;color:var(--text-muted);border:1.5px solid var(--border-default,rgba(255,255,255,0.1));padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit}
     .pai-fc-btn:hover{border-color:var(--color-ball-hot);color:var(--color-ball-hot)}
-    .game-card.pai-filtered-out{opacity:.22;filter:grayscale(.65);pointer-events:none;transition:opacity .25s,filter .25s}
+    /* v100: filtered out SOME completamente */
+    .game-card.pai-filtered-out{display:none !important}
+    /* v100: seleção múltipla */
+    .game-card.pai-selected{outline:2.5px solid var(--color-gold-primary);outline-offset:-2px;box-shadow:0 0 0 4px var(--color-gold-dim)}
+    .pai-card-check{position:absolute;top:8px;right:8px;width:26px;height:26px;border:2px solid var(--color-gold-dim);background:var(--bg-surface-2);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;color:transparent;font-weight:900;transition:all .15s;z-index:5}
+    .pai-card-check:hover{border-color:var(--color-gold-primary)}
+    .game-card.pai-selected .pai-card-check{background:var(--color-gold-primary);border-color:var(--color-gold-primary);color:#fff}
+    .game-card{position:relative}
+    /* v100: barra de ações em massa */
+    .pai-mass{margin-top:12px;padding-top:12px;border-top:1.5px dashed var(--border-default,rgba(255,255,255,0.12))}
+    .pai-mass-info{font-size:.85rem;color:var(--text-secondary);margin-bottom:10px;text-align:center;line-height:1.4}
+    .pai-mass-info b{color:var(--color-gold-primary);font-weight:800;font-variant-numeric:tabular-nums}
+    .pai-mass-row{display:flex;gap:8px;flex-wrap:wrap}
+    .pai-mass-btn{flex:1 1 calc(50% - 4px);min-width:120px;padding:12px 10px;border-radius:10px;border:0;background:var(--bg-surface-2);color:var(--text-primary);font-size:.92rem;font-weight:800;cursor:pointer;font-family:inherit;min-height:46px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.1;text-align:center;border:1.5px solid var(--border-default,rgba(255,255,255,0.08))}
+    .pai-mass-btn:hover{border-color:var(--color-moss-primary);color:var(--color-moss-primary)}
+    .pai-mass-btn:active{transform:scale(.97)}
+    .pai-mass-btn.pai-mass-primary{background:linear-gradient(135deg,var(--color-moss-primary),var(--color-gold-primary));color:#fff;border-color:var(--color-gold-primary);box-shadow:0 3px 10px rgba(212,168,83,.22)}
+    .pai-mass-btn.pai-mass-primary:hover{filter:brightness(1.08);color:#fff}
+    .pai-mass-btn.pai-mass-secondary{background:transparent;color:var(--text-muted);flex:0 0 auto;min-width:0;padding:10px 14px;font-size:.85rem;font-weight:700}
+    .pai-mass-toggles{display:flex;gap:8px;margin-bottom:8px;justify-content:center;flex-wrap:wrap}
+    @media(max-width:480px){
+      .pai-mass-btn{flex:1 1 100%}
+    }
     /* v99: Limite por linha/coluna — select nativo estilizado */
     .pai-row-grid{display:flex;flex-direction:column;gap:6px;margin-top:8px}
     .pai-row-line{display:flex;align-items:center;gap:10px;background:var(--bg-surface-1);border:1px solid var(--border-default,rgba(255,255,255,0.06));border-radius:8px;padding:8px 10px;min-height:44px}
@@ -2510,6 +2532,18 @@
               <button class="pai-preset-btn pai-preset-best" data-pai-preset="best" type="button">⭐ Recomendado</button>
               <button class="pai-preset-btn" data-pai-preset="balanced" type="button">⚖️ Mais aberto</button>
               <button class="pai-preset-btn" data-pai-preset="clear" type="button">🎲 Mostrar tudo</button>
+            </div>
+            <!-- v100: Acoes em massa — salvar/enviar varios de uma vez -->
+            <div class="pai-mass" id="paiMassActions">
+              <div class="pai-mass-info"><b id="paiMassCount">0</b> selecionados · <b id="paiMassVisible">0</b> visíveis</div>
+              <div class="pai-mass-toggles">
+                <button class="pai-mass-btn pai-mass-secondary" id="paiBtnSelectAll" type="button">☑ Marcar todos</button>
+                <button class="pai-mass-btn pai-mass-secondary" id="paiBtnClearSel" type="button">☐ Desmarcar</button>
+              </div>
+              <div class="pai-mass-row">
+                <button class="pai-mass-btn pai-mass-primary" id="paiBtnSaveAll" type="button">💾 Salvar</button>
+                <button class="pai-mass-btn pai-mass-primary" id="paiBtnShareAll" type="button">💬 Enviar</button>
+              </div>
             </div>
             <details class="pai-manual-details">
               <summary class="pai-manual-summary">✏️ Ajustar filtros manualmente <span class="pai-manual-chev">+</span></summary>
@@ -4715,6 +4749,7 @@ function renderJogos(){
     const cc=selectedLottery==='lotofacil'?j.filter(n=>CENTRO_NUMS.includes(n)).length:null;
     const ballsHtml=useCartela?renderCartela(j):`<div class="balls-container">${j.map(n=>`<div class="ball ${getBallClass(n)}" title="${esc(classifyNum(n).type)}: freq ${esc(FREQ[n]||0)}">${esc(dNum(n))}</div>`).join('')}</div>`;
     return `<div class="game-card" id="gc${i}" style="animation-delay:${i*0.05}s">
+      <div class="pai-card-check" onclick="paiToggleSelect(${i});event.stopPropagation()" title="Selecionar para acoes em lote">✓</div>
       <div class="game-header"><div class="game-number">#${i+1}${j.desdobramento?'<span class="badge-desdobramento">DESDOBRAMENTO</span>':''}</div><div class="score-badge ${j.cls.cls}">${j.score} · ${j.cls.label}</div></div>
       ${ballsHtml}
       ${j.mes?'<div style="text-align:center;margin:6px 0 2px;font-size:0.78rem;color:var(--color-gold-primary)">🗓️ Mes da Sorte: <strong>'+esc(j.mes)+'</strong></div>':''}
@@ -4858,6 +4893,8 @@ function paiApplyToUI(){
     if(rEl)rEl.classList.toggle('set', rEl.value!=='');
     if(cEl)cEl.classList.toggle('set', cEl.value!=='');
   }
+  // v100: re-renderiza UI de selecao multipla (limpa selecionados invisiveis + atualiza contadores)
+  if(typeof paiUpdateSelectionUI==='function')paiUpdateSelectionUI();
 }
 function paiClearFilters(){paiFilters=paiDefaultFilters();paiWriteUI();paiApplyToUI()}
 function paiShowOrHideCard(){
@@ -4889,9 +4926,128 @@ function paiBindFilters(){
   var clear=document.getElementById('paiFClear');
   if(clear)clear.addEventListener('click',paiClearFilters);
 }
+// v100: Selecao multipla + acoes em massa
+var paiSelected = new Set();
+function paiVisibleIndices(){
+  var arr=[];
+  for(var i=0;i<jogos.length;i++){
+    var st=paiStats(jogos[i]);
+    var rp=paiRepsCount(jogos[i]);
+    if(paiPasses(st,rp,paiFilters))arr.push(i);
+  }
+  return arr;
+}
+function paiToggleSelect(i){
+  // So permite selecionar jogos visiveis
+  var visible=paiVisibleIndices();
+  if(visible.indexOf(i)===-1)return;
+  if(paiSelected.has(i))paiSelected.delete(i);
+  else paiSelected.add(i);
+  paiUpdateSelectionUI();
+}
+function paiUpdateSelectionUI(){
+  var cards=document.querySelectorAll('#jogosContainer .game-card');
+  for(var i=0;i<cards.length;i++){
+    if(paiSelected.has(i))cards[i].classList.add('pai-selected');
+    else cards[i].classList.remove('pai-selected');
+  }
+  // limpa selecionados invisiveis
+  var visible=paiVisibleIndices();
+  var vis=new Set(visible);
+  paiSelected.forEach(function(i){if(!vis.has(i))paiSelected.delete(i)});
+  // atualiza contadores + textos dos botoes
+  var cnt=document.getElementById('paiMassCount');
+  var visEl=document.getElementById('paiMassVisible');
+  if(cnt)cnt.textContent=paiSelected.size;
+  if(visEl)visEl.textContent=visible.length;
+  // textos dinamicos
+  var n=paiSelected.size>0?paiSelected.size:visible.length;
+  var label=paiSelected.size>0?'selecionados':'visíveis';
+  var saveBtn=document.getElementById('paiBtnSaveAll');
+  var shareBtn=document.getElementById('paiBtnShareAll');
+  if(saveBtn)saveBtn.innerHTML='💾 Salvar '+n+' '+label;
+  if(shareBtn)shareBtn.innerHTML='💬 Enviar '+n;
+}
+function paiSelectAllVisible(){
+  var visible=paiVisibleIndices();
+  for(var i=0;i<visible.length;i++)paiSelected.add(visible[i]);
+  paiUpdateSelectionUI();
+}
+function paiClearSelection(){
+  paiSelected.clear();
+  paiUpdateSelectionUI();
+}
+function paiGetTargetIndices(){
+  // Se ha selecao, age sobre selecionados. Senao, age sobre todos visiveis.
+  if(paiSelected.size>0)return Array.from(paiSelected).sort(function(a,b){return a-b});
+  return paiVisibleIndices();
+}
+function paiSaveAll(){
+  var indices=paiGetTargetIndices();
+  if(indices.length===0){showToast('Nenhum jogo pra salvar');return}
+  // Trial: se isFree e ultrapassaria limite, mostra paywall
+  if(typeof isFree==='function' && isFree() && saved.length+indices.length>10){
+    if(typeof showPaywall==='function'){showPaywall('pro','Salve jogos ilimitados com Pro! (Limite: 10 no Free)');return}
+  }
+  var saved_before=saved.length;
+  var dups=0;
+  for(var k=0;k<indices.length;k++){
+    var i=indices[k];
+    var j=jogos[i];
+    if(saved.some(function(s){return s.n.join(',')===j.join(',')})){dups++;continue}
+    var game={n:[].concat(j),score:j.score,mod:selectedModelo,ref:concRef,dt:new Date().toLocaleDateString('pt-BR'),id:Date.now()+k,lot:selectedLottery};
+    if(j.mes)game.mes=j.mes;
+    if(j.trevos)game.trevos=j.trevos;
+    if(j.time)game.time=j.time;
+    saved.unshift(game);
+    if(saved.length>100)saved.pop();
+    if(typeof saveToCloud==='function')try{saveToCloud(game)}catch(e){}
+  }
+  if(typeof persist==='function')persist();
+  if(typeof updateStats==='function')updateStats();
+  if(typeof renderSaved==='function')renderSaved();
+  var novos=saved.length-saved_before;
+  var msg='💾 '+novos+' jogo(s) salvo(s)';
+  if(dups>0)msg+=' · '+dups+' ja salvos';
+  showToast(msg);
+  paiClearSelection();
+}
+function paiShareAll(){
+  var indices=paiGetTargetIndices();
+  if(indices.length===0){showToast('Nenhum jogo pra enviar');return}
+  var lot=getLottery().name;
+  var lines=indices.map(function(i){
+    var j=jogos[i];
+    var line='Jogo '+(i+1)+': '+j.map(function(n){return (typeof pad==='function')?pad(n):(n<10?'0'+n:''+n)}).join(' - ');
+    if(j.mes)line+=' · Mês: '+j.mes;
+    if(j.trevos)line+=' · 🍀 '+j.trevos.join(' e ');
+    if(j.time)line+=' · ⚽ '+j.time;
+    line+=' ('+j.score+'pts)';
+    return line;
+  });
+  var t='🎯 LOTTOBOT · '+lot+' — '+indices.length+' jogo(s)\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+lines.join('\n')+'\n\n⚠️ Aposte em uma Lotérica ou no app/site da Caixa para concorrer.';
+  if(navigator.share){
+    navigator.share({title:'Lottobot · '+indices.length+' jogos',text:t}).catch(function(){});
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(function(){showToast('📋 Copiado pra área de transferência ('+indices.length+' jogos)')});
+  } else {
+    showToast('Browser não suporta compartilhar');
+  }
+}
+function paiBindMass(){
+  var sa=document.getElementById('paiBtnSelectAll');
+  var cs=document.getElementById('paiBtnClearSel');
+  var bs=document.getElementById('paiBtnSaveAll');
+  var bsh=document.getElementById('paiBtnShareAll');
+  if(sa)sa.addEventListener('click',paiSelectAllVisible);
+  if(cs)cs.addEventListener('click',paiClearSelection);
+  if(bs)bs.addEventListener('click',paiSaveAll);
+  if(bsh)bsh.addEventListener('click',paiShareAll);
+}
+
 // Bind ao carregar
-if(document.readyState!=='loading'){paiBindFilters()}
-else{document.addEventListener('DOMContentLoaded',paiBindFilters)}
+if(document.readyState!=='loading'){paiBindFilters();paiBindMass()}
+else{document.addEventListener('DOMContentLoaded',function(){paiBindFilters();paiBindMass()})}
 
 // ══════ CONFERIR / SALVAR / SHARE ══════
 async function conferir(i){
