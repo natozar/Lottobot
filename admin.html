@@ -209,7 +209,11 @@ let _gateConfirm=null;
 let _gateRecaptcha=null;
 
 function loginAdmin(){
-  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+  // v107: provider com select_account + signOut antes pra forcar chooser
+  const provider=new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({prompt:'select_account'});
+  const go=()=>auth.signInWithRedirect(provider);
+  if(auth.currentUser){auth.signOut().then(go).catch(go)} else {go()}
 }
 
 function setupGateRecaptcha(){

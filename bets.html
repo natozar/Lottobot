@@ -282,7 +282,19 @@ function showToast(msg){
 // ══════ AUTH ══════
 function doLogin(){
   const provider=new firebase.auth.GoogleAuthProvider();
-  _auth.signInWithPopup(provider).catch(e=>{showToast('Erro no login: '+e.message)});
+  // v107: forca account chooser
+  provider.setCustomParameters({prompt:'select_account'});
+  const doPopup=()=>{
+    _auth.signInWithPopup(provider).catch(e=>{
+      if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')showToast('Erro no login: '+e.message);
+    });
+  };
+  // v107: signOut antes pra garantir chooser fresh
+  if(_auth.currentUser){
+    _auth.signOut().then(doPopup).catch(doPopup);
+  } else {
+    doPopup();
+  }
 }
 
 _auth.onAuthStateChanged(user=>{

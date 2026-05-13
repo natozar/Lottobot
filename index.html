@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v106';
+    var V='lottobot-v107';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -3716,10 +3716,21 @@ function checkPagamentoRetorno(){
 
 function loginGoogle(){
   const provider=new firebase.auth.GoogleAuthProvider();
-  _auth.signInWithPopup(provider).catch(e=>{
-    if(e.code==='auth/popup-blocked')_auth.signInWithRedirect(provider);
-    else showToast('Erro: '+e.message);
-  });
+  // v107: select_account forca chooser quando usuario tem multiplas contas Google
+  provider.setCustomParameters({prompt:'select_account'});
+  const doPopup=()=>{
+    _auth.signInWithPopup(provider).catch(e=>{
+      if(e.code==='auth/popup-blocked')_auth.signInWithRedirect(provider);
+      else if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')showToast('Erro: '+e.message);
+    });
+  };
+  // v107: signOut antes pra garantir que chooser apareca mesmo se houver
+  // sessao ativa de outro email (ex: usuario logou com X, quer trocar pra Y)
+  if(_auth.currentUser){
+    _auth.signOut().then(doPopup).catch(doPopup);
+  } else {
+    doPopup();
+  }
 }
 
 async function loginQuickForm(){

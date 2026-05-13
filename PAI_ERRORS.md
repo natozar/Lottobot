@@ -30,6 +30,7 @@ Erros em runtime também são capturados automaticamente no localStorage `paiErr
 | 10 | 2026-05-11 | API loteriascaixa retorna array em /lotofacil mas código esperava objeto | 🟢 fixed | v95 (usar /lotofacil/latest + normalizeResp) |
 | 11 | 2026-05-11 | SW retornando null no fetch → 'Failed to convert value to Response' | 🟢 fixed | v95 (fallback Response sempre) |
 | 12 | 2026-05-13 | REGRESSAO: storage partitioning Google login voltou (fix v92 perdido) | 🟢 fixed | v106 (re-aplicacao authDomain dinamico em index/pai/bets/admin) |
+| 13 | 2026-05-13 | Google login nao mostra account chooser — re-loga conta errada automaticamente | 🟢 fixed | v107 (signOut antes de signInWithPopup + prompt:select_account no index) |
 
 ---
 
@@ -154,6 +155,32 @@ authDomain:(function(){var h=location.hostname;return (h==='lottobot.com.br'||h=
 Quando servido em lottobot.com.br, authDomain = lottobot.com.br. /__/auth/handler ja eh servido nesse dominio pelo Firebase Hosting (confirmado: GET retorna 200). Mesma origem do parent = sem partitioning = state preservado.
 
 **Prevencao**: nao copiar/colar `authDomain:"lottobot-8d75e.firebaseapp.com"` em novos arquivos. Sempre usar a IIFE dinamica. Considerar mover pra um helper compartilhado.
+
+---
+
+### #13 — Google chooser nao aparece, re-loga conta errada · 🟢 v107
+**Erro reportado**: "Ele nao deixa eu escolher qual e-mail quero usar."
+
+**Contexto**: Renato 2026-05-13 em /pai. v106 corrigiu o storage partitioning,
+o popup do Google agora abre. Mas quando ele clica "Entrar com Google", o
+chooser de contas nao aparece — Google re-loga automaticamente a conta
+errada (provavelmente conta nao-admin que ele tinha tentado antes).
+
+**Causa raiz**: dois fatores combinados:
+1. Firebase tem sessao persistida (`firebase.auth().currentUser` set) da
+   tentativa anterior — onAuthStateChanged dispara imediatamente
+2. Google OAuth, mesmo com prompt:select_account, as vezes pula o chooser
+   quando ja ha consentimento recente e currentUser ativo
+
+**Fix v107**: em paivencedor.html `handleGoogleLogin` E em index.html
+`loginGoogle`:
+- `firebase.auth().signOut()` ANTES de `signInWithPopup` (se houver currentUser)
+- `prompt: 'select_account'` no provider (paivencedor ja tinha; index NAO)
+- index tinha so signInWithPopup nu, sem prompt nem signOut
+
+Sem signOut, Google OAuth ve que o usuario ja tem sessao Firebase+grant
+recente e silenciosamente re-autentica a mesma conta, ignorando o prompt.
+Com signOut, Firebase fica clean → Google reabre o chooser → user escolhe.
 
 ---
 

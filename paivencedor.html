@@ -2301,35 +2301,50 @@ function handleGoogleLogin(){
     return;
   }
   setGoogleMsg('Abrindo Google…', false);
+
+  var doPopup = function(){
+    try {
+      var provider = new firebase.auth.GoogleAuthProvider();
+      // v107: prompt=select_account + clearing previous session forca chooser
+      // mesmo quando ja ha sessao Firebase ativa de email diferente
+      provider.setCustomParameters({ prompt: 'select_account' });
+      firebase.auth().signInWithPopup(provider)
+        .then(function(result){
+          if (window.console && console.info) console.info('[pai/v107] popup OK:', result.user && result.user.email);
+          // onAuthStateChanged ja trata o setUnlocked + showAppAndBoot
+        })
+        .catch(function(e){
+          var code = e.code || '?';
+          var msg;
+          if (code === 'auth/popup-blocked'){
+            msg = 'Seu navegador bloqueou o popup. Permita popups pra esta pagina, ou use o PIN 0606.';
+          } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request'){
+            msg = 'Popup fechado. Tente de novo ou use o PIN 0606.';
+          } else if (code === 'auth/unauthorized-domain'){
+            msg = 'Dominio nao autorizado no Firebase Console. Use o PIN 0606.';
+          } else {
+            msg = '[' + code + '] ' + (e.message || 'erro') + ' — use PIN 0606';
+          }
+          setGoogleMsg(msg, true);
+          if (window.console && console.error) console.error('[pai/v107] popup error:', e);
+        });
+    } catch(e){
+      setGoogleMsg('Erro: ' + (e.message || e) + ' — use PIN 0606', true);
+      if (window.console && console.error) console.error('[pai/v107] handleGoogleLogin:', e);
+    }
+  };
+
+  // v107: signOut antes do popup pra forcar o account chooser do Google
+  // Sem isso, se Firebase tem sessao ativa (mesmo de email errado), o Google
+  // as vezes pula o chooser e re-loga na mesma conta automaticamente.
   try {
-    var provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    // v93: SEMPRE popup. Popup nao precisa cross-origin storage e nao depende
-    // de redirect_uri match no Google Cloud Console (so usa firebaseapp.com
-    // handler que ja eh autorizado por padrao).
-    firebase.auth().signInWithPopup(provider)
-      .then(function(result){
-        if (window.console && console.info) console.info('[pai/v93] popup OK:', result.user && result.user.email);
-        // onAuthStateChanged ja trata o setUnlocked + showAppAndBoot
-      })
-      .catch(function(e){
-        var code = e.code || '?';
-        var msg;
-        if (code === 'auth/popup-blocked'){
-          msg = 'Seu navegador bloqueou o popup. Permita popups pra esta pagina, ou use o PIN 0606.';
-        } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request'){
-          msg = 'Popup fechado. Tente de novo ou use o PIN 0606.';
-        } else if (code === 'auth/unauthorized-domain'){
-          msg = 'Dominio nao autorizado no Firebase Console. Use o PIN 0606.';
-        } else {
-          msg = '[' + code + '] ' + (e.message || 'erro') + ' — use PIN 0606';
-        }
-        setGoogleMsg(msg, true);
-        if (window.console && console.error) console.error('[pai/v93] popup error:', e);
-      });
+    if (firebase.auth().currentUser){
+      firebase.auth().signOut().then(doPopup).catch(doPopup);
+    } else {
+      doPopup();
+    }
   } catch(e){
-    setGoogleMsg('Erro: ' + (e.message || e) + ' — use PIN 0606', true);
-    if (window.console && console.error) console.error('[pai/v93] handleGoogleLogin:', e);
+    doPopup();
   }
 }
 
