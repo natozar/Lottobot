@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v104';
+    var V='lottobot-v105';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -113,6 +113,11 @@
       --z-header: 100;
       --z-modal: 200;
       --z-toast: 9999;
+      /* v105: header layout — sizes unificados pra alinhamento perfeito */
+      --header-h: 56px;
+      --header-btn: 32px;
+      --header-gap: 8px;
+      --header-pad-x: 20px;
     }
 
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
@@ -170,104 +175,191 @@
     }
     input, select, textarea, button { user-select: auto; -webkit-user-select: auto; }
 
+    /* === HEADER (v105: layout unificado, alturas iguais, gaps consistentes) === */
     header {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: calc(56px + env(safe-area-inset-top, 0px));
-      padding-top: env(safe-area-inset-top, 0px);
+      top: 0; left: 0; right: 0;
+      height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+      padding: env(safe-area-inset-top, 0px) var(--header-pad-x) 0;
       background: var(--bg-primary);
       border-bottom: 1px solid var(--border-default);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-left: 24px;
-      padding-right: 24px;
+      gap: var(--header-gap);
       z-index: var(--z-header);
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 16px;
-      font-weight: 600;
-      letter-spacing: -0.025em;
+      gap: 10px;
+      min-width: 0;
+      flex-shrink: 1;
     }
-
     .header-logo {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      white-space: nowrap;
+    }
+    #concursoBadge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--color-gold-primary);
+      letter-spacing: 0.02em;
+      padding: 0 8px;
+      height: 22px;
+      background: var(--color-gold-dim);
+      border: 1px solid rgba(212,168,83,0.22);
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .header-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: var(--header-gap);
+      flex-shrink: 0;
     }
-    .header-actions{display:flex;align-items:center;gap:4px}
-    .header-icon-btn{background:none;border:1px solid transparent;color:var(--text-muted);font-size:0.95rem;cursor:pointer;padding:4px 6px;border-radius:6px;transition:all 0.15s;line-height:1;display:flex;align-items:center;justify-content:center}
-    .header-icon-btn:hover{color:var(--text-primary);background:rgba(255,255,255,0.04);border-color:var(--border-default)}
-    .header-user{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;border-radius:8px;border:1px solid var(--border-default);background:rgba(255,255,255,0.02);cursor:default}
-    .header-divider{width:1px;height:20px;background:var(--border-default);margin:0 2px}
-    .header-avatar-btn{background:none;border:2.5px solid var(--color-gold-primary);border-radius:50%;width:34px;height:34px;padding:0;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;transition:all 0.2s;box-shadow:0 0 0 0 rgba(212,168,83,0);flex-shrink:0}
-    .header-avatar-btn:hover{box-shadow:0 0 12px rgba(212,168,83,0.35);transform:scale(1.08)}
-    .header-avatar-btn:active{transform:scale(0.95)}
-    .header-avatar-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-    .header-avatar-btn span{font-size:0.75rem;font-weight:700;color:var(--color-gold-primary);background:var(--color-gold-dim);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%}
 
-    #jackpotBadge {
-      display: none;
-      padding: 3px 8px;
-      background: rgba(74,124,89,0.15);
-      border: 1px solid rgba(74,124,89,0.3);
-      border-radius: 6px;
-      font-size: 0.65rem;
-      color: var(--color-moss-primary);
-      white-space: nowrap;
-      cursor: help;
-      transition: opacity 0.3s;
-    }
-    #jackpotBadge.show { display: block; }
-    #jackpotBadge.loading { animation: pulse 1.5s ease-in-out infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-
+    /* Status pills — todas com altura igual aos botoes */
+    #histBadge,
+    #jackpotBadge,
     #offlineBadge {
       display: none;
-      padding: 4px 10px;
-      background: rgba(212,168,83,0.1);
-      border: 1px solid rgba(212,168,83,0.2);
+      height: var(--header-btn);
+      padding: 0 9px;
+      align-items: center;
       border-radius: 6px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    #histBadge.show,
+    #jackpotBadge.show,
+    #offlineBadge.show { display: inline-flex; }
+
+    #histBadge {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+    }
+    #jackpotBadge {
+      background: rgba(74,124,89,0.12);
+      border: 1px solid rgba(74,124,89,0.3);
+      color: var(--color-moss-primary);
+      cursor: help;
+    }
+    #jackpotBadge.loading { animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    #offlineBadge {
+      background: rgba(212,168,83,0.1);
+      border: 1px solid rgba(212,168,83,0.25);
       color: var(--color-gold-primary);
     }
 
-    #offlineBadge.show {
-      display: block;
-    }
-
+    /* Spinner — reserva mesmo espaco de um icon-btn, opacity controla visibilidade */
     #headerSpinner {
-      width: 16px;
-      height: 16px;
+      width: var(--header-btn);
+      height: var(--header-btn);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+    #headerSpinner.active { opacity: 1; }
+    #headerSpinner::before {
+      content: '';
+      width: 14px;
+      height: 14px;
       border: 2px solid var(--border-default);
       border-top-color: var(--color-gold-primary);
       border-radius: 50%;
-      animation: none;
-      opacity: 0;
-    }
-
-    #headerSpinner.active {
       animation: spin 0.8s linear infinite;
-      opacity: 1;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Action icons — quadrados perfeitos */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .header-icon-btn {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      width: var(--header-btn);
+      height: var(--header-btn);
+      padding: 0;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .header-icon-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.05);
+      border-color: var(--border-default);
+    }
+    .header-icon-btn:active { transform: scale(0.92); }
+
+    /* Avatar tem mesmo height dos demais */
+    .header-avatar-btn {
+      background: none;
+      border: 2px solid var(--color-gold-primary);
+      border-radius: 50%;
+      width: var(--header-btn);
+      height: var(--header-btn);
+      padding: 0;
+      cursor: pointer;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.2s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .header-avatar-btn:hover { box-shadow: 0 0 0 3px rgba(212,168,83,0.18); }
+    .header-avatar-btn:active { transform: scale(0.93); }
+    .header-avatar-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .header-avatar-btn span {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--color-gold-primary);
+      background: var(--color-gold-dim);
+      width: 100%;
+      height: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    /* authArea: container alinhado */
+    #authArea {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .desktop-layout {
       display: grid;
       grid-template-columns: 280px 1fr 300px;
-      grid-template-rows: calc(56px + env(safe-area-inset-top, 0px)) 1fr;
+      grid-template-rows: calc(var(--header-h) + env(safe-area-inset-top, 0px)) 1fr;
       height: 100vh;
       height: 100dvh;
       gap: 0;
@@ -1567,7 +1659,7 @@
     @media (max-width: 768px) {
       .desktop-layout {
         grid-template-columns: 1fr;
-        grid-template-rows: calc(56px + env(safe-area-inset-top, 0px)) 1fr calc(60px + env(safe-area-inset-bottom, 0px));
+        grid-template-rows: calc(var(--header-h) + env(safe-area-inset-top, 0px)) 1fr calc(60px + env(safe-area-inset-bottom, 0px));
       }
       /* ALL 3 columns: hidden by default, shown via .mobile-show */
       .col-left, .col-center, .col-right {
@@ -1591,12 +1683,20 @@
       .col-center { padding: 12px; padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
       .col-right { padding: 16px; }
 
-      header { padding: env(safe-area-inset-top, 0px) 12px 0; }
-      .header-left { gap: 8px; }
-      .header-logo { font-size: 1rem; }
-      .header-right { gap: 6px; font-size: 0.7rem; }
-      .header-icon-btn{font-size:0.85rem;padding:3px 4px}
-      .header-avatar-btn{width:30px;height:30px;border-width:2px}
+      /* v105: header mobile — variaveis reduzidas, alinhamento mantido */
+      :root, [data-theme="light"] {
+        --header-h: 48px;
+        --header-btn: 30px;
+        --header-gap: 4px;
+        --header-pad-x: 10px;
+      }
+      .header-left { gap: 6px; }
+      .header-logo { font-size: 0.95rem; }
+      #concursoBadge { font-size: 0.62rem; padding: 0 6px; height: 20px; }
+      #histBadge, #jackpotBadge, #offlineBadge { font-size: 0.62rem; padding: 0 6px; }
+      .header-icon-btn { font-size: 0.92rem; }
+      .auth-btn { font-size: 0.68rem; padding: 0 9px; }
+      .auth-admin-link { display: none !important; } /* libera espaco; ja eh acessivel via profile */
       .mobile-nav { display: flex; }
       .mobile-fab { display: flex; }
 
@@ -1685,11 +1785,18 @@
     }
 
     @media (max-width: 380px) {
+      :root, [data-theme="light"] {
+        --header-h: 44px;
+        --header-btn: 28px;
+      }
       .ball { width: 26px; height: 26px; font-size: 0.65rem; }
       .num-cell { font-size: 0.65rem; }
       .modelo-card { padding: 8px; font-size: 0.75rem; }
-      header { height: calc(48px + env(safe-area-inset-top, 0px)); }
-      .desktop-layout { grid-template-rows: calc(48px + env(safe-area-inset-top, 0px)) 1fr calc(56px + env(safe-area-inset-bottom, 0px)); }
+      .header-logo { font-size: 0.88rem; }
+      #concursoBadge { font-size: 0.6rem; padding: 0 5px; height: 18px; }
+      /* Em telas muito pequenas, esconder pills nao-criticas pra evitar overflow */
+      #histBadge.show, #jackpotBadge.show { display: none; }
+      .desktop-layout { grid-template-rows: calc(var(--header-h) + env(safe-area-inset-top, 0px)) 1fr calc(56px + env(safe-area-inset-bottom, 0px)); }
       .casino-reels { max-width: 190px; gap: 2px; }
       .casino-reels.reels-8 { max-width: 240px; }
       .casino-reels.reels-10 { max-width: 280px; }
@@ -1886,7 +1993,7 @@
     .centro-val.active{border-color:var(--color-gold-primary);background:var(--color-gold-dim);color:var(--color-gold-primary)}
 
     /* === AUTH === */
-    .auth-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border-hover);background:rgba(255,255,255,0.04);color:var(--text-secondary);transition:all 0.2s;white-space:nowrap}
+    .auth-btn{display:inline-flex;align-items:center;gap:6px;height:var(--header-btn);padding:0 12px;border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border-hover);background:rgba(255,255,255,0.04);color:var(--text-secondary);transition:all 0.2s;white-space:nowrap;line-height:1}
     .auth-btn:hover{border-color:var(--color-gold-primary);color:var(--color-gold-primary);background:rgba(212,168,83,0.08)}
     .auth-avatar{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--color-gold-primary)}
     .auth-user-name{max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.72rem;font-weight:600;color:var(--text-primary)}
@@ -1911,8 +2018,8 @@
     .auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:var(--border-default)}
     .auth-divider::before{left:0}
     .auth-divider::after{right:0}
-    .auth-logout{font-size:0.7rem;color:var(--text-muted);cursor:pointer;border:none;background:none;text-decoration:underline;padding:4px}
-    .auth-logout:hover{color:var(--color-gold-primary)}
+    .auth-logout{display:inline-flex;align-items:center;height:var(--header-btn);padding:0 8px;font-size:0.68rem;color:var(--text-muted);cursor:pointer;border:1px solid transparent;background:none;border-radius:6px;line-height:1;transition:all 0.15s}
+    .auth-logout:hover{color:var(--color-gold-primary);background:rgba(255,255,255,0.04);border-color:var(--border-default)}
 
     /* === USER PROFILE === */
     #profileModal .modal{max-width:500px;max-height:90vh;overflow-y:auto}
@@ -1952,8 +2059,9 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .captcha-label{flex:1}
     .captcha-shield{font-size:1rem;opacity:0.5;flex-shrink:0}
-    .auth-admin-link{font-size:0.65rem;color:var(--color-gold-primary);text-decoration:none;opacity:0.7;display:none}
-    .auth-admin-link.show{display:inline}
+    .auth-admin-link{display:none;align-items:center;height:var(--header-btn);padding:0 9px;font-size:0.65rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--color-gold-primary);text-decoration:none;border:1px solid rgba(212,168,83,0.3);border-radius:6px;background:rgba(212,168,83,0.05);line-height:1;transition:background 0.15s}
+    .auth-admin-link:hover{background:rgba(212,168,83,0.12)}
+    .auth-admin-link.show{display:inline-flex}
 
     /* === FOCUS VISIBLE === */
     :focus-visible{outline:2px solid var(--color-gold-primary);outline-offset:2px;border-radius:4px}
@@ -2130,18 +2238,18 @@
   <header>
     <div class="header-left">
       <span class="header-logo">🎲 Lottobot</span>
-      <div id="concursoBadge" style="font-family:var(--font-mono);font-size:0.78rem;font-weight:700;color:var(--color-gold-primary);letter-spacing:0.02em">#0000</div>
+      <div id="concursoBadge">#0000</div>
     </div>
     <div class="header-right">
-      <div id="histBadge" class="text-secondary" style="font-size:0.7rem;display:none">—</div>
+      <div id="histBadge">—</div>
       <div id="jackpotBadge" title="Histórico de jackpots"></div>
       <div id="offlineBadge">📡 Offline</div>
-      <div id="headerSpinner"></div>
+      <div id="headerSpinner" aria-hidden="true"></div>
       <div class="header-actions">
-        <a href="/bets.html" class="header-icon-btn" title="Bets Scanner" style="text-decoration:none">⚽</a>
-        <a href="/blog" target="_blank" class="header-icon-btn" title="Blog" style="text-decoration:none">📰</a>
-        <button class="header-icon-btn" id="btnCheckUpdate" onclick="checkForUpdate()" title="Verificar atualizacao">🔄</button>
-        <button class="header-icon-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Alternar tema" title="Tema claro/escuro">🌙</button>
+        <a href="/bets.html" class="header-icon-btn" title="Bets Scanner" aria-label="Bets Scanner">⚽</a>
+        <a href="/blog" target="_blank" class="header-icon-btn" title="Blog" aria-label="Blog">📰</a>
+        <button class="header-icon-btn" id="btnCheckUpdate" onclick="checkForUpdate()" title="Verificar atualizacao" aria-label="Atualizar">🔄</button>
+        <button class="header-icon-btn" id="themeToggle" onclick="toggleTheme()" title="Tema claro/escuro" aria-label="Alternar tema">🌙</button>
       </div>
       <div id="authArea">
         <button class="auth-btn" id="authBtn" onclick="document.getElementById('authModal').classList.add('active')">Entrar</button>
@@ -3440,12 +3548,8 @@ function updateAuthUI(){
   const name=esc(currentUser.displayName||currentUser.phoneNumber||'User');
   const photo=currentUser.photoURL;
   const safePhoto=photo?photo.replace(/[^a-zA-Z0-9:\/\.\-_?=&%]/g,''):'';
-  area.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
-    <button onclick="openProfileModal()" class="header-avatar-btn" title="Meu Perfil">
-      ${safePhoto?'<img src="'+esc(safePhoto)+'" referrerpolicy="no-referrer">':'<span>'+esc(name[0].toUpperCase())+'</span>'}
-    </button>
-    <button class="auth-logout" onclick="doLogout()">Sair</button>
-  </div>`;
+  // v105: sem wrapper — #authArea ja eh flex
+  area.innerHTML=`<button onclick="openProfileModal()" class="header-avatar-btn" title="Meu Perfil">${safePhoto?'<img src="'+esc(safePhoto)+'" referrerpolicy="no-referrer">':'<span>'+esc(name[0].toUpperCase())+'</span>'}</button><button class="auth-logout" onclick="doLogout()">Sair</button>`;
   document.getElementById('authModal')?.classList.remove('active');
   if(isAdmin)adminLink?.classList.add('show');
 }
