@@ -47,7 +47,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ══════ CACHE (existing functionality) ══════
-const CACHE_NAME = 'lottobot-v103';
+const CACHE_NAME = 'lottobot-v104';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -58,7 +58,10 @@ const STATIC_ASSETS = [
 ];
 
 const API_CACHE = 'lotteries-api-v1';
+// v104: proxy proprio em /api/lottery/<slug>/... (Caixa-first com fallback Heroku)
+// Mantemos API_BASE pra compat com instalacoes antigas que ainda nao limparam cache
 const API_BASE = 'https://loteriascaixa-api.herokuapp.com/api/';
+const PROXY_BASE = '/api/lottery/';
 
 // Install — cache static assets
 self.addEventListener('install', (event) => {
@@ -110,11 +113,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network First for API calls (lotofacil, megasena, quina)
-  if (url.href.includes(API_BASE)) {
+  // Network First for API calls (proxy /api/lottery/* ou Heroku direto pra compat)
+  const isProxyCall = url.origin === self.location.origin && url.pathname.startsWith(PROXY_BASE);
+  if (url.href.includes(API_BASE) || isProxyCall) {
     // v103: /latest com cache-bust (_t=...) sempre passa direto (no-store) — nunca usa cache do SW
     // Antes, se Heroku timeout > 8s, SW retornava resultado de ontem e app nao detectava sorteio de hoje
-    const isLatestFresh = url.pathname.endsWith('/latest') && url.searchParams.has('_t');
+    const isLatestFresh = (url.pathname.endsWith('/latest') || url.pathname.endsWith('latest')) && url.searchParams.has('_t');
     if (isLatestFresh) {
       event.respondWith(
         fetch(request, { signal: AbortSignal.timeout(12000), cache: 'no-store' })

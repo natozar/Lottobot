@@ -48,17 +48,72 @@ const FIBONACCI = new Set([1, 2, 3, 5, 8, 13, 21, 34, 55]);
 
 // ══════════════════════════════════════════════
 // HELPERS — Fetch de dados da API Loterias
+// v104: Caixa oficial PRIMEIRO, Heroku como fallback
+// Motivo: Heroku (loteriascaixa-api) atrasa varios dias atras da Caixa
 // ══════════════════════════════════════════════
+const CAIXA_BASE = "https://servicebus2.caixa.gov.br/portaldeloterias/api";
+
+// Normaliza resposta da Caixa pro formato esperado por parseDraw (app + SSR)
+function normalizeCaixaResponse(data, apiSlug) {
+  if (!data) return null;
+  const out = { ...data };
+  out.concurso = out.concurso || data.numero;
+  out.numero = out.numero || data.numero;
+  out.data = out.data || data.dataApuracao;
+  out.dataApuracao = out.dataApuracao || data.data;
+  out.acumulou = data.acumulado || data.acumulou || false;
+  // Heroku usa "premiacoes", Caixa "listaRateioPremio" — mapear faixa/ganhadores/premio
+  if (!out.premiacoes && Array.isArray(data.listaRateioPremio)) {
+    out.premiacoes = data.listaRateioPremio.map(p => ({
+      descricao: p.descricaoFaixa, faixa: p.faixa,
+      ganhadores: p.numeroDeGanhadores, valorPremio: p.valorPremio
+    }));
+    out.listaPremiacoes = out.premiacoes;
+  }
+  // Dupla Sena: parseDraw espera 12 numeros em listaDezenas (6 do 1o + 6 do 2o sorteio)
+  if (apiSlug === 'duplasena' && Array.isArray(data.listaDezenasSegundoSorteio) && Array.isArray(data.listaDezenas)) {
+    out.listaDezenas = [...data.listaDezenas, ...data.listaDezenasSegundoSorteio];
+  }
+  // +Milionaria: trevos
+  if (Array.isArray(data.trevosSorteados)) out.trevos = data.trevosSorteados;
+  // Timemania / Dia de Sorte: nomeTimeCoracaoMesSorte vem com null bytes
+  const mesTime = (data.nomeTimeCoracaoMesSorte || '').replace(/\u0000/g, '').trim();
+  if (mesTime) {
+    if (apiSlug === 'timemania') out.timeCoracao = mesTime;
+    else if (apiSlug === 'diadesorte') out.mesSorte = mesTime;
+  }
+  return out;
+}
+
+async function fetchFromSource(apiSlug, pathSuffix) {
+  // Tenta Caixa oficial primeiro (mais atualizada)
+  const caixaUrl = pathSuffix
+    ? `${CAIXA_BASE}/${apiSlug}/${pathSuffix}`
+    : `${CAIXA_BASE}/${apiSlug}`;
+  try {
+    const r = await fetch(caixaUrl, { signal: AbortSignal.timeout(8000) });
+    if (r.ok) {
+      const data = await r.json();
+      if (data && (data.numero || data.concurso) && (data.listaDezenas || data.dezenas)) {
+        return normalizeCaixaResponse(data, apiSlug);
+      }
+    }
+  } catch (e) { /* fallback */ }
+  // Fallback: Heroku
+  const herokuUrl = pathSuffix
+    ? `${API_BASE}/${apiSlug}/${pathSuffix}`
+    : `${API_BASE}/${apiSlug}/latest`;
+  const r = await fetch(herokuUrl, { signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error(`API ${apiSlug}/${pathSuffix || 'latest'}: ${r.status}`);
+  return r.json();
+}
+
 async function fetchLatest(apiSlug) {
-  const resp = await fetch(`${API_BASE}/${apiSlug}/latest`, { signal: AbortSignal.timeout(8000) });
-  if (!resp.ok) throw new Error(`API ${apiSlug}: ${resp.status}`);
-  return resp.json();
+  return fetchFromSource(apiSlug, null);
 }
 
 async function fetchConcurso(apiSlug, numero) {
-  const resp = await fetch(`${API_BASE}/${apiSlug}/${numero}`, { signal: AbortSignal.timeout(8000) });
-  if (!resp.ok) throw new Error(`API ${apiSlug}/${numero}: ${resp.status}`);
-  return resp.json();
+  return fetchFromSource(apiSlug, numero);
 }
 
 async function fetchHistorico(apiSlug, quantidade) {
@@ -67,10 +122,7 @@ async function fetchHistorico(apiSlug, quantidade) {
   const resultados = [latest];
   const promises = [];
   for (let i = 1; i < quantidade; i++) {
-    promises.push(
-      fetch(`${API_BASE}/${apiSlug}/${concursoAtual - i}`, { signal: AbortSignal.timeout(8000) })
-        .then(r => r.ok ? r.json() : null).catch(() => null)
-    );
+    promises.push(fetchFromSource(apiSlug, concursoAtual - i).catch(() => null));
   }
   const extras = await Promise.all(promises);
   extras.forEach(r => { if (r) resultados.push(r); });
@@ -1192,6 +1244,44 @@ async function renderSitemap(req, res) {
   return res.status(200).send(xml);
 }
 
+// ══════════════════════════════════════════════
+// 0a. LOTTERY PROXY — Caixa-first com fallback Heroku
+// Rota: /api/lottery/<slug>/<latest|numero>
+// v104: Heroku (loteriascaixa-api) frequentemente atrasa dias atras da Caixa
+//       Esta funcao tenta Caixa oficial PRIMEIRO, normaliza pra compat
+// ══════════════════════════════════════════════
+exports.lotteryProxy = onRequest({
+  region: "southamerica-east1",
+  memory: "256MiB",
+  timeoutSeconds: 15,
+  cors: true
+}, async (req, res) => {
+  // path: /api/lottery/<slug>/<target>
+  const parts = req.path.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+  // Esperado: ['api','lottery','<slug>','<target>']
+  // Mas com rewrites firebase, o path chega so como '/<slug>/<target>' ou '/api/lottery/<slug>/<target>'
+  let slugIdx = parts.indexOf('lottery');
+  if (slugIdx === -1) slugIdx = -1;
+  const slug = parts[slugIdx + 1] || parts[0];
+  const target = parts[slugIdx + 2] || parts[1] || 'latest';
+  if (!slug) return res.status(400).json({ error: 'missing slug' });
+
+  // Permite apenas slugs conhecidos pra evitar SSRF
+  const ALLOWED = ['lotofacil','megasena','quina','duplasena','diadesorte','supersete','maismilionaria','timemania'];
+  if (!ALLOWED.includes(slug)) return res.status(404).json({ error: 'unknown lottery' });
+
+  try {
+    const pathSuffix = target === 'latest' ? null : target;
+    const data = await fetchFromSource(slug, pathSuffix);
+    // Cache curto: o user pode pegar dado novo em ate 60s
+    res.set('Cache-Control', 'public, max-age=60, s-maxage=60, stale-while-revalidate=300');
+    return res.status(200).json(data);
+  } catch (e) {
+    console.error('lotteryProxy error:', slug, target, e.message);
+    return res.status(502).json({ error: 'all sources failed', detail: e.message });
+  }
+});
+
 // ═══════════════════════��══════════════════════
 // 0. SSR PAGES — HTTP Function
 // ══════════════════════���═══════════════════════
@@ -1291,11 +1381,10 @@ exports.checkNewDraw = onSchedule({
 
   for (const lot of loteriasParaVerificar) {
     try {
-      const resp = await fetch(`${API_BASE}/${lot.api}/latest`, { signal: AbortSignal.timeout(10000) });
-      if (!resp.ok) { console.log(`${lot.slug}: API returned ${resp.status}`); continue; }
-      const data = await resp.json();
+      // v104: usa fetchFromSource (Caixa-first) — antes pegava do Heroku que pode estar dias atrasado
+      const data = await fetchFromSource(lot.api, null);
       const numero = data.concurso || data.numero;
-      if (!numero) continue;
+      if (!numero) { console.log(`${lot.slug}: no concurso in response`); continue; }
 
       const docId = `${lot.slug}_${numero}`;
       const drawRef = db.collection("draws").doc(docId);

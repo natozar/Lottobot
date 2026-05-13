@@ -34,6 +34,7 @@
       { "source": "/blog", "function": "ssrPages" },
       { "source": "/blog/**", "function": "ssrPages" },
       { "source": "/sitemap.xml", "function": "ssrPages" },
+      { "source": "/api/lottery/**", "function": "lotteryProxy" },
       { "source": "/pai", "destination": "/paivencedor.html" },
       { "source": "**", "destination": "/index.html" }
     ],

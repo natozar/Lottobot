@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://loteriascaixa-api.herokuapp.com">
+  <link rel="preconnect" href="https://servicebus2.caixa.gov.br">
   <link rel="dns-prefetch" href="https://firestore.googleapis.com">
   <link rel="manifest" href="manifest.json">
   <link rel="canonical" href="https://lottobot.com.br/">
@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v103';
+    var V='lottobot-v104';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2985,7 +2985,7 @@
 // ══════════════════════════════════════════════
 const LOTTERIES={
   lotofacil:{
-    name:'Lotofacil',api:'https://loteriascaixa-api.herokuapp.com/api/lotofacil',
+    name:'Lotofacil',api:'/api/lottery/lotofacil',
     total:25,pick:15,
     modelos:{A:{fora:6,dentro:9,noise:0.2},B:{fora:5,dentro:10,noise:0.35},C:{fora:7,dentro:8,noise:0.5},IA:{fora:5,dentro:10,noise:0.4}},
     premios:{11:'R$ 7',12:'R$ 14',13:'R$ 35',14:'Variavel',15:'JACKPOT'},
@@ -2994,7 +2994,7 @@ const LOTTERIES={
     filters:{parImpar:[6,9],soma:[183,212],consec:4,repet:[8,11]}
   },
   megasena:{
-    name:'Mega-Sena',api:'https://loteriascaixa-api.herokuapp.com/api/megasena',
+    name:'Mega-Sena',api:'/api/lottery/megasena',
     total:60,pick:6,
     modelos:{A:{fora:3,dentro:3,noise:0.2},B:{fora:2,dentro:4,noise:0.35},C:{fora:4,dentro:2,noise:0.5},IA:{fora:3,dentro:3,noise:0.4}},
     premios:{4:'Variavel',5:'Variavel',6:'JACKPOT'},
@@ -3003,7 +3003,7 @@ const LOTTERIES={
     filters:{parImpar:[2,4],soma:[131,235],consec:2,repet:[0,2]}
   },
   quina:{
-    name:'Quina',api:'https://loteriascaixa-api.herokuapp.com/api/quina',
+    name:'Quina',api:'/api/lottery/quina',
     total:80,pick:5,
     modelos:{A:{fora:2,dentro:3,noise:0.2},B:{fora:2,dentro:3,noise:0.35},C:{fora:3,dentro:2,noise:0.5},IA:{fora:2,dentro:3,noise:0.4}},
     premios:{2:'Variavel',3:'Variavel',4:'Variavel',5:'JACKPOT'},
@@ -3012,7 +3012,7 @@ const LOTTERIES={
     filters:{parImpar:[2,3],soma:[143,262],consec:2,repet:[0,1]}
   },
   duplasena:{
-    name:'Dupla Sena',api:'https://loteriascaixa-api.herokuapp.com/api/duplasena',
+    name:'Dupla Sena',api:'/api/lottery/duplasena',
     total:50,pick:6,
     modelos:{A:{fora:3,dentro:3,noise:0.2},B:{fora:2,dentro:4,noise:0.35},C:{fora:4,dentro:2,noise:0.5},IA:{fora:3,dentro:3,noise:0.4}},
     premios:{3:'Variavel',4:'Variavel',5:'Variavel',6:'JACKPOT'},
@@ -3021,7 +3021,7 @@ const LOTTERIES={
     filters:{parImpar:[2,4],soma:[100,200],consec:2,repet:[0,2]}
   },
   diadesorte:{
-    name:'Dia de Sorte',api:'https://loteriascaixa-api.herokuapp.com/api/diadesorte',
+    name:'Dia de Sorte',api:'/api/lottery/diadesorte',
     total:31,pick:7,
     modelos:{A:{fora:3,dentro:4,noise:0.2},B:{fora:3,dentro:4,noise:0.35},C:{fora:4,dentro:3,noise:0.5},IA:{fora:3,dentro:4,noise:0.4}},
     premios:{4:'R$ 5',5:'R$ 25',6:'Variavel',7:'JACKPOT'},
@@ -3031,7 +3031,7 @@ const LOTTERIES={
     meses:['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
   },
   supersete:{
-    name:'Super Sete',api:'https://loteriascaixa-api.herokuapp.com/api/supersete',
+    name:'Super Sete',api:'/api/lottery/supersete',
     total:9,pick:7,minNum:0,columns:true,
     modelos:{A:{fora:3,dentro:4,noise:0.2},B:{fora:3,dentro:4,noise:0.35},C:{fora:4,dentro:3,noise:0.5},IA:{fora:3,dentro:4,noise:0.4}},
     premios:{3:'R$ 5',4:'Variavel',5:'Variavel',6:'Variavel',7:'JACKPOT'},
@@ -3040,7 +3040,7 @@ const LOTTERIES={
     filters:{parImpar:[2,5],soma:[17,46],consec:3,repet:[1,3]}
   },
   maismilionaria:{
-    name:'+Milionaria',api:'https://loteriascaixa-api.herokuapp.com/api/maismilionaria',
+    name:'+Milionaria',api:'/api/lottery/maismilionaria',
     total:50,pick:6,
     modelos:{A:{fora:3,dentro:3,noise:0.2},B:{fora:2,dentro:4,noise:0.35},C:{fora:4,dentro:2,noise:0.5},IA:{fora:3,dentro:3,noise:0.4}},
     premios:{2:'R$ 6',3:'R$ 24',4:'Variavel',5:'Variavel',6:'JACKPOT'},
@@ -3050,7 +3050,7 @@ const LOTTERIES={
     trevos:{total:6,pick:2}
   },
   timemania:{
-    name:'Timemania',api:'https://loteriascaixa-api.herokuapp.com/api/timemania',
+    name:'Timemania',api:'/api/lottery/timemania',
     total:80,pick:10,draw:7,
     modelos:{A:{fora:5,dentro:5,noise:0.2},B:{fora:4,dentro:6,noise:0.35},C:{fora:6,dentro:4,noise:0.5},IA:{fora:5,dentro:5,noise:0.4}},
     premios:{3:'R$ 3,50',4:'R$ 10,50',5:'Variavel',6:'Variavel',7:'JACKPOT'},
