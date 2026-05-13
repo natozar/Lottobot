@@ -47,7 +47,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ══════ CACHE (existing functionality) ══════
-const CACHE_NAME = 'lottobot-v102';
+const CACHE_NAME = 'lottobot-v103';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -112,6 +112,23 @@ self.addEventListener('fetch', (event) => {
 
   // Network First for API calls (lotofacil, megasena, quina)
   if (url.href.includes(API_BASE)) {
+    // v103: /latest com cache-bust (_t=...) sempre passa direto (no-store) — nunca usa cache do SW
+    // Antes, se Heroku timeout > 8s, SW retornava resultado de ontem e app nao detectava sorteio de hoje
+    const isLatestFresh = url.pathname.endsWith('/latest') && url.searchParams.has('_t');
+    if (isLatestFresh) {
+      event.respondWith(
+        fetch(request, { signal: AbortSignal.timeout(12000), cache: 'no-store' })
+          .catch(() => {
+            // Sem cache pra fallback — tenta cache da versao sem _t (mesma URL base)
+            const fallbackUrl = url.origin + url.pathname;
+            return caches.match(fallbackUrl).then((cached) => cached || new Response(
+              JSON.stringify({ offline: true }),
+              { headers: { 'Content-Type': 'application/json' } }
+            ));
+          })
+      );
+      return;
+    }
     event.respondWith(
       fetch(request, { signal: AbortSignal.timeout(8000) })
         .then((response) => {

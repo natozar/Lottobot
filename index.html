@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v102';
+    var V='lottobot-v103';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -3338,6 +3338,18 @@ document.addEventListener('DOMContentLoaded',async()=>{
   await loadAPI();
   downloadJackpotHistory(selectedLottery); // background — anti-jackpot history
   updateUI();renderJogos();renderSaved();renderTop5();updateStats();
+  // v103: refresh ULT quando usuario volta pro app — assim "jogos de ontem" recebem o sorteio de hoje
+  // PWAs ficam abertas por dias; sem isso, ULT congela no momento que app carregou
+  var _lastRefresh=Date.now();
+  function _maybeRefresh(){
+    // Throttle: nao chama loadAPI mais de uma vez a cada 60s
+    if(Date.now()-_lastRefresh<60*1000)return;
+    _lastRefresh=Date.now();
+    loadAPI().then(function(){updateUI()}).catch(function(){});
+  }
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')_maybeRefresh()});
+  window.addEventListener('pageshow',function(e){if(e.persisted)_maybeRefresh()});
+  window.addEventListener('focus',_maybeRefresh);
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('service-worker.js',{updateViaCache:'none'}).then(reg=>{
       window._swReg=reg;
@@ -4187,7 +4199,13 @@ const UA_LIST=[
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
 ];
 function randomUA(){return UA_LIST[Math.floor(Math.random()*UA_LIST.length)]}
-async function apiFetch(url){const c=new AbortController();const t=setTimeout(()=>c.abort(),8000);try{const r=await fetch(url,{signal:c.signal,headers:{'User-Agent':randomUA()}});clearTimeout(t);return r.json()}catch(e){clearTimeout(t);throw e}}
+async function apiFetch(url,opts){
+  const c=new AbortController();const t=setTimeout(()=>c.abort(),8000);
+  // v103: cache-bust opcional para /latest — evita SW/HTTP cache servir dados de ontem
+  var finalUrl=url;
+  if(opts&&opts.fresh){finalUrl+=(url.indexOf('?')>=0?'&':'?')+'_t='+Date.now()}
+  try{const r=await fetch(finalUrl,{signal:c.signal,headers:{'User-Agent':randomUA()},cache:opts&&opts.fresh?'no-store':'default'});clearTimeout(t);return r.json()}catch(e){clearTimeout(t);throw e}
+}
 
 function parseDraw(d){
   const dz=d.listaDezenas||d.dezenas||d.numeros;
@@ -4224,7 +4242,8 @@ async function loadAPI(){
     if(cached){try{cachedData=JSON.parse(cached)}catch(e){}}
 
     let raw;
-    try{raw=await apiFetch(getLottery().api+'/latest')}catch(e){raw=null}
+    // v103: fresh=true — bypass SW cache pra garantir resultado de hoje
+    try{raw=await apiFetch(getLottery().api+'/latest',{fresh:true})}catch(e){raw=null}
 
     if(raw){
       const latest=parseDraw(raw);
@@ -5658,6 +5677,8 @@ function updateUI(){
   const res=document.getElementById('ultimoResumo');
   if(res){const p=ULT.numeros.filter(n=>n%2===0).length,s=ULT.numeros.reduce((a,b)=>a+b,0);res.innerHTML='Pares: '+p+' · Ímpares: '+(ULT.numeros.length-p)+' · Soma: '+s}
   updateGridLayout();renderAnaliseTab();renderHomeHeatmap();renderTop5();renderNumeroDoDia();renderHistoricoTimeline();updateStats();renderNumPanel();updatePreGenSummary();updatePrizeEstimate();updateDynamicDescriptions();updateInviteStats();
+  // v103: re-render saved games sempre que ULT mudar — assim "jogos de ontem" mostram resultado do sorteio de hoje
+  if(typeof renderSaved==='function')renderSaved();
 }
 
 function switchTab(tab){

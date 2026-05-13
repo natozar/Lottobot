@@ -1241,7 +1241,8 @@ exports.ssrPages = onRequest({
         const resultados = await fetchHistorico(loteria.api, 100);
         const stats = calcularEstatisticas(resultados, loteria.numeros);
         const html = renderPaginaEstatisticas(loteria, stats);
-        res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+        // v103: 5min + SWR — estatisticas mudam a cada novo sorteio
+        res.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=3600');
         return res.status(200).send(html);
       }
 
@@ -1251,7 +1252,9 @@ exports.ssrPages = onRequest({
       let artigos = [];
       try { artigos = await buscarArtigosBlog(loteriaSlug, 5); } catch (e) { /* ok */ }
       const html = renderPaginaLoteria(loteria, dados, stats, artigos);
-      res.set('Cache-Control', 'public, max-age=1800, s-maxage=1800');
+      // v103: cache curto (5min) + stale-while-revalidate — apos novo sorteio, CDN refresca em ate 5min
+      // Antes: 30min — usuario via resultado de ontem ate 30min depois do sorteio de hoje
+      res.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=1800');
       return res.status(200).send(html);
     }
 
