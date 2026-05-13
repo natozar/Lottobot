@@ -13,7 +13,8 @@
   <script>
     firebase.initializeApp({
       apiKey:"AIzaSyAJ5GdmAKuBJQhHcbtn1dgN8Am5n--SJBo",
-      authDomain:"lottobot-8d75e.firebaseapp.com",
+      // v106: authDomain dinamico — evita storage partitioning no popup login
+      authDomain:(function(){var h=location.hostname;return (h==='lottobot.com.br'||h==='www.lottobot.com.br'||/\.web\.app$/.test(h)||/\.firebaseapp\.com$/.test(h))?h:'lottobot-8d75e.firebaseapp.com'})(),
       projectId:"lottobot-8d75e",
       storageBucket:"lottobot-8d75e.firebasestorage.app",
       messagingSenderId:"764623255861",

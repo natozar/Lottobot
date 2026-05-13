@@ -116,7 +116,10 @@
     if (typeof firebase !== 'undefined' && firebase.initializeApp){
       firebase.initializeApp({
         apiKey:"AIzaSyAJ5GdmAKuBJQhHcbtn1dgN8Am5n--SJBo",
-        authDomain:"lottobot-8d75e.firebaseapp.com",
+        // v106 (re-aplicacao do v92 que regrediu): authDomain dinamico evita
+        // erro "falta do estado inicial" no signInWithPopup quando navegador
+        // particiona storage entre lottobot.com.br <-> firebaseapp.com.
+        authDomain:(function(){var h=location.hostname;return (h==='lottobot.com.br'||h==='www.lottobot.com.br'||/\.web\.app$/.test(h)||/\.firebaseapp\.com$/.test(h))?h:'lottobot-8d75e.firebaseapp.com'})(),
         projectId:"lottobot-8d75e",
         storageBucket:"lottobot-8d75e.firebasestorage.app",
         messagingSenderId:"764623255861",

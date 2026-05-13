@@ -29,6 +29,7 @@ Erros em runtime também são capturados automaticamente no localStorage `paiErr
 | 9 | 2026-05-11 | redirect_uri_mismatch no Google login | 🟢 fixed | v93 (popup-only) |
 | 10 | 2026-05-11 | API loteriascaixa retorna array em /lotofacil mas código esperava objeto | 🟢 fixed | v95 (usar /lotofacil/latest + normalizeResp) |
 | 11 | 2026-05-11 | SW retornando null no fetch → 'Failed to convert value to Response' | 🟢 fixed | v95 (fallback Response sempre) |
+| 12 | 2026-05-13 | REGRESSAO: storage partitioning Google login voltou (fix v92 perdido) | 🟢 fixed | v106 (re-aplicacao authDomain dinamico em index/pai/bets/admin) |
 
 ---
 
@@ -134,6 +135,25 @@ PIN 0606 funciona sempre como backup independente.
 **Causa**: Firebase Hosting aplica headers baseado na URL da REQUISIÇÃO, não no destino do rewrite. Regra pra "paivencedor.html" não matchava com requisições a `/pai`. Default era 1h.
 
 **Fix** (commit `44312fa`): adicionada regra explícita pra `source: "/pai"` com `Cache-Control: no-cache, no-store, must-revalidate` + Pragma + Expires.
+
+---
+
+### #12 — REGRESSAO authDomain (storage partitioning Google login) · 🟢 v106
+**Erro EXATO reportado** (re-aparecimento do #4):
+> "Não foi possível processar a solicitação devido à falta do estado inicial. Isso pode ocorrer se o armazenamento de sessão do navegador estiver inacessível ou tiver sido apagado acidentalmente."
+
+**Contexto**: Renato 2026-05-13 tentando Google login no /pai.
+
+**Causa**: O fix v92 (authDomain dinamico = location.hostname) foi perdido em algum commit posterior. Os 4 arquivos (index/paivencedor/bets/admin) voltaram pra `authDomain: "lottobot-8d75e.firebaseapp.com"` hardcoded. O popup do Google login carrega o handler em firebaseapp.com como third-party — sessionStorage e particionado por Chrome 115+ — handler nao acha o initial state.
+
+**Fix** (v106): re-aplicado em index.html, paivencedor.html, bets.html, admin.html:
+```js
+authDomain:(function(){var h=location.hostname;return (h==='lottobot.com.br'||h==='www.lottobot.com.br'||/\.web\.app$/.test(h)||/\.firebaseapp\.com$/.test(h))?h:'lottobot-8d75e.firebaseapp.com'})()
+```
+
+Quando servido em lottobot.com.br, authDomain = lottobot.com.br. /__/auth/handler ja eh servido nesse dominio pelo Firebase Hosting (confirmado: GET retorna 200). Mesma origem do parent = sem partitioning = state preservado.
+
+**Prevencao**: nao copiar/colar `authDomain:"lottobot-8d75e.firebaseapp.com"` em novos arquivos. Sempre usar a IIFE dinamica. Considerar mover pra um helper compartilhado.
 
 ---
 

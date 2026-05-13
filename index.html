@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v105';
+    var V='lottobot-v106';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -72,7 +72,9 @@
   <script>
     firebase.initializeApp({
       apiKey:"AIzaSyAJ5GdmAKuBJQhHcbtn1dgN8Am5n--SJBo",
-      authDomain:"lottobot-8d75e.firebaseapp.com",
+      // v106: authDomain = hostname atual (mesma-origem) pra evitar storage partitioning
+      // no signInWithPopup/Redirect. Era a regressao do fix v92 (PAI_ERRORS #4).
+      authDomain:(function(){var h=location.hostname;return (h==='lottobot.com.br'||h==='www.lottobot.com.br'||/\.web\.app$/.test(h)||/\.firebaseapp\.com$/.test(h))?h:'lottobot-8d75e.firebaseapp.com'})(),
       projectId:"lottobot-8d75e",
       storageBucket:"lottobot-8d75e.firebasestorage.app",
       messagingSenderId:"764623255861",
