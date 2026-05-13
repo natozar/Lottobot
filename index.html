@@ -3226,7 +3226,8 @@ async function downloadJackpotHistory(lottery){
       const lot=LOTTERIES[lottery];
       let latestNum;
       try{
-        const data=await apiFetch(lot.api+'/latest');
+        // v103: fresh — jackpot history precisa do sorteio mais recente real, nao do cache
+        const data=await apiFetch(lot.api+'/latest',{fresh:true});
         latestNum=parseInt(data.concurso||data.numero);
       }catch(e){
         console.warn('Jackpot history: cannot get latest for',lottery);
@@ -3902,7 +3903,14 @@ async function loadSavedFromCloud(){
       return;
     }
     // Load from cloud
-    saved=snap.docs.map(d=>{const g=d.data();return{n:g.numbers,score:g.score||0,mod:g.modelo||'B',ref:g.concursoRef||0,dt:g.createdAt?.toDate?.()?.toLocaleDateString('pt-BR')||'',id:parseInt(d.id)||Date.now()}});
+    // v103: preserva lot, mes, trevos, time — sem isso, jogos voltam genericos e conferencia falha
+    saved=snap.docs.map(d=>{const g=d.data();const obj={n:g.numbers,score:g.score||0,mod:g.modelo||'B',ref:g.concursoRef||0,dt:g.createdAt?.toDate?.()?.toLocaleDateString('pt-BR')||'',id:parseInt(d.id)||Date.now()};
+      if(g.lottery)obj.lot=g.lottery;
+      if(g.mes)obj.mes=g.mes;
+      if(g.trevos)obj.trevos=g.trevos;
+      if(g.time)obj.time=g.time;
+      return obj;
+    });
     persist();renderSaved();updateStats();
   }catch(e){console.warn('Cloud sync error:',e)}
 }
@@ -3910,10 +3918,16 @@ async function loadSavedFromCloud(){
 async function saveToCloud(game){
   if(!currentUser)return;
   try{
-    await _db.collection('users').doc(currentUser.uid).collection('savedGames').doc(String(game.id)).set({
+    // v103: persiste lot e campos especiais (mes, trevos, time) — antes perdiam-se na sync
+    const payload={
       numbers:game.n,score:game.score||0,modelo:game.mod||'B',concursoRef:game.ref||0,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),checkedDraws:[]
-    });
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),checkedDraws:[],
+      lottery:game.lot||selectedLottery
+    };
+    if(game.mes)payload.mes=game.mes;
+    if(game.trevos)payload.trevos=game.trevos;
+    if(game.time)payload.time=game.time;
+    await _db.collection('users').doc(currentUser.uid).collection('savedGames').doc(String(game.id)).set(payload);
   }catch(e){console.warn('Save to cloud error:',e)}
 }
 
@@ -4300,7 +4314,8 @@ async function loadAPI(){
 setInterval(async()=>{
   if(!ULT)return;
   try{
-    const raw=await apiFetch(getLottery().api+'/latest');
+    // v103: fresh — sempre buscar do servidor pra detectar novo sorteio (nunca cache)
+    const raw=await apiFetch(getLottery().api+'/latest',{fresh:true});
     const latest=parseDraw(raw);
     if(latest&&latest.numero>ULT.numero){
       showToast('🆕 Novo sorteio #'+latest.numero+'! Atualizando...');
@@ -5151,7 +5166,8 @@ else{document.addEventListener('DOMContentLoaded',function(){paiBindFilters();pa
 // ══════ CONFERIR / SALVAR / SHARE ══════
 async function conferir(i){
   try{
-    const raw=await apiFetch(getLottery().api+'/latest');const d=parseDraw(raw);if(!d)throw 0;
+    // v103: fresh — usuario quer conferir AGORA, garante dado de hoje
+    const raw=await apiFetch(getLottery().api+'/latest',{fresh:true});const d=parseDraw(raw);if(!d)throw 0;
     if(d.numero===concRef){checkIdx=i;const desc=document.getElementById('manualCheckDesc');if(desc)desc.textContent='Selecione os '+getLottery().pick+' números sorteados:';document.getElementById('manualCheckModal').classList.add('active');showToast('⏳ Próximo sorteio ainda não saiu. Use conferência manual.');return}
     const mesSorteado=raw.mesSorte||null;
     showCheckResult(i,d.numeros,d.numero,d.numeros2||null,mesSorteado);
@@ -5421,6 +5437,14 @@ function limparJogos(){previousJogos=[...jogos];jogos=[];concRef=null;renderJogo
 function undoJogos(){if(!previousJogos.length){showToast('Nada para desfazer');return}jogos=[...previousJogos];previousJogos=[];renderJogos();updateStats();persist();showToast('↩ Desfeito')}
 
 // ══════ SAVED GAMES ══════
+// v103: helper — busca latest da loteria certa (do cache por-loteria), nao do ULT atual
+// Antes: jogos de Mega-Sena comparados contra ULT da Lotofacil = X acertos falso
+function _latestForLottery(lot){
+  if(!lot||lot===selectedLottery)return ULT;
+  try{const c=localStorage.getItem('lottobot_cache_'+lot);if(!c)return null;
+    const p=JSON.parse(c);return p&&p.latest?p.latest:null;
+  }catch(e){return null}
+}
 function renderSaved(){
   const c=document.getElementById('savedContainer');if(!c)return;
   const bar=document.getElementById('savedExportBar');
@@ -5428,10 +5452,13 @@ function renderSaved(){
   if(bar)bar.style.display='flex';
   c.innerHTML=saved.map(g=>{
     let checkHtml='';
-    if(ULT&&g.ref&&ULT.numero>g.ref){
-      const hits=g.n.filter(n=>ULT.numeros.includes(n)).length;
-      const prize=getPremios()[hits]||'';
-      const color=hits>=maxPrizeHits()-1?'var(--color-gold-primary)':hits>=minPrizeHits()?'#6aac7e':'var(--text-muted)';
+    // v103: cada jogo conferido contra o ULT da SUA loteria (nao o atual)
+    const gLatest=_latestForLottery(g.lot);
+    if(gLatest&&g.ref&&gLatest.numero>g.ref){
+      const hits=g.n.filter(n=>gLatest.numeros.includes(n)).length;
+      // Premios variam por loteria — se cross-lottery, prize generico
+      const prize=(g.lot&&g.lot!==selectedLottery)?(hits>=3?hits+' acertos':''):(getPremios()[hits]||'');
+      const color=(g.lot===selectedLottery&&hits>=maxPrizeHits()-1)?'var(--color-gold-primary)':hits>=3?'#6aac7e':'var(--text-muted)';
       checkHtml=`<div style="font-size:0.65rem;color:${color};margin-top:3px">${hits} acertos${prize?' · '+prize:''}</div>`;
     }
     return `<div class="saved-item">

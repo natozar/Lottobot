@@ -1109,7 +1109,8 @@ async function renderBlogIndex(req, res) {
 </body>
 </html>`;
 
-  res.set('Cache-Control', 'public, max-age=1800');
+  // v103: 5min + SWR — novo sorteio gera novo artigo; index nao pode atrasar 30min
+  res.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=1800');
   return res.status(200).send(html);
 }
 
