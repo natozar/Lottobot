@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v110';
+    var V='lottobot-v111';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -3538,6 +3538,24 @@ document.addEventListener('DOMContentLoaded',async()=>{
         },3000);
       },800);
     }else{
+      // v111: quem entrou pelo /pai (grant local) NUNCA ve login Google.
+      // Cria uma sessao anonima silenciosa — mesmo caminho ja usado pelo
+      // formulario nome/email (loginQuickForm). Zero UI, zero Google.
+      if(isPaiVencedor()){
+        try{
+          await _auth.signInAnonymously();
+          return; // onAuthStateChanged dispara de novo com user -> fluxo normal
+        }catch(e){
+          // Sem rede pra auth anonima — libera o app localmente assim mesmo.
+          document.getElementById('appLayout').style.display='';
+          document.getElementById('mobileFab').style.display='';
+          document.getElementById('mobileNav').style.display='';
+          document.getElementById('authModal').classList.remove('active');
+          document.getElementById('authCloseBtn').style.display='none';
+          try{applyPlanRestrictions();updatePlanBadge();}catch(_e){}
+          return;
+        }
+      }
       // Bloquear app — exigir login
       document.getElementById('appLayout').style.display='none';
       document.getElementById('mobileFab').style.display='none';
