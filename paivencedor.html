@@ -105,34 +105,8 @@
   })();
 </script>
 
-<!-- Firebase SDK pra auth unificada com admin -->
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-<script>
-  // v94: Firebase init dentro de try/catch — se Firebase nao carregar (rede,
-  // ad blocker), o resto do app ainda funciona com PIN 0606.
-  try {
-    if (typeof firebase !== 'undefined' && firebase.initializeApp){
-      firebase.initializeApp({
-        apiKey:"AIzaSyAJ5GdmAKuBJQhHcbtn1dgN8Am5n--SJBo",
-        // v106 (re-aplicacao do v92 que regrediu): authDomain dinamico evita
-        // erro "falta do estado inicial" no signInWithPopup quando navegador
-        // particiona storage entre lottobot.com.br <-> firebaseapp.com.
-        authDomain:(function(){var h=location.hostname;return (h==='lottobot.com.br'||h==='www.lottobot.com.br'||/\.web\.app$/.test(h)||/\.firebaseapp\.com$/.test(h))?h:'lottobot-8d75e.firebaseapp.com'})(),
-        projectId:"lottobot-8d75e",
-        storageBucket:"lottobot-8d75e.firebasestorage.app",
-        messagingSenderId:"764623255861",
-        appId:"1:764623255861:web:0e741825f6316f0be3347c"
-      });
-      console.info('[pai/v94] Firebase init OK');
-    } else {
-      console.warn('[pai/v94] Firebase SDK nao carregou — PIN 0606 funciona normal');
-    }
-  } catch(e){
-    console.error('[pai/v94] Firebase init erro:', e);
-  }
-</script>
+<!-- v110: login do /pai e 100% local (e-mail + PIN). Firebase/Google removido -->
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -270,24 +244,13 @@ input{font-family:inherit}
 .pin-btn:active{transform:scale(.98)}
 .pin-msg{margin-top:12px;font-size:.9rem;color:#5a6a66;min-height:20px;line-height:1.4}
 .pin-msg.error{color:var(--error)}
-.pin-divider{
-  display:flex;align-items:center;gap:12px;
-  color:#94a39e;font-size:.78rem;
-  margin:22px 0 16px;
-  text-transform:uppercase;letter-spacing:.12em;
-  font-weight:700;
+.pin-input-email{
+  font-size:1.05rem;letter-spacing:normal;
+  font-weight:600;
+  padding:15px 16px;
+  text-transform:lowercase;
 }
-.pin-divider::before,.pin-divider::after{
-  content:"";flex:1;height:1px;
-  background:linear-gradient(to right, transparent, #e0e8e3, transparent);
-}
-.pin-btn-google{
-  background:#fff;color:#1a1a1a;
-  border:1.5px solid #e0e8e3;
-  font-weight:700;font-size:.95rem;
-  box-shadow:0 2px 6px rgba(0,0,0,.04);
-}
-.pin-btn-google:hover{background:#f6f7f5;border-color:var(--primary);box-shadow:0 4px 10px rgba(0,166,81,.12)}
+.pin-input-email::placeholder{font-weight:500;color:#94a39e;text-transform:none}
 .pin-card .footer-love{
   margin-top:22px;
   font-size:.78rem;color:#94a39e;
@@ -1450,7 +1413,7 @@ main{
   background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
   color:#fff;
   padding:18px 20px;
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;align-items:center;justify-content:center;
   box-shadow:var(--shadow-sm);
 }
 .welcome-header-title{font-size:1.05rem;font-weight:600}
@@ -1567,15 +1530,13 @@ main{
 <div id="pinScreen" class="pin-wrap">
   <div class="pin-card">
     <h1>Bem-vindo, pai</h1>
-    <p class="sub">Digite seu código de 4 dígitos pra entrar</p>
-    <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="pinInput" class="pin-input" autocomplete="off" placeholder="••••" />
+    <p class="sub">Entre com seu e-mail e o código de 6 dígitos</p>
+    <input type="email" id="emailInput" class="pin-input pin-input-email" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="email" placeholder="seu e-mail" />
+    <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="pinInput" class="pin-input" autocomplete="current-password" placeholder="••••••" />
     <button id="pinSubmit" class="pin-btn">Entrar</button>
     <p id="pinMsg" class="pin-msg"></p>
-    <div class="pin-divider"><span>ou</span></div>
-    <button id="googleLoginBtn" class="pin-btn pin-btn-google" type="button">🔑 Entrar com Google</button>
-    <p id="googleLoginMsg" class="pin-msg"></p>
     <p class="footer-love">feito com amor por seu filho 💚</p>
-    <p style="font-size:.65rem;color:#aaa;margin-top:8px;letter-spacing:.1em">v97 · pai mode</p>
+    <p style="font-size:.65rem;color:#aaa;margin-top:8px;letter-spacing:.1em">v110 · pai mode</p>
   </div>
 </div>
 
@@ -1594,7 +1555,6 @@ main{
 <div id="welcomeScreen" class="welcome-wrap hidden">
   <header class="welcome-header">
     <div class="welcome-header-title">Para você, pai 💚</div>
-    <button id="welcomeLogoutBtn" class="logout-btn">Sair</button>
   </header>
   <main class="welcome-main">
     <div class="welcome-card">
@@ -2059,10 +2019,13 @@ main{
 'use strict';
 
 // ============ CONSTANTS ============
-var PIN = '0606';
+// v110: acesso 100% local — e-mails autorizados + PIN unico de 6 digitos.
+var PIN = '060608';
+var ALLOWED_EMAILS = ['chatsagrado@gmail.com','agrorv@gmail.com'];
 var MAX_ATTEMPTS = 3;
 var LOCKOUT_MS = 5 * 60 * 1000;
 var KEY_UNLOCKED = 'paiVencedor_pin_unlocked';
+var KEY_EMAIL = 'paiVencedor_email';
 var KEY_ATTEMPTS = 'paiVencedor_pin_attempts';
 var KEY_LOCKOUT = 'paiVencedor_pin_lockout';
 var KEY_DATA_CACHE = 'paiVencedor_data_cache';
@@ -2152,11 +2115,16 @@ function showPinScreen(){
   hide($('lockoutScreen'));
   hide($('welcomeScreen'));
   show($('pinScreen'));
+  var emailEl = $('emailInput');
   var inp = $('pinInput');
+  // v110: pre-preenche o ultimo e-mail usado (facilita re-setup apos limpar cache)
+  emailEl.value = safeGet(KEY_EMAIL) || '';
+  emailEl.classList.remove('error');
   inp.value = '';
+  inp.classList.remove('error');
   $('pinMsg').textContent = '';
   $('pinMsg').classList.remove('error');
-  setTimeout(function(){ try { inp.focus(); } catch(e){} }, 60);
+  setTimeout(function(){ try { (emailEl.value ? inp : emailEl).focus(); } catch(e){} }, 60);
 }
 
 function showLockoutScreen(){
@@ -2275,163 +2243,39 @@ function setupErrorViewer(){
   setInterval(refreshBadge, 2000);
 }
 
-// v91: Login com Google (mesma conta do admin) — com defesas robustas
-var ADMIN_EMAILS = ['chatsagrado@gmail.com','agrorv@gmail.com'];
+// v110: login Google/Firebase removido do /pai — acesso e via e-mail + PIN local.
 
-function firebaseReady(){
-  return typeof window.firebase !== 'undefined'
-      && typeof firebase.auth === 'function';
-}
+// v110: handleGoogleLogin e setupAuthListener removidos.
+// O acesso ao /pai agora e validado em handlePinSubmit (e-mail + PIN), sem rede.
 
-function isMobile(){
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
-}
-
-function setGoogleMsg(text, isError){
-  var msg = $('googleLoginMsg');
-  if (!msg) return;
-  msg.textContent = text || '';
-  if (isError) msg.classList.add('error');
-  else msg.classList.remove('error');
-}
-
-function handleGoogleLogin(){
-  if (!firebaseReady()){
-    setGoogleMsg('Login Google indisponivel. Use o PIN 0606.', true);
-    return;
-  }
-  setGoogleMsg('Abrindo Google…', false);
-
-  // v109: no celular o signInWithPopup reaproveita a sessao Google do aparelho
-  // SEM mostrar a tela "Escolha uma conta" — logando direto na conta errada
-  // (ex: nato.gorwp, que nao e admin -> bloqueia o /pai). O redirect de pagina
-  // inteira sempre mostra o chooser do Google, onde da pra "Usar outra conta".
-  var isMobile = /Android|webOS|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
-
-  var startLogin = function(){
-    try {
-      var provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
-      if (isMobile){
-        setGoogleMsg('Redirecionando pro Google… escolha chatsagrado@gmail.com', false);
-        firebase.auth().signInWithRedirect(provider).catch(function(e){
-          setGoogleMsg('[' + (e.code || '?') + '] ' + (e.message || 'erro') + ' — use PIN 0606', true);
-          if (window.console && console.error) console.error('[pai/v109] redirect error:', e);
-        });
-        return;
-      }
-      firebase.auth().signInWithPopup(provider)
-        .then(function(result){
-          if (window.console && console.info) console.info('[pai/v109] popup OK:', result.user && result.user.email);
-          // onAuthStateChanged ja trata o setUnlocked + showAppAndBoot
-        })
-        .catch(function(e){
-          var code = e.code || '?';
-          var msg;
-          if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment'){
-            // fallback: redirect de pagina inteira
-            firebase.auth().signInWithRedirect(provider).catch(function(){});
-            return;
-          } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request'){
-            msg = 'Popup fechado. Tente de novo ou use o PIN 0606.';
-          } else if (code === 'auth/unauthorized-domain'){
-            msg = 'Dominio nao autorizado no Firebase Console. Use o PIN 0606.';
-          } else {
-            msg = '[' + code + '] ' + (e.message || 'erro') + ' — use PIN 0606';
-          }
-          setGoogleMsg(msg, true);
-          if (window.console && console.error) console.error('[pai/v109] popup error:', e);
-        });
-    } catch(e){
-      setGoogleMsg('Erro: ' + (e.message || e) + ' — use PIN 0606', true);
-      if (window.console && console.error) console.error('[pai/v109] handleGoogleLogin:', e);
-    }
-  };
-
-  // v107: signOut antes do login pra forcar o account chooser do Google.
-  // Sem isso, se Firebase tem sessao ativa (mesmo de email errado), o Google
-  // as vezes pula o chooser e re-loga na mesma conta automaticamente.
-  try {
-    if (firebase.auth().currentUser){
-      firebase.auth().signOut().then(startLogin).catch(startLogin);
-    } else {
-      startLogin();
-    }
-  } catch(e){
-    startLogin();
-  }
-}
-
-// Listener de auth state — auto-unlock se for admin
-function setupAuthListener(){
-  if (!firebaseReady()){
-    // Se Firebase nao carregou (ad blocker, rede ruim), esconde o botao Google
-    var btn = $('googleLoginBtn');
-    var divider = document.querySelector('.pin-divider');
-    if (btn) btn.style.display = 'none';
-    if (divider) divider.style.display = 'none';
-    if (window.console && console.warn) console.warn('[pai/v91] firebase indisponivel — escondendo Google login');
-    return;
-  }
-  // Trata o resultado do redirect (volta do Google) — mostra erro pro usuario
-  try {
-    firebase.auth().getRedirectResult()
-      .then(function(result){
-        if (result && result.user){
-          if (window.console && console.info) console.info('[pai/v91] redirect OK:', result.user.email);
-        }
-      })
-      .catch(function(e){
-        if (!e || e.code === 'auth/null-user') return;
-        var human = '[' + (e.code || '?') + '] ' + (e.message || 'erro');
-        setGoogleMsg('Falha login Google: ' + human + ' — use PIN 0606', true);
-        if (window.console && console.error) console.error('[pai/v91] getRedirectResult:', e);
-      });
-  } catch(e){
-    if (window.console && console.error) console.error('[pai/v91] getRedirectResult sync:', e);
-  }
-
-  try {
-    firebase.auth().onAuthStateChanged(function(user){
-      if (!user) return;
-      var email = (user.email || '').toLowerCase();
-      var isAdmin = ADMIN_EMAILS.indexOf(email) !== -1;
-      if (window.console && console.info) console.info('[pai/v91] auth state · email=' + email + ' · isAdmin=' + isAdmin);
-      if (isAdmin){
-        setUnlocked();  // ja seta paiGrant tb (v96)
-        setGoogleMsg('✓ Logado como ' + email, false);
-        var pin = $('pinScreen');
-        if (pin && !pin.classList.contains('hidden')){
-          // v96: volta o Welcome com 2 opcoes — LottoBot completo OU Gerador especial
-          setTimeout(function(){ showWelcomeScreen(); }, 600);
-        }
-      } else {
-        // v109: conta errada — desloga pra limpar a sessao e orienta a troca.
-        setGoogleMsg('A conta ' + email + ' nao tem acesso ao /pai. Toque em "Entrar com Google" de novo e escolha "Usar outra conta" → chatsagrado@gmail.com. Ou use o PIN 0606.', true);
-        try { firebase.auth().signOut(); } catch(e){}
-      }
-    });
-  } catch(e){
-    if (window.console && console.error) console.error('[pai/v91] onAuthStateChanged:', e);
-  }
-}
+// v110: normaliza e-mail (trim + minusculas) pra evitar erro de digitacao no celular
+function normEmail(s){ return (s || '').trim().toLowerCase(); }
 
 function handlePinSubmit(){
-  if (window.console) console.info('[pai/v96] handlePinSubmit chamado');
+  var emailEl = $('emailInput');
   var input = $('pinInput');
   var msg = $('pinMsg');
+  var email = normEmail(emailEl.value);
   var val = (input.value || '').trim();
-  if (window.console) console.info('[pai/v96] PIN value len=' + val.length + ' · esperado=' + PIN.length);
-  if (val === PIN){
-    if (window.console) console.info('[pai/v96] PIN CORRETO — setUnlocked + showWelcomeScreen');
+  var emailOk = ALLOWED_EMAILS.indexOf(email) !== -1;
+  var pinOk = val === PIN;
+  if (window.console) console.info('[pai/v110] handlePinSubmit · emailOk=' + emailOk + ' · pinLen=' + val.length);
+  if (emailOk && pinOk){
+    if (window.console) console.info('[pai/v110] acesso liberado — setUnlocked + showWelcomeScreen');
+    try { localStorage.setItem(KEY_EMAIL, email); } catch(e){}
     setUnlocked();  // ja seta paiGrant tb (v96)
-    // v96: volta o Welcome com escolha LottoBot vs Gerador especial
     showWelcomeScreen();
     return;
   }
   var locked = bumpFailedAttempt();
-  input.classList.add('error');
-  setTimeout(function(){ input.classList.remove('error'); }, 400);
+  if (!emailOk){
+    emailEl.classList.add('error');
+    setTimeout(function(){ emailEl.classList.remove('error'); }, 400);
+  }
+  if (!pinOk){
+    input.classList.add('error');
+    setTimeout(function(){ input.classList.remove('error'); }, 400);
+  }
   input.value = '';
   if (locked){
     msg.textContent = 'Acesso nao autorizado.';
@@ -2440,17 +2284,12 @@ function handlePinSubmit(){
     return;
   }
   var left = MAX_ATTEMPTS - getAttempts();
-  msg.textContent = 'PIN incorreto. ' + left + ' tentativa' + (left === 1 ? '' : 's') + ' restante' + (left === 1 ? '' : 's') + '.';
+  msg.textContent = (!emailOk ? 'E-mail nao autorizado. ' : 'PIN incorreto. ')
+    + left + ' tentativa' + (left === 1 ? '' : 's') + ' restante' + (left === 1 ? '' : 's') + '.';
   msg.classList.add('error');
 }
 
-function fullLogout(){
-  clearUnlock();
-  safeRemove(KEY_GRANT);
-  safeRemove(KEY_GRANT_DATE);
-  if (lockoutInterval){ clearInterval(lockoutInterval); lockoutInterval = null; }
-  showPinScreen();
-}
+// v110: fullLogout removido — uma vez logado, o pai nunca mais e deslogado.
 
 function enterMainApp(){
   try {
@@ -3367,15 +3206,13 @@ function updateModeUI(){
 function wireUI(){
   $('pinSubmit').addEventListener('click', handlePinSubmit);
   $('pinInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') handlePinSubmit(); });
-  var googleBtn = $('googleLoginBtn');
-  if (googleBtn) googleBtn.addEventListener('click', handleGoogleLogin);
-  $('welcomeLogoutBtn').addEventListener('click', fullLogout);
+  // v110: Enter no campo de e-mail pula pro campo de PIN
+  $('emailInput').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('pinInput').focus(); } });
   $('enterAppBtn').addEventListener('click', enterMainApp);
   $('enterGeneratorBtn').addEventListener('click', showAppAndBoot);
   // v96: volta pro Welcome (escolha LottoBot completo ou Gerador especial)
   $('logoutBtn').addEventListener('click', backToWelcome);
 
-  setupAuthListener();
   setupErrorViewer();
 
   // v90: Card volta a viver DENTRO do #mainArea (em flow).
