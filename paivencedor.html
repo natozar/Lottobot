@@ -2302,22 +2302,36 @@ function handleGoogleLogin(){
   }
   setGoogleMsg('Abrindo Google…', false);
 
-  var doPopup = function(){
+  // v109: no celular o signInWithPopup reaproveita a sessao Google do aparelho
+  // SEM mostrar a tela "Escolha uma conta" — logando direto na conta errada
+  // (ex: nato.gorwp, que nao e admin -> bloqueia o /pai). O redirect de pagina
+  // inteira sempre mostra o chooser do Google, onde da pra "Usar outra conta".
+  var isMobile = /Android|webOS|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
+
+  var startLogin = function(){
     try {
       var provider = new firebase.auth.GoogleAuthProvider();
-      // v107: prompt=select_account + clearing previous session forca chooser
-      // mesmo quando ja ha sessao Firebase ativa de email diferente
       provider.setCustomParameters({ prompt: 'select_account' });
+      if (isMobile){
+        setGoogleMsg('Redirecionando pro Google… escolha chatsagrado@gmail.com', false);
+        firebase.auth().signInWithRedirect(provider).catch(function(e){
+          setGoogleMsg('[' + (e.code || '?') + '] ' + (e.message || 'erro') + ' — use PIN 0606', true);
+          if (window.console && console.error) console.error('[pai/v109] redirect error:', e);
+        });
+        return;
+      }
       firebase.auth().signInWithPopup(provider)
         .then(function(result){
-          if (window.console && console.info) console.info('[pai/v107] popup OK:', result.user && result.user.email);
+          if (window.console && console.info) console.info('[pai/v109] popup OK:', result.user && result.user.email);
           // onAuthStateChanged ja trata o setUnlocked + showAppAndBoot
         })
         .catch(function(e){
           var code = e.code || '?';
           var msg;
-          if (code === 'auth/popup-blocked'){
-            msg = 'Seu navegador bloqueou o popup. Permita popups pra esta pagina, ou use o PIN 0606.';
+          if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment'){
+            // fallback: redirect de pagina inteira
+            firebase.auth().signInWithRedirect(provider).catch(function(){});
+            return;
           } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request'){
             msg = 'Popup fechado. Tente de novo ou use o PIN 0606.';
           } else if (code === 'auth/unauthorized-domain'){
@@ -2326,25 +2340,25 @@ function handleGoogleLogin(){
             msg = '[' + code + '] ' + (e.message || 'erro') + ' — use PIN 0606';
           }
           setGoogleMsg(msg, true);
-          if (window.console && console.error) console.error('[pai/v107] popup error:', e);
+          if (window.console && console.error) console.error('[pai/v109] popup error:', e);
         });
     } catch(e){
       setGoogleMsg('Erro: ' + (e.message || e) + ' — use PIN 0606', true);
-      if (window.console && console.error) console.error('[pai/v107] handleGoogleLogin:', e);
+      if (window.console && console.error) console.error('[pai/v109] handleGoogleLogin:', e);
     }
   };
 
-  // v107: signOut antes do popup pra forcar o account chooser do Google
+  // v107: signOut antes do login pra forcar o account chooser do Google.
   // Sem isso, se Firebase tem sessao ativa (mesmo de email errado), o Google
   // as vezes pula o chooser e re-loga na mesma conta automaticamente.
   try {
     if (firebase.auth().currentUser){
-      firebase.auth().signOut().then(doPopup).catch(doPopup);
+      firebase.auth().signOut().then(startLogin).catch(startLogin);
     } else {
-      doPopup();
+      startLogin();
     }
   } catch(e){
-    doPopup();
+    startLogin();
   }
 }
 
@@ -2392,7 +2406,9 @@ function setupAuthListener(){
           setTimeout(function(){ showWelcomeScreen(); }, 600);
         }
       } else {
-        setGoogleMsg('Conta ' + email + ' nao tem acesso /pai. Use PIN 0606.', true);
+        // v109: conta errada — desloga pra limpar a sessao e orienta a troca.
+        setGoogleMsg('A conta ' + email + ' nao tem acesso ao /pai. Toque em "Entrar com Google" de novo e escolha "Usar outra conta" → chatsagrado@gmail.com. Ou use o PIN 0606.', true);
+        try { firebase.auth().signOut(); } catch(e){}
       }
     });
   } catch(e){
