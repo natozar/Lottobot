@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v107';
+    var V='lottobot-v108';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -3479,6 +3479,17 @@ document.addEventListener('DOMContentLoaded',async()=>{
   }
   // Garantir persistencia de login entre sessoes e atualizacoes
   try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(e){}
+  // v108: capturar resultado/erros do fluxo de redirect (login Google no celular).
+  // Sem isto, falhas no redirect ficam silenciosas e o app reusa a sessao antiga.
+  try{
+    await firebase.auth().getRedirectResult();
+  }catch(e){
+    if(e&&e.code==='auth/account-exists-with-different-credential'){
+      showToast('Este email ja tem conta criada de outra forma. Fale com o suporte.','error');
+    }else if(e&&e.code){
+      showToast('Erro ao entrar: '+e.message,'error');
+    }
+  }
   // Firebase Auth listener
   _auth.onAuthStateChanged(async user=>{
     currentUser=user;
@@ -3718,18 +3729,31 @@ function loginGoogle(){
   const provider=new firebase.auth.GoogleAuthProvider();
   // v107: select_account forca chooser quando usuario tem multiplas contas Google
   provider.setCustomParameters({prompt:'select_account'});
-  const doPopup=()=>{
-    _auth.signInWithPopup(provider).catch(e=>{
-      if(e.code==='auth/popup-blocked')_auth.signInWithRedirect(provider);
-      else if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request')showToast('Erro: '+e.message);
-    });
+  // v108: no celular o popup as vezes reaproveita a sessao Google do aparelho
+  // SEM mostrar a tela "Escolha uma conta" — logando direto na conta errada.
+  // O redirect de pagina inteira sempre mostra o chooser do Google.
+  const isMobile=/Android|webOS|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
+  const go=()=>{
+    if(isMobile){
+      _auth.signInWithRedirect(provider).catch(e=>showToast('Erro: '+e.message));
+    } else {
+      _auth.signInWithPopup(provider).catch(e=>{
+        if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'){
+          _auth.signInWithRedirect(provider).catch(()=>{});
+        }else if(e.code==='auth/account-exists-with-different-credential'){
+          showToast('Este email ja tem conta criada de outra forma. Fale com o suporte.','error');
+        }else if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request'){
+          showToast('Erro: '+e.message);
+        }
+      });
+    }
   };
   // v107: signOut antes pra garantir que chooser apareca mesmo se houver
   // sessao ativa de outro email (ex: usuario logou com X, quer trocar pra Y)
   if(_auth.currentUser){
-    _auth.signOut().then(doPopup).catch(doPopup);
+    _auth.signOut().then(go).catch(go);
   } else {
-    doPopup();
+    go();
   }
 }
 
