@@ -377,13 +377,13 @@
       <div class="row"><span class="lbl">O que checa</span><span class="val">Olha o <strong>último dígito</strong> de cada número e conta quantos dígitos diferentes aparecem. Vêm marcados <strong>9 e 10</strong>.</span></div>
       <div class="row"><span class="lbl">Por que existe</span><span class="val">Sem ele, nada impede um jogo com <span class="mono">03</span>, <span class="mono">13</span> e <span class="mono">23</span> — três finais 3 — repetido em vários dígitos. Como só existem 10 finais possíveis (de 0 a 9) e o jogo tem 15 números, alguma repetição é inevitável; o filtro só limita o exagero.</span></div>
       <div class="row"><span class="lbl">Peso no score</span><span class="val">
-        <span class="peso zero"><span class="pts">0 pts</span><span class="bar"><i style="width:4%"></i></span></span>
-        <span style="display:block;margin-top:8px;font-size:14px">Como <strong>filtro</strong>, funciona normalmente. Na <strong>pontuação</strong>, hoje ele não soma nada na Lotofácil: a regra de pontos pede mais finais distintos do que os 10 que existem. Nas loterias de jogo curto — Mega-Sena e Quina — ele pontua.</span>
+        <span class="peso"><span class="pts">5 pts</span><span class="bar"><i style="width:20%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">5 pontos com <strong>9 ou 10</strong> finais diferentes; 2 pontos com 8. Como o jogo tem 15 números e só existem 10 finais possíveis, chegar a 10 significa que nenhum dígito se repetiu mais que o necessário.</span>
       </span></div>
     </div>
     <div class="uso">
-      <div class="sim"><b>Ligue</b>Quando quiser espalhar os finais e não se importar com o score.</div>
-      <div class="nao"><b>Pense duas vezes</b>Se está montando a configuração para maximizar pontos — na Lotofácil, este não ajuda.</div>
+      <div class="sim"><b>Ligue</b>Quando quiser espalhar os finais — é barato e ainda rende pontos.</div>
+      <div class="nao"><b>Pense duas vezes</b>Junto com muitos números fixados: exigir 10 finais distintos com metade do jogo travado é pedir demais.</div>
     </div>
   </div>
 </article>
@@ -405,18 +405,18 @@
         <tr><td class="k">Primos</td><td class="num-col">10</td><td>De 4 a 6 primos</td></tr>
         <tr><td class="k">Baixo / Alto</td><td class="num-col">5</td><td>De 7 a 9 números baixos</td></tr>
         <tr><td class="k">Múltiplos de 3</td><td class="num-col">5</td><td>De 4 a 6 múltiplos</td></tr>
+        <tr><td class="k">Finais Distintos</td><td class="num-col">5</td><td>9 ou 10 finais diferentes</td></tr>
         <tr><td class="k">Centro da Cartela</td><td class="num-col">4</td><td>De 4 a 6 centrais</td></tr>
         <tr><td class="k">Fibonacci</td><td class="num-col">4</td><td>De 3 a 5</td></tr>
         <tr><td class="k">Pares Espelho</td><td class="num-col">4</td><td>De 3 a 5 pares completos</td></tr>
         <tr><td class="k">Consecutivas</td><td class="num-col">0</td><td>Não pontua — só filtra</td></tr>
-        <tr><td class="k">Finais Distintos</td><td class="num-col">0</td><td>Não pontua na Lotofácil</td></tr>
       </tbody>
     </table>
   </div>
   <div class="box">
     <span class="eyebrow">Por que ninguém precisa acertar tudo</span>
-    <p>Somando todos os aspectos dá <strong>122 pontos possíveis</strong>, mas o score é limitado a <strong>100</strong>. Ou seja: sobra folga. Um jogo pode errar completamente dois ou três itens pequenos e ainda assim marcar 100.</p>
-    <p>Repare também que os três primeiros — Soma, Par/Ímpar e Repetição — valem <strong>65 dos 122</strong>. São justamente os que já vêm ligados. Acertar esses três é mais da metade do caminho, e é por isso que a configuração de fábrica costuma render scores altos sem você mexer em nada.</p>
+    <p>Somando todos os aspectos dá <strong>127 pontos possíveis</strong>, mas o score é limitado a <strong>100</strong>. Ou seja: sobra folga. Um jogo pode errar completamente dois ou três itens pequenos e ainda assim marcar 100.</p>
+    <p>Repare também que os três primeiros — Soma, Par/Ímpar e Repetição — valem <strong>65 dos 127</strong>. São justamente os que já vêm ligados. Acertar esses três é mais da metade do caminho, e é por isso que a configuração de fábrica costuma render scores altos sem você mexer em nada.</p>
   </div>
 </section>
 

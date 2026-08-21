@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v113';
+    var V='lottobot-v114';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -4913,7 +4913,11 @@ function calcScore(j){
   const idealB=Math.round(pk/2);s+=(Math.abs(bc-idealB)<=1)?5:(Math.abs(bc-idealB)<=2)?2:0;
   const t2=getLottery().total;const m3L=[];for(let k=3;k<=t2;k+=3)m3L.push(k);const m3c=j.filter(n=>m3L.includes(n)).length;
   const m3Ideal=Math.round(pk*m3L.length/t2);s+=(Math.abs(m3c-m3Ideal)<=1)?5:0;
-  const fnc=new Set(j.map(n=>n%10)).size;s+=(fnc>=pk-1)?5:(fnc>=pk-2)?2:0;
+  // v114: o alvo nao pode passar de 10 — so existem 10 finais (0-9).
+  // Para pick<=10 o resultado e identico ao anterior; corrige pick>10 (Lotofacil),
+  // onde a condicao antiga era inalcancavel e nunca somava pontos.
+  const maxFin=Math.min(pk,10);
+  const fnc=new Set(j.map(n=>n%10)).size;s+=(fnc>=maxFin-1)?5:(fnc>=maxFin-2)?2:0;
   // Lotofácil-only patterns
   if(selectedLottery==='lotofacil'){
     const cc=j.filter(n=>CENTRO_NUMS.includes(n)).length;s+=(cc>=4&&cc<=6)?4:(cc>=3&&cc<=7)?2:0;
@@ -6267,7 +6271,10 @@ function updateDynamicDescriptions(){
     const defs=fnDefs[selectedLottery]||[pk-1,pk];
     const maxFinais=Math.min(pk,10);
     fnDiv.innerHTML='';
-    for(let v=Math.max(2,pk-3);v<=maxFinais;v++){
+    // v114: o piso tambem respeita o teto de 10 finais. Com pk>10 (Lotofacil)
+    // o intervalo antigo comecava em 12 e nao gerava botao nenhum — sem botoes,
+    // getActiveFilterVals('finais') voltava vazio e o filtro nao filtrava nada.
+    for(let v=Math.max(2,maxFinais-3);v<=maxFinais;v++){
       const btn=document.createElement('button');btn.className='centro-val'+(defs.includes(v)?' active':'');
       btn.dataset.val=v;btn.dataset.group='finais';btn.textContent=v;
       btn.onclick=function(){toggleFilterVal(this)};fnDiv.appendChild(btn);
