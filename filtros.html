@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Os filtros do Lottobot, um por um</title>
+<meta name="description" content="O que cada um dos 12 filtros do Lottobot faz, a regra exata que ele aplica, quanto pesa no score de 0 a 100 e quando vale — ou não vale — ligar.">
+<meta name="theme-color" content="#09090b">
+<link rel="canonical" href="https://lottobot.com.br/filtros">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Os filtros do Lottobot, um por um">
+<meta property="og:description" content="A regra exata de cada filtro, o peso no score e quando ligar cada um.">
+<meta property="og:url" content="https://lottobot.com.br/filtros">
+<meta property="og:image" content="https://lottobot.com.br/og-image.png">
+<link rel="icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="/guia.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-in">
+    <a class="home" href="/">LOTTO<b>BOT</b></a>
+    <a href="/tutorial">Tutorial</a>
+    <a href="/filtros" class="here">Filtros</a>
+    <a href="/">Abrir o app →</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<header>
+  <span class="eyebrow">Guia dos filtros · Lotofácil</span>
+  <h1 style="margin-top:14px">Os filtros,<br>um por um</h1>
+  <p class="lede">Doze chaves que apertam ou afrouxam o gerador. O que cada uma checa, por que ela existe, quanto vale no score — e quando é melhor deixar desligada.</p>
+  <div class="hero-meta">
+    <span class="chip"><b>4</b> ligados de fábrica</span>
+    <span class="chip"><b>8</b> opcionais</span>
+    <span class="chip">todos <b>grátis</b></span>
+  </div>
+</header>
+
+<section class="ref" style="margin-top:56px;padding-top:0;border-top:none">
+  <h2>Primeiro: o que um filtro faz</h2>
+  <p>Um filtro <strong>não escolhe números</strong>. Ele funciona como uma peneira: o gerador monta uma combinação, o filtro olha para ela e diz <em>passa</em> ou <em>não passa</em>. Se não passar, aquela combinação é jogada fora e o gerador tenta outra.</p>
+  <p>Por isso os filtros não aumentam sua chance de ganhar — <strong>nada aumenta</strong>, o sorteio é aleatório. O que eles fazem é impedir que você leve para a lotérica um jogo com um formato que praticamente nunca sai: quinze números em sequência, todos pares, ou a soma nas pontas.</p>
+
+  <div class="alert" style="margin-top:32px">
+    <span class="ic">🔑</span>
+    <p><strong>A regra de ouro:</strong> cada filtro que você liga reduz o universo de jogos possíveis. Dois ou três filtros afinam o resultado. Doze ao mesmo tempo, com faixas estreitas, podem deixar o gerador rodando à toa — ou entregar sempre os mesmos jogos. Ligue aos poucos e observe.</p>
+  </div>
+
+  <div class="toc">
+    <span class="eyebrow">Os doze</span>
+    <ol>
+      <li><a href="#f01">Par / Ímpar</a></li>
+      <li><a href="#f02">Soma</a></li>
+      <li><a href="#f03">Consecutivas</a></li>
+      <li><a href="#f04">Repetição</a></li>
+      <li><a href="#f05">Dezena</a></li>
+      <li><a href="#f06">Primos</a></li>
+      <li><a href="#f07">Baixo / Alto</a></li>
+      <li><a href="#f08">Centro da Cartela</a></li>
+      <li><a href="#f09">Fibonacci</a></li>
+      <li><a href="#f10">Múltiplos de 3</a></li>
+      <li><a href="#f11">Pares Espelho</a></li>
+      <li><a href="#f12">Finais Distintos</a></li>
+    </ol>
+  </div>
+  <p style="margin-top:18px;font-size:14.5px;color:var(--tx3)">Todos os números desta página são os da <strong>Lotofácil</strong>, com 15 dezenas por jogo. Ao trocar de loteria, o app ajusta as faixas sozinho.</p>
+</section>
+
+
+<!-- ══════ 01 ══════ -->
+<article class="filtro" id="f01">
+  <div class="filtro-head">
+    <span class="idx">01</span>
+    <h3>Par / Ímpar</h3>
+    <span class="tag free">LIGADO DE FÁBRICA</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Impede que o jogo penda demais para um lado — só pares ou só ímpares.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Conta quantos números <strong>pares</strong> o jogo tem. Precisa ficar entre <strong>6 e 9</strong> — ou seja, de 6 a 9 pares e o resto ímpar.</span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">Um jogo com 2 pares e 13 ímpares é possível, mas praticamente nunca sai. A faixa de 6 a 9 concentra a grande maioria dos sorteios reais.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">20 pts</span><span class="bar"><i style="width:80%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">Atenção à diferença: o filtro <em>aceita</em> de 6 a 9 pares, mas os 20 pontos cheios só vêm de <strong>7 a 9</strong>. Com 6 pares o jogo passa e leva 10.</span>
+      </span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Sempre. É o filtro mais barato do conjunto: corta muita coisa ruim e quase não atrapalha a geração.</div>
+      <div class="nao"><b>Pense duas vezes</b>Só desligue se quiser testar de propósito um jogo desequilibrado.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 02 ══════ -->
+<article class="filtro" id="f02">
+  <div class="filtro-head">
+    <span class="idx">02</span>
+    <h3>Soma</h3>
+    <span class="tag free">LIGADO DE FÁBRICA</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Controla onde o jogo se apoia na cartela — no começo, no meio ou no fim.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Soma as 15 dezenas. O total precisa ficar entre <strong>183 e 212</strong>.</span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">A soma é o retrato mais rápido de um jogo. Soma baixa significa números amontoados no começo da cartela; soma alta, no fim. Os sorteios reais se concentram no miolo, e é isso que a faixa reproduz.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">25 pts</span><span class="bar"><i style="width:100%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">É o <strong>maior peso de todos</strong>. O centro ideal é <span class="mono">198</span>, e a pontuação cai conforme você se afasta: até 2 de distância vale 25; até 4, vale 18; até 7, vale 10; mais que isso, 2.</span>
+      </span></div>
+      <div class="row"><span class="lbl">Ajuste fino</span><span class="val">Logo abaixo do botão existe o campo <strong>Soma exata</strong>. Ele é uma armadilha silenciosa: se você digitar um número ali, a faixa de 183 a 212 é <strong>ignorada</strong> e o gerador passa a exigir aquele valor exato. Use só se for exatamente isso que você quer — e apague depois.</span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Sempre. Se você for desligar algum filtro para o gerador respirar, que não seja este.</div>
+      <div class="nao"><b>Pense duas vezes</b>Ao preencher a Soma exata: combinada com muitos números fixados, ela pode tornar o jogo impossível.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 03 ══════ -->
+<article class="filtro" id="f03">
+  <div class="filtro-head">
+    <span class="idx">03</span>
+    <h3>Consecutivas</h3>
+    <span class="tag free">LIGADO DE FÁBRICA</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Corta jogos com sequências longas de números seguidos.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Procura a maior sequência de números colados — <span class="mono">07 08 09 10</span> conta como 4 — e recusa o jogo se ela passar de <strong>4</strong>.</span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">Sequências curtas são comuns e esperadas. Cinco, seis ou sete números seguidos, não: é o tipo de padrão que chama atenção na cartela e quase nunca aparece no sorteio.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso zero"><span class="pts">0 pts</span><span class="bar"><i style="width:4%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">Este é filtro puro: ele <strong>descarta</strong>, mas não premia. Um jogo sem sequências longas não ganha pontos por isso — apenas não é eliminado.</span>
+      </span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Na dúvida, deixe ligado. Custa pouco e evita jogos de aparência estranha.</div>
+      <div class="nao"><b>Pense duas vezes</b>Se você ligou muitos filtros e o gerador está penando, este é o primeiro candidato a desligar — já que não rende pontos.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 04 ══════ -->
+<article class="filtro" id="f04">
+  <div class="filtro-head">
+    <span class="idx">04</span>
+    <h3>Repetição</h3>
+    <span class="tag free">LIGADO DE FÁBRICA</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Define quanto do último concurso volta no seu jogo.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Conta quantos números do seu jogo estavam no <strong>último sorteio</strong>. Precisa ficar entre <strong>8 e 11</strong>.</span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">A Lotofácil repete muito de um concurso para o outro — como são 15 dezenas em 25, 9 ou 10 repetidas é o comportamento normal. Um jogo que repete só 3 está apostando contra o padrão mais forte dessa loteria.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">20 pts</span><span class="bar"><i style="width:80%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">Cheio na faixa de 8 a 11. Errando por 1, ainda leva 14; por 2, leva 6.</span>
+      </span></div>
+      <div class="row"><span class="lbl">Depende de</span><span class="val">Do último resultado estar carregado. É a mesma informação que alimenta os blocos <strong>Saíram no Último</strong> e <strong>Ficaram Fora</strong> no painel.</span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Sempre, na Lotofácil. É o filtro que mais aproxima o jogo do comportamento real dessa loteria.</div>
+      <div class="nao"><b>Pense duas vezes</b>Em Mega-Sena e Quina a repetição normal é bem menor — a faixa muda sozinha, mas o filtro pesa menos ali.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 05 ══════ -->
+<article class="filtro" id="f05">
+  <div class="filtro-head">
+    <span class="idx">05</span>
+    <h3>Dezena</h3>
+    <span class="tag off">desligado</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Espalha o jogo pela cartela, impedindo que ele se amontoe numa região.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Divide a cartela em cinco faixas e não deixa <strong>nenhuma passar de 4 números</strong>.</span></div>
+      <div class="row"><span class="lbl">As faixas</span><span class="val">
+        <span class="nums"><span>01–05</span><span>06–10</span><span>11–15</span><span>16–20</span><span>21–25</span></span>
+      </span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">Com 15 números em 5 faixas, a média é 3 por faixa. Um jogo com 7 dezenas entre 01 e 05 está concentrado demais para ser típico.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">10 pts</span><span class="bar"><i style="width:40%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">Começa em 10 e desconta: <strong>−3</strong> para cada faixa vazia ou estourada, <strong>−1</strong> para cada faixa no limite. Repare que deixar uma faixa <em>vazia</em> tira tantos pontos quanto lotá-la.</span>
+      </span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Quando seus jogos estão saindo concentrados numa região da cartela e você quer forçar a distribuição.</div>
+      <div class="nao"><b>Pense duas vezes</b>Se você fixou vários números da mesma faixa — o filtro vai brigar direto com a sua escolha.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 06 ══════ -->
+<article class="filtro" id="f06">
+  <div class="filtro-head">
+    <span class="idx">06</span>
+    <h3>Primos</h3>
+    <span class="tag off">desligado</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Controla quantos números primos entram no jogo.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Conta os primos e exige entre <strong>2 e 7</strong> deles.</span></div>
+      <div class="row"><span class="lbl">Os números</span><span class="val">
+        <span class="nums"><span>02</span><span>03</span><span>05</span><span>07</span><span>11</span><span>13</span><span>17</span><span>19</span><span>23</span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">São 9 primos entre as 25 dezenas.</span>
+      </span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">Como os primos ocupam pouco mais de um terço da cartela, um jogo típico traz cerca de 5 deles. Muito acima ou muito abaixo disso é sinal de que a combinação está torta.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">10 pts</span><span class="bar"><i style="width:40%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">O alvo é <strong>5 primos</strong>. De 4 a 6 leva os 10 pontos; errando por 2, leva 5; além disso, 1.</span>
+      </span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Quando quiser um jogo de perfil médio sem precisar mexer em faixas e botões.</div>
+      <div class="nao"><b>Pense duas vezes</b>Se já usa Dezena e Baixo/Alto: os três medem espalhamento por cortes diferentes e acabam se sobrepondo.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 07 ══════ -->
+<article class="filtro" id="f07">
+  <div class="filtro-head">
+    <span class="idx">07</span>
+    <h3>Baixo / Alto</h3>
+    <span class="tag off">desligado</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Equilibra as duas metades da cartela.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Conta quantos números são <strong>13 ou menos</strong> — a metade de baixo. Você marca quais quantidades aceita; vêm marcados <strong>6, 7, 8 e 9</strong>.</span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">Metade e metade é o resultado natural de um sorteio bem distribuído. Doze números da parte de baixo e três da de cima é um jogo torto.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">5 pts</span><span class="bar"><i style="width:20%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">O alvo é <strong>8 números baixos</strong>. De 7 a 9 leva os 5 pontos; errando por 2, leva 2.</span>
+      </span></div>
+      <div class="row"><span class="lbl">Como ajustar</span><span class="val">Os botões numerados deixam você abrir ou fechar a exigência. Marcar só um valor — <span class="mono">8</span>, por exemplo — é o ajuste mais rígido possível e pode travar a geração.</span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Quando quiser garantia de equilíbrio entre as duas metades, sem se preocupar com as faixas menores.</div>
+      <div class="nao"><b>Pense duas vezes</b>Junto com Dezena — é a mesma ideia com outro corte, e o custo em tempo de geração dobra.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 08 ══════ -->
+<article class="filtro" id="f08">
+  <div class="filtro-head">
+    <span class="idx">08</span>
+    <h3>Centro da Cartela</h3>
+    <span class="tag off">desligado</span>
+    <span class="tag free">só Lotofácil</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Controla quantos números do miolo da cartela entram no jogo.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Conta quantos dos 9 números centrais aparecem. Vêm marcados <strong>4, 5 e 6</strong>.</span></div>
+      <div class="row"><span class="lbl">Os números</span><span class="val">
+        <span class="nums"><span>07</span><span>08</span><span>09</span><span>12</span><span>13</span><span>14</span><span>17</span><span>18</span><span>19</span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">São as 9 casas do meio quando você desenha a cartela em 5 colunas. Saem <strong>5,2</strong> por sorteio, em média.</span>
+      </span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">É o filtro mais visual do conjunto: ele faz o jogo ter a aparência de um sorteio típico quando você olha a cartela preenchida, em vez de tudo empurrado para as bordas.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">4 pts</span><span class="bar"><i style="width:16%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">4 pontos entre 4 e 6 centrais; 2 pontos entre 3 e 7.</span>
+      </span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Quando quiser um jogo com a cara de um resultado comum da Lotofácil.</div>
+      <div class="nao"><b>Pense duas vezes</b>Se está fixando números das bordas de propósito — aí os dois se anulam.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 09 ══════ -->
+<article class="filtro" id="f09">
+  <div class="filtro-head">
+    <span class="idx">09</span>
+    <h3>Fibonacci</h3>
+    <span class="tag off">desligado</span>
+    <span class="tag free">só Lotofácil</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Controla quantos números da sequência de Fibonacci entram.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Conta quantos dos 7 números de Fibonacci aparecem. Vêm marcados <strong>3, 4 e 5</strong>.</span></div>
+      <div class="row"><span class="lbl">Os números</span><span class="val">
+        <span class="nums"><span>01</span><span>02</span><span>03</span><span>05</span><span>08</span><span>13</span><span>21</span></span>
+      </span></div>
+      <div class="row"><span class="lbl">Seja honesto aqui</span><span class="val">Este filtro não tem base estatística especial. A média de <span class="mono">4,1</span> por sorteio não acontece porque Fibonacci é mágico — acontece porque são <strong>7 números quaisquer</strong> dentro de 25, e qualquer conjunto de 7 daria uma média parecida. É um recorte de gosto, não de evidência.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">4 pts</span><span class="bar"><i style="width:16%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">4 pontos entre 3 e 5; 2 pontos entre 2 e 6.</span>
+      </span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Se você gosta do recorte e quer que seus jogos o respeitem. É uma escolha estética legítima.</div>
+      <div class="nao"><b>Pense duas vezes</b>Se está montando a configuração só com critérios de base estatística — este não é um deles.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 10 ══════ -->
+<article class="filtro" id="f10">
+  <div class="filtro-head">
+    <span class="idx">10</span>
+    <h3>Múltiplos de 3</h3>
+    <span class="tag off">desligado</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Controla quantos múltiplos de três entram no jogo.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Conta quantos dos 8 múltiplos de 3 aparecem. Vêm marcados <strong>4 e 5</strong>.</span></div>
+      <div class="row"><span class="lbl">Os números</span><span class="val">
+        <span class="nums"><span>03</span><span>06</span><span>09</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span></span>
+      </span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">Mesma lógica dos primos: é um recorte aritmético que ocupa uma fatia conhecida da cartela. Como são 8 números em 25, o esperado é cerca de 5 por jogo — e o filtro mantém você perto disso.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">5 pts</span><span class="bar"><i style="width:20%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">5 pontos quando o jogo fica a um de distância de 5 múltiplos — ou seja, de 4 a 6. Fora disso, zero.</span>
+      </span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Quando quiser mais uma trava de espalhamento sem repetir o corte por faixas.</div>
+      <div class="nao"><b>Pense duas vezes</b>Se já ligou Primos: os dois recortes se cruzam bastante e apertam demais.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 11 ══════ -->
+<article class="filtro" id="f11">
+  <div class="filtro-head">
+    <span class="idx">11</span>
+    <h3>Pares Espelho</h3>
+    <span class="tag off">desligado</span>
+    <span class="tag free">só Lotofácil</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Força simetria: números que se espelham nas pontas da cartela.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Olha os 12 pares que somam <strong>26</strong> e conta quantos estão <strong>completos</strong> — os dois números presentes no jogo. Vêm marcados <strong>3, 4 e 5</strong>.</span></div>
+      <div class="row"><span class="lbl">Os pares</span><span class="val">
+        <span class="nums pairs"><span>01+25</span><span>02+24</span><span>03+23</span><span>04+22</span><span>05+21</span><span>06+20</span><span>07+19</span><span>08+18</span><span>09+17</span><span>10+16</span><span>11+15</span><span>12+14</span></span>
+      </span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">Um par completo puxa um número da metade de baixo e o seu reflexo na de cima. Exigir três ou quatro pares fechados dá ao jogo uma simetria que costuma vir junto com uma boa distribuição.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso"><span class="pts">4 pts</span><span class="bar"><i style="width:16%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">4 pontos entre 3 e 5 pares completos; 2 pontos entre 2 e 6.</span>
+      </span></div>
+      <div class="row"><span class="lbl">Cuidado</span><span class="val">É o filtro mais exigente do conjunto: fechar pares consome números rápido. Com muitos fixados, ele trava fácil.</span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Quando quiser jogos visualmente simétricos e não tiver muita coisa fixada.</div>
+      <div class="nao"><b>Pense duas vezes</b>Com números fixados ou junto de Baixo/Alto — a chance de o gerador não achar nada válido sobe muito.</div>
+    </div>
+  </div>
+</article>
+
+<!-- ══════ 12 ══════ -->
+<article class="filtro" id="f12">
+  <div class="filtro-head">
+    <span class="idx">12</span>
+    <h3>Finais Distintos</h3>
+    <span class="tag off">desligado</span>
+  </div>
+  <div class="filtro-body">
+    <p class="resumo">Evita que muitos números do jogo terminem no mesmo dígito.</p>
+    <div class="rows">
+      <div class="row"><span class="lbl">O que checa</span><span class="val">Olha o <strong>último dígito</strong> de cada número e conta quantos dígitos diferentes aparecem. Vêm marcados <strong>9 e 10</strong>.</span></div>
+      <div class="row"><span class="lbl">Por que existe</span><span class="val">Sem ele, nada impede um jogo com <span class="mono">03</span>, <span class="mono">13</span> e <span class="mono">23</span> — três finais 3 — repetido em vários dígitos. Como só existem 10 finais possíveis (de 0 a 9) e o jogo tem 15 números, alguma repetição é inevitável; o filtro só limita o exagero.</span></div>
+      <div class="row"><span class="lbl">Peso no score</span><span class="val">
+        <span class="peso zero"><span class="pts">0 pts</span><span class="bar"><i style="width:4%"></i></span></span>
+        <span style="display:block;margin-top:8px;font-size:14px">Como <strong>filtro</strong>, funciona normalmente. Na <strong>pontuação</strong>, hoje ele não soma nada na Lotofácil: a regra de pontos pede mais finais distintos do que os 10 que existem. Nas loterias de jogo curto — Mega-Sena e Quina — ele pontua.</span>
+      </span></div>
+    </div>
+    <div class="uso">
+      <div class="sim"><b>Ligue</b>Quando quiser espalhar os finais e não se importar com o score.</div>
+      <div class="nao"><b>Pense duas vezes</b>Se está montando a configuração para maximizar pontos — na Lotofácil, este não ajuda.</div>
+    </div>
+  </div>
+</article>
+
+
+<section class="ref">
+  <span class="eyebrow">O placar</span>
+  <h2>Quanto cada filtro vale</h2>
+  <p>O score de 0 a 100 não sai do nada: cada aspecto do jogo rende uma quantidade fixa de pontos. Vale conhecer a tabela, porque ela mostra onde vale a pena caprichar.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Aspecto avaliado</th><th>Pontos</th><th>Como ganhar o máximo</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Soma</td><td class="num-col">25</td><td>Chegar perto de <span class="mono">198</span></td></tr>
+        <tr><td class="k">Par / Ímpar</td><td class="num-col">20</td><td>De 7 a 9 pares</td></tr>
+        <tr><td class="k">Repetição</td><td class="num-col">20</td><td>De 8 a 11 do último concurso</td></tr>
+        <tr><td class="k">Números quentes</td><td class="num-col">15</td><td>Cerca de 6 quentes ou em ascensão</td></tr>
+        <tr><td class="k">Dezena</td><td class="num-col">10</td><td>Nenhuma faixa vazia nem lotada</td></tr>
+        <tr><td class="k">Primos</td><td class="num-col">10</td><td>De 4 a 6 primos</td></tr>
+        <tr><td class="k">Baixo / Alto</td><td class="num-col">5</td><td>De 7 a 9 números baixos</td></tr>
+        <tr><td class="k">Múltiplos de 3</td><td class="num-col">5</td><td>De 4 a 6 múltiplos</td></tr>
+        <tr><td class="k">Centro da Cartela</td><td class="num-col">4</td><td>De 4 a 6 centrais</td></tr>
+        <tr><td class="k">Fibonacci</td><td class="num-col">4</td><td>De 3 a 5</td></tr>
+        <tr><td class="k">Pares Espelho</td><td class="num-col">4</td><td>De 3 a 5 pares completos</td></tr>
+        <tr><td class="k">Consecutivas</td><td class="num-col">0</td><td>Não pontua — só filtra</td></tr>
+        <tr><td class="k">Finais Distintos</td><td class="num-col">0</td><td>Não pontua na Lotofácil</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="box">
+    <span class="eyebrow">Por que ninguém precisa acertar tudo</span>
+    <p>Somando todos os aspectos dá <strong>122 pontos possíveis</strong>, mas o score é limitado a <strong>100</strong>. Ou seja: sobra folga. Um jogo pode errar completamente dois ou três itens pequenos e ainda assim marcar 100.</p>
+    <p>Repare também que os três primeiros — Soma, Par/Ímpar e Repetição — valem <strong>65 dos 122</strong>. São justamente os que já vêm ligados. Acertar esses três é mais da metade do caminho, e é por isso que a configuração de fábrica costuma render scores altos sem você mexer em nada.</p>
+  </div>
+</section>
+
+<section class="ref">
+  <span class="eyebrow">Configurações prontas</span>
+  <h2>Três jeitos de começar</h2>
+  <p>Se você não quer decidir filtro por filtro, escolha um destes três pontos de partida e ajuste depois.</p>
+  <div class="presets">
+    <div class="preset">
+      <h3>Simples</h3>
+      <p class="who">Para quem só quer jogar. É a configuração de fábrica — não mexa em nada.</p>
+      <ul>
+        <li><span class="mk">✓</span> Par / Ímpar</li>
+        <li><span class="mk">✓</span> Soma</li>
+        <li><span class="mk">✓</span> Consecutivas</li>
+        <li><span class="mk">✓</span> Repetição</li>
+        <li class="off"><span class="mk">—</span> todo o resto desligado</li>
+      </ul>
+    </div>
+    <div class="preset">
+      <h3>Cartela equilibrada</h3>
+      <p class="who">Para quem quer o jogo com cara de sorteio típico, bem distribuído na cartela.</p>
+      <ul>
+        <li><span class="mk">✓</span> os quatro de fábrica</li>
+        <li><span class="mk">+</span> Dezena</li>
+        <li><span class="mk">+</span> Centro da Cartela</li>
+        <li><span class="mk">+</span> Primos</li>
+        <li class="off"><span class="mk">—</span> Baixo/Alto fica de fora: repetiria a Dezena</li>
+      </ul>
+    </div>
+    <div class="preset">
+      <h3>Apertada</h3>
+      <p class="who">Para quem quer explorar os limites. Espere demora e poucos jogos válidos.</p>
+      <ul>
+        <li><span class="mk">✓</span> os quatro de fábrica</li>
+        <li><span class="mk">+</span> Dezena, Primos, Baixo/Alto</li>
+        <li><span class="mk">+</span> Centro, Múltiplos de 3</li>
+        <li class="off"><span class="mk">!</span> se travar, desligue Consecutivas primeiro</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="ref">
+  <span class="eyebrow">Erros comuns</span>
+  <h2>Quatro armadilhas</h2>
+  <ul class="plain">
+    <li><strong>Ligar os doze de uma vez.</strong> O gerador passa a procurar uma agulha no palheiro e devolve poucos jogos — quase sempre parecidos entre si. Ligue de dois em dois e veja o efeito.</li>
+    <li><strong>Deixar a Soma exata preenchida sem querer.</strong> Ela cala a faixa inteira. Se seus jogos pararam de sair, esse campo é o primeiro lugar para olhar.</li>
+    <li><strong>Fixar oito números e estranhar que os jogos se pareçam.</strong> Com 8 fixados sobram apenas 7 posições livres — a variedade que você está pedindo simplesmente não cabe.</li>
+    <li><strong>Achar que score alto é chance alta.</strong> Score mede o quanto o jogo se parece com um sorteio típico. Um jogo de score 100 e um de score 40 têm exatamente a mesma probabilidade de sair.</li>
+  </ul>
+</section>
+
+<footer>
+  <a href="/">Abrir o Lottobot</a> · <a href="/tutorial">Guia completo</a><br>
+  Todos os valores desta página são os que o app aplica na Lotofácil. Ao trocar de loteria, as faixas mudam sozinhas.
+  Sem vínculo com a Caixa Econômica Federal.
+</footer>
+
+</div>
+</body>
+</html>

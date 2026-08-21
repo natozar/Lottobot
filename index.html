@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v112';
+    var V='lottobot-v113';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2424,7 +2424,10 @@
       </div>
 
       <div class="config-section">
-        <div class="section-title">Filtros de Validação</div>
+        <div class="section-title" style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+          <span>Filtros de Validação</span>
+          <a href="/filtros" target="_blank" rel="noopener" style="font-size:0.62rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--color-gold-primary);text-decoration:none;white-space:nowrap">como funcionam? →</a>
+        </div>
         <div class="toggle-row">
           <div><span class="toggle-label">Par/Ímpar</span><div class="filter-info" id="filterDescPI"></div></div>
           <div id="filterParImpar" class="toggle-switch on" role="switch" aria-checked="true" aria-label="Filtro Par/Impar" tabindex="0"><div class="toggle-knob"></div></div>
@@ -2618,6 +2621,7 @@
 
       <button id="btnGerar">🎲 Gerar Números</button>
       <div style="margin-top:10px;padding:8px 10px;background:rgba(212,168,83,0.06);border:1px solid rgba(212,168,83,0.12);border-radius:8px;font-size:0.62rem;color:var(--text-muted);line-height:1.5;text-align:center">⚠️ Os jogos gerados aqui so concorrem aos premios se apostados em uma <strong style="color:var(--text-secondary)">Loterica</strong> ou pelo app/site da <strong style="color:var(--text-secondary)">Caixa Economica Federal</strong>.</div>
+      <div style="margin-top:8px;text-align:center"><a href="/tutorial" target="_blank" rel="noopener" style="font-size:0.66rem;color:var(--text-muted);text-decoration:none">📖 Como usar o Lottobot</a></div>
     </div>
 
     <div class="col-center">
@@ -4227,6 +4231,24 @@ function toggleFilterVal(btn){btn.classList.toggle('active');updatePreGenSummary
 function getActiveCentroValues(){return Array.from(document.querySelectorAll('#centroValues .centro-val.active')).map(b=>parseInt(b.dataset.val))}
 function getActiveFilterVals(group){return Array.from(document.querySelectorAll('[data-group="'+group+'"].centro-val.active')).map(b=>parseInt(b.dataset.val))}
 
+// ══════ v113: CONVITE AO TUTORIAL (primeira geracao) ══════
+const TUTORIAL_SEEN_KEY='lottobot_tutorial_prompt_v1';
+function precisaOferecerTutorial(){
+  // Sem localStorage (aba anonima, storage bloqueado) o app gera direto.
+  try{return localStorage.getItem(TUTORIAL_SEEN_KEY)!=='1'}catch(e){return false}
+}
+function marcarTutorialVisto(){try{localStorage.setItem(TUTORIAL_SEEN_KEY,'1')}catch(e){}}
+function fecharTutorialPrompt(){document.getElementById('tutorialPromptModal')?.classList.remove('active')}
+function verTutorialAgora(){
+  marcarTutorialVisto();fecharTutorialPrompt();
+  window.open('/tutorial','_blank','noopener');
+}
+function pularTutorial(){
+  marcarTutorialVisto();fecharTutorialPrompt();
+  // O flag ja esta marcado, entao este clique passa direto para a geracao.
+  document.getElementById('btnGerar')?.click();
+}
+
 // ══════ UPDATE CHECK ══════
 async function checkForUpdate(){
   const btn=document.getElementById('btnCheckUpdate');
@@ -4321,6 +4343,8 @@ function setupEventListeners(){
   });
   document.getElementById('garantiaSelect')?.addEventListener('change',updateDesdobramentoUI);
   document.getElementById('btnGerar')?.addEventListener('click',function(){
+    // v113: na primeira geracao, oferece o tutorial antes de rodar
+    if(precisaOferecerTutorial()){document.getElementById('tutorialPromptModal').classList.add('active');return}
     this.classList.add('loading');this.textContent='⏳ Gerando...';
     // Init AudioContext on user gesture (required for mobile)
     if(!window._lottoAudio)try{window._lottoAudio=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}
@@ -7101,6 +7125,27 @@ function slotMachineReveal(games, callback){
         </div>
       </div>
       <div class="push-card-footer">Voce pode desativar a qualquer momento nas configuracoes do navegador.</div>
+    </div>
+  </div>
+
+  <!-- v113: convite ao tutorial antes da primeira geracao -->
+  <div id="tutorialPromptModal" class="modal-overlay" role="dialog" aria-label="Conhecer o Lottobot">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Antes de gerar</h2>
+        <button class="btn-close" onclick="document.getElementById('tutorialPromptModal').classList.remove('active')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.6;margin-bottom:12px">
+          O Lottobot nao sorteia numeros a esmo: ele monta os jogos com modelos analiticos, filtros de validacao e um score de 0 a 100 para cada combinacao.
+        </p>
+        <p style="color:var(--text-primary);font-size:0.92rem;font-weight:600;line-height:1.5">
+          Quer ver como o sistema e os filtros funcionam antes do primeiro jogo?
+        </p>
+        <p style="color:var(--text-muted);font-size:0.72rem;margin-top:10px">Leva uns 3 minutos. So aparece desta vez.</p>
+      </div>
+      <button onclick="verTutorialAgora()">📖 Ver o tutorial</button>
+      <button onclick="pularTutorial()" style="margin-top:8px;background:var(--bg-surface-2);color:var(--text-secondary);border:1px solid var(--border-default)">🎲 Gerar agora</button>
     </div>
   </div>
 
