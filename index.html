@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v114';
+    var V='lottobot-v115';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -1418,6 +1418,26 @@
       color: var(--color-gold-primary);
     }
 
+    /* v115: aviso permanente — a plataforma so gera combinacoes */
+    .aviso-gerador {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      background: rgba(212,168,83,0.07);
+      border: 1px solid rgba(212,168,83,0.22);
+      border-radius: var(--border-radius-md);
+      font-size: 0.72rem;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+    .aviso-gerador .ag-ic { font-size: 0.95rem; line-height: 1.35; flex: 0 0 auto; }
+    .aviso-gerador b { display: block; margin-bottom: 2px; color: var(--color-gold-primary); font-weight: 700; }
+    @media (max-width: 768px) {
+      .aviso-gerador { font-size: 0.68rem; padding: 10px 12px; margin-bottom: 12px; }
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -2620,7 +2640,7 @@
       </div>
 
       <button id="btnGerar">🎲 Gerar Números</button>
-      <div style="margin-top:10px;padding:8px 10px;background:rgba(212,168,83,0.06);border:1px solid rgba(212,168,83,0.12);border-radius:8px;font-size:0.62rem;color:var(--text-muted);line-height:1.5;text-align:center">⚠️ Os jogos gerados aqui so concorrem aos premios se apostados em uma <strong style="color:var(--text-secondary)">Loterica</strong> ou pelo app/site da <strong style="color:var(--text-secondary)">Caixa Economica Federal</strong>.</div>
+      <div style="margin-top:10px;padding:8px 10px;background:rgba(212,168,83,0.06);border:1px solid rgba(212,168,83,0.12);border-radius:8px;font-size:0.62rem;color:var(--text-muted);line-height:1.5;text-align:center">⚠️ O Lottobot <strong style="color:var(--text-secondary)">só gera combinações</strong> — não registra apostas. Os jogos só concorrem se forem apostados em uma <strong style="color:var(--text-secondary)">lotérica</strong> ou pelo app/site da <strong style="color:var(--text-secondary)">Caixa Econômica Federal</strong>.</div>
       <div style="margin-top:8px;text-align:center"><a href="/tutorial" target="_blank" rel="noopener" style="font-size:0.66rem;color:var(--text-muted);text-decoration:none">📖 Como usar o Lottobot</a></div>
     </div>
 
@@ -2645,10 +2665,16 @@
           <button class="btn-export" onclick="undoJogos()">↩ Desfazer</button>
           <button class="btn-export" onclick="limparJogos()">🗑️ Limpar</button>
         </div>
-        <div style="font-size:0.6rem;color:var(--text-muted);opacity:0.7;margin-top:6px">⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.</div>
+        <div style="font-size:0.6rem;color:var(--text-muted);opacity:0.7;margin-top:6px">⚠️ Só geramos as combinações — a aposta tem que ser registrada na lotérica ou no app/site da Caixa.</div>
       </div>
 
       <div id="tabJogos" class="tab-content active" role="tabpanel" aria-label="Jogos gerados">
+        <!-- v115: deixa explicito que o app nao registra apostas -->
+        <div class="aviso-gerador">
+          <span class="ag-ic">ℹ️</span>
+          <div><b>Aqui a gente só gera combinações — não joga por você.</b>
+          O Lottobot não registra apostas nem tem vínculo com a Caixa. Para concorrer a prêmio, registre o jogo em uma <strong style="color:var(--text-primary)">lotérica</strong> ou no app/site da <strong style="color:var(--text-primary)">Caixa Econômica Federal</strong>.</div>
+        </div>
         <!-- v97: Card de filtros (modo /pai, Lotofácil) — aparece após gerar jogos -->
         <div id="paiFilterCard" class="pai-filter-card" style="display:none">
           <div class="pai-filter-strip">🎯 ESCOLHER OS MELHORES JOGOS</div>
@@ -5326,7 +5352,7 @@ function paiShareAll(){
     line+=' ('+j.score+'pts)';
     return line;
   });
-  var t='🎯 LOTTOBOT · '+lot+' — '+indices.length+' jogo(s)\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+lines.join('\n')+'\n\n⚠️ Aposte em uma Lotérica ou no app/site da Caixa para concorrer.';
+  var t='🎯 LOTTOBOT · '+lot+' — '+indices.length+' jogo(s)\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+lines.join('\n')+'\n\n⚠️ O Lottobot so gera combinacoes. Registre a aposta em uma Loterica ou no app/site da Caixa para concorrer.';
   if(navigator.share){
     navigator.share({title:'Lottobot · '+indices.length+' jogos',text:t}).catch(function(){});
   } else if(navigator.clipboard && navigator.clipboard.writeText){
@@ -5469,12 +5495,12 @@ function shareGame(i){
 
 function exportCopy(){
   const lot=getLottery().name;
-  const t='🎯 LOTTOBOT · '+lot+' — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'Jogo '+(i+1)+': '+j.map(n=>pad(n)).join(' - ')+(j.mes?' · Mes: '+j.mes:'')+' ('+j.score+'pts)').join('\n')+'\n\n⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.';
+  const t='🎯 LOTTOBOT · '+lot+' — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'Jogo '+(i+1)+': '+j.map(n=>pad(n)).join(' - ')+(j.mes?' · Mes: '+j.mes:'')+' ('+j.score+'pts)').join('\n')+'\n\n⚠️ O Lottobot so gera combinacoes. Registre a aposta em uma Loterica ou no app/site da Caixa para concorrer.';
   navigator.clipboard.writeText(t).then(()=>showToast('📋 Copiado!')).catch(()=>showToast('Erro ao copiar'));
 }
 function exportWhatsApp(){
   const lot=getLottery().name;
-  const t='🎯 *LOTTOBOT · '+lot+'* — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'*Jogo '+(i+1)+':* '+j.map(n=>pad(n)).join('-')+(j.mes?' · 🗓️ '+j.mes:'')+' _('+j.score+'pts)_').join('\n')+'\n\n⚠️ _Aposte em uma Loterica ou no app/site da Caixa para concorrer._\n_Gerado por Lottobot — lottobot.com.br_';
+  const t='🎯 *LOTTOBOT · '+lot+'* — '+jogos.length+' jogos\nRef: #'+concRef+' · Modelo '+selectedModelo+'\n\n'+jogos.map((j,i)=>'*Jogo '+(i+1)+':* '+j.map(n=>pad(n)).join('-')+(j.mes?' · 🗓️ '+j.mes:'')+' _('+j.score+'pts)_').join('\n')+'\n\n⚠️ _O Lottobot so gera combinacoes. Registre a aposta em uma Loterica ou no app/site da Caixa para concorrer._\n_Gerado por Lottobot — lottobot.com.br_';
   window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
 }
 function exportPDF(){
@@ -5495,7 +5521,7 @@ function exportPDF(){
     <h2>Ref: #${concRef} · Modelo ${selectedModelo} · ${new Date().toLocaleDateString('pt-BR')}</h2>
     ${jogos.map((j,i)=>{const p=j.filter(n=>n%2===0).length,s=j.reduce((a,b)=>a+b,0);
       return '<div class="game"><div class="game-head"><span>Jogo '+(i+1)+'</span><span>'+j.score+' pts · '+j.cls.label+'</span></div><div class="nums">'+j.map(n=>'<div class="num">'+dNum(n)+'</div>').join('')+'</div>'+(j.mes?'<div style="font-size:11px;color:#b8912e;margin-bottom:4px">🗓️ Mês da Sorte: <b>'+j.mes+'</b></div>':'')+'<div class="meta"><span>'+p+'P/'+(j.length-p)+'I</span><span>Σ'+s+'</span></div></div>'}).join('')}
-    <div class="footer">⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.<br>Gerado por Lottobot — lottobot.com.br</div>
+    <div class="footer">⚠️ O Lottobot so gera combinacoes. Registre a aposta em uma Loterica ou no app/site da Caixa para concorrer.<br>Gerado por Lottobot — lottobot.com.br</div>
     <script>setTimeout(()=>window.print(),300)<\/script>
   </body></html>`);
   w.document.close();
@@ -5532,7 +5558,7 @@ function exportShareCard(){
     });
   });
   // Footer
-  ctx.fillStyle='#8a8a94';ctx.font='10px Inter,sans-serif';ctx.fillText('Aposte em uma Loterica ou no app/site da Caixa · Lottobot — lottobot.com.br',20,cardH-12);
+  ctx.fillStyle='#8a8a94';ctx.font='10px Inter,sans-serif';ctx.fillText('Lottobot so gera combinacoes — registre a aposta na Loterica ou app da Caixa · lottobot.com.br',20,cardH-12);
   // Download
   cvs.toBlob(blob=>{
     if(navigator.share&&navigator.canShare?.({files:[new File([blob],'lottobot.png',{type:'image/png'})]})){
@@ -5587,13 +5613,13 @@ function updateInviteStats(){
 function exportSavedCopy(){
   if(!saved.length){showToast('Nenhum jogo salvo');return}
   const lot=getLottery().name;
-  const t='🎯 LOTTOBOT · '+lot+' — '+saved.length+' jogos salvos\n\n'+saved.map((g,i)=>'Jogo '+(i+1)+': '+g.n.map(n=>pad(n)).join(' - ')+' ('+g.score+'pts · M'+g.mod+')').join('\n')+'\n\n⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.';
+  const t='🎯 LOTTOBOT · '+lot+' — '+saved.length+' jogos salvos\n\n'+saved.map((g,i)=>'Jogo '+(i+1)+': '+g.n.map(n=>pad(n)).join(' - ')+' ('+g.score+'pts · M'+g.mod+')').join('\n')+'\n\n⚠️ O Lottobot so gera combinacoes. Registre a aposta em uma Loterica ou no app/site da Caixa para concorrer.';
   navigator.clipboard.writeText(t).then(()=>showToast('📋 '+saved.length+' jogos copiados!')).catch(()=>showToast('Erro ao copiar'));
 }
 function exportSavedWhatsApp(){
   if(!saved.length){showToast('Nenhum jogo salvo');return}
   const lot=getLottery().name;
-  const t='🎯 *LOTTOBOT · '+lot+'* — '+saved.length+' jogos salvos\n\n'+saved.map((g,i)=>'*Jogo '+(i+1)+':* '+g.n.map(n=>pad(n)).join('-')+' _('+g.score+'pts · M'+g.mod+')_').join('\n')+'\n\n⚠️ _Aposte em uma Loterica ou no app/site da Caixa para concorrer._\n_Gerado por Lottobot — lottobot.com.br_';
+  const t='🎯 *LOTTOBOT · '+lot+'* — '+saved.length+' jogos salvos\n\n'+saved.map((g,i)=>'*Jogo '+(i+1)+':* '+g.n.map(n=>pad(n)).join('-')+' _('+g.score+'pts · M'+g.mod+')_').join('\n')+'\n\n⚠️ _O Lottobot so gera combinacoes. Registre a aposta em uma Loterica ou no app/site da Caixa para concorrer._\n_Gerado por Lottobot — lottobot.com.br_';
   window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
 }
 function exportSavedPDF(){
@@ -5614,7 +5640,7 @@ function exportSavedPDF(){
     <h2>${new Date().toLocaleDateString('pt-BR')}</h2>
     ${saved.map((g,i)=>{const p=g.n.filter(n=>n%2===0).length,s=g.n.reduce((a,b)=>a+b,0);
       return '<div class="game"><div class="game-head"><span>Jogo '+(i+1)+' · M'+g.mod+'</span><span>'+g.score+' pts · #'+g.ref+'</span></div><div class="nums">'+g.n.map(n=>'<div class="num">'+dNum(n)+'</div>').join('')+'</div><div class="meta"><span>'+p+'P/'+(g.n.length-p)+'I</span><span>Σ'+s+'</span><span>'+g.dt+'</span></div></div>'}).join('')}
-    <div class="footer">⚠️ Aposte em uma Loterica ou no app/site da Caixa para concorrer.<br>Gerado por Lottobot — lottobot.com.br</div>
+    <div class="footer">⚠️ O Lottobot so gera combinacoes. Registre a aposta em uma Loterica ou no app/site da Caixa para concorrer.<br>Gerado por Lottobot — lottobot.com.br</div>
     <script>setTimeout(()=>window.print(),300)<\/script>
   </body></html>`);
   w.document.close();
