@@ -214,7 +214,9 @@
       <button class="tab" data-pane="paneUsuarios">Usuarios<span class="cnt" id="tabCntUsers"></span></button>
       <button class="tab" data-pane="paneGeradas">Combinacoes geradas<span class="cnt" id="tabCntGer"></span></button>
       <button class="tab" data-pane="panePremiados">Premiados<span class="cnt" id="tabCntWins"></span></button>
+      <button class="tab" data-pane="paneBlog">Blog<span class="cnt" id="tabCntBlog"></span></button>
       <button class="tab" data-pane="paneEnvios">Envios e config</button>
+      <button class="btn btn-outline" id="btnRecarregar" onclick="recarregar()" style="margin-left:auto;padding:6px 14px;font-size:0.76rem">Atualizar</button>
     </div>
 
     <!-- Stats -->
@@ -341,6 +343,14 @@
       <div id="gerWinsList" class="empty">-</div>
     </div>
     </div><!-- /panePremiados -->
+
+    <div class="pane" id="paneBlog">
+    <div class="admin-section">
+      <h2>Artigos Publicados</h2>
+      <p class="sec-note">Gerados automaticamente pela <code>gerarArtigoBlog</code> a cada sorteio novo. Clique no titulo para abrir a pagina publica.</p>
+      <div id="blogList" class="empty">Carregando...</div>
+    </div>
+    </div><!-- /paneBlog -->
 
     <div class="pane" id="paneEnvios">
 
@@ -640,18 +650,22 @@ async function loadDashboard(){
   // Sorteios (para calcular acertos) — falha aqui nao impede a tabela
   try{ await loadDraws() }catch(e){ console.warn('draws:',e.message) }
 
-  // Jogos de cada usuario
+  // Jogos de cada usuario — em paralelo, 12 por vez.
+  // Era um await por usuario dentro do laco: com 28 contas ja custava
+  // 28 idas ao servidor em fila; com centenas, o painel travaria na abertura.
   let totalGames=0, erroJogos=null;
-  for(const u of users){
-    try{
-      const gSnap=await db.collection('users').doc(u.id).collection('savedGames')
-        .orderBy('createdAt','desc').limit(200).get();
-      gamesByUser[u.id]=gSnap.docs.map(d=>Object.assign({id:d.id},d.data()));
-      totalGames+=gSnap.size;
-    }catch(e){
-      gamesByUser[u.id]=null;
-      if(!erroJogos)erroJogos=e.message;
-    }
+  for(let i=0;i<users.length;i+=12){
+    await Promise.all(users.slice(i,i+12).map(async u=>{
+      try{
+        const gSnap=await db.collection('users').doc(u.id).collection('savedGames')
+          .orderBy('createdAt','desc').limit(200).get();
+        gamesByUser[u.id]=gSnap.docs.map(d=>Object.assign({id:d.id},d.data()));
+        totalGames+=gSnap.size;
+      }catch(e){
+        gamesByUser[u.id]=null;
+        if(!erroJogos)erroJogos=e.message;
+      }
+    }));
   }
   document.getElementById('statGames').textContent=erroJogos?'—':totalGames;
   if(erroJogos){
@@ -682,6 +696,7 @@ async function loadDashboard(){
   try{ renderTops() }catch(e){console.warn('tops:',e.message)}
   try{ renderDraws() }catch(e){console.warn('sorteios:',e.message)}
   try{ renderSaude() }catch(e){console.warn('saude:',e.message)}
+  try{ renderBlog() }catch(e){console.warn('blog:',e.message)}
   try{ renderDispositivos() }catch(e){console.warn('aparelhos:',e.message)}
 
   try{
@@ -1174,6 +1189,48 @@ function renderTops(){
   listaTop('topModelos',ord(mod));
   listaTop('topFiltros',ord(fil),'x');
   listaTop('topUsers',ord(porUser).map(([uid,v])=>[userLabel(uid),v]));
+}
+
+// v121: artigos gerados automaticamente a cada sorteio
+async function renderBlog(){
+  const box=document.getElementById('blogList');
+  try{
+    const snap=await db.collection('blog_posts')
+      .orderBy('dataPublicacao','desc').limit(60).get();
+    document.getElementById('tabCntBlog').textContent=snap.size?'('+snap.size+')':'';
+    if(snap.empty){box.className='empty';box.textContent='Nenhum artigo publicado ainda.';return}
+    box.className='';
+    box.innerHTML=snap.docs.map(d=>{
+      const x=d.data();
+      const nums=(x.numeros||[]).map(Number);
+      const st=x.estatisticas||{};
+      return '<div class="win-item">'+
+        '<div class="win-who">'+
+          '<b><a href="/blog/'+esc(x.slug||d.id)+'" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none">'+
+          esc(x.titulo||d.id)+'</a></b>'+
+          '<span>'+esc(x.loteria||'-')+' · concurso '+(x.concurso||'-')+' · '+dt(x.dataPublicacao)+
+          (st.soma?' · soma '+st.soma+' · '+st.pares+'P/'+st.impares+'I':'')+'</span>'+
+        '</div>'+
+        (nums.length?'<div class="g-nums">'+nums.map(n=>'<span>'+pad2(n)+'</span>').join('')+'</div>':'')+
+        '<span class="g-tag">'+((x.conteudo||'').length)+' chars</span>'+
+        '</div>';
+    }).join('');
+  }catch(e){box.className='err';box.textContent='Erro ao ler blog_posts: '+e.message}
+}
+
+// v121: recarrega tudo sem perder a aba aberta
+async function recarregar(){
+  const btn=document.getElementById('btnRecarregar');
+  const aba=document.querySelector('#adminTabs .tab.active')?.dataset.pane;
+  btn.disabled=true;btn.textContent='Atualizando...';
+  gamesByUser={};drawsByLot={};batches=[];
+  try{ await loadDashboard() }catch(e){ showToast('Erro: '+e.message) }
+  if(aba){
+    document.querySelectorAll('#adminTabs .tab').forEach(t=>t.classList.toggle('active',t.dataset.pane===aba));
+    document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.id===aba));
+  }
+  btn.disabled=false;btn.textContent='Atualizar';
+  showToast('Painel atualizado');
 }
 
 // v120: painel de alertas — o que esta errado ou perto de vencer.
