@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v124';
+    var V='lottobot-v132';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -1804,6 +1804,51 @@
       .casino-light { width: 6px; height: 6px; }
       .ball { width: 28px; height: 28px; font-size: 0.68rem; }
       #emptyState { padding: 40px 20px; }
+    }
+
+    /* v124: o header era flex sem permitir encolhimento — a soma dos itens
+       chegava a 496px num viewport de 390px e eles se sobrepunham.
+       Aqui eles passam a ceder espaco em vez de transbordar. */
+    @media (max-width: 480px) {
+      header { gap: 4px; }
+      .header-left { min-width: 0; flex: 0 1 auto; overflow: hidden; }
+      .header-right { min-width: 0; }
+      .header-logo { white-space: nowrap; flex: 0 0 auto; }
+      #concursoBadge {
+        max-width: 74px; overflow: hidden; text-overflow: ellipsis;
+        white-space: nowrap; flex: 0 1 auto;
+      }
+      /* indicadores secundarios: ja escondidos abaixo de 380px, agora
+         tambem na faixa 380-480 onde a colisao acontecia */
+      #histBadge, #histBadge.show, #jackpotBadge, #jackpotBadge.show { display: none; }
+      /* area de toque cheia na barra inferior: os botoes ocupavam 27px de
+         um espaco de 78px, deixando o resto morto */
+      .nav-button { flex: 1 1 0; min-width: 0; height: 100%; }
+
+      /* A barra de abas colapsava para 1px (flex sem flex-shrink), deixando
+         botoes focaveis invisiveis. No celular ela e redundante: a nav
+         inferior ja chama switchTab, entao sai de cena de forma explicita. */
+      .tabs-header { display: none; }
+    }
+
+    @media (max-width: 400px) {
+      header { gap: 2px; }
+      /* Entre 360 e 400px o badge nao cabe e ficava cortado pelo overflow do
+         container. O numero do concurso continua visivel no painel
+         "Sairam no Ultimo", entao aqui ele sai. */
+      #concursoBadge { display: none; }
+      /* reservava 30px mesmo invisivel (opacity:0), espremendo o logo; o
+         carregamento ja e sinalizado pelo texto do botao e pelos toasts */
+      #headerSpinner { display: none; }
+    }
+
+    @media (max-width: 340px) {
+      /* Nesta largura o header ainda estourava por causa dos gaps. O numero do
+         concurso ja aparece no painel "Sairam no Ultimo" (#numPanelConc),
+         entao o badge do header sai sem perda de informacao. */
+      :root { --header-pad-x: 6px; --header-gap: 2px; }
+      /* o app ja avisa sozinho com o banner "Nova versao disponivel" */
+      #btnCheckUpdate { display: none; }
     }
 
     @media (max-width: 380px) {
