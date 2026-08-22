@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v116';
+    var V='lottobot-v117';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -7230,6 +7230,7 @@ function slotMachineReveal(games, callback){
         <li><strong>Dados de autenticacao:</strong> nome, email ou telefone (quando voce faz login via Google ou SMS)</li>
         <li><strong>Jogos salvos:</strong> combinacoes numericas geradas e salvas por voce</li>
         <li><strong>Preferencias:</strong> modelo analitico, filtros ativos, tema visual</li>
+        <li><strong>Combinacoes geradas:</strong> as combinacoes produzidas pelo gerador, salvas ou nao, junto da configuracao usada (loteria, modelo, filtros ativos) — registradas para analise e melhoria do servico</li>
         <li><strong>Dados de uso:</strong> quantidade de jogos gerados, streak diario</li>
       </ul>
       <h3>2. Armazenamento</h3>

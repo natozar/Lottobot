@@ -62,6 +62,33 @@
     .win-who b{color:var(--text);font-weight:600}
     .win-who span{display:block;font-size:0.7rem;color:var(--text3)}
     .err{font-size:0.74rem;color:var(--red);padding:8px 0}
+    /* v116: abas */
+    .tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:22px;
+      border-bottom:1px solid var(--border);padding-bottom:0}
+    .tab{padding:10px 16px;background:none;border:none;cursor:pointer;
+      font-family:var(--sans);font-size:0.82rem;font-weight:600;color:var(--text3);
+      border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+    .tab:hover{color:var(--text2)}
+    .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+    .tab .cnt{font-family:var(--mono);font-size:0.68rem;opacity:.75;margin-left:5px}
+    .pane{display:none}
+    .pane.active{display:block}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+    .toolbar select,.toolbar input{padding:8px 10px;border-radius:8px;background:var(--surface2);
+      border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:0.78rem}
+    .b-item{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--surface)}
+    .b-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;cursor:pointer}
+    .b-head:hover{background:rgba(255,255,255,0.03)}
+    .b-head b{color:var(--text);font-weight:600;font-size:0.82rem}
+    .b-body{display:none;padding:0 14px 14px;border-top:1px solid var(--border)}
+    .b-item.open .b-body{display:block}
+    .b-cfg{font-size:0.7rem;color:var(--text3);margin:10px 0 12px;line-height:1.6}
+    .b-cfg code{background:var(--surface2);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:0.94em}
+    .freq{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+    .freq div{display:flex;flex-direction:column;align-items:center;gap:3px;
+      padding:7px 9px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+    .freq b{font-family:var(--mono);font-size:0.82rem;color:var(--gold)}
+    .freq span{font-size:0.62rem;color:var(--text3)}
     .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border)}
     .admin-header h1{font-size:1.3rem;color:var(--gold)}
     .admin-header .user-info{font-size:0.8rem;color:var(--text2);display:flex;align-items:center;gap:10px}
@@ -168,7 +195,16 @@
       </div>
     </div>
 
+    <div class="tabs" id="adminTabs">
+      <button class="tab active" data-pane="paneVisao">Visao geral</button>
+      <button class="tab" data-pane="paneUsuarios">Usuarios<span class="cnt" id="tabCntUsers"></span></button>
+      <button class="tab" data-pane="paneGeradas">Combinacoes geradas<span class="cnt" id="tabCntGer"></span></button>
+      <button class="tab" data-pane="panePremiados">Premiados<span class="cnt" id="tabCntWins"></span></button>
+      <button class="tab" data-pane="paneEnvios">Envios e config</button>
+    </div>
+
     <!-- Stats -->
+    <div class="pane active" id="paneVisao">
     <div class="admin-grid" id="statsGrid">
       <div class="stat-card"><div class="value" id="statUsers">-</div><div class="label">Usuarios</div></div>
       <div class="stat-card"><div class="value" id="statGames">-</div><div class="label">Jogos Salvos</div></div>
@@ -178,6 +214,13 @@
       <div class="stat-card"><div class="value" id="statNotifs">-</div><div class="label">Notificacoes Enviadas</div></div>
     </div>
 
+    <div class="admin-section">
+      <h2>Historico de Notificacoes</h2>
+      <div id="notifHistory" style="font-size:0.8rem;color:var(--text3)">Carregando...</div>
+    </div>
+    </div><!-- /paneVisao -->
+
+    <div class="pane" id="paneUsuarios">
     <!-- Usuarios -->
     <div class="admin-section">
       <h2>Usuarios (<span id="userCount">0</span>)</h2>
@@ -191,13 +234,54 @@
       </div>
       <button class="btn btn-outline" id="btnLoadMore" onclick="loadMoreUsers()" style="margin-top:12px;width:100%;display:none">Carregar mais</button>
     </div>
+    </div><!-- /paneUsuarios -->
 
+    <div class="pane" id="paneGeradas">
+    <div class="admin-section">
+      <h2>Combinacoes Geradas</h2>
+      <p class="sec-note">Todo lote produzido pelo gerador e registrado, tenha o usuario salvo o jogo ou nao, junto da configuracao usada. Clique em um lote para ver as combinacoes.</p>
+      <div id="gerError"></div>
+      <div class="admin-grid" style="margin-bottom:18px">
+        <div class="stat-card"><div class="value" id="statLotes">-</div><div class="label">Lotes</div></div>
+        <div class="stat-card"><div class="value" id="statCombos">-</div><div class="label">Combinacoes</div></div>
+        <div class="stat-card"><div class="value" id="statScoreMed">-</div><div class="label">Score Medio</div></div>
+        <div class="stat-card"><div class="value" id="statGerPrem">-</div><div class="label">Teriam Premiado</div></div>
+      </div>
+      <div class="toolbar">
+        <select id="gerUser" onchange="renderBatches()"><option value="">Todos os usuarios</option></select>
+        <select id="gerLot" onchange="renderBatches()"><option value="">Todas as loterias</option></select>
+        <select id="gerOrd" onchange="renderBatches()">
+          <option value="rec">Mais recentes</option>
+          <option value="prem">Com premiacao primeiro</option>
+          <option value="score">Maior score medio</option>
+        </select>
+      </div>
+      <div id="batchList" class="empty">Carregando...</div>
+    </div>
+
+    <div class="admin-section">
+      <h2>Numeros Mais Gerados</h2>
+      <p class="sec-note">Frequencia com que cada dezena apareceu nas combinacoes produzidas — util para ver se o gerador esta enviesado.</p>
+      <div id="freqGer" class="empty">-</div>
+    </div>
+    </div><!-- /paneGeradas -->
+
+    <div class="pane" id="panePremiados">
     <!-- Vencedores -->
     <div class="admin-section">
-      <h2>Jogos Premiados (11+ acertos)</h2>
+      <h2>Jogos Salvos Premiados (11+ acertos)</h2>
       <p class="sec-note">Calculado aqui, na hora, cruzando cada jogo salvo com os sorteios da colecao <code>draws</code>. Cobre tambem os concursos anteriores a esta versao.</p>
       <div id="winsList" class="empty">Carregando...</div>
     </div>
+
+    <div class="admin-section">
+      <h2>Combinacoes Geradas que Teriam Premiado</h2>
+      <p class="sec-note">Combinacoes que sairam do gerador e alcancariam 11+ acertos — inclusive as que o usuario nao salvou.</p>
+      <div id="gerWinsList" class="empty">-</div>
+    </div>
+    </div><!-- /panePremiados -->
+
+    <div class="pane" id="paneEnvios">
 
     <!-- Send Push -->
     <div class="admin-section">
@@ -226,11 +310,7 @@
       </div>
     </div>
 
-    <!-- Notification History -->
-    <div class="admin-section">
-      <h2>Historico de Notificacoes</h2>
-      <div id="notifHistory" style="font-size:0.8rem;color:var(--text3)">Carregando...</div>
-    </div>
+    </div><!-- /paneEnvios -->
   </div>
 </div>
 
@@ -339,6 +419,14 @@ auth.onAuthStateChanged(async user=>{
 //  usuarios nunca chegava a ser montada.)
 let gamesByUser={};   // uid -> [{id, ...dados}]
 let drawsByLot={};    // loteria -> [{numero, numeros:Set, data}]
+let batches=[];       // lotes de combinacoes geradas (salvas ou nao)
+
+// ── abas ──
+document.getElementById('adminTabs').addEventListener('click',e=>{
+  const b=e.target.closest('.tab');if(!b)return;
+  document.querySelectorAll('#adminTabs .tab').forEach(t=>t.classList.toggle('active',t===b));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.id===b.dataset.pane));
+});
 
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad2=n=>String(n).padStart(2,'0');
@@ -386,6 +474,21 @@ async function loadDashboard(){
 
   renderUsers(0);
   renderWins();
+  document.getElementById('tabCntUsers').textContent=users.length?'('+users.length+')':'';
+
+  // Lotes de combinacoes geradas
+  try{
+    const bSnap=await db.collection('generatedBatches')
+      .orderBy('createdAt','desc').limit(500).get();
+    batches=bSnap.docs.map(d=>Object.assign({id:d.id},d.data()));
+  }catch(e){
+    batches=[];
+    document.getElementById('gerError').innerHTML=
+      '<div class="err">Nao consegui ler /generatedBatches: '+esc(e.message)+'</div>';
+  }
+  buildGerFilters();
+  renderBatches();
+  renderFreq();
 
   try{
     const notifSnap=await db.collection('notifications').get();
@@ -530,6 +633,149 @@ function toggleUser(uid,tr){
   box.innerHTML=html;
 }
 
+// ══════ v116: combinacoes geradas ══════
+function userLabel(uid){
+  const u=allUsers.find(x=>x.id===uid);
+  if(!u)return uid;
+  const d=u.data();
+  return d.displayName||d.email||d.phone||uid;
+}
+
+// Melhor acerto de uma combinacao avulsa (mesma regra dos jogos salvos).
+function melhorAcertoNums(nums,lot,ref){
+  return melhorAcerto({numbers:nums,lottery:lot,concursoRef:ref});
+}
+
+function buildGerFilters(){
+  const su=document.getElementById('gerUser'),sl=document.getElementById('gerLot');
+  const uids=[...new Set(batches.map(b=>b.userId))];
+  su.innerHTML='<option value="">Todos os usuarios</option>'+
+    uids.map(u=>'<option value="'+esc(u)+'">'+esc(userLabel(u))+'</option>').join('');
+  const lots=[...new Set(batches.map(b=>b.lottery||'lotofacil'))];
+  sl.innerHTML='<option value="">Todas as loterias</option>'+
+    lots.map(l=>'<option value="'+esc(l)+'">'+esc(l)+'</option>').join('');
+}
+
+// Anota cada lote com o melhor acerto encontrado entre suas combinacoes.
+function analisarLote(b){
+  if(b._an)return b._an;
+  const lot=b.lottery||'lotofacil';
+  let best=null,premiadas=[];
+  (b.games||[]).forEach(g=>{
+    const nums=(g.n||[]).map(Number);
+    const r=melhorAcertoNums(nums,lot,b.concursoRef);
+    if(r&&(!best||r.hits>best.hits))best=r;
+    if(r&&r.hits>=11)premiadas.push({nums,score:g.score||0,r});
+  });
+  b._an={best,premiadas,lot};
+  return b._an;
+}
+
+function renderBatches(){
+  const box=document.getElementById('batchList');
+  const fu=document.getElementById('gerUser').value;
+  const fl=document.getElementById('gerLot').value;
+  const ord=document.getElementById('gerOrd').value;
+
+  let list=batches.filter(b=>(!fu||b.userId===fu)&&(!fl||(b.lottery||'lotofacil')===fl));
+  list.forEach(analisarLote);
+
+  if(ord==='prem')list=list.slice().sort((a,b)=>(b._an.best?.hits||0)-(a._an.best?.hits||0));
+  else if(ord==='score')list=list.slice().sort((a,b)=>(b.avgScore||0)-(a.avgScore||0));
+
+  // Estatisticas do recorte atual
+  const combos=list.reduce((s,b)=>s+(b.count||(b.games||[]).length),0);
+  const somaScore=list.reduce((s,b)=>s+(b.avgScore||0)*(b.count||1),0);
+  const totPrem=list.reduce((s,b)=>s+b._an.premiadas.length,0);
+  document.getElementById('statLotes').textContent=list.length;
+  document.getElementById('statCombos').textContent=combos;
+  document.getElementById('statScoreMed').textContent=combos?Math.round(somaScore/combos):'-';
+  document.getElementById('statGerPrem').textContent=totPrem;
+  document.getElementById('tabCntGer').textContent=batches.length?'('+batches.length+')':'';
+
+  if(!list.length){
+    box.className='empty';
+    box.textContent=batches.length?'Nenhum lote com esses filtros.'
+      :'Nenhum lote registrado ainda. Os primeiros aparecem assim que alguem gerar jogos com esta versao no ar.';
+    renderGerWins();
+    return;
+  }
+  box.className='';
+  box.innerHTML=list.slice(0,120).map((b,i)=>{
+    const an=b._an;
+    const hits=an.best?an.best.hits:null;
+    const badge=hits!==null
+      ?'<span class="g-hits '+(hits>=11?'win':'none')+'">melhor: '+hits+' ac.</span>'
+      :'<span class="g-hits none">nao conferido</span>';
+    return '<div class="b-item" id="b_'+i+'">'+
+      '<div class="b-head" onclick="document.getElementById(\'b_'+i+'\').classList.toggle(\'open\')">'+
+        '<b>'+esc(userLabel(b.userId))+'</b>'+
+        '<span class="g-tag">'+esc(an.lot)+' · '+(b.count||(b.games||[]).length)+' jogos · modelo '+esc(b.modelo||'-')+
+        ' · score med '+(b.avgScore||0)+' · '+dt(b.createdAt)+'</span>'+
+        badge+
+      '</div>'+
+      '<div class="b-body">'+
+        '<div class="b-cfg">'+
+          'Loteria <code>'+esc(an.lot)+'</code> · '+
+          'numeros por jogo <code>'+(b.pickSize||'-')+'</code> · '+
+          'concurso ref <code>'+(b.concursoRef||'-')+'</code> · '+
+          'fixados <code>'+(b.fixedCount||0)+'</code> · '+
+          'excluidos <code>'+(b.excludedCount||0)+'</code><br>'+
+          'filtros ativos: '+((b.filters||[]).length
+            ?(b.filters||[]).map(f=>'<code>'+esc(String(f).replace(/^filter/,''))+'</code>').join(' ')
+            :'<span style="color:var(--text3)">nenhum</span>')+
+        '</div>'+
+        '<div class="g-list">'+(b.games||[]).map(g=>{
+          const nums=(g.n||[]).map(Number);
+          const r=melhorAcertoNums(nums,an.lot,b.concursoRef);
+          const hs=r?r.numeros:new Set();
+          const bolas=nums.map(n=>'<span class="'+(r&&hs.has(n)?'hit':'')+'">'+pad2(n)+'</span>').join('');
+          return '<div class="g-item"><div class="g-nums">'+bolas+'</div>'+
+            '<span class="g-hits '+(r&&r.hits>=11?'win':'none')+'">'+
+            (r?r.hits+' ac. · c.'+r.concurso:'—')+'</span>'+
+            '<span class="g-tag">score '+(g.score||0)+'</span></div>';
+        }).join('')+'</div>'+
+      '</div></div>';
+  }).join('');
+  renderGerWins();
+}
+
+function renderGerWins(){
+  const box=document.getElementById('gerWinsList');
+  const out=[];
+  batches.forEach(b=>{
+    const an=analisarLote(b);
+    an.premiadas.forEach(p=>out.push({b,p}));
+  });
+  out.sort((a,x)=>x.p.r.hits-a.p.r.hits||x.p.r.concurso-a.p.r.concurso);
+  if(!out.length){
+    box.className='empty';
+    box.textContent=batches.length?'Nenhuma combinacao gerada atingiu 11 acertos.':'Sem lotes registrados ainda.';
+    return;
+  }
+  box.className='';
+  box.innerHTML=out.slice(0,60).map(o=>{
+    const bolas=o.p.nums.map(n=>'<span class="'+(o.p.r.numeros.has(n)?'hit':'')+'">'+pad2(n)+'</span>').join('');
+    return '<div class="win-item">'+
+      '<div class="win-who"><b>'+esc(userLabel(o.b.userId))+'</b>'+
+      '<span>lote de '+dt(o.b.createdAt)+' · modelo '+esc(o.b.modelo||'-')+'</span></div>'+
+      '<div class="g-nums">'+bolas+'</div>'+
+      '<span class="g-hits win">'+esc(premioLabel(o.b.lottery||'lotofacil',o.p.r.hits))+'</span>'+
+      '<span class="g-tag">concurso '+o.p.r.concurso+' · score '+o.p.score+'</span>'+
+      '</div>';
+  }).join('');
+}
+
+function renderFreq(){
+  const box=document.getElementById('freqGer');
+  const freq={};let tot=0;
+  batches.forEach(b=>(b.games||[]).forEach(g=>(g.n||[]).forEach(n=>{freq[n]=(freq[n]||0)+1;tot++})));
+  const ks=Object.keys(freq).map(Number).sort((a,b)=>freq[b]-freq[a]);
+  if(!ks.length){box.className='empty';box.textContent='Sem combinacoes registradas ainda.';return}
+  box.className='freq';
+  box.innerHTML=ks.map(n=>'<div><b>'+pad2(n)+'</b><span>'+freq[n]+'</span></div>').join('');
+}
+
 function renderWins(){
   const box=document.getElementById('winsList');
   const wins=[];
@@ -544,6 +790,7 @@ function renderWins(){
   });
   wins.sort((a,b)=>b.best.hits-a.best.hits||b.best.concurso-a.best.concurso);
   document.getElementById('statWins').textContent=wins.length;
+  document.getElementById('tabCntWins').textContent=wins.length?'('+wins.length+')':'';
 
   if(!wins.length){
     box.className='empty';

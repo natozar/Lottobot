@@ -21,6 +21,18 @@ service cloud.firestore {
       }
     }
 
+    // Lotes de combinacoes geradas (salvas ou nao) — usados para analise.
+    // O cliente so cria o proprio lote; nao le, nao edita e nao apaga.
+    // Sem este bloco o Firestore negava por padrao e todo o logging de
+    // logGeneratedGames() falhava em silencio.
+    match /generatedBatches/{id} {
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow update, delete: if false;
+    }
+
     // Vitorias detectadas pela Cloud Function — leitura so do admin,
     // escrita apenas pelo Admin SDK (Cloud Functions ignoram estas regras).
     match /wins/{id} {
