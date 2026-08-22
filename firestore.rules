@@ -1,6 +1,17 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // v119: quem e admin fica decidido aqui, por identidade, e nao por um
+    // campo gravavel no banco. Antes bastava ter isAdmin:true no proprio
+    // documento para virar admin — e o documento e escrito pelo cliente.
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email in ['chatsagrado@gmail.com', 'agrorv@gmail.com']
+        || request.auth.token.phone_number == '+5516999916690'
+      );
+    }
+
     // Users: own data only, admin can read all
     // Plan fields (plano, planoExpira, planoCiclo, mpSubscriptionId, planoHistorico)
     // can only be written by Cloud Functions (admin SDK)
@@ -9,39 +20,29 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == uid
         && !request.resource.data.diff(resource.data).affectedKeys()
             .hasAny(['plano', 'planoExpira', 'planoCiclo', 'mpSubscriptionId', 'planoHistorico']);
-      allow read: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow read: if isAdmin();
 
       match /savedGames/{gameId} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
-        // Regras de subcolecao nao herdam do documento pai: sem esta linha o
-        // admin le /users mas recebe permission-denied em /savedGames.
-        allow read: if request.auth != null &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+        // Regras de subcolecao nao herdam do documento pai.
+        allow read: if isAdmin();
       }
     }
 
     // Lotes de combinacoes geradas (salvas ou nao) — usados para analise.
-    // O cliente so cria o proprio lote; nao le, nao edita e nao apaga.
-    // Sem este bloco o Firestore negava por padrao e todo o logging de
-    // logGeneratedGames() falhava em silencio.
+    // O cliente so cria o proprio lote; nao le e nao edita.
     match /generatedBatches/{id} {
       allow create: if request.auth != null &&
         request.resource.data.userId == request.auth.uid;
-      allow read: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow read: if isAdmin();
       // Ninguem edita um lote depois de criado (o registro tem que ser fiel).
-      // O admin pode apagar, para limpar testes e dados antigos.
       allow update: if false;
-      allow delete: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow delete: if isAdmin();
     }
 
-    // Vitorias detectadas pela Cloud Function — leitura so do admin,
-    // escrita apenas pelo Admin SDK (Cloud Functions ignoram estas regras).
+    // Vitorias detectadas pela Cloud Function — escrita so pelo Admin SDK.
     match /wins/{id} {
-      allow read: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow read: if isAdmin();
       allow write: if false;
     }
 
@@ -56,17 +57,21 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Config: readable by all auth users, writable by admin
+    // Config: readable by all auth users (o app le config/pix), writable by admin
     match /config/{doc} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow write: if isAdmin();
+    }
+
+    // Aparelhos autorizados a abrir o painel. Colecao propria de proposito:
+    // /config e legivel por qualquer usuario logado e esta lista nao pode ser.
+    match /adminDevices/{deviceId} {
+      allow read, write: if isAdmin();
     }
 
     // Notifications: admin only
     match /notifications/{id} {
-      allow read, write: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow read, write: if isAdmin();
     }
 
     // Bets odds: readable by all auth users, writable only by Cloud Functions
@@ -77,8 +82,7 @@ service cloud.firestore {
 
     // Bets meta: readable by admin only
     match /bets_meta/{doc} {
-      allow read: if request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow read: if isAdmin();
       allow write: if false;
     }
   }

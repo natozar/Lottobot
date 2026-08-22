@@ -95,6 +95,14 @@
       padding:7px 9px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
     .freq b{font-family:var(--mono);font-size:0.82rem;color:var(--gold)}
     .freq span{font-size:0.62rem;color:var(--text3)}
+    /* v119: blocos de concentracao de uso */
+    .tops{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px}
+    .tops h3{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.09em;color:var(--text3);margin-bottom:10px;font-weight:700}
+    .topline{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:0.76rem}
+    .topline .tn{flex:0 0 40%;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .topline .tb{flex:1;height:5px;border-radius:3px;background:var(--surface2);overflow:hidden}
+    .topline .tb i{display:block;height:100%;background:var(--gold);border-radius:3px}
+    .topline .tv{font-family:var(--mono);font-size:0.72rem;color:var(--text);min-width:38px;text-align:right}
     .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border)}
     .admin-header h1{font-size:1.3rem;color:var(--gold)}
     .admin-header .user-info{font-size:0.8rem;color:var(--text2);display:flex;align-items:center;gap:10px}
@@ -213,11 +221,35 @@
     <div class="pane active" id="paneVisao">
     <div class="admin-grid" id="statsGrid">
       <div class="stat-card"><div class="value" id="statUsers">-</div><div class="label">Usuarios</div></div>
+      <div class="stat-card"><div class="value" id="statNovos7">-</div><div class="label">Novos (7 dias)</div></div>
+      <div class="stat-card"><div class="value" id="statAtivos7">-</div><div class="label">Ativos (7 dias)</div></div>
+      <div class="stat-card"><div class="value" id="statAtivos30">-</div><div class="label">Ativos (30 dias)</div></div>
+      <div class="stat-card"><div class="value" id="statPagos">-</div><div class="label">Pro / Ultra</div></div>
+      <div class="stat-card"><div class="value" id="statMrr">-</div><div class="label">Receita / mes</div></div>
       <div class="stat-card"><div class="value" id="statGames">-</div><div class="label">Jogos Salvos</div></div>
       <div class="stat-card"><div class="value" id="statPush">-</div><div class="label">Push Ativos</div></div>
-      <div class="stat-card"><div class="value" id="statPagos">-</div><div class="label">Pro / Ultra</div></div>
       <div class="stat-card"><div class="value" id="statWins">-</div><div class="label">Jogos Premiados</div></div>
-      <div class="stat-card"><div class="value" id="statNotifs">-</div><div class="label">Notificacoes Enviadas</div></div>
+      <div class="stat-card"><div class="value" id="statNotifs">-</div><div class="label">Notificacoes</div></div>
+    </div>
+
+    <div class="admin-section">
+      <h2>Cadastros e Geracoes — ultimos 30 dias</h2>
+      <div id="chartAtividade" class="empty">Carregando...</div>
+    </div>
+
+    <div class="admin-section">
+      <h2>Onde o Uso se Concentra</h2>
+      <div class="tops">
+        <div><h3>Loterias</h3><div id="topLoterias" class="empty">-</div></div>
+        <div><h3>Modelos</h3><div id="topModelos" class="empty">-</div></div>
+        <div><h3>Filtros mais usados</h3><div id="topFiltros" class="empty">-</div></div>
+        <div><h3>Usuarios mais ativos</h3><div id="topUsers" class="empty">-</div></div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h2>Sorteios Recentes</h2>
+      <div id="drawList" class="empty">Carregando...</div>
     </div>
 
     <div class="admin-section">
@@ -231,6 +263,22 @@
     <div class="admin-section">
       <h2>Usuarios (<span id="userCount">0</span>)</h2>
       <p class="sec-note">Clique em uma linha para ver os jogos salvos daquele usuario e quantos numeros cada um acertou.</p>
+      <div class="toolbar">
+        <input type="text" id="uBusca" placeholder="Buscar por nome, email ou telefone" oninput="renderUsers(0)" style="min-width:260px">
+        <select id="uPlano" onchange="renderUsers(0)">
+          <option value="">Todos os planos</option>
+          <option value="free">Free</option>
+          <option value="pro">Pro</option>
+          <option value="ultra">Ultra</option>
+        </select>
+        <select id="uOrd" onchange="renderUsers(0)">
+          <option value="login">Ultimo acesso</option>
+          <option value="novo">Mais recentes</option>
+          <option value="jogos">Mais jogos salvos</option>
+          <option value="nome">Nome</option>
+        </select>
+        <button class="btn btn-outline" onclick="exportarCSV()">Exportar CSV</button>
+      </div>
       <div id="usersError"></div>
       <div style="overflow-x:auto">
         <table class="user-table">
@@ -317,6 +365,11 @@
       </div>
     </div>
 
+    <div class="admin-section">
+      <h2>Aparelhos Autorizados</h2>
+      <p class="sec-note">O painel so abre em aparelhos desta lista. A conta continua sendo a chave principal — isto e a segunda tranca, e serve para voce ver se alguem entrou de outro lugar.</p>
+      <div id="devList" class="empty">Carregando...</div>
+    </div>
     </div><!-- /paneEnvios -->
   </div>
 </div>
@@ -409,29 +462,24 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('adminScreen').classList.add('hidden');
     return;
   }
-  // Check admin: phone match OR email match OR Firestore flag
+  // v119: so identidade autoriza. O caminho antigo aceitava qualquer conta
+  // com isAdmin:true no proprio documento — e esse documento e escrito pelo
+  // cliente, entao o proprio usuario podia se promover.
   const phoneAdmin=user.phoneNumber===ADMIN_PHONE;
   const emailAdmin=user.email && ADMIN_EMAILS.indexOf(user.email.toLowerCase())!==-1;
-  // v118: a leitura do Firestore pode falhar sem querer dizer "nao e admin"
-  // (rede caida, projeto respondendo devagar). Antes uma falha aqui derrubava
-  // o handler inteiro e prendia o usuario na tela de login.
-  let doc={exists:false,data:()=>({})};
-  try{ doc=await db.collection('users').doc(user.uid).get() }
-  catch(e){ console.warn('leitura do perfil falhou:',e.message) }
-  const firestoreAdmin=doc.exists&&doc.data().isAdmin;
-  if(!phoneAdmin&&!emailAdmin&&!firestoreAdmin){
+  if(!phoneAdmin&&!emailAdmin){
     try{ localStorage.removeItem('lottobot_admin_device') }catch(_e){}
     document.getElementById('gateError').textContent='Voce nao tem permissao de administrador. (login: '+(user.email||user.phoneNumber||user.uid)+')';
     auth.signOut();
     return;
   }
-  // Ensure admin flag is set in Firestore (cria doc se nao existir)
-  if((phoneAdmin||emailAdmin) && (!doc.exists || !doc.data().isAdmin)){
-    try {
-      await db.collection('users').doc(user.uid).set({isAdmin:true, email:user.email||null, phone:user.phoneNumber||null, updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
-    } catch(e){ console.warn('falhou ao set isAdmin:', e); }
-  }
   adminUser=user;
+
+  // v119: trava de aparelho. A conta continua sendo a chave de verdade —
+  // isto e uma segunda tranca, e serve para voce enxergar (e cortar) qualquer
+  // aparelho que abra o painel alem deste.
+  const okDisp=await verificarDispositivo(user);
+  if(!okDisp)return;
   // v118: marca o dispositivo como confiavel para abrir direto no painel
   // nas proximas visitas, sem o piscar da tela de login.
   try{ localStorage.setItem('lottobot_admin_device','1') }catch(_e){}
@@ -445,6 +493,112 @@ auth.onAuthStateChanged(async user=>{
 // Cada bloco roda isolado: um erro de permissao em um nao apaga os outros.
 // (era o que acontecia antes — a contagem de jogos falhava e a tabela de
 //  usuarios nunca chegava a ser montada.)
+// ══════ v119: aparelhos autorizados ══════
+const DEV_KEY='lottobot_admin_device_id';
+function deviceId(){
+  try{
+    let id=localStorage.getItem(DEV_KEY);
+    if(!id){
+      id=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+Date.now());
+      localStorage.setItem(DEV_KEY,id);
+    }
+    return id;
+  }catch(e){return null}
+}
+function deviceLabel(){
+  const ua=navigator.userAgent;
+  const so=/Windows/.test(ua)?'Windows':/Android/.test(ua)?'Android':
+           /iPhone|iPad/.test(ua)?'iOS':/Mac/.test(ua)?'macOS':/Linux/.test(ua)?'Linux':'desconhecido';
+  const nav=/Edg\//.test(ua)?'Edge':/OPR\//.test(ua)?'Opera':/Chrome\//.test(ua)?'Chrome':
+            /Firefox\//.test(ua)?'Firefox':/Safari\//.test(ua)?'Safari':'navegador';
+  return so+' · '+nav;
+}
+
+async function verificarDispositivo(user){
+  const id=deviceId();
+  const tela=document.getElementById('gateScreen');
+  if(!id){ // storage bloqueado — nao da para prender a um aparelho
+    return true;
+  }
+  let devs=[];
+  try{
+    const snap=await db.collection('adminDevices').get();
+    devs=snap.docs;
+  }catch(e){
+    console.warn('adminDevices:',e.message);
+    return true; // falha de leitura nao pode trancar voce para fora
+  }
+
+  const jaTem=devs.some(d=>d.id===id);
+  if(jaTem||devs.length===0){
+    // primeiro aparelho a entrar vira o aparelho autorizado
+    try{
+      await db.collection('adminDevices').doc(id).set({
+        label:deviceLabel(),
+        conta:user.email||user.phoneNumber||user.uid,
+        addedAt:devs.length===0?firebase.firestore.FieldValue.serverTimestamp():
+                (devs.find(d=>d.id===id)?.data().addedAt||firebase.firestore.FieldValue.serverTimestamp()),
+        lastSeen:firebase.firestore.FieldValue.serverTimestamp()
+      },{merge:true});
+    }catch(e){console.warn('registro do aparelho:',e.message)}
+    return true;
+  }
+
+  // Aparelho novo, com outros ja autorizados: pede confirmacao explicita.
+  tela.style.visibility='';
+  tela.classList.remove('hidden');
+  document.getElementById('adminScreen').classList.add('hidden');
+  tela.innerHTML=
+    '<div><h2>Aparelho nao autorizado</h2>'+
+    '<p>Voce entrou como <strong>'+esc(user.email||user.phoneNumber)+'</strong>, mas este aparelho '+
+    '('+esc(deviceLabel())+') nao esta na lista.</p>'+
+    '<p style="font-size:0.78rem;color:var(--text3);margin-bottom:20px">'+
+    devs.length+' aparelho(s) autorizado(s). Autorizar este vai aparecer na lista do painel.</p>'+
+    '<button onclick="autorizarEsteAparelho()">Autorizar este aparelho</button>'+
+    '<div class="gate-divider">ou</div>'+
+    '<button class="gate-phone-toggle" onclick="auth.signOut().then(()=>location.reload())">Sair</button></div>';
+  return false;
+}
+
+async function autorizarEsteAparelho(){
+  try{
+    await db.collection('adminDevices').doc(deviceId()).set({
+      label:deviceLabel(),
+      conta:adminUser.email||adminUser.phoneNumber||adminUser.uid,
+      addedAt:firebase.firestore.FieldValue.serverTimestamp(),
+      lastSeen:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    location.reload();
+  }catch(e){alert('Nao consegui autorizar: '+e.message)}
+}
+
+async function renderDispositivos(){
+  const box=document.getElementById('devList');
+  if(!box)return;
+  try{
+    const snap=await db.collection('adminDevices').get();
+    if(snap.empty){box.className='empty';box.textContent='Nenhum aparelho registrado.';return}
+    const meu=deviceId();
+    box.className='';
+    box.innerHTML=snap.docs.map(d=>{
+      const x=d.data();
+      const eu=d.id===meu;
+      return '<div class="win-item">'+
+        '<div class="win-who"><b>'+esc(x.label||'aparelho')+(eu?' · este':'')+'</b>'+
+        '<span>'+esc(x.conta||'-')+' · visto em '+dt(x.lastSeen)+'</span></div>'+
+        (eu?'<span class="g-hits none">em uso</span>'
+           :'<button class="btn btn-outline" style="padding:4px 10px;font-size:0.7rem;border-color:rgba(239,68,68,0.35);color:var(--red)" onclick="revogarAparelho(\''+esc(d.id)+'\')">revogar</button>')+
+        '</div>';
+    }).join('');
+  }catch(e){box.className='err';box.textContent='Erro: '+e.message}
+}
+
+async function revogarAparelho(id){
+  if(!confirm('Revogar este aparelho? Ele vai precisar ser autorizado de novo.'))return;
+  try{ await db.collection('adminDevices').doc(id).delete(); renderDispositivos(); showToast('Aparelho revogado') }
+  catch(e){ showToast('Erro: '+e.message) }
+}
+
 let gamesByUser={};   // uid -> [{id, ...dados}]
 let drawsByLot={};    // loteria -> [{numero, numeros:Set, data}]
 let batches=[];       // lotes de combinacoes geradas (salvas ou nao)
@@ -517,6 +671,11 @@ async function loadDashboard(){
   buildGerFilters();
   renderBatches();
   renderFreq();
+  try{ renderMetricas() }catch(e){console.warn('metricas:',e.message)}
+  try{ renderChart() }catch(e){console.warn('grafico:',e.message)}
+  try{ renderTops() }catch(e){console.warn('tops:',e.message)}
+  try{ renderDraws() }catch(e){console.warn('sorteios:',e.message)}
+  try{ renderDispositivos() }catch(e){console.warn('aparelhos:',e.message)}
 
   try{
     const notifSnap=await db.collection('notifications').get();
@@ -571,10 +730,51 @@ function premioLabel(lot,hits){
   return p[hits]?hits+' acertos · '+p[hits]:hits+' acertos';
 }
 
+// v119: lista filtrada/ordenada a partir dos controles da barra
+let usersView=[];
+function aplicarFiltrosUsuarios(){
+  const q=(document.getElementById('uBusca')?.value||'').trim().toLowerCase();
+  const pl=document.getElementById('uPlano')?.value||'';
+  const ord=document.getElementById('uOrd')?.value||'login';
+  usersView=allUsers.filter(u=>{
+    const d=u.data();
+    if(pl&&(d.plano||'free')!==pl)return false;
+    if(!q)return true;
+    return [d.displayName,d.email,d.phone,u.id].some(v=>String(v||'').toLowerCase().includes(q));
+  });
+  const ms=t=>t?.toDate?.()?.getTime?.()||0;
+  usersView.sort((a,b)=>{
+    const A=a.data(),B=b.data();
+    if(ord==='novo')return ms(B.createdAt)-ms(A.createdAt);
+    if(ord==='nome')return String(A.displayName||'').localeCompare(String(B.displayName||''));
+    if(ord==='jogos')return (gamesByUser[b.id]?.length||0)-(gamesByUser[a.id]?.length||0);
+    return ms(B.lastLogin)-ms(A.lastLogin);
+  });
+}
+
+function exportarCSV(){
+  aplicarFiltrosUsuarios();
+  const linhas=[['nome','email','telefone','login','plano','push','jogos_salvos','melhor_acerto','cadastro','ultimo_acesso','uid']];
+  usersView.forEach(u=>{
+    const d=u.data(),g=gamesByUser[u.id];
+    let top='';
+    if(Array.isArray(g)){let m=0;g.forEach(x=>{const b=melhorAcerto(x);if(b&&b.hits>m)m=b.hits});top=m||''}
+    linhas.push([d.displayName||'',d.email||'',d.phone||'',d.authProvider||'',d.plano||'free',
+      (d.fcmTokens?.length>0&&d.notificationsEnabled)?'sim':'nao',
+      Array.isArray(g)?g.length:'',top,dt(d.createdAt),dt(d.lastLogin),u.id]);
+  });
+  const csv='﻿'+linhas.map(l=>l.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='lottobot-usuarios.csv';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  showToast(usersView.length+' usuario(s) exportado(s)');
+}
+
 function renderUsers(start){
   const tbody=document.getElementById('userTableBody');
-  if(start===0)tbody.innerHTML='';
-  const show=allUsers.slice(start,start+30);
+  if(start===0){tbody.innerHTML='';aplicarFiltrosUsuarios()}
+  const show=usersView.slice(start,start+30);
 
   show.forEach(doc=>{
     const d=doc.data();
@@ -610,7 +810,9 @@ function renderUsers(start){
   });
 
   document.getElementById('btnLoadMore').style.display=
-    allUsers.length>start+30?'':'none';
+    usersView.length>start+30?'':'none';
+  document.getElementById('userCount').textContent=
+    usersView.length===allUsers.length?allUsers.length:usersView.length+' de '+allUsers.length;
 }
 
 function loadMoreUsers(){
@@ -829,6 +1031,106 @@ function renderGerWins(){
       '<span class="g-tag">concurso '+o.p.r.concurso+' · score '+o.p.score+'</span>'+
       '</div>';
   }).join('');
+}
+
+// ══════ v119: metricas, grafico e concentracao de uso ══════
+const DIA=86400000;
+const msDe=t=>t?.toDate?.()?.getTime?.()||0;
+const brl=n=>'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function renderMetricas(){
+  const agora=Date.now();
+  const d=u=>u.data();
+  const novos7=allUsers.filter(u=>agora-msDe(d(u).createdAt)<7*DIA&&msDe(d(u).createdAt)).length;
+  const at7=allUsers.filter(u=>agora-msDe(d(u).lastLogin)<7*DIA&&msDe(d(u).lastLogin)).length;
+  const at30=allUsers.filter(u=>agora-msDe(d(u).lastLogin)<30*DIA&&msDe(d(u).lastLogin)).length;
+  const pro=allUsers.filter(u=>d(u).plano==='pro').length;
+  const ultra=allUsers.filter(u=>d(u).plano==='ultra').length;
+  document.getElementById('statNovos7').textContent=novos7;
+  document.getElementById('statAtivos7').textContent=at7;
+  document.getElementById('statAtivos30').textContent=at30;
+  document.getElementById('statPagos').textContent=pro+ultra;
+  // Estimativa simples: preco de tabela x assinantes ativos de cada plano.
+  document.getElementById('statMrr').textContent=brl(pro*9.9+ultra*19.9);
+}
+
+// Grafico de barras em SVG puro — sem biblioteca.
+function renderChart(){
+  const box=document.getElementById('chartAtividade');
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const dias=[];
+  for(let i=29;i>=0;i--)dias.push(hoje.getTime()-i*DIA);
+  const cad=dias.map(()=>0),ger=dias.map(()=>0);
+  const bucket=ms=>{const i=Math.floor((ms-dias[0])/DIA);return (i>=0&&i<30)?i:-1};
+  allUsers.forEach(u=>{const i=bucket(msDe(u.data().createdAt));if(i>=0)cad[i]++});
+  batches.forEach(b=>{const i=bucket(msDe(b.createdAt));if(i>=0)ger[i]+=(b.count||0)});
+
+  const max=Math.max(1,...cad,...ger);
+  if(!cad.some(x=>x)&&!ger.some(x=>x)){
+    box.className='empty';box.textContent='Sem atividade registrada nos ultimos 30 dias.';return;
+  }
+  box.className='';
+  const W=920,H=170,pad=26,bw=(W-pad*2)/30;
+  const barras=dias.map((ms,i)=>{
+    const hc=(cad[i]/max)*(H-pad*2), hg=(ger[i]/max)*(H-pad*2);
+    const x=pad+i*bw;
+    const dia=new Date(ms).getDate();
+    return '<rect x="'+(x+1)+'" y="'+(H-pad-hc)+'" width="'+(bw/2-1.5)+'" height="'+hc+'" fill="var(--gold)" opacity="0.85"><title>'+dia+': '+cad[i]+' cadastro(s)</title></rect>'+
+           '<rect x="'+(x+bw/2)+'" y="'+(H-pad-hg)+'" width="'+(bw/2-1.5)+'" height="'+hg+'" fill="var(--green)" opacity="0.85"><title>'+dia+': '+ger[i]+' combinacao(oes)</title></rect>'+
+           (i%5===0?'<text x="'+(x+bw/2)+'" y="'+(H-8)+'" fill="var(--text3)" font-size="9" text-anchor="middle" font-family="var(--mono)">'+dia+'</text>':'');
+  }).join('');
+  box.innerHTML='<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="min-width:620px;display:block">'+
+    '<line x1="'+pad+'" y1="'+(H-pad)+'" x2="'+(W-pad)+'" y2="'+(H-pad)+'" stroke="var(--border)"/>'+
+    barras+'</svg></div>'+
+    '<div style="display:flex;gap:18px;font-size:0.72rem;color:var(--text3);margin-top:8px">'+
+    '<span><span style="display:inline-block;width:10px;height:10px;background:var(--gold);border-radius:2px;margin-right:5px"></span>cadastros</span>'+
+    '<span><span style="display:inline-block;width:10px;height:10px;background:var(--green);border-radius:2px;margin-right:5px"></span>combinacoes geradas</span>'+
+    '<span>pico do periodo: '+max+'</span></div>';
+}
+
+function listaTop(el,pares,sufixo){
+  const box=document.getElementById(el);
+  if(!pares.length){box.className='empty';box.textContent='Sem dados ainda.';return}
+  const max=pares[0][1]||1;
+  box.className='';
+  box.innerHTML=pares.slice(0,8).map(([k,v])=>
+    '<div class="topline"><span class="tn">'+esc(k)+'</span>'+
+    '<span class="tb"><i style="width:'+Math.round(v/max*100)+'%"></i></span>'+
+    '<span class="tv">'+v+(sufixo||'')+'</span></div>').join('');
+}
+
+function renderTops(){
+  const conta=(arr,fn)=>{const m={};arr.forEach(x=>{const k=fn(x);if(k!=null)m[k]=(m[k]||0)+1});
+    return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+
+  // loterias e modelos, ponderados pelo numero de combinacoes do lote
+  const lot={},mod={},fil={},porUser={};
+  batches.forEach(b=>{
+    const n=b.count||(b.games||[]).length;
+    lot[b.lottery||'lotofacil']=(lot[b.lottery||'lotofacil']||0)+n;
+    mod[b.modelo||'-']=(mod[b.modelo||'-']||0)+n;
+    (b.filters||[]).forEach(f=>{const k=String(f).replace(/^filter/,'');fil[k]=(fil[k]||0)+1});
+    porUser[b.userId]=(porUser[b.userId]||0)+n;
+  });
+  const ord=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]);
+  listaTop('topLoterias',ord(lot));
+  listaTop('topModelos',ord(mod));
+  listaTop('topFiltros',ord(fil),'x');
+  listaTop('topUsers',ord(porUser).map(([uid,v])=>[userLabel(uid),v]));
+}
+
+function renderDraws(){
+  const box=document.getElementById('drawList');
+  const todos=[];
+  Object.entries(drawsByLot).forEach(([lot,ds])=>ds.forEach(d=>todos.push({lot,...d})));
+  todos.sort((a,b)=>b.numero-a.numero);
+  if(!todos.length){box.className='empty';box.textContent='Nenhum sorteio carregado.';return}
+  box.className='';
+  box.innerHTML=todos.slice(0,25).map(d=>
+    '<div class="win-item"><div class="win-who"><b>'+esc(d.lot)+' · concurso '+d.numero+'</b>'+
+    '<span>'+esc(d.data||'sem data')+'</span></div>'+
+    '<div class="g-nums">'+[...d.numeros].sort((a,b)=>a-b).map(n=>'<span>'+pad2(n)+'</span>').join('')+'</div></div>'
+  ).join('');
 }
 
 function renderFreq(){
