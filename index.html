@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v117';
+    var V='lottobot-v123';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -2306,7 +2306,13 @@
           <input type="text" class="auth-phone-input" id="qfName" placeholder="Seu nome" maxlength="60" style="font-family:var(--font-sans)">
           <input type="email" class="auth-phone-input" id="qfEmail" placeholder="Seu email" maxlength="80" style="font-family:var(--font-sans)">
           <input type="tel" class="auth-phone-input" id="qfPhone" placeholder="Telefone (opcional)" maxlength="15" style="font-family:var(--font-mono)">
-          <button class="auth-send-btn" style="background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b" onclick="loginQuickForm()">Entrar</button>
+          <button class="auth-send-btn" id="qfEntrar" style="background:linear-gradient(135deg,var(--color-gold-primary),#b8912e);color:#09090b" onclick="loginQuickForm()">Entrar</button>
+          <!-- v123: recuperacao de acesso — so aparece quando o login falha -->
+          <div id="qfRecover" style="display:none;margin-top:12px;padding:12px;border-radius:10px;background:rgba(212,168,83,0.07);border:1px solid rgba(212,168,83,0.25)">
+            <div id="qfRecoverMsg" style="font-size:0.8rem;color:var(--text-secondary);line-height:1.55;margin-bottom:10px"></div>
+            <input type="password" class="auth-phone-input" id="qfPwd" placeholder="Sua senha" style="display:none;font-family:var(--font-sans);margin-bottom:8px">
+            <button class="auth-send-btn" id="qfRecoverBtn" style="display:none" onclick="recuperarAcesso()"></button>
+          </div>
         </div>
       </div>
     </div>
@@ -3805,30 +3811,139 @@ function loginGoogle(){
   }
 }
 
+// ══════ v123: RECUPERACAO DE ACESSO ══════
+// Nunca deixa o usuario numa tela sem saida, e nunca cria sessao anonima
+// silenciosa no lugar da conta dele.
+let _recModo=null,_recEmail=null,_recNome=null;
+
+function mostrarRecuperacao(modo,email,nome){
+  _recModo=modo;_recEmail=email;_recNome=nome;
+  const cx=document.getElementById('qfRecover');
+  const msg=document.getElementById('qfRecoverMsg');
+  const inp=document.getElementById('qfPwd');
+  const bt=document.getElementById('qfRecoverBtn');
+  if(!cx)return;
+  cx.style.display='';
+  if(modo==='google'){
+    // Caminho mais simples que existe: um toque, sem senha nenhuma.
+    msg.innerHTML='Esse email ja tem conta criada com o <strong>Google</strong>. '+
+      'Seus jogos salvos estao nela — entre por ali e voce cai direto na sua conta, sem senha.';
+    inp.style.display='none';
+    const g=document.getElementById('qfRecGoogle');if(g)g.style.display='none';
+    const ou=document.getElementById('qfRecOu');if(ou)ou.style.display='none';
+    bt.style.display='';
+    bt.textContent='Entrar com Google';
+  }else{
+    // O Firebase esconde de proposito com qual provedor o email foi criado
+    // (protecao contra enumeracao de contas), entao nao da para adivinhar.
+    // Em vez de chutar, oferecemos os dois caminhos.
+    msg.innerHTML='<strong>Esse email ja tem conta.</strong><br>'+
+      'Se voce criou com o Google, entre por ali — e um toque e cai direto na sua conta, com seus jogos salvos.';
+    inp.style.display='';
+    inp.value='';
+    bt.style.display='';
+    bt.textContent='Entrar com a senha';
+    inp.oninput=function(){bt.textContent=this.value?'Entrar com a senha':'Enviar link de recuperacao'};
+    // Botao do Google como primeira opcao, acima do campo de senha
+    let g=document.getElementById('qfRecGoogle');
+    if(!g){
+      g=document.createElement('button');
+      g.id='qfRecGoogle';g.className='auth-send-btn';
+      g.style.cssText='margin-bottom:10px;background:#fff;color:#1a1a1a';
+      g.textContent='Entrar com Google';
+      g.onclick=function(){loginGoogle()};
+      inp.parentNode.insertBefore(g,inp);
+      const ou=document.createElement('div');
+      ou.id='qfRecOu';ou.className='auth-divider';ou.textContent='ou tenho senha';
+      inp.parentNode.insertBefore(ou,inp);
+    }
+    g.style.display='';
+    const ou=document.getElementById('qfRecOu');if(ou)ou.style.display='';
+  }
+}
+
+function esconderRecuperacao(){
+  const cx=document.getElementById('qfRecover');
+  if(cx)cx.style.display='none';
+}
+
+async function recuperarAcesso(){
+  const bt=document.getElementById('qfRecoverBtn');
+  if(_recModo==='google'){loginGoogle();return}
+  const senha=document.getElementById('qfPwd').value;
+  bt.disabled=true;
+  try{
+    if(senha){
+      const cred=await _auth.signInWithEmailAndPassword(_recEmail,senha);
+      if(_recNome)try{await cred.user.updateProfile({displayName:_recNome})}catch(e){}
+      esconderRecuperacao();
+      showToast('Bem-vindo de volta!');
+    }else{
+      await _auth.sendPasswordResetEmail(_recEmail);
+      document.getElementById('qfRecoverMsg').innerHTML=
+        'Link enviado para <strong>'+esc(_recEmail)+'</strong>. Abra o email, defina uma senha nova '+
+        'e volte aqui para entrar com ela. Se nao chegar em alguns minutos, olhe no spam.';
+      document.getElementById('qfPwd').style.display='';
+      bt.textContent='Entrar com a senha';
+    }
+  }catch(e){
+    const m=e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'
+      ? 'Senha incorreta. Deixe o campo vazio e toque no botao para receber um link de recuperacao.'
+      : e.code==='auth/too-many-requests'
+      ? 'Muitas tentativas seguidas. Espere alguns minutos e tente de novo.'
+      : 'Nao consegui: '+e.message;
+    document.getElementById('qfRecoverMsg').textContent=m;
+    if(!senha)bt.textContent='Enviar link de recuperacao';
+  }
+  bt.disabled=false;
+}
+
 async function loginQuickForm(){
   const name=document.getElementById('qfName').value.trim();
   const email=document.getElementById('qfEmail').value.trim();
   const phone=document.getElementById('qfPhone').value.trim();
   if(!name||name.length<2){showToast('Digite seu nome');return}
   if(!email||!email.includes('@')||!email.includes('.')){showToast('Digite um email valido');return}
-  const btn=document.querySelector('#quickForm .auth-send-btn');
+  esconderRecuperacao();
+  const btn=document.getElementById('qfEntrar');
   if(btn){btn.disabled=true;btn.textContent='Entrando...'}
   try{
     let user;
-    // Tentar login com email/senha (senha = email invertido + salt fixo)
+    // v123: pergunta ao Firebase COMO este email esta cadastrado antes de
+    // tentar entrar. Antes o codigo adivinhava pelo codigo de erro, e
+    // 'auth/invalid-credential' estava nos dois ramos — o segundo, que
+    // tratava email ja usado no Google, era inalcancavel. O resultado era
+    // erro generico, ou pior: uma sessao anonima vazia, com o usuario
+    // achando que tinha entrado enquanto seus jogos ficavam na outra conta.
     const pwd=email.split('').reverse().join('')+'#Lb2026';
+    let metodos=[];
+    try{ metodos=await _auth.fetchSignInMethodsForEmail(email) }catch(e){}
+
+    if(metodos.includes('google.com')&&!metodos.includes('password')){
+      mostrarRecuperacao('google',email,name);
+      if(btn){btn.disabled=false;btn.textContent='Entrar'}
+      return;
+    }
+
     try{
-      const cred=await _auth.signInWithEmailAndPassword(email,pwd);
-      user=cred.user;
-    }catch(e){
-      if(e.code==='auth/user-not-found'||e.code==='auth/invalid-credential'){
-        // Criar conta nova
+      if(metodos.length===0){
         const cred=await _auth.createUserWithEmailAndPassword(email,pwd);
         user=cred.user;
-      }else if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'){
-        // Email ja existe com outra senha (Google?) — tentar anonimo
-        try{const cred=await _auth.signInAnonymously();user=cred.user}
-        catch(e2){showToast('Este email ja esta vinculado a uma conta Google. Use "Entrar com Google".');if(btn){btn.disabled=false;btn.textContent='Entrar'}return}
+      }else{
+        const cred=await _auth.signInWithEmailAndPassword(email,pwd);
+        user=cred.user;
+      }
+    }catch(e){
+      if(e.code==='auth/email-already-in-use'){
+        // corrida: alguem criou entre a consulta e a criacao
+        try{const cred=await _auth.signInWithEmailAndPassword(email,pwd);user=cred.user}
+        catch(e2){mostrarRecuperacao('senha',email,name);if(btn){btn.disabled=false;btn.textContent='Entrar'}return}
+      }else if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'||e.code==='auth/user-not-found'){
+        // A senha deste email nao e mais a derivada — oferece recuperacao
+        // em vez de deixar o usuario sem saida.
+        mostrarRecuperacao('senha',email,name);
+        if(btn){btn.disabled=false;btn.textContent='Entrar'}
+        return;
       }else throw e;
     }
     // Atualizar perfil

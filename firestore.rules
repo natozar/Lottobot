@@ -23,12 +23,18 @@ service cloud.firestore {
       // resource.data, que e null na criacao — o diff falhava e o Firestore
       // negava. Desde a entrada do freemium, nenhum usuario novo conseguia
       // criar o proprio perfil (sem doc: sem sync na nuvem e sem push).
+      // Na criacao o app inicializa o plano com os valores de conta gratuita.
+      // Proibir esses campos por completo bloqueava o cadastro inteiro; o que
+      // importa e que o cliente nao consiga se dar um plano pago.
       allow create: if request.auth != null && request.auth.uid == uid
-        && !request.resource.data.keys()
-            .hasAny(['plano', 'planoExpira', 'planoCiclo', 'mpSubscriptionId', 'planoHistorico', 'isAdmin']);
+        && (!('plano' in request.resource.data) || request.resource.data.plano == 'free')
+        && (!('planoExpira' in request.resource.data) || request.resource.data.planoExpira == null)
+        && (!('planoCiclo' in request.resource.data) || request.resource.data.planoCiclo == null)
+        && (!('mpSubscriptionId' in request.resource.data) || request.resource.data.mpSubscriptionId == null)
+        && (!('planoHistorico' in request.resource.data) || request.resource.data.planoHistorico.size() == 0);
       allow update: if request.auth != null && request.auth.uid == uid
         && !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['plano', 'planoExpira', 'planoCiclo', 'mpSubscriptionId', 'planoHistorico', 'isAdmin']);
+            .hasAny(['plano', 'planoExpira', 'planoCiclo', 'mpSubscriptionId', 'planoHistorico']);
       allow delete: if request.auth != null && request.auth.uid == uid;
 
       match /savedGames/{gameId} {
