@@ -17,10 +17,19 @@ service cloud.firestore {
     // can only be written by Cloud Functions (admin SDK)
     match /users/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if request.auth != null && request.auth.uid == uid
-        && !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['plano', 'planoExpira', 'planoCiclo', 'mpSubscriptionId', 'planoHistorico']);
       allow read: if isAdmin();
+
+      // v119: create e update separados. A regra unica de write usava
+      // resource.data, que e null na criacao — o diff falhava e o Firestore
+      // negava. Desde a entrada do freemium, nenhum usuario novo conseguia
+      // criar o proprio perfil (sem doc: sem sync na nuvem e sem push).
+      allow create: if request.auth != null && request.auth.uid == uid
+        && !request.resource.data.keys()
+            .hasAny(['plano', 'planoExpira', 'planoCiclo', 'mpSubscriptionId', 'planoHistorico', 'isAdmin']);
+      allow update: if request.auth != null && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['plano', 'planoExpira', 'planoCiclo', 'mpSubscriptionId', 'planoHistorico', 'isAdmin']);
+      allow delete: if request.auth != null && request.auth.uid == uid;
 
       match /savedGames/{gameId} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
