@@ -347,7 +347,21 @@
     <div class="pane" id="paneBlog">
     <div class="admin-section">
       <h2>Artigos Publicados</h2>
-      <p class="sec-note">Gerados automaticamente pela <code>gerarArtigoBlog</code> a cada sorteio novo. Clique no titulo para abrir a pagina publica.</p>
+      <p class="sec-note">Duas rotinas publicam aqui: a <code>gerarArtigoBlog</code>, a cada sorteio novo, e a <code>fetchBetsOdds</code>, uma vez por dia com as odds. Clique no titulo para abrir a pagina publica.</p>
+      <div class="admin-grid" style="margin-bottom:16px">
+        <div class="stat-card"><div class="value" id="statBlogTot">-</div><div class="label">Artigos</div></div>
+        <div class="stat-card"><div class="value" id="statBlogLot">-</div><div class="label">De Loteria</div></div>
+        <div class="stat-card"><div class="value" id="statBlogBets">-</div><div class="label">De Apostas</div></div>
+        <div class="stat-card"><div class="value" id="statBlogHoje">-</div><div class="label">Publicados Hoje</div></div>
+      </div>
+      <div class="toolbar">
+        <select id="blogTipo" onchange="renderBlogLista()">
+          <option value="">Todos os tipos</option>
+          <option value="loteria">So loterias</option>
+          <option value="bets">So apostas</option>
+        </select>
+        <select id="blogLot" onchange="renderBlogLista()"><option value="">Todas as loterias</option></select>
+      </div>
       <div id="blogList" class="empty">Carregando...</div>
     </div>
     </div><!-- /paneBlog -->
@@ -1191,31 +1205,65 @@ function renderTops(){
   listaTop('topUsers',ord(porUser).map(([uid,v])=>[userLabel(uid),v]));
 }
 
-// v121: artigos gerados automaticamente a cada sorteio
+// v122: o blog tem duas rotinas publicando — sorteios e odds de futebol.
+// Os artigos de apostas nao tem campo `loteria`, e antes apareciam como "-".
+let blogPosts=[];
+
 async function renderBlog(){
   const box=document.getElementById('blogList');
   try{
     const snap=await db.collection('blog_posts')
-      .orderBy('dataPublicacao','desc').limit(60).get();
-    document.getElementById('tabCntBlog').textContent=snap.size?'('+snap.size+')':'';
-    if(snap.empty){box.className='empty';box.textContent='Nenhum artigo publicado ainda.';return}
-    box.className='';
-    box.innerHTML=snap.docs.map(d=>{
-      const x=d.data();
-      const nums=(x.numeros||[]).map(Number);
-      const st=x.estatisticas||{};
-      return '<div class="win-item">'+
-        '<div class="win-who">'+
-          '<b><a href="/blog/'+esc(x.slug||d.id)+'" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none">'+
-          esc(x.titulo||d.id)+'</a></b>'+
-          '<span>'+esc(x.loteria||'-')+' · concurso '+(x.concurso||'-')+' · '+dt(x.dataPublicacao)+
-          (st.soma?' · soma '+st.soma+' · '+st.pares+'P/'+st.impares+'I':'')+'</span>'+
-        '</div>'+
-        (nums.length?'<div class="g-nums">'+nums.map(n=>'<span>'+pad2(n)+'</span>').join('')+'</div>':'')+
-        '<span class="g-tag">'+((x.conteudo||'').length)+' chars</span>'+
-        '</div>';
-    }).join('');
+      .orderBy('dataPublicacao','desc').limit(200).get();
+    blogPosts=snap.docs.map(d=>Object.assign({id:d.id},d.data()));
+    document.getElementById('tabCntBlog').textContent=blogPosts.length?'('+blogPosts.length+')':'';
+
+    const lots=[...new Set(blogPosts.filter(p=>p.loteria).map(p=>p.loteria))].sort();
+    document.getElementById('blogLot').innerHTML='<option value="">Todas as loterias</option>'+
+      lots.map(l=>'<option value="'+esc(l)+'">'+esc(l)+'</option>').join('');
+
+    const hoje=new Date().toDateString();
+    document.getElementById('statBlogTot').textContent=blogPosts.length;
+    document.getElementById('statBlogLot').textContent=blogPosts.filter(p=>p.tipo==='loteria').length;
+    document.getElementById('statBlogBets').textContent=blogPosts.filter(p=>p.tipo==='bets').length;
+    document.getElementById('statBlogHoje').textContent=
+      blogPosts.filter(p=>p.dataPublicacao?.toDate?.()?.toDateString?.()===hoje).length;
+
+    renderBlogLista();
   }catch(e){box.className='err';box.textContent='Erro ao ler blog_posts: '+e.message}
+}
+
+function renderBlogLista(){
+  const box=document.getElementById('blogList');
+  const ft=document.getElementById('blogTipo').value;
+  const fl=document.getElementById('blogLot').value;
+  // O filtro de loteria so faz sentido para artigos de sorteio.
+  document.getElementById('blogLot').disabled=(ft==='bets');
+
+  const lista=blogPosts.filter(p=>(!ft||p.tipo===ft)&&(!fl||p.loteria===fl));
+  if(!lista.length){box.className='empty';box.textContent='Nenhum artigo com esses filtros.';return}
+  box.className='';
+  box.innerHTML=lista.slice(0,80).map(x=>{
+    const bets=x.tipo==='bets';
+    const nums=(x.numeros||[]).map(Number);
+    const st=x.estatisticas||{};
+    const selo=bets
+      ? '<span class="tag pro">apostas</span>'
+      : '<span class="tag free">'+esc(x.loteria||'loteria')+'</span>';
+    const detalhe=bets
+      ? esc(x.liga||'liga')+' · '+((x.jogos||[]).length)+' jogo(s) · '+dt(x.dataPublicacao)
+      : 'concurso '+(x.concurso||'-')+' · '+dt(x.dataPublicacao)+
+        (st.soma?' · soma '+st.soma+' · '+st.pares+'P/'+st.impares+'I':'');
+    return '<div class="win-item">'+
+      '<div class="win-who">'+
+        '<b><a href="/blog/'+esc(x.slug||x.id)+'" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none">'+
+        esc(x.titulo||x.id)+'</a></b>'+
+        '<span>'+detalhe+'</span>'+
+      '</div>'+
+      selo+
+      (nums.length?'<div class="g-nums">'+nums.map(n=>'<span>'+pad2(n)+'</span>').join('')+'</div>':'')+
+      '<span class="g-tag">'+((x.conteudo||'').length)+' chars</span>'+
+      '</div>';
+  }).join('');
 }
 
 // v121: recarrega tudo sem perder a aba aberta
