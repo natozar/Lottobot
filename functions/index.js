@@ -1459,13 +1459,42 @@ exports.processDrawResults = onDocumentCreated({
       for (const gameDoc of gamesSnap.docs) {
         const game = gameDoc.data();
         if (game.checkedDraws && game.checkedDraws.includes(drawNumero)) continue;
+        // v115: so confere jogos da mesma loteria. Docs antigos (migracao do
+        // localStorage) nao gravavam o campo e continuam tratados como lotofacil.
+        if ((game.lottery || "lotofacil") !== loteria) continue;
 
         const hits = (game.numbers || []).filter(n => drawNums.has(n)).length;
         if (hits > bestHits) { bestHits = hits; bestGameId = gameDoc.id; }
 
+        // v115: persiste o resultado. Antes os acertos eram calculados, usados
+        // no push e descartados — o admin nao tinha como saber quem ganhou.
         await gameDoc.ref.update({
-          checkedDraws: admin.firestore.FieldValue.arrayUnion(drawNumero)
+          checkedDraws: admin.firestore.FieldValue.arrayUnion(drawNumero),
+          lastHits: hits,
+          lastCheckedDraw: drawNumero,
+          lastCheckedAt: admin.firestore.FieldValue.serverTimestamp()
         });
+
+        if (hits >= 11) {
+          try {
+            await db.collection("wins").doc(`${drawNumero}_${userDoc.id}_${gameDoc.id}`).set({
+              uid: userDoc.id,
+              displayName: user.displayName || null,
+              email: user.email || null,
+              phone: user.phone || null,
+              gameId: gameDoc.id,
+              numbers: game.numbers || [],
+              hits,
+              concurso: drawNumero,
+              loteria,
+              score: game.score || 0,
+              modelo: game.modelo || null,
+              detectedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+          } catch (e) {
+            console.error(`wins write error for ${userDoc.id}/${gameDoc.id}:`, e.message);
+          }
+        }
       }
 
       if (bestHits >= 11 && user.fcmTokens && user.fcmTokens.length > 0 && user.notificationsEnabled) {

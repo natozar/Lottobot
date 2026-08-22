@@ -46,7 +46,7 @@
   <!-- Force SW update for stuck PWA installs -->
   <script>
   (function(){
-    var V='lottobot-v115';
+    var V='lottobot-v116';
     if(localStorage.getItem('sw_ver')!==V){
       // Clear API data caches from localStorage
       try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('lottobot_cache_')===0)localStorage.removeItem(k)})}catch(e){}
@@ -4084,7 +4084,7 @@ async function loadSavedFromCloud(){
         const batch=_db.batch();
         saved.forEach(g=>{
           const ref=_db.collection('users').doc(currentUser.uid).collection('savedGames').doc(String(g.id));
-          batch.set(ref,{numbers:g.n,score:g.score||0,modelo:g.mod||'B',concursoRef:g.ref||0,createdAt:firebase.firestore.Timestamp.fromDate(new Date(g.dt?g.dt.split('/').reverse().join('-'):Date.now())),checkedDraws:[]});
+          batch.set(ref,{numbers:g.n,score:g.score||0,modelo:g.mod||'B',concursoRef:g.ref||0,createdAt:firebase.firestore.Timestamp.fromDate(new Date(g.dt?g.dt.split('/').reverse().join('-'):Date.now())),checkedDraws:[],lottery:g.lot||'lotofacil'});
         });
         await batch.commit();
         showToast('Jogos migrados para a nuvem!');

@@ -14,7 +14,19 @@ service cloud.firestore {
 
       match /savedGames/{gameId} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
+        // Regras de subcolecao nao herdam do documento pai: sem esta linha o
+        // admin le /users mas recebe permission-denied em /savedGames.
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
       }
+    }
+
+    // Vitorias detectadas pela Cloud Function — leitura so do admin,
+    // escrita apenas pelo Admin SDK (Cloud Functions ignoram estas regras).
+    match /wins/{id} {
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      allow write: if false;
     }
 
     // Draws: read-only for clients

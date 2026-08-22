@@ -31,7 +31,37 @@
     .admin-gate h2{color:var(--gold);margin-bottom:12px}
     .admin-gate p{margin-bottom:20px}
     .admin-gate button{padding:12px 28px;border-radius:10px;background:var(--gold);color:#09090b;font-weight:700;border:none;cursor:pointer;font-size:0.9rem}
-    .admin-container{max-width:900px;margin:0 auto;padding:24px}
+    .admin-container{max-width:1100px;margin:0 auto;padding:24px}
+    /* v115: detalhamento de usuarios, jogos e vencedores */
+    .u-row{cursor:pointer}
+    .u-row:hover{background:rgba(255,255,255,0.03)}
+    .u-row td{vertical-align:middle}
+    .u-caret{display:inline-block;width:14px;color:var(--text3);font-size:0.7rem;transition:transform .15s}
+    .u-row.open .u-caret{transform:rotate(90deg)}
+    .u-detail td{background:var(--surface2);padding:0 !important}
+    .u-detail-in{padding:16px 18px}
+    .u-meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:14px;font-size:0.74rem;color:var(--text3)}
+    .u-meta b{color:var(--text2);font-weight:600}
+    .g-list{display:flex;flex-direction:column;gap:8px}
+    .g-item{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+      padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:9px}
+    .g-nums{display:flex;gap:4px;flex-wrap:wrap}
+    .g-nums span{min-width:26px;height:26px;padding:0 5px;display:flex;align-items:center;justify-content:center;
+      font-family:var(--mono);font-size:0.68rem;font-weight:600;border-radius:6px;
+      background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+    .g-nums span.hit{background:rgba(74,124,89,0.28);border-color:rgba(74,124,89,0.6);color:#8fc79f}
+    .g-tag{font-family:var(--mono);font-size:0.66rem;color:var(--text3);white-space:nowrap}
+    .g-hits{font-family:var(--mono);font-size:0.72rem;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap}
+    .g-hits.win{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(212,168,83,0.4)}
+    .g-hits.none{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+    .empty{font-size:0.76rem;color:var(--text3);padding:8px 0}
+    .sec-note{font-size:0.72rem;color:var(--text3);margin:-8px 0 14px;line-height:1.5}
+    .win-item{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--border)}
+    .win-item:last-child{border-bottom:none}
+    .win-who{flex:1;min-width:180px}
+    .win-who b{color:var(--text);font-weight:600}
+    .win-who span{display:block;font-size:0.7rem;color:var(--text3)}
+    .err{font-size:0.74rem;color:var(--red);padding:8px 0}
     .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border)}
     .admin-header h1{font-size:1.3rem;color:var(--gold)}
     .admin-header .user-info{font-size:0.8rem;color:var(--text2);display:flex;align-items:center;gap:10px}
@@ -143,7 +173,30 @@
       <div class="stat-card"><div class="value" id="statUsers">-</div><div class="label">Usuarios</div></div>
       <div class="stat-card"><div class="value" id="statGames">-</div><div class="label">Jogos Salvos</div></div>
       <div class="stat-card"><div class="value" id="statPush">-</div><div class="label">Push Ativos</div></div>
+      <div class="stat-card"><div class="value" id="statPagos">-</div><div class="label">Pro / Ultra</div></div>
+      <div class="stat-card"><div class="value" id="statWins">-</div><div class="label">Jogos Premiados</div></div>
       <div class="stat-card"><div class="value" id="statNotifs">-</div><div class="label">Notificacoes Enviadas</div></div>
+    </div>
+
+    <!-- Usuarios -->
+    <div class="admin-section">
+      <h2>Usuarios (<span id="userCount">0</span>)</h2>
+      <p class="sec-note">Clique em uma linha para ver os jogos salvos daquele usuario e quantos numeros cada um acertou.</p>
+      <div id="usersError"></div>
+      <div style="overflow-x:auto">
+        <table class="user-table">
+          <thead><tr><th></th><th>Nome</th><th>Contato</th><th>Login</th><th>Plano</th><th>Push</th><th>Jogos</th><th>Melhor</th><th>Cadastro</th><th>Ultimo acesso</th></tr></thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline" id="btnLoadMore" onclick="loadMoreUsers()" style="margin-top:12px;width:100%;display:none">Carregar mais</button>
+    </div>
+
+    <!-- Vencedores -->
+    <div class="admin-section">
+      <h2>Jogos Premiados (11+ acertos)</h2>
+      <p class="sec-note">Calculado aqui, na hora, cruzando cada jogo salvo com os sorteios da colecao <code>draws</code>. Cobre tambem os concursos anteriores a esta versao.</p>
+      <div id="winsList" class="empty">Carregando...</div>
     </div>
 
     <!-- Send Push -->
@@ -171,18 +224,6 @@
         </div>
         <button class="btn btn-outline" onclick="savePixKey()">Salvar</button>
       </div>
-    </div>
-
-    <!-- Users -->
-    <div class="admin-section">
-      <h2>Usuarios (<span id="userCount">0</span>)</h2>
-      <div style="overflow-x:auto">
-        <table class="user-table">
-          <thead><tr><th>Nome</th><th>Email / Telefone</th><th>Tipo</th><th>Push</th><th>Jogos</th><th>Ultimo Login</th></tr></thead>
-          <tbody id="userTableBody"></tbody>
-        </table>
-      </div>
-      <button class="btn btn-outline" id="btnLoadMore" onclick="loadMoreUsers()" style="margin-top:12px;width:100%;display:none">Carregar mais</button>
     </div>
 
     <!-- Notification History -->
@@ -292,88 +333,238 @@ auth.onAuthStateChanged(async user=>{
   loadDashboard();
 });
 
+// ══════ v115: dashboard detalhado ══════
+// Cada bloco roda isolado: um erro de permissao em um nao apaga os outros.
+// (era o que acontecia antes — a contagem de jogos falhava e a tabela de
+//  usuarios nunca chegava a ser montada.)
+let gamesByUser={};   // uid -> [{id, ...dados}]
+let drawsByLot={};    // loteria -> [{numero, numeros:Set, data}]
+
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad2=n=>String(n).padStart(2,'0');
+const dt=t=>t?.toDate?.()?.toLocaleDateString('pt-BR')||'-';
+
 async function loadDashboard(){
-  // Stats
-  const usersSnap=await db.collection('users').get();
-  const users=usersSnap.docs;
-  document.getElementById('statUsers').textContent=users.length;
-  document.getElementById('userCount').textContent=users.length;
+  let users=[];
+  try{
+    const usersSnap=await db.collection('users').get();
+    users=usersSnap.docs;
+    allUsers=users;
+    document.getElementById('statUsers').textContent=users.length;
+    document.getElementById('userCount').textContent=users.length;
+    document.getElementById('statPush').textContent=
+      users.filter(u=>u.data().fcmTokens?.length>0&&u.data().notificationsEnabled).length;
+    document.getElementById('statPagos').textContent=
+      users.filter(u=>['pro','ultra'].includes(u.data().plano)).length;
+  }catch(e){
+    document.getElementById('usersError').innerHTML=
+      '<div class="err">Nao consegui ler /users: '+esc(e.message)+'</div>';
+  }
 
-  let totalGames=0,pushActive=0;
+  // Sorteios (para calcular acertos) — falha aqui nao impede a tabela
+  try{ await loadDraws() }catch(e){ console.warn('draws:',e.message) }
+
+  // Jogos de cada usuario
+  let totalGames=0, erroJogos=null;
   for(const u of users){
-    const d=u.data();
-    if(d.fcmTokens?.length>0&&d.notificationsEnabled)pushActive++;
+    try{
+      const gSnap=await db.collection('users').doc(u.id).collection('savedGames')
+        .orderBy('createdAt','desc').limit(200).get();
+      gamesByUser[u.id]=gSnap.docs.map(d=>Object.assign({id:d.id},d.data()));
+      totalGames+=gSnap.size;
+    }catch(e){
+      gamesByUser[u.id]=null;
+      if(!erroJogos)erroJogos=e.message;
+    }
   }
-  document.getElementById('statPush').textContent=pushActive;
-
-  // Count games (sample first 50 users)
-  const sampleUsers=users.slice(0,50);
-  for(const u of sampleUsers){
-    const gSnap=await db.collection('users').doc(u.id).collection('savedGames').get();
-    totalGames+=gSnap.size;
+  document.getElementById('statGames').textContent=erroJogos?'—':totalGames;
+  if(erroJogos){
+    document.getElementById('usersError').innerHTML+=
+      '<div class="err">Nao consegui ler os jogos salvos: '+esc(erroJogos)+
+      '<br>Verifique se a regra de leitura do admin em <code>savedGames</code> foi publicada.</div>';
   }
-  if(users.length>50)totalGames=Math.round(totalGames*(users.length/50));
-  document.getElementById('statGames').textContent=totalGames;
 
-  // Notifications count
-  const notifSnap=await db.collection('notifications').get();
-  document.getElementById('statNotifs').textContent=notifSnap.size;
+  renderUsers(0);
+  renderWins();
 
-  // Load users table
-  loadUsersTable(users);
+  try{
+    const notifSnap=await db.collection('notifications').get();
+    document.getElementById('statNotifs').textContent=notifSnap.size;
+  }catch(e){}
 
-  // Load notification history
-  loadNotifHistory();
+  try{ await loadNotifHistory() }catch(e){}
 
-  // Load PIX key
-  const pixDoc=await db.collection('config').doc('pix').get();
-  if(pixDoc.exists)document.getElementById('pixKeyInput').value=pixDoc.data().key||'';
+  try{
+    const pixDoc=await db.collection('config').doc('pix').get();
+    if(pixDoc.exists)document.getElementById('pixKeyInput').value=pixDoc.data().key||'';
+  }catch(e){}
 }
 
-function loadUsersTable(userDocs){
-  const tbody=document.getElementById('userTableBody');
-  tbody.innerHTML='';
-  allUsers=userDocs;
+async function loadDraws(){
+  // Sem orderBy de proposito: docs antigos podem nao ter o campo `numero`
+  // e seriam silenciosamente omitidos por uma query ordenada.
+  const snap=await db.collection('draws').limit(500).get();
+  drawsByLot={};
+  snap.docs.forEach(d=>{
+    const x=d.data();
+    const lot=x.loteria||'lotofacil';
+    const num=x.numero||parseInt(String(d.id).split('_').pop())||0;
+    (drawsByLot[lot]=drawsByLot[lot]||[]).push({
+      numero:num,
+      numeros:new Set((x.numeros||[]).map(Number)),
+      data:x.data||null
+    });
+  });
+}
 
-  const show=allUsers.slice(0,30);
+// Melhor resultado de um jogo contra todos os sorteios da sua loteria.
+function melhorAcerto(game){
+  const lot=game.lottery||'lotofacil';
+  const draws=drawsByLot[lot]||[];
+  const nums=(game.numbers||[]).map(Number);
+  if(!nums.length||!draws.length)return null;
+  let best=null;
+  for(const dr of draws){
+    // O jogo foi montado com base no concurso `concursoRef`, entao ele so
+    // concorre nos sorteios seguintes — nunca no proprio concurso de referencia.
+    if(game.concursoRef&&dr.numero<=game.concursoRef)continue;
+    const hits=nums.filter(n=>dr.numeros.has(n)).length;
+    if(!best||hits>best.hits)best={hits,concurso:dr.numero,numeros:dr.numeros};
+  }
+  return best;
+}
+
+function premioLabel(lot,hits){
+  if(lot!=='lotofacil')return hits+' acertos';
+  const p={11:'R$ 6',12:'R$ 12',13:'R$ 30',14:'~R$ 1.700',15:'JACKPOT'};
+  return p[hits]?hits+' acertos · '+p[hits]:hits+' acertos';
+}
+
+function renderUsers(start){
+  const tbody=document.getElementById('userTableBody');
+  if(start===0)tbody.innerHTML='';
+  const show=allUsers.slice(start,start+30);
+
   show.forEach(doc=>{
     const d=doc.data();
-    const tr=document.createElement('tr');
-    const lastLogin=d.lastLogin?.toDate?.()?.toLocaleDateString('pt-BR')||'-';
+    const games=gamesByUser[doc.id];
     const hasPush=d.fcmTokens?.length>0&&d.notificationsEnabled;
+    const plano=d.plano||'free';
+    let melhor='-';
+    if(Array.isArray(games)&&games.length){
+      let top=0;
+      games.forEach(g=>{const b=melhorAcerto(g);if(b&&b.hits>top)top=b.hits});
+      if(top)melhor=top;
+    }
+    const tr=document.createElement('tr');
+    tr.className='u-row';
+    tr.onclick=()=>toggleUser(doc.id,tr);
     tr.innerHTML=`
-      <td style="color:var(--text);font-weight:500">${d.displayName||'-'}</td>
-      <td>${d.email||d.phone||'-'}</td>
-      <td><span class="badge ${d.authProvider==='google'?'badge-gold':'badge-green'}">${d.authProvider||'-'}</span></td>
-      <td><span class="badge ${hasPush?'badge-green':'badge-red'}">${hasPush?'Ativo':'Off'}</span></td>
-      <td style="font-family:var(--mono)">-</td>
-      <td>${lastLogin}</td>`;
+      <td><span class="u-caret">▶</span></td>
+      <td style="color:var(--text);font-weight:500">${esc(d.displayName||'(sem nome)')}</td>
+      <td style="font-size:0.74rem">${esc(d.email||'-')}${d.phone?'<br><span style="color:var(--text3)">'+esc(d.phone)+'</span>':''}</td>
+      <td><span class="badge ${d.authProvider==='google'?'badge-gold':'badge-green'}">${esc(d.authProvider||'google')}</span></td>
+      <td><span class="badge ${plano==='free'?'badge-red':'badge-gold'}">${esc(plano)}</span></td>
+      <td><span class="badge ${hasPush?'badge-green':'badge-red'}">${hasPush?'on':'off'}</span></td>
+      <td style="font-family:var(--mono)">${games===null?'?':(games?games.length:0)}</td>
+      <td style="font-family:var(--mono);color:${melhor>=11?'var(--gold)':'var(--text3)'}">${melhor}</td>
+      <td style="font-size:0.74rem">${dt(d.createdAt)}</td>
+      <td style="font-size:0.74rem">${dt(d.lastLogin)}</td>`;
     tbody.appendChild(tr);
+
+    const det=document.createElement('tr');
+    det.className='u-detail';det.style.display='none';
+    det.innerHTML='<td colspan="10"><div class="u-detail-in" id="det_'+esc(doc.id)+'"></div></td>';
+    tbody.appendChild(det);
   });
 
-  if(allUsers.length>30)document.getElementById('btnLoadMore').style.display='';
-
-  // Load game counts async
-  show.forEach(async(doc,i)=>{
-    const gSnap=await db.collection('users').doc(doc.id).collection('savedGames').get();
-    const cells=tbody.rows[i]?.cells;
-    if(cells&&cells[4])cells[4].textContent=gSnap.size;
-  });
+  document.getElementById('btnLoadMore').style.display=
+    allUsers.length>start+30?'':'none';
 }
 
 function loadMoreUsers(){
-  const tbody=document.getElementById('userTableBody');
-  const start=tbody.rows.length;
-  const more=allUsers.slice(start,start+30);
-  more.forEach(doc=>{
-    const d=doc.data();
-    const tr=document.createElement('tr');
-    const lastLogin=d.lastLogin?.toDate?.()?.toLocaleDateString('pt-BR')||'-';
-    const hasPush=d.fcmTokens?.length>0&&d.notificationsEnabled;
-    tr.innerHTML=`<td style="color:var(--text);font-weight:500">${d.displayName||'-'}</td><td>${d.email||d.phone||'-'}</td><td><span class="badge ${d.authProvider==='google'?'badge-gold':'badge-green'}">${d.authProvider||'-'}</span></td><td><span class="badge ${hasPush?'badge-green':'badge-red'}">${hasPush?'Ativo':'Off'}</span></td><td style="font-family:var(--mono)">-</td><td>${lastLogin}</td>`;
-    tbody.appendChild(tr);
+  renderUsers(document.getElementById('userTableBody').rows.length/2);
+}
+
+function toggleUser(uid,tr){
+  const det=tr.nextElementSibling;
+  const open=det.style.display!=='none';
+  det.style.display=open?'none':'';
+  tr.classList.toggle('open',!open);
+  if(open)return;
+
+  const box=document.getElementById('det_'+uid);
+  const d=allUsers.find(u=>u.id===uid)?.data()||{};
+  const games=gamesByUser[uid];
+
+  let html='<div class="u-meta">'+
+    '<span><b>UID</b> '+esc(uid)+'</span>'+
+    (d.email?'<span><b>Email</b> '+esc(d.email)+'</span>':'')+
+    (d.phone?'<span><b>Telefone</b> '+esc(d.phone)+'</span>':'')+
+    '<span><b>Plano</b> '+esc(d.plano||'free')+'</span>'+
+    (d.planoExpira?'<span><b>Expira</b> '+dt(d.planoExpira)+'</span>':'')+
+    '<span><b>Dispositivos com push</b> '+((d.fcmTokens||[]).length)+'</span>'+
+    '</div>';
+
+  if(games===null){
+    html+='<div class="err">Sem permissao para ler os jogos deste usuario.</div>';
+  }else if(!games||!games.length){
+    html+='<div class="empty">Nenhum jogo salvo.</div>';
+  }else{
+    html+='<div class="g-list">'+games.map(g=>{
+      const best=melhorAcerto(g);
+      const lot=g.lottery||'lotofacil';
+      const nums=(g.numbers||[]).map(Number);
+      const hitSet=best?best.numeros:new Set();
+      const bolas=nums.map(n=>'<span class="'+(best&&hitSet.has(n)?'hit':'')+'">'+pad2(n)+'</span>').join('');
+      const hc=best?(best.hits>=11?'win':'none'):'none';
+      const ht=best?premioLabel(lot,best.hits)+' · c.'+best.concurso:'nao conferido';
+      return '<div class="g-item">'+
+        '<div class="g-nums">'+bolas+'</div>'+
+        '<span class="g-hits '+hc+'">'+esc(ht)+'</span>'+
+        '<span class="g-tag">'+esc(lot)+' · score '+(g.score||0)+' · mod '+esc(g.modelo||'-')+
+        (g.concursoRef?' · ref #'+g.concursoRef:'')+' · '+dt(g.createdAt)+'</span>'+
+        '</div>';
+    }).join('')+'</div>';
+  }
+  box.innerHTML=html;
+}
+
+function renderWins(){
+  const box=document.getElementById('winsList');
+  const wins=[];
+  allUsers.forEach(u=>{
+    const games=gamesByUser[u.id];
+    if(!Array.isArray(games))return;
+    const d=u.data();
+    games.forEach(g=>{
+      const best=melhorAcerto(g);
+      if(best&&best.hits>=11)wins.push({d,uid:u.id,g,best});
+    });
   });
-  if(start+30>=allUsers.length)document.getElementById('btnLoadMore').style.display='none';
+  wins.sort((a,b)=>b.best.hits-a.best.hits||b.best.concurso-a.best.concurso);
+  document.getElementById('statWins').textContent=wins.length;
+
+  if(!wins.length){
+    box.className='empty';
+    box.textContent=Object.keys(drawsByLot).length
+      ?'Nenhum jogo salvo atingiu 11 acertos ate agora.'
+      :'Sem sorteios carregados — nao da para calcular acertos.';
+    return;
+  }
+  box.className='';
+  box.innerHTML=wins.slice(0,50).map(w=>{
+    const lot=w.g.lottery||'lotofacil';
+    const bolas=(w.g.numbers||[]).map(Number)
+      .map(n=>'<span class="'+(w.best.numeros.has(n)?'hit':'')+'">'+pad2(n)+'</span>').join('');
+    return '<div class="win-item">'+
+      '<div class="win-who"><b>'+esc(w.d.displayName||'(sem nome)')+'</b>'+
+      '<span>'+esc(w.d.email||w.d.phone||w.uid)+'</span></div>'+
+      '<div class="g-nums">'+bolas+'</div>'+
+      '<span class="g-hits win">'+esc(premioLabel(lot,w.best.hits))+'</span>'+
+      '<span class="g-tag">concurso '+w.best.concurso+' · '+esc(lot)+'</span>'+
+      '</div>';
+  }).join('');
 }
 
 async function sendBroadcast(){
