@@ -248,6 +248,12 @@
     </div>
 
     <div class="admin-section">
+      <h2>Saude do Sistema</h2>
+      <p class="sec-note">O que precisa da sua atencao agora — sorteios que nao foram conferidos, envios travados e assinaturas perto de vencer.</p>
+      <div id="saude" class="empty">Carregando...</div>
+    </div>
+
+    <div class="admin-section">
       <h2>Sorteios Recentes</h2>
       <div id="drawList" class="empty">Carregando...</div>
     </div>
@@ -675,6 +681,7 @@ async function loadDashboard(){
   try{ renderChart() }catch(e){console.warn('grafico:',e.message)}
   try{ renderTops() }catch(e){console.warn('tops:',e.message)}
   try{ renderDraws() }catch(e){console.warn('sorteios:',e.message)}
+  try{ renderSaude() }catch(e){console.warn('saude:',e.message)}
   try{ renderDispositivos() }catch(e){console.warn('aparelhos:',e.message)}
 
   try{
@@ -702,7 +709,9 @@ async function loadDraws(){
     (drawsByLot[lot]=drawsByLot[lot]||[]).push({
       numero:num,
       numeros:new Set((x.numeros||[]).map(Number)),
-      data:x.data||null
+      data:x.data||null,
+      processed:x.processed===true,
+      fetchedAt:x.fetchedAt||null
     });
   });
 }
@@ -830,14 +839,36 @@ function toggleUser(uid,tr){
   const d=allUsers.find(u=>u.id===uid)?.data()||{};
   const games=gamesByUser[uid];
 
+  const meus=batches.filter(b=>b.userId===uid);
+  const totalGer=meus.reduce((s,b)=>s+(b.count||(b.games||[]).length),0);
+  const nTokens=(d.fcmTokens||[]).length;
+
   let html='<div class="u-meta">'+
     '<span><b>UID</b> '+esc(uid)+'</span>'+
     (d.email?'<span><b>Email</b> '+esc(d.email)+'</span>':'')+
     (d.phone?'<span><b>Telefone</b> '+esc(d.phone)+'</span>':'')+
     '<span><b>Plano</b> '+esc(d.plano||'free')+'</span>'+
     (d.planoExpira?'<span><b>Expira</b> '+dt(d.planoExpira)+'</span>':'')+
-    '<span><b>Dispositivos com push</b> '+((d.fcmTokens||[]).length)+'</span>'+
-    '</div>';
+    '<span><b>Combinacoes geradas</b> '+totalGer+' em '+meus.length+' lote(s)</span>'+
+    '<span><b>Dispositivos com push</b> '+nTokens+'</span>'+
+    '</div>'+
+    (nTokens
+      ? '<button class="btn btn-outline" style="margin-bottom:14px;padding:6px 12px;font-size:0.74rem" onclick="pushIndividual(\''+esc(uid)+'\')">Enviar push so para este usuario</button>'
+      : '<div class="empty" style="margin-bottom:10px">Sem dispositivo com push — nao da para notificar.</div>');
+
+  if(meus.length){
+    html+='<h3 style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.09em;color:var(--text3);margin:4px 0 8px;font-weight:700">Lotes gerados</h3>'+
+      '<div class="g-list" style="margin-bottom:16px">'+meus.slice(0,10).map(b=>{
+        const an=analisarLote(b);
+        return '<div class="g-item"><span class="g-tag">'+dt(b.createdAt)+' · '+esc(an.lot)+
+          ' · '+(b.count||0)+' jogos · modelo '+esc(b.modelo||'-')+' · score med '+(b.avgScore||0)+
+          ' · '+((b.filters||[]).length)+' filtros</span>'+
+          (an.best?'<span class="g-hits '+(an.best.hits>=11?'win':'none')+'">melhor '+an.best.hits+' ac.</span>':'')+
+          '</div>';
+      }).join('')+'</div>';
+  }
+
+  html+='<h3 style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.09em;color:var(--text3);margin:4px 0 8px;font-weight:700">Jogos salvos</h3>';
 
   if(games===null){
     html+='<div class="err">Sem permissao para ler os jogos deste usuario.</div>';
@@ -970,6 +1001,32 @@ function renderBatches(){
       '</div></div>';
   }).join('');
   renderGerWins();
+}
+
+// v120: push para um usuario so. Reaproveita o mesmo caminho do broadcast —
+// a Cloud Function sendAdminBroadcast dispara para os tokens do documento.
+async function pushIndividual(uid){
+  const u=allUsers.find(x=>x.id===uid);
+  if(!u)return;
+  const d=u.data();
+  const tokens=d.fcmTokens||[];
+  if(!tokens.length){showToast('Este usuario nao tem dispositivo com push');return}
+  const titulo=prompt('Titulo da notificacao para '+(d.displayName||d.email||uid)+':');
+  if(!titulo)return;
+  const corpo=prompt('Mensagem:');
+  if(!corpo)return;
+  try{
+    await db.collection('notifications').add({
+      type:'admin_broadcast',
+      title:titulo,body:corpo,tokens,
+      status:'pending',
+      alvo:uid,
+      sentAt:firebase.firestore.FieldValue.serverTimestamp(),
+      sentBy:adminUser.uid,
+      recipientCount:tokens.length
+    });
+    showToast('Enviado para '+tokens.length+' dispositivo(s) de '+(d.displayName||'usuario'));
+  }catch(e){showToast('Erro: '+e.message)}
 }
 
 async function excluirLote(id){
@@ -1117,6 +1174,68 @@ function renderTops(){
   listaTop('topModelos',ord(mod));
   listaTop('topFiltros',ord(fil),'x');
   listaTop('topUsers',ord(porUser).map(([uid,v])=>[userLabel(uid),v]));
+}
+
+// v120: painel de alertas — o que esta errado ou perto de vencer.
+async function renderSaude(){
+  const box=document.getElementById('saude');
+  const itens=[];
+
+  // 1) sorteios que a Cloud Function nao marcou como processados
+  const naoProc=[];
+  Object.entries(drawsByLot).forEach(([lot,ds])=>ds.forEach(d=>{if(!d.processed)naoProc.push(lot+' #'+d.numero)}));
+  if(naoProc.length)
+    itens.push(['aviso',naoProc.length+' sorteio(s) sem conferencia',
+      'A processDrawResults nao marcou como processado: '+naoProc.slice(0,6).join(', ')+
+      (naoProc.length>6?' e mais '+(naoProc.length-6):'')+'. Jogos desses concursos podem nao ter sido conferidos.']);
+
+  // 2) ultimo sorteio de cada loteria — atraso indica coleta parada
+  const atrasadas=[];
+  Object.entries(drawsByLot).forEach(([lot,ds])=>{
+    const ult=ds.reduce((a,b)=>b.numero>a.numero?b:a,ds[0]);
+    const ms=ult.fetchedAt?.toDate?.()?.getTime?.()||0;
+    if(ms && Date.now()-ms>10*DIA)atrasadas.push(lot+' (ultimo em '+dt(ult.fetchedAt)+')');
+  });
+  if(atrasadas.length)
+    itens.push(['aviso','Coleta possivelmente parada','Sem sorteio novo ha mais de 10 dias em: '+atrasadas.join(', ')]);
+
+  // 3) envios que ficaram pendentes
+  try{
+    const pend=await db.collection('notifications').where('status','==','pending').limit(20).get();
+    if(!pend.empty)
+      itens.push(['erro',pend.size+' envio(s) travado(s) em "pending"',
+        'A sendAdminBroadcast nao concluiu. O mais antigo e de '+dt(pend.docs[0].data().sentAt)+'.']);
+  }catch(e){}
+
+  // 4) assinaturas vencendo
+  const agora=Date.now();
+  const vencendo=allUsers.filter(u=>{
+    const e=u.data().planoExpira?.toDate?.()?.getTime?.();
+    return e&&e>agora&&e-agora<7*DIA;
+  });
+  if(vencendo.length)
+    itens.push(['aviso',vencendo.length+' assinatura(s) vencendo em 7 dias',
+      vencendo.map(u=>(u.data().displayName||u.data().email||u.id)+' ('+dt(u.data().planoExpira)+')').join(' · ')]);
+
+  const vencidas=allUsers.filter(u=>{
+    const e=u.data().planoExpira?.toDate?.()?.getTime?.();
+    return e&&e<agora&&['pro','ultra'].includes(u.data().plano);
+  });
+  if(vencidas.length)
+    itens.push(['erro',vencidas.length+' plano(s) vencido(s) ainda ativo(s)',
+      'A checkPlanosExpirados deveria ter rebaixado: '+
+      vencidas.map(u=>u.data().displayName||u.data().email||u.id).join(', ')]);
+
+  if(!itens.length){
+    box.className='empty';
+    box.textContent='Nada pedindo atencao: sorteios conferidos, envios em dia e nenhuma assinatura vencendo.';
+    return;
+  }
+  box.className='';
+  box.innerHTML=itens.map(([tipo,t,d])=>
+    '<div class="win-item"><div class="win-who">'+
+    '<b style="color:'+(tipo==='erro'?'var(--red)':'var(--gold)')+'">'+(tipo==='erro'?'! ':'~ ')+esc(t)+'</b>'+
+    '<span>'+esc(d)+'</span></div></div>').join('');
 }
 
 function renderDraws(){
