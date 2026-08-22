@@ -30,7 +30,11 @@ service cloud.firestore {
         request.resource.data.userId == request.auth.uid;
       allow read: if request.auth != null &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
-      allow update, delete: if false;
+      // Ninguem edita um lote depois de criado (o registro tem que ser fiel).
+      // O admin pode apagar, para limpar testes e dados antigos.
+      allow update: if false;
+      allow delete: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
 
     // Vitorias detectadas pela Cloud Function — leitura so do admin,

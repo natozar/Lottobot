@@ -255,6 +255,7 @@
           <option value="prem">Com premiacao primeiro</option>
           <option value="score">Maior score medio</option>
         </select>
+        <button class="btn btn-outline" onclick="excluirFiltrados()" style="border-color:rgba(239,68,68,0.35);color:var(--red)">Excluir os lotes filtrados</button>
       </div>
       <div id="batchList" class="empty">Carregando...</div>
     </div>
@@ -713,6 +714,8 @@ function renderBatches(){
         '<span class="g-tag">'+esc(an.lot)+' · '+(b.count||(b.games||[]).length)+' jogos · modelo '+esc(b.modelo||'-')+
         ' · score med '+(b.avgScore||0)+' · '+dt(b.createdAt)+'</span>'+
         badge+
+        '<button class="btn btn-outline" style="padding:4px 10px;font-size:0.7rem;border-color:rgba(239,68,68,0.35);color:var(--red)" '+
+        'onclick="event.stopPropagation();excluirLote(\''+esc(b.id)+'\')">excluir</button>'+
       '</div>'+
       '<div class="b-body">'+
         '<div class="b-cfg">'+
@@ -738,6 +741,41 @@ function renderBatches(){
       '</div></div>';
   }).join('');
   renderGerWins();
+}
+
+async function excluirLote(id){
+  const b=batches.find(x=>x.id===id);
+  if(!b)return;
+  if(!confirm('Excluir este lote de '+(b.count||0)+' combinacoes de '+userLabel(b.userId)+'?\n\nNao da para desfazer.'))return;
+  try{
+    await db.collection('generatedBatches').doc(id).delete();
+    batches=batches.filter(x=>x.id!==id);
+    buildGerFilters();renderBatches();renderFreq();
+    showToast('Lote excluido');
+  }catch(e){showToast('Erro ao excluir: '+e.message)}
+}
+
+async function excluirFiltrados(){
+  const fu=document.getElementById('gerUser').value;
+  const fl=document.getElementById('gerLot').value;
+  const alvo=batches.filter(b=>(!fu||b.userId===fu)&&(!fl||(b.lottery||'lotofacil')===fl));
+  if(!alvo.length){showToast('Nada para excluir com esses filtros');return}
+  const combos=alvo.reduce((s,b)=>s+(b.count||0),0);
+  if(!confirm('Excluir '+alvo.length+' lote(s), com '+combos+' combinacoes no total?\n\n'+
+    (fu||fl?'Filtro ativo: '+(fu?userLabel(fu):'todos')+' / '+(fl||'todas as loterias')
+          :'ATENCAO: nenhum filtro ativo — isso apaga TODOS os lotes registrados.')+
+    '\n\nNao da para desfazer.'))return;
+  const apagados=new Set();
+  let erro=null;
+  for(const b of alvo){
+    try{await db.collection('generatedBatches').doc(b.id).delete();apagados.add(b.id)}
+    catch(e){if(!erro)erro=e.message}
+  }
+  // Remove da lista local apenas os que realmente sairam do banco.
+  batches=batches.filter(b=>!apagados.has(b.id));
+  buildGerFilters();renderBatches();renderFreq();
+  const falhas=alvo.length-apagados.size;
+  showToast(apagados.size+' lote(s) excluido(s)'+(falhas?' · '+falhas+' falharam: '+erro:''));
 }
 
 function renderGerWins(){
