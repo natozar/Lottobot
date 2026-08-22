@@ -22,6 +22,12 @@
     });
     const auth=firebase.auth();
     const db=firebase.firestore();
+    // v118: sessao presa ao dispositivo — sobrevive a fechar o navegador e
+    // reiniciar a maquina. E o padrao da web, mas declarado aqui de proposito
+    // para nao depender do default e para falhar visivelmente se o navegador
+    // estiver bloqueando storage (aba anonima, ITP agressivo).
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .catch(e=>console.warn('persistencia:',e.message));
   </script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -385,18 +391,36 @@ auth.getRedirectResult().catch(e=>{
     document.getElementById('gateError').textContent=e.message;
 });
 
+// v118: dispositivo ja reconhecido — esconde o gate enquanto o Firebase
+// restaura a sessao salva, para nao piscar a tela de login a cada visita.
+try{
+  if(localStorage.getItem('lottobot_admin_device')==='1'){
+    document.getElementById('gateScreen').style.visibility='hidden';
+  }
+}catch(_e){}
+
 auth.onAuthStateChanged(async user=>{
   if(!user){
-    document.getElementById('gateScreen').classList.remove('hidden');
+    // Sem sessao: o dispositivo deixa de ser confiavel e o login volta.
+    try{ localStorage.removeItem('lottobot_admin_device') }catch(_e){}
+    const g=document.getElementById('gateScreen');
+    g.style.visibility='';
+    g.classList.remove('hidden');
     document.getElementById('adminScreen').classList.add('hidden');
     return;
   }
   // Check admin: phone match OR email match OR Firestore flag
   const phoneAdmin=user.phoneNumber===ADMIN_PHONE;
   const emailAdmin=user.email && ADMIN_EMAILS.indexOf(user.email.toLowerCase())!==-1;
-  const doc=await db.collection('users').doc(user.uid).get();
+  // v118: a leitura do Firestore pode falhar sem querer dizer "nao e admin"
+  // (rede caida, projeto respondendo devagar). Antes uma falha aqui derrubava
+  // o handler inteiro e prendia o usuario na tela de login.
+  let doc={exists:false,data:()=>({})};
+  try{ doc=await db.collection('users').doc(user.uid).get() }
+  catch(e){ console.warn('leitura do perfil falhou:',e.message) }
   const firestoreAdmin=doc.exists&&doc.data().isAdmin;
   if(!phoneAdmin&&!emailAdmin&&!firestoreAdmin){
+    try{ localStorage.removeItem('lottobot_admin_device') }catch(_e){}
     document.getElementById('gateError').textContent='Voce nao tem permissao de administrador. (login: '+(user.email||user.phoneNumber||user.uid)+')';
     auth.signOut();
     return;
@@ -408,6 +432,9 @@ auth.onAuthStateChanged(async user=>{
     } catch(e){ console.warn('falhou ao set isAdmin:', e); }
   }
   adminUser=user;
+  // v118: marca o dispositivo como confiavel para abrir direto no painel
+  // nas proximas visitas, sem o piscar da tela de login.
+  try{ localStorage.setItem('lottobot_admin_device','1') }catch(_e){}
   document.getElementById('gateScreen').classList.add('hidden');
   document.getElementById('adminScreen').classList.remove('hidden');
   document.getElementById('adminName').textContent=user.displayName||user.phoneNumber||user.email;

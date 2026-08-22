@@ -1976,3 +1976,40 @@ exports.checkPlanosExpirados = onSchedule({
   await batch.commit();
   console.log(`${snap.size} expired plans downgraded to free`);
 });
+
+// ══════════════════════════════════════════════
+// TEMPORARIO — remocao das contas anonimas criadas nos testes de 22/08.
+// A lista de UIDs e fixa: esta funcao nao consegue apagar mais nada.
+// Deve ser removida logo apos o uso.
+// ══════════════════════════════════════════════
+exports.limparAnonimosTeste = onRequest({
+  region: "southamerica-east1",
+  cors: false
+}, async (req, res) => {
+  const ALVOS = [
+    "RPFddbkEKqhb5DijPvIoZBqX7Ku2",
+    "ic2tZxr9pHczQq8qF0GrdvsQYBk1",
+    "ErKwhtHny3UYwfZUfF24aLYVo8h1",
+    "m38T5KETukQbDXKIUkwbsw5j2Rh2",
+    "nsZ1OjvlwbO6u9ZUZugE4jxYMZl1"
+  ];
+  if (req.query.token !== "limpeza-22ago-lottobot") {
+    res.status(403).json({ erro: "token invalido" });
+    return;
+  }
+  const out = [];
+  for (const uid of ALVOS) {
+    try {
+      const u = await admin.auth().getUser(uid);
+      if (u.providerData && u.providerData.length > 0) {
+        out.push({ uid, status: "ignorado — nao e anonima" });
+        continue;
+      }
+      await admin.auth().deleteUser(uid);
+      out.push({ uid, status: "apagada" });
+    } catch (e) {
+      out.push({ uid, status: e.code === "auth/user-not-found" ? "ja nao existia" : "erro: " + e.message });
+    }
+  }
+  res.json({ resultado: out });
+});
